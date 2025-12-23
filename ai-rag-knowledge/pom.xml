@@ -18,7 +18,6 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring-ai.version>1.0.0-M5</spring-ai.version>
     </properties>
 
     <parent>
@@ -33,7 +32,7 @@
             <dependency>
                 <groupId>org.springframework.ai</groupId>
                 <artifactId>spring-ai-bom</artifactId>
-                <version>${spring-ai.version}</version>
+                <version>1.0.0-M5</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -77,11 +76,6 @@
             <dependency>
                 <groupId>com.dasi</groupId>
                 <artifactId>ai-rag-knowledge-api</artifactId>
-                <version>1.0</version>
-            </dependency>
-            <dependency>
-                <groupId>com.dasi</groupId>
-                <artifactId>ai-rag-knowledge</artifactId>
                 <version>1.0</version>
             </dependency>
             <dependency>
