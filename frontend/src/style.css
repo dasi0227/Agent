@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600&display=swap');
+
+:root {
+    --bg-page: #f4f6fb;
+    --text-primary: #1b2437;
+    --text-secondary: #5b6780;
+    --accent-color: #2f7cf6;
+    --border-color: #e3e8f0;
+    --shadow-soft: 0 12px 30px rgba(27, 36, 55, 0.08);
+    --header-height: 72px;
+    --footer-height: 54px;
+    --avatar-bg: linear-gradient(135deg, #e0f3ff, #c7e1ff);
+    --avatar-text: #0f172a;
+    --scrollbar-w: 0px;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Space Grotesk', 'Noto Sans SC', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
+}
+
+#app {
+    height: 100vh;
+}
+
+.content-container {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding-left: 24px;
+    padding-right: calc(24px + var(--scrollbar-w, 0px));
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+}
