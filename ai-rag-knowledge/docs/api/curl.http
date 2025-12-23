@@ -1,0 +1,16 @@
+### Ollama API：单一问答
+POST http://localhost:11434/api/generate
+Content-Type: application/json
+
+{
+  "model": "deepseek-r1:1.5b",
+  "prompt": "2*3=？",
+  "stream": false
+}
+
+### Spring API：单一问答
+GET http://localhost:8001/api/v1/ollama/complete?model=deepseek-r1%3A1.5b&message=hi
+
+### Spring API：流式问答
+GET http://localhost:8001/api/v1/ollama/stream?model=deepseek-r1%3A1.5b&message=hi
+Accept: text/event-stream
