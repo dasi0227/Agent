@@ -51,10 +51,7 @@ public class RAGTest {
         // 使用分词器对文档做切分
         List<Document> documentSplitterList = tokenTextSplitter.apply(documentList);
 
-        // 为原始文档打上知识库标识
-        documentList.forEach(document -> document.getMetadata().put("data_source", "file.txt"));
-
-        // 为切分后的文档打上知识库标识
+        // 为切分后的文档打上元数据标识
         documentSplitterList.forEach(document -> document.getMetadata().put("data_source", "file.txt"));
 
         // 写入向量库
@@ -66,7 +63,7 @@ public class RAGTest {
     @Test
     public void chat() {
         // 用户查询问题
-        String message = "万驿苇是谁？";
+        String message = "万驿苇是什么大学的？";
         UserMessage userMessage = new UserMessage(message);
 
         // RAG 系统提示词模板
