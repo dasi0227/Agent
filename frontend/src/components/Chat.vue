@@ -310,6 +310,24 @@ const handleDelete = () => {
     chatStore.deleteChat();
 };
 
+const hasThink = (message) => {
+    return Boolean(message?.think && message.think.trim());
+};
+
+const getThink = (message) => {
+    if (!message?.think) {
+        return '';
+    }
+    return message.think.trim();
+};
+
+const getContent = (message) => {
+    if (!message?.content) {
+        return '';
+    }
+    return message.content.toString().trimStart();
+};
+
 const toggleModelDropdown = () => {
     modelDropdownOpen.value = !modelDropdownOpen.value;
 };
@@ -394,8 +412,8 @@ const detachClickOutside = () => {
                             :class="['message-row', message.role]"
                         >
                             <div class="bubble" :class="{ pending: message.pending }">
-                                <div v-if="message.think" class="think">
-                                    {{ message.think }}
+                                <div v-if="hasThink(message)" class="think">
+                                    {{ getThink(message) }}
                                 </div>
                                 <div
                                     v-if="message.pending && message.role === 'assistant' && !message.content"
@@ -409,7 +427,7 @@ const detachClickOutside = () => {
                                     <div class="pending-text">思考中</div>
                                 </div>
                                 <div v-else class="text" :class="{ error: message.error }">
-                                    {{ message.content }}
+                                    {{ getContent(message) }}
                                 </div>
                                 <div v-if="message.error" class="error-tip">
                                     {{ message.error.message || '请求失败' }}
