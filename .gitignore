@@ -1,0 +1,92 @@
+# ==================== OS / Editor ====================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+*.swp
+*.swo
+*~
+
+# ==================== Logs / Runtime ====================
+log/
+logs/
+**/log/
+**/logs/
+*.log
+*.pid
+*.pid.lock
+
+# ==================== Java / Maven / Gradle ====================
+**/target/
+**/out/
+**/build/
+*.class
+.mvn/wrapper/maven-wrapper.jar
+**/.classpath
+**/.project
+**/.settings/
+**/.factorypath
+**/.metadata/
+**/.recommenders/
+.nb-gradle/
+nbproject/
+
+# ==================== Spring Boot / Config ====================
+**/application-*.yml
+**/application-*.yaml
+**/application-*.properties
+!**/application.yml
+!**/application.yaml
+!**/application.properties
+
+**/*.jks
+**/*.p12
+**/*.pfx
+**/*.pem
+**/*.key
+**/*keystore*
+**/*secret*
+
+**/.env
+**/.env.*
+!**/.env.example
+
+# ==================== Frontend (Node / Vite) ====================
+**/node_modules/
+**/dist/
+**/.vite/
+**/.cache/
+**/.turbo/
+**/.parcel-cache/
+**/.eslintcache
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ==================== Test / Coverage ====================
+**/coverage/
+**/.nyc_output/
+
+# ==================== Docker / Local data ====================
+**/.docker/
+**/docker-data/
+**/*.db
+**/*.sqlite
+**/*.sqlite3
+
+# ==================== Misc ====================
+**/.history/
+**/.tmp/
+**/tmp/
+**/.DS_Store
