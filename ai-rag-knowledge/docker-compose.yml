@@ -46,6 +46,7 @@ services:
       - POSTGRES_DB=springai
       - PGPASSWORD=jason2004
     volumes:
+      - ${HOME}/docker/pgvector/data:/var/lib/postgresql/data
       - ${PWD}/docs/pgvector/init.sql:/docker-entrypoint-initdb.d/init.sql
     logging:
       options:
