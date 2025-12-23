@@ -6,7 +6,7 @@
 
     <groupId>com.dasi</groupId>
     <artifactId>ai-rag-knowledge</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <packaging>pom</packaging>
     <modules>
         <module>ai-rag-knowledge-api</module>
@@ -15,9 +15,136 @@
     </modules>
 
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring-ai.version>1.0.0-M5</spring-ai.version>
     </properties>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.3</version>
+        <relativePath/>
+    </parent>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>2.0.28</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>3.9</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>32.1.3-jre</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson-spring-boot-starter</artifactId>
+                <version>3.44.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson</artifactId>
+                <version>3.44.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.jgit</groupId>
+                <artifactId>org.eclipse.jgit</artifactId>
+                <version>5.13.0.202109080827-r</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.dasi</groupId>
+                <artifactId>ai-rag-knowledge-api</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.dasi</groupId>
+                <artifactId>ai-rag-knowledge</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.dasi</groupId>
+                <artifactId>ai-rag-knowledge-trigger</artifactId>
+                <version>1.0</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.0</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.7</version>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <java_jvm>-Xms1G -Xmx1G -server  -XX:MaxPermSize=256M -Xss256K -Dspring.profiles.active=test -XX:+DisableExplicitGC -XX:+UseG1GC  -XX:LargePageSizeInBytes=128m -XX:+UseFastAccessorMethods -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/export/Logs/xfg-frame-archetype-lite-boot -Xloggc:/export/Logs/xfg-frame-archetype-lite-boot/gc-xfg-frame-archetype-lite-boot.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps</java_jvm>
+                <profileActive>dev</profileActive>
+            </properties>
+        </profile>
+        <profile>
+            <id>test</id>
+            <properties>
+                <java_jvm>-Xms1G -Xmx1G -server  -XX:MaxPermSize=256M -Xss256K -Dspring.profiles.active=test -XX:+DisableExplicitGC -XX:+UseG1GC  -XX:LargePageSizeInBytes=128m -XX:+UseFastAccessorMethods -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/export/Logs/xfg-frame-archetype-lite-boot -Xloggc:/export/Logs/xfg-frame-archetype-lite-boot/gc-xfg-frame-archetype-lite-boot.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps</java_jvm>
+                <profileActive>test</profileActive>
+            </properties>
+        </profile>
+        <profile>
+            <id>prod</id>
+            <properties>
+                <java_jvm>-Xms6G -Xmx6G -server  -XX:MaxPermSize=256M -Xss256K -Dspring.profiles.active=release -XX:+DisableExplicitGC -XX:+UseG1GC  -XX:LargePageSizeInBytes=128m -XX:+UseFastAccessorMethods -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/export/Logs/fq-mall-activity-app -Xloggc:/export/Logs/xfg-frame-archetype-lite-boot/gc-xfg-frame-archetype-lite-boot.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps</java_jvm>
+                <profileActive>prod</profileActive>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>
