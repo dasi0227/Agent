@@ -7,8 +7,8 @@
     --accent-color: #2f7cf6;
     --border-color: #e3e8f0;
     --shadow-soft: 0 12px 30px rgba(27, 36, 55, 0.08);
-    --header-height: 72px;
-    --footer-height: 54px;
+    --header-height: 60px;
+    --footer-height: 30px;
     --avatar-bg: linear-gradient(135deg, #e0f3ff, #c7e1ff);
     --avatar-text: #0f172a;
     --scrollbar-w: 0px;

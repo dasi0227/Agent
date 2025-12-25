@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import logoImg from '../assets/logo.jpg';
 import { useChatStore } from '../router/pinia';
 
@@ -7,6 +7,10 @@ const chatStore = useChatStore();
 
 const chats = computed(() => chatStore.chats);
 const currentChatId = computed(() => chatStore.currentChatId);
+const editingId = ref(null);
+const editTitle = ref('');
+const showDeleteConfirm = ref(false);
+const targetChatId = ref('');
 
 const handleNewChat = () => {
     chatStore.createChat();
@@ -28,6 +32,40 @@ const formatDate = (timestamp) => {
         hour: '2-digit',
         minute: '2-digit'
     });
+};
+
+const startRename = (chat) => {
+    editingId.value = chat.id;
+    editTitle.value = chat.title || '';
+};
+
+const saveRename = (chat) => {
+    if (!chat || editingId.value !== chat.id) {
+        return;
+    }
+    const title = editTitle.value.trim() || '未命名会话';
+    chatStore.renameChat(chat.id, title);
+    editingId.value = null;
+    editTitle.value = '';
+};
+
+const cancelRename = () => {
+    editingId.value = null;
+    editTitle.value = '';
+};
+
+const openDeleteConfirm = (chatId) => {
+    targetChatId.value = chatId;
+    showDeleteConfirm.value = true;
+};
+
+const handleDelete = () => {
+    if (targetChatId.value) {
+        chatStore.deleteChat(targetChatId.value);
+    }
+    showDeleteConfirm.value = false;
+    targetChatId.value = '';
+    cancelRename();
 };
 </script>
 
@@ -53,10 +91,44 @@ const formatDate = (timestamp) => {
                 v-for="chat in chats"
                 :key="chat.id"
                 :class="['chat-item', { active: chat.id === currentChatId }]"
-                @click="handleSelectChat(chat.id)"
             >
-                <div class="chat-title">{{ chat.title || '未命名会话' }}</div>
-                <div class="chat-meta">{{ formatDate(chat.createdAt) }}</div>
+                <div class="chat-row" @click="handleSelectChat(chat.id)">
+                    <div class="chat-info">
+                        <template v-if="editingId === chat.id">
+                            <input
+                                v-model="editTitle"
+                                class="rename-input"
+                                :placeholder="chat.title || '未命名会话'"
+                                @keydown.enter.prevent="saveRename(chat)"
+                                @keydown.esc.prevent="cancelRename"
+                                @blur="saveRename(chat)"
+                                @click.stop
+                            />
+                        </template>
+                        <template v-else>
+                            <div class="chat-title">{{ chat.title || '未命名会话' }}</div>
+                        </template>
+                        <div class="chat-meta">{{ formatDate(chat.createdAt) }}</div>
+                    </div>
+                    <div class="chat-actions">
+                        <button
+                            class="circle-btn"
+                            type="button"
+                            title="重命名"
+                            @click.stop="startRename(chat)"
+                        >
+                            ✎
+                        </button>
+                        <button
+                            class="circle-btn danger"
+                            type="button"
+                            title="删除"
+                            @click.stop="openDeleteConfirm(chat.id)"
+                        >
+                            ⌫
+                        </button>
+                    </div>
+                </div>
             </div>
             <div v-if="chats.length === 0" class="empty">
                 暂无会话，点击上方按钮开始
@@ -68,6 +140,26 @@ const formatDate = (timestamp) => {
             <div class="user-info">
                 <div class="user-name">访客</div>
                 <div class="user-status">在线</div>
+            </div>
+        </div>
+
+        <div v-if="showDeleteConfirm" class="modal-mask" @click.self="showDeleteConfirm = false">
+            <div class="modal small">
+                <div class="modal-header">
+                    <div class="title">删除会话</div>
+                    <button class="close" type="button" @click="showDeleteConfirm = false">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="confirm-text">确认删除当前会话吗？</div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-ghost" type="button" @click="showDeleteConfirm = false">
+                        取消
+                    </button>
+                    <button class="btn btn-primary danger" type="button" @click="handleDelete">
+                        确认删除
+                    </button>
+                </div>
             </div>
         </div>
     </aside>
@@ -139,8 +231,7 @@ const formatDate = (timestamp) => {
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 12px;
-    padding: 12px;
-    cursor: pointer;
+    padding: 10px 12px;
     transition: all 0.2s ease;
 }
 
@@ -226,6 +317,111 @@ const formatDate = (timestamp) => {
     margin-bottom: 6px;
     justify-content: center;
     display: flex;
+}
+
+.chat-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.chat-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.chat-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.circle-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid #f59e0b;
+    background: transparent;
+    color: #f59e0b;
+    font-size: 13px;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: all 0.2s ease;
+}
+
+.circle-btn:hover {
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.circle-btn.danger {
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.circle-btn.danger:hover {
+    background: rgba(239, 68, 68, 0.12);
+}
+
+.rename-input {
+    width: 100%;
+    padding: 6px 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+    color: #e7ecf4;
+    font-weight: 600;
+}
+
+.modal-mask {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    z-index: 20;
+}
+
+.modal {
+    width: min(420px, 100%);
+    background: #0f172a;
+    border-radius: 14px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e7ecf4;
+}
+
+.modal-header,
+.modal-footer {
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.modal-header .title {
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.modal-body {
+    padding: 14px 16px;
+}
+
+.confirm-text {
+    font-size: 14px;
+}
+
+.close {
+    border: none;
+    background: transparent;
+    font-size: 20px;
+    color: #e7ecf4;
+    cursor: pointer;
 }
 
 @media (max-width: 720px) {

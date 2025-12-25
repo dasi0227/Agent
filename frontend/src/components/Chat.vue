@@ -1,6 +1,12 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
-import { fetchComplete, fetchStream, pickContentFromResult } from '../request/api';
+import {
+    fetchComplete,
+    fetchStream,
+    pickContentFromResult,
+    queryRagTags,
+    uploadRagFile
+} from '../request/api';
 import { normalizeError } from '../request/request';
 import { applyStreamToken, createStreamAccumulator, parseThinkText } from '../utils/parseThink';
 import { createTypewriter, DEFAULT_TYPEWRITER_SEGMENTS } from '../utils/typewriter';
@@ -9,21 +15,35 @@ import { useChatStore, useSettingsStore } from '../router/pinia';
 const chatStore = useChatStore();
 const settingsStore = useSettingsStore();
 
-const models = ref([
-    { label: 'deepseek-r1:1.5b', value: 'deepseek-r1:1.5b' }
-]);
+const models = ref([{ label: 'deepseek-r1:1.5b', value: 'deepseek-r1:1.5b' }]);
+const ragTags = ref([{ label: '不使用知识库', value: '' }]);
 
 const messageScrollRef = ref(null);
+const modelSelectRef = ref(null);
+const ragSelectRef = ref(null);
+const uploadRagSelectRef = ref(null);
 const inputValue = ref('');
 const showSettings = ref(false);
-const showDeleteConfirm = ref(false);
+const showUploadModal = ref(false);
 const isAtBottom = ref(true);
 const modelDropdownOpen = ref(false);
-const modelSelectRef = ref(null);
+const ragDropdownOpen = ref(false);
+const uploadRagDropdownOpen = ref(false);
+
 const typewriterState = reactive({
     lines: [],
     lineIndex: 0,
     playing: false
+});
+
+const uploadForm = reactive({
+    tagInput: '',
+    selectedTag: '',
+    file: null,
+    fileName: '',
+    fileSize: '',
+    error: '',
+    uploading: false
 });
 
 const settingsForm = reactive({
@@ -49,15 +69,18 @@ const currentModel = computed({
     set: (value) => settingsStore.updateSettings({ model: value })
 });
 
+const currentRagTag = computed({
+    get: () => settingsStore.ragTag,
+    set: (value) => settingsStore.updateSettings({ ragTag: value })
+});
+
 const messages = computed(() => chatStore.currentMessages);
 const sending = computed(() => chatStore.sending);
 const hasMessages = computed(() => messages.value.length > 0);
 
 const handleScroll = () => {
     const el = messageScrollRef.value;
-    if (!el) {
-        return;
-    }
+    if (!el) return;
     const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
     isAtBottom.value = distance < 80;
 };
@@ -65,37 +88,26 @@ const handleScroll = () => {
 const scrollToBottom = (smooth = true) => {
     nextTick(() => {
         const el = messageScrollRef.value;
-        if (!el) {
-            return;
-        }
-        el.scrollTo({
-            top: el.scrollHeight,
-            behavior: smooth ? 'smooth' : 'auto'
-        });
+        if (!el) return;
+        el.scrollTo({ top: el.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
     });
 };
 
 watch(
     messages,
     () => {
-        if (isAtBottom.value) {
-            scrollToBottom(true);
-        }
+        if (isAtBottom.value) scrollToBottom(true);
     },
     { deep: true }
 );
 
 watch(
     () => chatStore.currentChatId,
-    () => {
-        nextTick(() => scrollToBottom(false));
-    }
+    () => nextTick(() => scrollToBottom(false))
 );
 
 const startTypewriter = () => {
-    if (hasMessages.value) {
-        return;
-    }
+    if (hasMessages.value) return;
     typewriterController.start();
 };
 
@@ -118,14 +130,38 @@ watch(
     { immediate: true }
 );
 
+const fetchTags = async () => {
+    try {
+        const resp = await queryRagTags();
+        const list = Array.isArray(resp?.result)
+            ? resp.result
+            : Array.isArray(resp)
+              ? resp
+              : Array.isArray(resp?.data)
+                ? resp.data
+                : [];
+        const unique = Array.from(new Set(['', ...list.filter((t) => typeof t === 'string')]));
+        ragTags.value = unique.map((item, idx) => ({
+            label: item || '不使用知识库',
+            value: item || ''
+        }));
+        if (!unique.includes(currentRagTag.value)) {
+            currentRagTag.value = '';
+        }
+    } catch (error) {
+        console.warn('获取知识库标签失败', error);
+    }
+};
+
 onMounted(() => {
     scrollToBottom(false);
-    attachClickOutside();
+    attachListeners();
+    fetchTags();
 });
 
 onBeforeUnmount(() => {
     chatStore.stopCurrentRequest();
-    detachClickOutside();
+    detachListeners();
     stopTypewriter();
 });
 
@@ -134,13 +170,15 @@ const handleKeydown = (event) => {
         event.preventDefault();
         sendMessage();
     }
+    if (event.key === 'Escape') {
+        modelDropdownOpen.value = false;
+        ragDropdownOpen.value = false;
+    }
 };
 
 const sendMessage = async () => {
     const content = inputValue.value.trim();
-    if (!content || sending.value) {
-        return;
-    }
+    if (!content || sending.value) return;
     const mode = settingsStore.type || 'complete';
     chatStore.stopCurrentRequest();
     stopTypewriter();
@@ -158,11 +196,7 @@ const sendMessage = async () => {
 };
 
 const runComplete = async (content, controller) => {
-    const assistantMessage = chatStore.addAssistantMessage({
-        pending: true,
-        content: '',
-        think: ''
-    });
+    const assistantMessage = chatStore.addAssistantMessage({ pending: true, content: '', think: '' });
     try {
         const response = await fetchComplete({
             model: currentModel.value,
@@ -195,17 +229,11 @@ const runComplete = async (content, controller) => {
 
 const runStream = async (content, controller) => {
     const accumulator = createStreamAccumulator();
-    const assistantMessage = chatStore.addAssistantMessage({
-        pending: true,
-        content: '',
-        think: ''
-    });
+    const assistantMessage = chatStore.addAssistantMessage({ pending: true, content: '', think: '' });
     let closed = false;
 
     const finishStream = () => {
-        if (closed) {
-            return;
-        }
+        if (closed) return;
         closed = true;
         chatStore.updateAssistantMessage(assistantMessage.id, { pending: false });
         chatStore.setSending(false);
@@ -214,9 +242,7 @@ const runStream = async (content, controller) => {
     };
 
     const handleError = (error) => {
-        if (closed) {
-            return;
-        }
+        if (closed) return;
         const friendly = normalizeError(error);
         if (friendly.message && friendly.message.toLowerCase().includes('取消')) {
             finishStream();
@@ -251,13 +277,9 @@ const runStream = async (content, controller) => {
                         pending: true,
                         error: null
                     });
-                    if (isAtBottom.value) {
-                        scrollToBottom(true);
-                    }
+                    if (isAtBottom.value) scrollToBottom(true);
                 }
-                if (finishReason === 'stop') {
-                    finishStream();
-                }
+                if (finishReason === 'stop') finishStream();
             },
             onError: handleError,
             onDone: finishStream
@@ -268,13 +290,9 @@ const runStream = async (content, controller) => {
 };
 
 const handleStop = () => {
-    if (!sending.value) {
-        return;
-    }
+    if (!sending.value) return;
     chatStore.stopCurrentRequest();
-    const lastAssistant = [...messages.value]
-        .filter((item) => item.role === 'assistant')
-        .pop();
+    const lastAssistant = [...messages.value].filter((item) => item.role === 'assistant').pop();
     if (lastAssistant && lastAssistant.pending) {
         chatStore.updateAssistantMessage(lastAssistant.id, {
             pending: false,
@@ -301,34 +319,12 @@ const saveSettings = () => {
     showSettings.value = false;
 };
 
-const confirmDelete = () => {
-    showDeleteConfirm.value = true;
-};
-
-const handleDelete = () => {
-    showDeleteConfirm.value = false;
-    chatStore.deleteChat();
-};
-
-const hasThink = (message) => {
-    return Boolean(message?.think && message.think.trim());
-};
-
-const getThink = (message) => {
-    if (!message?.think) {
-        return '';
-    }
-    return message.think.trim();
-};
-
-const getContent = (message) => {
-    if (!message?.content) {
-        return '';
-    }
-    return message.content.toString().trimStart();
-};
+const hasThink = (message) => Boolean(message?.think && message.think.trim());
+const getThink = (message) => (message?.think ? message.think.trim() : '');
+const getContent = (message) => (message?.content ? message.content.toString().trimStart() : '');
 
 const toggleModelDropdown = () => {
+    ragDropdownOpen.value = false;
     modelDropdownOpen.value = !modelDropdownOpen.value;
 };
 
@@ -337,20 +333,133 @@ const selectModel = (value) => {
     modelDropdownOpen.value = false;
 };
 
+const toggleRagDropdown = () => {
+    modelDropdownOpen.value = false;
+    ragDropdownOpen.value = !ragDropdownOpen.value;
+};
+
+const selectRag = (value) => {
+    currentRagTag.value = value;
+    uploadForm.tagInput = value;
+    uploadForm.selectedTag = value;
+    ragDropdownOpen.value = false;
+};
+
+const toggleUploadRagDropdown = () => {
+    uploadRagDropdownOpen.value = !uploadRagDropdownOpen.value;
+};
+
+const selectUploadRag = (value) => {
+    uploadForm.selectedTag = value;
+    uploadForm.tagInput = value;
+    uploadRagDropdownOpen.value = false;
+};
+
 const handleClickOutside = (event) => {
     const target = event.target;
-    const trigger = modelSelectRef.value;
-    if (trigger && !trigger.contains(target)) {
+    const inModel = modelSelectRef.value && modelSelectRef.value.contains(target);
+    const inRag = ragSelectRef.value && ragSelectRef.value.contains(target);
+    const inUploadRag = uploadRagSelectRef.value && uploadRagSelectRef.value.contains(target);
+    if (!inModel) modelDropdownOpen.value = false;
+    if (!inRag) ragDropdownOpen.value = false;
+    if (!inUploadRag) uploadRagDropdownOpen.value = false;
+};
+
+const handleEscClose = (event) => {
+    if (event.key === 'Escape') {
         modelDropdownOpen.value = false;
+        ragDropdownOpen.value = false;
+        uploadRagDropdownOpen.value = false;
     }
 };
 
-const attachClickOutside = () => {
+const attachListeners = () => {
     document.addEventListener('click', handleClickOutside);
+    window.addEventListener('keydown', handleEscClose);
 };
 
-const detachClickOutside = () => {
+const detachListeners = () => {
     document.removeEventListener('click', handleClickOutside);
+    window.removeEventListener('keydown', handleEscClose);
+};
+
+const openUpload = () => {
+    uploadForm.tagInput = currentRagTag.value || '';
+    uploadForm.selectedTag = currentRagTag.value || '';
+    uploadForm.file = null;
+    uploadForm.fileName = '';
+    uploadForm.fileSize = '';
+    uploadForm.error = '';
+    uploadForm.uploading = false;
+    uploadRagDropdownOpen.value = false;
+    showUploadModal.value = true;
+};
+
+const closeUpload = () => {
+    showUploadModal.value = false;
+    uploadForm.tagInput = '';
+    uploadForm.selectedTag = '';
+    uploadForm.file = null;
+    uploadForm.fileName = '';
+    uploadForm.fileSize = '';
+    uploadForm.error = '';
+    uploadForm.uploading = false;
+};
+
+const formatSize = (size) => {
+    if (!size && size !== 0) return '';
+    if (size < 1024) return `${size} B`;
+    if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
+    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+const handleFileChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.txt')) {
+        uploadForm.error = '仅支持 .txt 文件';
+        uploadForm.file = null;
+        uploadForm.fileName = '';
+        uploadForm.fileSize = '';
+        event.target.value = '';
+        return;
+    }
+    uploadForm.error = '';
+    uploadForm.file = file;
+    uploadForm.fileName = file.name;
+    uploadForm.fileSize = formatSize(file.size);
+};
+
+const resolveUploadTag = () => {
+    const input = uploadForm.tagInput.trim();
+    if (input) return input;
+    return uploadForm.selectedTag || '';
+};
+
+const handleUpload = async () => {
+    const tag = resolveUploadTag();
+    if (!tag) {
+        uploadForm.error = '请选择或输入知识库标签';
+        return;
+    }
+    if (!uploadForm.file) {
+        uploadForm.error = '请选择 txt 文件';
+        return;
+    }
+    uploadForm.error = '';
+    uploadForm.uploading = true;
+    try {
+        await uploadRagFile({ ragTag: tag, file: uploadForm.file });
+        await fetchTags();
+        currentRagTag.value = tag;
+        selectRag(tag);
+        closeUpload();
+    } catch (error) {
+        const friendly = normalizeError(error);
+        uploadForm.error = friendly.message || '上传失败，请重试';
+    } finally {
+        uploadForm.uploading = false;
+    }
 };
 </script>
 
@@ -358,28 +467,50 @@ const detachClickOutside = () => {
     <section class="chat">
         <header class="chat-header">
             <div class="content-container header-inner">
-                <div class="model-select">
-                    <label for="model">模型</label>
-                    <div ref="modelSelectRef" class="model-trigger" @click="toggleModelDropdown">
-                        <span class="model-text">{{ currentModel }}</span>
-                        <span class="arrow" :class="{ open: modelDropdownOpen }">⌄</span>
+                <div class="select-group">
+                    <div class="model-select">
+                        <span class="select-label">模型</span>
+                        <div ref="modelSelectRef" class="model-trigger" @click="toggleModelDropdown">
+                            <span class="model-text">{{ currentModel }}</span>
+                            <span class="arrow" :class="{ open: modelDropdownOpen }">⌄</span>
+                        </div>
+                        <div v-if="modelDropdownOpen" class="model-dropdown scrollable">
+                            <div
+                                v-for="item in models"
+                                :key="item.value"
+                                :class="['model-option', { active: item.value === currentModel }]"
+                                @click.stop="selectModel(item.value)"
+                            >
+                                <span>{{ item.label }}</span>
+                                <span v-if="item.value === currentModel" class="check">✓</span>
+                            </div>
+                        </div>
                     </div>
-                    <div v-if="modelDropdownOpen" class="model-dropdown">
-                        <div
-                            v-for="item in models"
-                            :key="item.value"
-                            :class="['model-option', { active: item.value === currentModel }]"
-                            @click.stop="selectModel(item.value)"
-                        >
-                            <span>{{ item.label }}</span>
-                            <span v-if="item.value === currentModel" class="check">✓</span>
+
+                    <div class="model-select">
+                        <span class="select-label">知识库</span>
+                        <div ref="ragSelectRef" class="model-trigger" @click="toggleRagDropdown">
+                            <span class="model-text">
+                                {{ ragTags.find((t) => t.value === currentRagTag)?.label || '不使用知识库' }}
+                            </span>
+                            <span class="arrow" :class="{ open: ragDropdownOpen }">⌄</span>
+                        </div>
+                        <div v-if="ragDropdownOpen" class="model-dropdown scrollable">
+                            <div
+                                v-for="item in ragTags"
+                                :key="item.value || 'empty'"
+                                :class="['model-option', { active: item.value === currentRagTag }]"
+                                @click.stop="selectRag(item.value)"
+                            >
+                                <span>{{ item.label }}</span>
+                                <span v-if="item.value === currentRagTag" class="check">✓</span>
+                            </div>
                         </div>
                     </div>
                 </div>
+
                 <div class="header-actions">
-                    <button class="btn btn-ghost danger" type="button" @click="confirmDelete">
-                        删除会话
-                    </button>
+                    <button class="btn btn-ghost" type="button" @click="openUpload">上传知识库</button>
                     <button class="btn btn-primary" type="button" @click="openSettings">
                         回答设置
                     </button>
@@ -524,21 +655,85 @@ const detachClickOutside = () => {
             </div>
         </div>
 
-        <div v-if="showDeleteConfirm" class="modal-mask" @click.self="showDeleteConfirm = false">
-            <div class="modal small">
+        <div v-if="showUploadModal" class="modal-mask" @click.self="closeUpload">
+            <div class="modal large">
                 <div class="modal-header">
-                    <div class="title">删除会话</div>
-                    <button class="close" type="button" @click="showDeleteConfirm = false">×</button>
+                    <div class="title">上传知识库</div>
+                    <button class="close" type="button" @click="closeUpload">×</button>
                 </div>
                 <div class="modal-body">
-                    <div class="confirm-text">确认删除当前会话吗？</div>
+                    <div class="form-item">
+                        <label>知识库标签</label>
+                        <div class="tag-row">
+                            <div class="model-select compact">
+                                <div
+                                    ref="uploadRagSelectRef"
+                                    class="model-trigger"
+                                    @click.stop="toggleUploadRagDropdown"
+                                >
+                                    <span class="model-text">
+                                        {{ ragTags.find((t) => t.value === uploadForm.selectedTag)?.label || '选择标签' }}
+                                    </span>
+                                    <span class="arrow" :class="{ open: uploadRagDropdownOpen }">⌄</span>
+                                </div>
+                                <div v-if="uploadRagDropdownOpen" class="model-dropdown scrollable">
+                                    <div
+                                        v-for="item in ragTags"
+                                        :key="item.value || 'empty-upload'"
+                                        :class="[
+                                            'model-option',
+                                            { active: item.value === uploadForm.selectedTag }
+                                        ]"
+                                        @click.stop="
+                                            () => {
+                                                selectUploadRag(item.value);
+                                            }
+                                        "
+                                    >
+                                        <span>{{ item.label }}</span>
+                                        <span v-if="item.value === uploadForm.selectedTag" class="check">✓</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <input
+                                v-model="uploadForm.tagInput"
+                                type="text"
+                                class="tag-input"
+                                placeholder="或输入新标签"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="form-item">
+                        <label>上传文件（仅 .txt）</label>
+                        <label class="upload-box">
+                            <input
+                                type="file"
+                                accept=".txt,text/plain"
+                                class="file-input"
+                                @change="handleFileChange"
+                            />
+                            <div v-if="uploadForm.fileName" class="file-info">
+                                <span class="name">{{ uploadForm.fileName }}</span>
+                                <span class="size">{{ uploadForm.fileSize }}</span>
+                            </div>
+                            <div v-else class="placeholder">点击选择或拖拽 TXT 文件</div>
+                        </label>
+                    </div>
+
+                    <div v-if="uploadForm.error" class="error-tip dense">
+                        {{ uploadForm.error }}
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-ghost" type="button" @click="showDeleteConfirm = false">
-                        取消
-                    </button>
-                    <button class="btn btn-primary danger" type="button" @click="handleDelete">
-                        确认删除
+                    <button class="btn btn-ghost" type="button" @click="closeUpload">取消</button>
+                    <button
+                        class="btn btn-primary"
+                        type="button"
+                        :disabled="uploadForm.uploading"
+                        @click="handleUpload"
+                    >
+                        {{ uploadForm.uploading ? '上传中…' : '上传' }}
                     </button>
                 </div>
             </div>
@@ -569,20 +764,33 @@ const detachClickOutside = () => {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    gap: 12px;
+}
+
+.select-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .model-select {
     display: flex;
+    flex-direction: row;
     align-items: center;
-    gap: 10px;
+    gap: 4px;
     font-weight: 600;
     position: relative;
 }
 
+.select-label {
+    font-size: 16px;
+    color: var(--text-secondary);
+    min-width: 30px;
+}
+
 .model-trigger {
-    min-width: 220px;
-    padding: 10px 12px;
+    min-width: 200px;
+    padding: 8px 12px;
     border-radius: 12px;
     border: 1px solid var(--border-color);
     background: #fff;
@@ -592,6 +800,11 @@ const detachClickOutside = () => {
     gap: 10px;
     cursor: pointer;
     box-shadow: var(--shadow-soft);
+    min-height: 36px;
+}
+
+.model-select.compact .model-trigger {
+    min-width: 160px;
 }
 
 .model-text {
@@ -610,7 +823,7 @@ const detachClickOutside = () => {
 
 .model-dropdown {
     position: absolute;
-    top: calc(100% + 8px);
+    top: calc(100% + 6px);
     left: 0;
     width: 100%;
     background: #fff;
@@ -619,6 +832,11 @@ const detachClickOutside = () => {
     box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
     padding: 6px;
     z-index: 15;
+}
+
+.model-dropdown.scrollable {
+    max-height: 240px;
+    overflow-y: auto;
 }
 
 .model-option {
@@ -669,7 +887,7 @@ const detachClickOutside = () => {
 .message-scroll {
     height: 100%;
     overflow-y: auto;
-    padding: 22px 0;
+    padding: 16px 0;
     scroll-behavior: smooth;
     background: var(--bg-page);
     scrollbar-gutter: auto;
@@ -698,7 +916,6 @@ const detachClickOutside = () => {
     background: #fff;
     border-radius: 14px;
     padding: 12px 14px;
-    box-shadow: var(--shadow-soft);
     border: 1px solid var(--border-color);
     position: relative;
 }
@@ -740,6 +957,10 @@ const detachClickOutside = () => {
     font-size: 13px;
 }
 
+.error-tip.dense {
+    margin-top: 0;
+}
+
 .typing {
     display: inline-flex;
     gap: 4px;
@@ -778,7 +999,7 @@ const detachClickOutside = () => {
     flex-direction: column;
     gap: 12px;
     align-items: flex-start;
-    padding: 80px 0;
+    padding: 60px 0;
     color: var(--text-primary);
 }
 
@@ -817,7 +1038,7 @@ const detachClickOutside = () => {
     display: flex;
     flex-direction: column;
     gap: 0;
-    padding: 16px 28px 16px 18px;
+    padding: 12px 0;
 }
 
 .input-card {
@@ -853,7 +1074,7 @@ const detachClickOutside = () => {
 }
 
 .input-actions .btn {
-    height: 38px;
+    height: 36px;
 }
 
 .chat-footer {
@@ -890,6 +1111,10 @@ const detachClickOutside = () => {
     border: 1px solid var(--border-color);
 }
 
+.modal.large {
+    width: min(640px, 100%);
+}
+
 .modal.small {
     width: min(380px, 100%);
 }
@@ -898,7 +1123,7 @@ const detachClickOutside = () => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 18px 20px 12px;
+    padding: 14px 18px 10px;
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -916,10 +1141,10 @@ const detachClickOutside = () => {
 }
 
 .modal-body {
-    padding: 16px 20px;
+    padding: 14px 18px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
 }
 
 .form-item {
@@ -933,7 +1158,8 @@ const detachClickOutside = () => {
     color: var(--text-primary);
 }
 
-.form-item input[type='number'] {
+.form-item input[type='number'],
+.form-item input[type='text'] {
     padding: 10px 12px;
     border-radius: 12px;
     border: 1px solid var(--border-color);
@@ -957,7 +1183,7 @@ const detachClickOutside = () => {
 }
 
 .modal-footer {
-    padding: 14px 20px 18px;
+    padding: 12px 18px 16px;
     display: flex;
     justify-content: flex-end;
     gap: 10px;
@@ -965,7 +1191,7 @@ const detachClickOutside = () => {
 }
 
 .btn {
-    padding: 10px 14px;
+    padding: 9px 14px;
     border-radius: 12px;
     font-weight: 700;
     cursor: pointer;
@@ -1013,6 +1239,51 @@ const detachClickOutside = () => {
     color: var(--text-primary);
 }
 
+.tag-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tag-input {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    font-size: 14px;
+}
+
+.upload-box {
+    border: 1px dashed var(--border-color);
+    border-radius: 12px;
+    padding: 14px 12px;
+    background: #f8fafc;
+    cursor: pointer;
+    display: block;
+}
+
+.file-input {
+    display: none;
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.file-info .size {
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.placeholder {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
 @keyframes caretBlink {
     0%,
     50% {
@@ -1036,10 +1307,17 @@ const detachClickOutside = () => {
 
     .header-actions {
         gap: 6px;
+        flex-wrap: wrap;
     }
 
-    .model-select select {
-        min-width: 160px;
+    .select-group {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .model-trigger {
+        min-width: 0;
+        width: 100%;
     }
 }
 </style>

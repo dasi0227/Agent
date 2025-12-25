@@ -8,6 +8,7 @@ const defaultSettings = () => ({
     temperature: 0.7,
     topK: 40,
     model: 'deepseek-r1:1.5b',
+    ragTag: '',
     token: ''
 });
 
@@ -39,6 +40,7 @@ export const useSettingsStore = defineStore('settings', {
                 temperature: this.temperature,
                 topK: this.topK,
                 model: this.model,
+                ragTag: this.ragTag,
                 token: this.token
             };
             localStorage.setItem(SETTINGS_KEY, JSON.stringify(payload));
@@ -151,6 +153,13 @@ export const useChatStore = defineStore('chat', {
                 this.currentChatId = newChat.id;
             }
             persistChatState(this.chats, this.currentChatId);
+        },
+        renameChat(chatId, newTitle) {
+            const chat = this.chats.find((item) => item.id === chatId);
+            if (chat) {
+                chat.title = newTitle || '未命名会话';
+                persistChatState(this.chats, this.currentChatId);
+            }
         },
         addUserMessage(content) {
             const chat = this.ensureChat();
