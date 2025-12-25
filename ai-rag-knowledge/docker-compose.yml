@@ -4,6 +4,8 @@ networks:
 
 services:
 
+  # ollama pull deepseek-r1:1.5b：从 Ollama 仓库下载到本机/容器
+  # ollama pull nomic-embed-text：下载向量嵌入模型，用来把文本转成向量给 pgvector 做相似度检索
   ollama:
     image: ollama/ollama:0.5.10
     container_name: ollama

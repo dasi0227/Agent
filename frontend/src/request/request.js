@@ -50,8 +50,9 @@ http.interceptors.request.use(
     (config) => {
         const storedSettings = localStorage.getItem(SETTINGS_KEY);
         const settings = storedSettings ? JSON.parse(storedSettings) : {};
+        const isFormData = config.data instanceof FormData;
         config.headers = {
-            'Content-Type': 'application/json',
+            ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
             Accept: 'application/json',
             ...(config.headers || {})
         };

@@ -63,7 +63,7 @@ public class RAGTest {
     @Test
     public void chat() {
         // 用户查询问题
-        String message = "万驿苇是什么大学的？";
+        String message = "万驿苇是什么大学的学生？";
         UserMessage userMessage = new UserMessage(message);
 
         // RAG 系统提示词模板
@@ -75,11 +75,14 @@ public class RAGTest {
                     {documents}
                 """;
 
-        // 构建向量检索请求
-        String key = "data_source";
-        String value = "file.txt";
+        // 构建向量检索条件
         FilterExpressionBuilder filterExpressionBuilder = new FilterExpressionBuilder();
-        Expression expression = filterExpressionBuilder.eq(key, value).build();
+        Expression expression = filterExpressionBuilder.and(
+                filterExpressionBuilder.eq("knowledge", "test_knowledge"),
+                filterExpressionBuilder.eq("source", "test.txt")
+        ).build();
+
+        // 构建向量检索请求
         SearchRequest searchRequest = SearchRequest.builder()
                 .query(message)
                 .filterExpression(expression)
