@@ -4,8 +4,6 @@ networks:
 
 services:
 
-  # ollama pull deepseek-r1:1.5b：从 Ollama 仓库下载到本机/容器
-  # ollama pull nomic-embed-text：下载向量嵌入模型，用来把文本转成向量给 pgvector 做相似度检索
   ollama:
     image: ollama/ollama:0.5.10
     container_name: ollama
@@ -61,5 +59,17 @@ services:
       interval: 2s
       timeout: 20s
       retries: 10
+    networks:
+      - agent
+
+  one-api:
+    image: justsong/one-api:latest
+    platform: linux/amd64
+    ports:
+      - "3000:3000"
+    environment:
+      - TZ=Asia/Shanghai
+      - SQL_DSN=oneapi:oneapi@tcp(mysql:3306)/oneapi
+    restart: always
     networks:
       - agent

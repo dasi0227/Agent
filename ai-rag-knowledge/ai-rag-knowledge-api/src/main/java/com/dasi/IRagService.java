@@ -5,12 +5,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-public interface IRAGService {
-
-    Result<List<String>> queryRagTagList();
+public interface IRagService {
 
     Result<Void> uploadFile(String ragTag, List<MultipartFile> fileList);
 
-    Result<Void> analyzeGitRepo(String repo, String username, String password);
+    Result<Void> uploadGitRepo(String repo, String username, String password);
 
 }
