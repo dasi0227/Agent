@@ -14,8 +14,14 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RedisClientConfig {
 
+    private final RedisClientProperties redisClientProperties;
+
+    public RedisClientConfig(RedisClientProperties redisClientProperties) {
+        this.redisClientProperties = redisClientProperties;
+    }
+
     @Bean
-    public RedissonClient redissonClient(RedisClientProperties properties) {
+    public RedissonClient redissonClient() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -23,19 +29,19 @@ public class RedisClientConfig {
 
         Config config = new Config();
         config.setCodec(codec);
-        String address = "redis://" + properties.getHost() + ":" + properties.getPort();
+        String address = "redis://" + redisClientProperties.getHost() + ":" + redisClientProperties.getPort();
         config.useSingleServer()
                 .setAddress(address)
-                .setPassword(properties.getPassword())
-                .setDatabase(properties.getDatabase())
-                .setConnectionPoolSize(properties.getPoolSize())
-                .setConnectionMinimumIdleSize(properties.getMinIdleSize())
-                .setIdleConnectionTimeout(properties.getIdleTimeout())
-                .setConnectTimeout(properties.getConnectTimeout())
-                .setRetryAttempts(properties.getRetryAttempts())
-                .setRetryInterval(properties.getRetryInterval())
-                .setPingConnectionInterval(properties.getPingInterval())
-                .setKeepAlive(properties.isKeepAlive())
+                .setPassword(redisClientProperties.getPassword())
+                .setDatabase(redisClientProperties.getDatabase())
+                .setConnectionPoolSize(redisClientProperties.getPoolSize())
+                .setConnectionMinimumIdleSize(redisClientProperties.getMinIdleSize())
+                .setIdleConnectionTimeout(redisClientProperties.getIdleTimeout())
+                .setConnectTimeout(redisClientProperties.getConnectTimeout())
+                .setRetryAttempts(redisClientProperties.getRetryAttempts())
+                .setRetryInterval(redisClientProperties.getRetryInterval())
+                .setPingConnectionInterval(redisClientProperties.getPingInterval())
+                .setKeepAlive(redisClientProperties.isKeepAlive())
         ;
 
         return Redisson.create(config);

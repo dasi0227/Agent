@@ -1,6 +1,6 @@
 package com.dasi.http;
 
-import com.dasi.IRAGService;
+import com.dasi.IRagService;
 import com.dasi.result.Result;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +15,10 @@ import org.springframework.ai.reader.tika.TikaDocumentReader;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.ai.vectorstore.pgvector.PgVectorStore;
 import org.springframework.core.io.PathResource;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -24,34 +27,23 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 
+import static com.dasi.type.SystemConstant.*;
+
 @RestController
 @RequestMapping("/api/v1/rag")
 @Slf4j
-public class RAGController implements IRAGService {
-
-    private final String REDIS_RAG_TAG_LIST_KEY = "ragTagList";
-
-    private final String PGVECTOR_KNOWLEDGE_KEY = "knowledge";
-
-    private final String GIT_CLONE_DIRECTORY = "./git-cloned-repo";
+public class RagController implements IRagService {
 
     @Resource
     private TokenTextSplitter tokenTextSplitter;
 
     @Resource
-    private PgVectorStore pgVectorStore;
-
-    @Resource
     private RedissonClient redissonClient;
 
-    @GetMapping("/query/tags")
-    @Override
-    public Result<List<String>> queryRagTagList() {
-        RList<String> elements = redissonClient.getList(REDIS_RAG_TAG_LIST_KEY);
-        return Result.success(elements);
-    }
+    @Resource
+    private PgVectorStore pgVectorStore;
 
-    @PostMapping("/upload")
+    @PostMapping("/file")
     @Override
     public Result<Void> uploadFile(@RequestParam String ragTag, @RequestParam List<MultipartFile> fileList) {
         for (MultipartFile file : fileList) {
@@ -60,7 +52,7 @@ public class RAGController implements IRAGService {
             List<Document> documentSplitList = tokenTextSplitter.apply(documentList);
 
             documentSplitList.forEach(document -> document.getMetadata().put(PGVECTOR_KNOWLEDGE_KEY, ragTag));
-            pgVectorStore.accept(documentSplitList);
+            writeToVectorStore(documentSplitList);
 
             RList<String> elements = redissonClient.getList(REDIS_RAG_TAG_LIST_KEY);
             if (!elements.contains(ragTag)) {
@@ -73,9 +65,9 @@ public class RAGController implements IRAGService {
         return Result.success();
     }
 
-    @PostMapping("/analyze-git")
+    @PostMapping("/git")
     @Override
-    public Result<Void> analyzeGitRepo(String repo, String username, String password) {
+    public Result<Void> uploadGitRepo(@RequestParam String repo, @RequestParam String username, @RequestParam String password) {
         try {
             String[] parts = repo.split("/");
             String projectName = parts[parts.length - 1].replace(".git", "");
@@ -122,7 +114,7 @@ public class RAGController implements IRAGService {
                     List<Document> split = tokenTextSplitter.apply(documents);
                     split.forEach(doc -> doc.getMetadata().put("knowledge", projectName));
 
-                    pgVectorStore.accept(split);
+                    writeToVectorStore(split);
 
                     return FileVisitResult.CONTINUE;
                 }
@@ -143,10 +135,12 @@ public class RAGController implements IRAGService {
 
             FileUtils.deleteDirectory(path);
 
+            log.info("知识库上传完成：ragTag={}", projectName);
+
             return Result.success();
 
         } catch (IOException | GitAPIException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -161,14 +155,16 @@ public class RAGController implements IRAGService {
             return false;
 
         // 白名单
-        return name.endsWith(".java") || name.endsWith(".kt") || name.endsWith(".go")
-                || name.endsWith(".py") || name.endsWith(".js") || name.endsWith(".ts")
-                || name.endsWith(".jsx") || name.endsWith(".tsx")
-                || name.endsWith(".xml") || name.endsWith(".yml") || name.endsWith(".yaml")
-                || name.endsWith(".json") || name.endsWith(".properties") || name.endsWith(".conf")
-                || name.endsWith(".md") || name.endsWith(".txt") || name.endsWith(".sql")
-                || name.endsWith(".sh") || name.endsWith(".bat") || name.endsWith(".gradle")
-                || name.equals("dockerfile") || name.endsWith(".gitignore");
+        return name.endsWith(".java") || name.endsWith(".yml") || name.endsWith(".xml")
+                || name.endsWith(".html") || name.endsWith(".js") || name.endsWith(".css")
+                || name.endsWith(".md") || name.endsWith(".txt") || name.endsWith(".conf");
+    }
+
+    private void writeToVectorStore(List<Document> documents) {
+        if (documents == null || documents.isEmpty()) {
+            return;
+        }
+        pgVectorStore.add(documents);
     }
 
 }

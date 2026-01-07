@@ -4,8 +4,10 @@ import {
     fetchComplete,
     fetchStream,
     pickContentFromResult,
+    queryChatModels,
     queryRagTags,
-    uploadRagFile
+    uploadRagFile,
+    uploadRagGit
 } from '../request/api';
 import { normalizeError } from '../request/request';
 import { applyStreamToken, createStreamAccumulator, parseThinkText } from '../utils/parseThink';
@@ -37,11 +39,15 @@ const typewriterState = reactive({
 });
 
 const uploadForm = reactive({
+    mode: 'file',
     tagInput: '',
     selectedTag: '',
     file: null,
     fileName: '',
     fileSize: '',
+    repoUrl: '',
+    repoUsername: '',
+    repoPassword: '',
     error: '',
     uploading: false
 });
@@ -153,9 +159,36 @@ const fetchTags = async () => {
     }
 };
 
+const fetchModels = async () => {
+    try {
+        const resp = await queryChatModels();
+        const list = Array.isArray(resp?.result)
+            ? resp.result
+            : Array.isArray(resp)
+              ? resp
+              : Array.isArray(resp?.data)
+                ? resp.data
+                : [];
+        const unique = Array.from(new Set(list.filter((item) => typeof item === 'string' && item)));
+        if (unique.length > 0) {
+            models.value = unique.map((item) => ({ label: item, value: item }));
+            if (!unique.includes(currentModel.value)) {
+                currentModel.value = unique[0];
+            }
+        }
+    } catch (error) {
+        console.warn('获取模型列表失败', error);
+    }
+};
+
 onMounted(() => {
     scrollToBottom(false);
     attachListeners();
+    fetchTags();
+    fetchModels();
+});
+
+watch(currentModel, () => {
     fetchTags();
 });
 
@@ -201,6 +234,7 @@ const runComplete = async (content, controller) => {
         const response = await fetchComplete({
             model: currentModel.value,
             message: content,
+            ragTag: currentRagTag.value,
             signal: controller.signal
         });
         const text = pickContentFromResult(response);
@@ -264,6 +298,7 @@ const runStream = async (content, controller) => {
         await fetchStream({
             model: currentModel.value,
             message: content,
+            ragTag: currentRagTag.value,
             signal: controller.signal,
             onData: (payload) => {
                 const data = payload?.result || payload;
@@ -384,11 +419,15 @@ const detachListeners = () => {
 };
 
 const openUpload = () => {
+    uploadForm.mode = 'file';
     uploadForm.tagInput = currentRagTag.value || '';
     uploadForm.selectedTag = currentRagTag.value || '';
     uploadForm.file = null;
     uploadForm.fileName = '';
     uploadForm.fileSize = '';
+    uploadForm.repoUrl = '';
+    uploadForm.repoUsername = '';
+    uploadForm.repoPassword = '';
     uploadForm.error = '';
     uploadForm.uploading = false;
     uploadRagDropdownOpen.value = false;
@@ -397,11 +436,15 @@ const openUpload = () => {
 
 const closeUpload = () => {
     showUploadModal.value = false;
+    uploadForm.mode = 'file';
     uploadForm.tagInput = '';
     uploadForm.selectedTag = '';
     uploadForm.file = null;
     uploadForm.fileName = '';
     uploadForm.fileSize = '';
+    uploadForm.repoUrl = '';
+    uploadForm.repoUsername = '';
+    uploadForm.repoPassword = '';
     uploadForm.error = '';
     uploadForm.uploading = false;
 };
@@ -437,22 +480,57 @@ const resolveUploadTag = () => {
 };
 
 const handleUpload = async () => {
-    const tag = resolveUploadTag();
-    if (!tag) {
-        uploadForm.error = '请选择或输入知识库标签';
-        return;
-    }
-    if (!uploadForm.file) {
-        uploadForm.error = '请选择 txt 文件';
-        return;
-    }
     uploadForm.error = '';
+    if (uploadForm.mode === 'file') {
+        const tag = resolveUploadTag();
+        if (!tag) {
+            uploadForm.error = '请选择或输入知识库标签';
+            return;
+        }
+        if (!uploadForm.file) {
+            uploadForm.error = '请选择 txt 文件';
+            return;
+        }
+        uploadForm.uploading = true;
+        try {
+            await uploadRagFile({ ragTag: tag, file: uploadForm.file });
+            await fetchTags();
+            currentRagTag.value = tag;
+            selectRag(tag);
+            closeUpload();
+        } catch (error) {
+            const friendly = normalizeError(error);
+            uploadForm.error = friendly.message || '上传失败，请重试';
+        } finally {
+            uploadForm.uploading = false;
+        }
+        return;
+    }
+
+    const repo = uploadForm.repoUrl.trim();
+    const username = uploadForm.repoUsername.trim();
+    const password = uploadForm.repoPassword;
+    if (!repo) {
+        uploadForm.error = '请输入 Git 仓库地址';
+        return;
+    }
+    if (!username) {
+        uploadForm.error = '请输入 Git 用户名';
+        return;
+    }
+    if (!password) {
+        uploadForm.error = '请输入 Git 密码';
+        return;
+    }
     uploadForm.uploading = true;
     try {
-        await uploadRagFile({ ragTag: tag, file: uploadForm.file });
+        await uploadRagGit({ repo, username, password });
         await fetchTags();
-        currentRagTag.value = tag;
-        selectRag(tag);
+        const repoName = repo.split('/').pop()?.replace(/\.git$/i, '') || '';
+        if (repoName) {
+            currentRagTag.value = repoName;
+            selectRag(repoName);
+        }
         closeUpload();
     } catch (error) {
         const friendly = normalizeError(error);
@@ -662,7 +740,26 @@ const handleUpload = async () => {
                     <button class="close" type="button" @click="closeUpload">×</button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-item">
+                    <div class="upload-mode">
+                        <button
+                            class="mode-btn"
+                            :class="{ active: uploadForm.mode === 'file' }"
+                            type="button"
+                            @click="uploadForm.mode = 'file'"
+                        >
+                            上传文件
+                        </button>
+                        <button
+                            class="mode-btn"
+                            :class="{ active: uploadForm.mode === 'git' }"
+                            type="button"
+                            @click="uploadForm.mode = 'git'"
+                        >
+                            上传 Git 仓库
+                        </button>
+                    </div>
+
+                    <div v-if="uploadForm.mode === 'file'" class="form-item">
                         <label>知识库标签</label>
                         <div class="tag-row">
                             <div class="model-select compact">
@@ -704,7 +801,7 @@ const handleUpload = async () => {
                         </div>
                     </div>
 
-                    <div class="form-item">
+                    <div v-if="uploadForm.mode === 'file'" class="form-item">
                         <label>上传文件（仅 .txt）</label>
                         <label class="upload-box">
                             <input
@@ -719,6 +816,36 @@ const handleUpload = async () => {
                             </div>
                             <div v-else class="placeholder">点击选择或拖拽 TXT 文件</div>
                         </label>
+                    </div>
+
+                    <div v-if="uploadForm.mode === 'git'" class="form-item">
+                        <label>Git 仓库地址</label>
+                        <input
+                            v-model="uploadForm.repoUrl"
+                            type="text"
+                            class="tag-input"
+                            placeholder="https://github.com/xxx/xxx.git"
+                        />
+                    </div>
+
+                    <div v-if="uploadForm.mode === 'git'" class="form-item">
+                        <label>Git 用户名</label>
+                        <input
+                            v-model="uploadForm.repoUsername"
+                            type="text"
+                            class="tag-input"
+                            placeholder="请输入用户名"
+                        />
+                    </div>
+
+                    <div v-if="uploadForm.mode === 'git'" class="form-item">
+                        <label>Git 密码</label>
+                        <input
+                            v-model="uploadForm.repoPassword"
+                            type="password"
+                            class="tag-input"
+                            placeholder="请输入密码或 token"
+                        />
                     </div>
 
                     <div v-if="uploadForm.error" class="error-tip dense">
@@ -1243,6 +1370,27 @@ const handleUpload = async () => {
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+.upload-mode {
+    display: flex;
+    gap: 10px;
+}
+
+.mode-btn {
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: #f7f9fc;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.mode-btn.active {
+    background: #e8f1ff;
+    color: var(--accent-color);
+    border-color: #c7dcff;
 }
 
 .tag-input {
