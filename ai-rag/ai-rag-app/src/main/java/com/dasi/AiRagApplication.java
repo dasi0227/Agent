@@ -19,7 +19,7 @@ import static com.dasi.type.SystemConstant.*;
 @SpringBootApplication
 @Configuration
 @Slf4j
-public class AgentApplication {
+public class AiRagApplication {
 
     @Resource
     private RedissonClient redissonClient;
@@ -34,7 +34,7 @@ public class AgentApplication {
     private String vectorTable;
 
     public static void main(String[] args) {
-        SpringApplication.run(AgentApplication.class);
+        SpringApplication.run(AiRagApplication.class);
     }
 
     @PostConstruct
