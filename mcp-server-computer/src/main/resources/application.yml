@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: mcp-server-computer
+
+  ai:
+    mcp:
+      server:
+        name: mcp-server-computer
+        version: 1.0.0
+
+  main:
+    banner-mode: off
+    web-application-type: none
+
+logging:
+  pattern:
+    console:
+  file:
+    name: mcp-server-computer.log
