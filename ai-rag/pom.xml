@@ -5,13 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.dasi</groupId>
-    <artifactId>ai-rag-knowledge</artifactId>
+    <artifactId>ai-rag</artifactId>
     <version>1.0</version>
     <packaging>pom</packaging>
     <modules>
-        <module>ai-rag-knowledge-api</module>
-        <module>ai-rag-knowledge-app</module>
-        <module>ai-rag-knowledge-trigger</module>
+        <module>ai-rag-api</module>
+        <module>ai-rag-app</module>
+        <module>ai-rag-trigger</module>
     </modules>
 
     <properties>
@@ -75,12 +75,12 @@
 
             <dependency>
                 <groupId>com.dasi</groupId>
-                <artifactId>ai-rag-knowledge-api</artifactId>
+                <artifactId>ai-rag-api</artifactId>
                 <version>1.0</version>
             </dependency>
             <dependency>
                 <groupId>com.dasi</groupId>
-                <artifactId>ai-rag-knowledge-trigger</artifactId>
+                <artifactId>ai-rag-trigger</artifactId>
                 <version>1.0</version>
             </dependency>
         </dependencies>
@@ -91,25 +91,29 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.0</version>
+                <version>3.11.0</version>
                 <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
+                    <release>${java.version}</release>
                     <encoding>${project.build.sourceEncoding}</encoding>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.5</version>
+                <version>3.3.1</version>
                 <configuration>
-                    <encoding>UTF-8</encoding>
+                    <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
-                <version>2.7</version>
+                <version>2.16.2</version>
             </plugin>
         </plugins>
     </build>

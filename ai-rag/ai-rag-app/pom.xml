@@ -5,16 +5,22 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.dasi</groupId>
-        <artifactId>ai-rag-knowledge</artifactId>
+        <artifactId>ai-rag</artifactId>
         <version>1.0</version>
     </parent>
 
-    <artifactId>ai-rag-knowledge-trigger</artifactId>
+    <artifactId>ai-rag-app</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -29,7 +35,7 @@
 
         <dependency>
             <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-pgvector-store</artifactId>
+            <artifactId>spring-ai-pgvector-store-spring-boot-starter</artifactId>
         </dependency>
 
         <dependency>
@@ -38,13 +44,18 @@
         </dependency>
 
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-spring-boot-autoconfigure</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-tx</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
         </dependency>
 
         <dependency>
@@ -53,13 +64,13 @@
         </dependency>
 
         <dependency>
-            <groupId>com.dasi</groupId>
-            <artifactId>ai-rag-knowledge-api</artifactId>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.redisson</groupId>
-            <artifactId>redisson</artifactId>
+            <artifactId>redisson-spring-boot-starter</artifactId>
         </dependency>
 
         <dependency>
@@ -67,6 +78,16 @@
             <artifactId>org.eclipse.jgit</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.dasi</groupId>
+            <artifactId>ai-rag-trigger</artifactId>
+        </dependency>
     </dependencies>
 
     <properties>

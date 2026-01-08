@@ -1,5 +1,5 @@
 spring:
   application:
-    name: ai-rag-knowledge
+    name: ai-rag
   profiles:
     active: dev

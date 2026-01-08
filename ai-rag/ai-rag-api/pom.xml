@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.dasi</groupId>
-        <artifactId>ai-rag-knowledge</artifactId>
+        <artifactId>ai-rag</artifactId>
         <version>1.0</version>
     </parent>
 
-    <artifactId>ai-rag-knowledge-api</artifactId>
+    <artifactId>ai-rag-api</artifactId>
 
     <dependencies>
         <dependency>
