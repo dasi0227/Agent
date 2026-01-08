@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem@2025.3.28",
+        "/Users/wyw/Downloads",
+        "/Users/wyw/Downloads"
+      ]
+    },
+    "mcp-server-computer": {
+      "command": "java",
+      "args": [
+        "-Dfile.encoding=utf-8",
+        "-Dspring.ai.mcp.server.stdio=true",
+        "-jar",
+        "/Users/wyw/Desktop/Project/Agent/mcp-server-computer/target/mcp-server-computer-1.0-SNAPSHOT.jar"
+      ]
+    }
+  }
+}
+
