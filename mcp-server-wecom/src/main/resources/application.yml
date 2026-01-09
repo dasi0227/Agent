@@ -23,6 +23,6 @@ logging:
 
 wecom:
   base-url: https://qyapi.weixin.qq.com
-  agentid: 1000002
-  corpid: wwd0f04db1eede0898
-  corpsecret: WyNnz0g5qIRpOrezxp-ok2sdTcrXIgI3s_BRROGaxJU
+  agentid: ${AGENT_ID}
+  corpid: ${CORP_ID}
+  corpsecret: ${CORP_SECRET}
