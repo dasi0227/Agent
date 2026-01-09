@@ -1,14 +1,14 @@
-package com.dasi.infrastructure.gateway;
+package com.dasi.sse.gateway;
 
-import com.dasi.infrastructure.dto.PostCsdnServiceRequest;
-import com.dasi.infrastructure.dto.PostCsdnServiceResponse;
+import com.dasi.sse.dto.PostCsdnHttpRequest;
+import com.dasi.sse.dto.PostCsdnHttpResponse;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
 
-public interface IPostCsdnService {
+public interface IPostCsdnHttp {
 
     @Headers({
             "accept: */*",
@@ -33,8 +33,8 @@ public interface IPostCsdnService {
             "x-ca-signature-headers: x-ca-key,x-ca-nonce"
     })
     @POST("/blog-console-api/v3/mdeditor/saveArticle")
-    Call<PostCsdnServiceResponse> saveArticle(
-            @Body PostCsdnServiceRequest serviceRequest,
+    Call<PostCsdnHttpResponse> saveArticle(
+            @Body PostCsdnHttpRequest serviceRequest,
             @Header("Cookie") String cookie);
 
 }

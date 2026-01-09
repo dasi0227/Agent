@@ -17,9 +17,6 @@ spring:
         name: mcp-server-csdn
         version: 1.0.0
 
-  main:
-    banner-mode: off
-
 logging:
   level:
     root: info

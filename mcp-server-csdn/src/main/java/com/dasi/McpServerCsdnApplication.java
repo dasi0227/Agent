@@ -1,6 +1,6 @@
 package com.dasi;
 
-import com.dasi.infrastructure.gateway.IPostCsdnService;
+import com.dasi.sse.gateway.IPostCsdnHttp;
 import com.dasi.mcp.tool.PostCsdnTool;
 import com.dasi.type.properties.PostCsdnProperties;
 import org.springframework.ai.tool.ToolCallbackProvider;
@@ -12,23 +12,23 @@ import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 @SpringBootApplication
-public class McpServerApplication {
+public class McpServerCsdnApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(McpServerApplication.class, args);
+        SpringApplication.run(McpServerCsdnApplication.class, args);
     }
 
-    // 把 CSDN 的 HTTP 接口，变成一个可以被 Spring 调用的 Java 对象
+    // 把 HTTP 接口变成一个可以被 Spring 调用的 Java 对象
     @Bean
-    public IPostCsdnService csdnService(PostCsdnProperties csdnProperties) {
+    public IPostCsdnHttp postCsdnHttp(PostCsdnProperties csdnProperties) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(csdnProperties.getBaseUrl())
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build();
-        return retrofit.create(IPostCsdnService.class);
+        return retrofit.create(IPostCsdnHttp.class);
     }
 
-    // 把工具类方法，注册成 MCP / Spring AI 能调用的 Tool
+    // 把 MCP 接口变成一个可以被 Spring 调用的 Java 对象
     @Bean
     public ToolCallbackProvider csdnTools(PostCsdnTool postCsdnTool) {
         return MethodToolCallbackProvider.builder().toolObjects(postCsdnTool).build();

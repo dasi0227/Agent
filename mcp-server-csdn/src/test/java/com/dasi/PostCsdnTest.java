@@ -1,8 +1,8 @@
 package com.dasi;
 
-import com.dasi.infrastructure.dto.PostCsdnServiceRequest;
-import com.dasi.infrastructure.dto.PostCsdnServiceResponse;
-import com.dasi.infrastructure.gateway.IPostCsdnService;
+import com.dasi.sse.dto.PostCsdnHttpRequest;
+import com.dasi.sse.dto.PostCsdnHttpResponse;
+import com.dasi.sse.gateway.IPostCsdnHttp;
 import com.dasi.type.properties.PostCsdnProperties;
 import com.dasi.type.util.MarkdownConverter;
 import org.junit.jupiter.api.Test;
@@ -16,11 +16,11 @@ import java.time.format.DateTimeFormatter;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@SpringBootTest(classes = McpServerApplication.class)
+@SpringBootTest(classes = McpServerCsdnApplication.class)
 class PostCsdnTest {
 
     @Autowired
-    private IPostCsdnService postCsdnService;
+    private IPostCsdnHttp postCsdnHttp;
 
     @Autowired
     private PostCsdnProperties postCsdnProperties;
@@ -30,7 +30,7 @@ class PostCsdnTest {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         String markdown = "# MCP CSDN 测试\n\n这是一篇自动化发布测试。\n\n时间: " + timestamp;
 
-        PostCsdnServiceRequest request = new PostCsdnServiceRequest();
+        PostCsdnHttpRequest request = new PostCsdnHttpRequest();
         request.setTitle("MCP CSDN 测试-" + timestamp);
         request.setMarkdowncontent(markdown);
         request.setContent(MarkdownConverter.convertToHtml(markdown));
@@ -38,7 +38,7 @@ class PostCsdnTest {
         request.setTags(postCsdnProperties.getTags());
         request.setCategories(postCsdnProperties.getCategories());
 
-        Response<PostCsdnServiceResponse> response = postCsdnService
+        Response<PostCsdnHttpResponse> response = postCsdnHttp
                 .saveArticle(request, postCsdnProperties.getCookie())
                 .execute();
 
@@ -47,7 +47,7 @@ class PostCsdnTest {
             fail("HTTP " + response.code() + ": " + errorBody);
         }
 
-        PostCsdnServiceResponse body = response.body();
+        PostCsdnHttpResponse body = response.body();
         assertThat(body).isNotNull();
         assertThat(body.getCode()).isEqualTo(200);
         assertThat(body.getData()).isNotNull();
