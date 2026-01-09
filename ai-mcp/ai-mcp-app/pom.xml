@@ -69,6 +69,11 @@
         </dependency>
 
         <dependency>
+            <groupId>me.paulschwarz</groupId>
+            <artifactId>spring-dotenv</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.dasi</groupId>
             <artifactId>ai-mcp-trigger</artifactId>
             <version>1.0-SNAPSHOT</version>
