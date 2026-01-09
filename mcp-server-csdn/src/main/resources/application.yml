@@ -1,5 +1,13 @@
-spring:
+server:
+  port: 9001
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
 
+
+spring:
   application:
     name: mcp-server-csdn
 
@@ -11,16 +19,15 @@ spring:
 
   main:
     banner-mode: off
-    web-application-type: none
 
 logging:
-  pattern:
-    console:
-  file:
-    name: mcp-server-csdn.log
+  level:
+    root: info
+  config: classpath:logback-spring.xml
 
 csdn:
   base-url: https://bizapi.csdn.net
   categories: AI文章放送
   tags: java
   cookie: fid=20_99314058308-1742820888928-917150; UN=m0_74766888; Hm_ct_6bcd52f51e9b3dce32bec4a3997715ac=6525*1*10_17329988070-1742820887449-437474!5744*1*m0_74766888; p_uid=U010000; c_dl_prid=1758189625211_767379; c_dl_rid=1760064419589_393620; c_dl_fref=https://so.csdn.net/so/search; c_dl_fpage=/download/weixin_38632488/14890841; c_dl_um=distribute.pc_search_result.none-task-blog-2%7Eall%7EElasticSearch%7Esearch_v2-1-127367343-null-null.142%5Ev102%5Epc_search_result_base9; FCCDCF=%5Bnull%2Cnull%2Cnull%2C%5B%22CQWCSgAQWCSgAEsACBENB3FoAP_gAEPgAA5QK1IB_C7EbCFCiDp3IKMEMAhHABBAYsAwAAYBAwAADBIQIAQCgkEYBASAFCACCAAAKASBAAAgCAAAAUAAIAAVAABAAAwAIBAIIAAAgAAAAEAIAAAACIAAEQCAAAAEAEAAkAgAAAIASAAAAAAAAACBAAAAAAAAAAAAAAAABAAAAQAAQAAAAAAAiAAAAAAAABAIAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAABAAAAAAAQR2QD-F2I2EKFEHCuQUYIYBCuACAAxYBgAAwCBgAAGCQgQAgFJIIkCAEAIEAAEAAAQAgCAABQEBAAAIAAAAAqAACAABgAQCAQQIABAAAAgIAAAAAAEQAAIgEAAAAIAIABABAAAAQAkAAAAAAAAAECAAAAAAAAAAAAAAAAAAAAAEABgAAAAAABEAAAAAAAACAQIAAA%22%2C%222~61.89.122.184.196.230.314.318.442.445.494.550.576.827.1029.1033.1046.1047.1051.1097.1126.1166.1301.1342.1415.1725.1765.1942.1958.1987.2068.2072.2074.2107.2213.2219.2223.2224.2328.2331.2387.2416.2501.2567.2568.2575.2657.2686.2778.2869.2878.2908.2920.2963.3005.3023.3100.3126.3219.3234.3235.3253.3309.3731.6931.8931.13731.15731~dv.%22%2C%22FD5D7E7E-DE1B-4E82-972E-7485E2C589BA%22%5D%2Cnull%2Cnull%2C%5B%5B32%2C%22%5B%5C%22db433876-4f38-4bc5-9bbb-3664a16980af%5C%22%2C%5B1762437440%2C182000000%5D%5D%22%5D%5D%5D; historyList-new=%5B%5D; c_segment=2; dc_sid=f5a65219140ba0ec553f53fe2dcb3439; Hm_lvt_6bcd52f51e9b3dce32bec4a3997715ac=1765691264,1765979104,1766329137,1767762604; HMACCOUNT=DE92BE3752346052; _clck=1uuylew%5E2%5Eg2j%5E0%5E2071; csdn_newcert_m0_74766888=1; c_ab_test=1; creative_btn_mp=3; c_first_ref=www.bing.com; c_first_page=https%3A//blog.csdn.net/qq_41877371/article/details/144848350; c_dsid=11_1767875706280.027336; __gads=ID=e07f8e6c6693955b:T=1766331659:RT=1767875710:S=ALNI_MaTZcMi-fW7uKYlYBuqMJ2SoCMl7g; __gpi=UID=000011d0865ed3b6:T=1766331659:RT=1767875710:S=ALNI_Ma7E3rkQjHB_kmD8KB-mDqYLD4BEQ; __eoi=ID=092c8602835285c1:T=1766331659:RT=1767875710:S=AA-AfjbYlr_wfXRWRApL-MByfT2U; _clsk=1c5s128%5E1767875708770%5E1%5E0%5Eb.clarity.ms%2Fcollect; FCNEC=%5B%5B%22AKsRol-Zx52mHa6cnb1mNHq5FnDzLh955rUQmvE3lU7QkdSgAEtfhhX6T5ekBRzslN-bXzdkjA9NTs3hdQDKBaWADhEu33dnyaipRte-eYDqUoLlLHBNNuB53MuHdOwIz02ML4B08RsEfnA6kpBGwNGS8Ql6HBPHsQ%3D%3D%22%5D%5D; SESSION=7376b919-7de2-4e31-88c9-e83be36aeead; uuid_tt_dd=10_11236316270-1766756387777-161698; dc_session_id=10_1766756387777.870354; hide_login=1; UserName=m0_74766888; UserInfo=f0462e0f032347afada4df35e6aabc08; UserToken=f0462e0f032347afada4df35e6aabc08; UserNick=dasi0227; AU=F6C; BT=1767877644516; Hm_lpvt_6bcd52f51e9b3dce32bec4a3997715ac=1767877829; c_pref=https%3A//mp.csdn.net/; c_ref=https%3A//editor.csdn.net/; c_page_id=default; log_Id_pv=42; log_Id_view=525; dc_tos=t8jr9s; log_Id_click=50
+  cover-url: https://dasi-blog.oss-cn-guangzhou.aliyuncs.com/Java/202601082147219.png

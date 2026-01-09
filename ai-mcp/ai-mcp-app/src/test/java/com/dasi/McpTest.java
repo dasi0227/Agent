@@ -78,4 +78,30 @@ public class McpTest {
         log.info("测试结果：{}", content);
     }
 
+    @Test
+    public void testOpenaiMcp3() {
+        String userMessage = """
+            我需要你帮我生成一篇文章，要求如下：
+            - 主题：关于 Java 的趣味小故事
+            - 文风：好笑风趣，具贴吧老哥的黄色幽默和美国人的黑色幽默
+            - 字数：限定在 500 字内
+            - 标题：Java趣闻
+            根据以上要求，将内容发布文章到 CSDN 上。
+            最后你只需要告诉我文章的 id、url、qrcode 即可，其他内容不需要。
+            """;
+
+        ChatClient chatClient = ChatClient
+                .builder(openAiChatModel)
+                .defaultTools(tools)
+                .defaultOptions(OpenAiChatOptions.builder()
+                        .model("glm-4.7")
+                        .build())
+                .build();
+
+        String content = chatClient.prompt(userMessage).call().content();
+
+        log.info("测试结果：{}", content);
+    }
+
+
 }

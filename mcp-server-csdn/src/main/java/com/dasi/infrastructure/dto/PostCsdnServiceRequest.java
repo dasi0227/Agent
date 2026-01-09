@@ -25,6 +25,9 @@ public class PostCsdnServiceRequest {
     // 文章摘要
     private String Description;
 
+    // 封面图片地址列表
+    private List<String> cover_images;
+
     // 阅读权限类型
     private String readType = "public";
 
@@ -51,9 +54,6 @@ public class PostCsdnServiceRequest {
 
     // 文章来源：
     private String source = "pc_mdeditor";
-
-    // 封面图片地址列表
-    private List<String> cover_images = List.of("https://dasi-blog.oss-cn-guangzhou.aliyuncs.com/Java/202601082147219.png");
 
     // 封面类型
     private Integer cover_type = 1;

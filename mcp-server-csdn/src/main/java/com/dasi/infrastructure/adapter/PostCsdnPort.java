@@ -14,6 +14,7 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 import java.io.IOException;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -33,27 +34,44 @@ public class PostCsdnPort implements IPostCsdnPort {
         serviceRequest.setMarkdowncontent(toolRequest.getMarkdowncontent());
         serviceRequest.setContent(toolRequest.getContent());
         serviceRequest.setDescription(toolRequest.getDescription());
+        serviceRequest.setCover_images(List.of(postCsdnProperties.getCoverUrl()));
         serviceRequest.setTags(postCsdnProperties.getTags());
         serviceRequest.setCategories(postCsdnProperties.getCategories());
 
         Call<PostCsdnServiceResponse> call = postCsdnService.saveArticle(serviceRequest, postCsdnProperties.getCookie());
         Response<PostCsdnServiceResponse> result = call.execute();
 
-        if (result.isSuccessful()) {
-            PostCsdnServiceResponse serviceResponse = result.body();
-            if (serviceResponse == null) return null;
+        log.info("通过 HTTP 请求向 CSDN 发帖：标题={}", toolRequest.getTitle());
 
-            PostCsdnToolResponse toolResponse = new PostCsdnToolResponse();
+        if (!result.isSuccessful()) {
+            String err = result.errorBody() == null ? "<empty>" : result.errorBody().string();
+            PostCsdnToolResponse r = new PostCsdnToolResponse();
+            r.setCode(result.code());
+            r.setMsg("CSDN HTTP 请求失败: " + err);
+            return r;
+        }
+
+        PostCsdnServiceResponse serviceResponse = result.body();
+        PostCsdnToolResponse toolResponse = new PostCsdnToolResponse();
+
+        if (serviceResponse == null) {
+            toolResponse.setCode(500);
+            toolResponse.setMsg("CSDN 响应体为空");
+            return toolResponse;
+        }
+        if (serviceResponse.getData() == null) {
             toolResponse.setCode(serviceResponse.getCode());
-            toolResponse.setMsg(serviceResponse.getMsg());
-            toolResponse.setUrl(serviceResponse.getData().getUrl());
-            toolResponse.setId(serviceResponse.getData().getId());
-            toolResponse.setQrcode(serviceResponse.getData().getQrcode());
-
+            toolResponse.setMsg("CSDN 响应数据为空: " + serviceResponse.getMsg());
             return toolResponse;
         }
 
-        return null;
+        toolResponse.setCode(serviceResponse.getCode());
+        toolResponse.setMsg(serviceResponse.getMsg());
+        toolResponse.setUrl(serviceResponse.getData().getUrl());
+        toolResponse.setId(serviceResponse.getData().getId());
+        toolResponse.setQrcode(serviceResponse.getData().getQrcode());
+
+        return toolResponse;
     }
 
 }
