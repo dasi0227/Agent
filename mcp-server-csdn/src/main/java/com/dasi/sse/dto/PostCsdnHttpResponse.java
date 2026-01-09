@@ -1,9 +1,9 @@
-package com.dasi.infrastructure.dto;
+package com.dasi.sse.dto;
 
 import lombok.Data;
 
 @Data
-public class PostCsdnServiceResponse {
+public class PostCsdnHttpResponse {
 
     // 接口返回状态码，200 表示成功
     private Integer code;

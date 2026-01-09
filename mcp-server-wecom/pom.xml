@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.dasi</groupId>
-    <artifactId>mcp-server-csdn</artifactId>
+    <artifactId>mcp-server-wecom</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
@@ -95,7 +95,7 @@
     </dependencies>
 
     <build>
-        <finalName>mcp-server-csdn</finalName>
+        <finalName>mcp-server-wecom</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -114,12 +114,11 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>3.4.3</version>
                 <configuration>
-                    <mainClass>com.dasi.McpServerCsdnApplication</mainClass>
+                    <mainClass>com.dasi.McpServerWeComApplication</mainClass>
                     <layout>JAR</layout>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-
 
 </project>

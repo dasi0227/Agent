@@ -21,10 +21,6 @@ public class PostCsdnToolRequest {
     @JsonPropertyDescription("文章内容")
     private String markdowncontent;
 
-    @JsonProperty(required = true, value = "Description")
-    @JsonPropertyDescription("文章摘要")
-    private String Description;
-
     public String getContent() {
         return MarkdownConverter.convertToHtml(markdowncontent);
     }

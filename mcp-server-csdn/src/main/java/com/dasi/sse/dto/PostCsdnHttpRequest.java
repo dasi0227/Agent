@@ -1,11 +1,11 @@
-package com.dasi.infrastructure.dto;
+package com.dasi.sse.dto;
 
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class PostCsdnServiceRequest {
+public class PostCsdnHttpRequest {
 
     // 文章标题
     private String title;
@@ -22,11 +22,11 @@ public class PostCsdnServiceRequest {
     // 文章分类栏目
     private String categories;
 
-    // 文章摘要
-    private String Description;
-
     // 封面图片地址列表
     private List<String> cover_images;
+
+    // 文章摘要
+    private String Description = "有关 Java 的有趣知识，文章标题和内容为 AI 生成，请仔细甄别信息！";
 
     // 阅读权限类型
     private String readType = "public";

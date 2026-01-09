@@ -19,7 +19,7 @@ public class PostCsdnTool {
 
     @Tool(description = "发布文章到 CSDN")
     public PostCsdnToolResponse saveArticle(PostCsdnToolRequest toolRequest) throws IOException {
-        log.info("通过 MCP 向 CSDN 发帖：标题={}", toolRequest.getTitle());
+        log.info("调用 MCP 工具进行 CSDN 发帖：标题={}", toolRequest.getTitle());
         return postCsdnPort.saveArticle(toolRequest);
     }
 
