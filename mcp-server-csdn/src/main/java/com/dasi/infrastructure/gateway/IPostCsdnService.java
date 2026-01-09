@@ -28,6 +28,8 @@ public interface IPostCsdnService {
             "sec-fetch-site: same-site",
             "user-agent: Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36 Edg/143.0.0.0",
             "x-ca-key: 203803574",
+            "x-ca-nonce: a1f9c545-67b0-4b7e-ad52-259ef031d865",
+            "x-ca-signature: GDdOEHQBkKcyNkm+gZ/cAR54pAGS7vHLZMxkaXnn3b4=",
             "x-ca-signature-headers: x-ca-key,x-ca-nonce"
     })
     @POST("/blog-console-api/v3/mdeditor/saveArticle")

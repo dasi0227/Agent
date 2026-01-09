@@ -16,4 +16,6 @@ public class PostCsdnProperties {
     private String categories;
 
     private String tags;
+
+    private String coverUrl;
 }

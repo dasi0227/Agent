@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+
 @Slf4j
 @Component
 public class PostCsdnTool {
@@ -16,8 +18,8 @@ public class PostCsdnTool {
     private IPostCsdnPort postCsdnPort;
 
     @Tool(description = "发布文章到 CSDN")
-    public PostCsdnToolResponse saveArticle(PostCsdnToolRequest toolRequest) {
-        log.info("通过 MCP 向 CSDN 发帖：标签={}, 标题={}", toolRequest.getTags(), toolRequest.getTitle());
+    public PostCsdnToolResponse saveArticle(PostCsdnToolRequest toolRequest) throws IOException {
+        log.info("通过 MCP 向 CSDN 发帖：标题={}", toolRequest.getTitle());
         return postCsdnPort.saveArticle(toolRequest);
     }
 
