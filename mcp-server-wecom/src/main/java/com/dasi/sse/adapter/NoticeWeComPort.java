@@ -107,7 +107,7 @@ public class NoticeWeComPort implements INoticeWeiXinPort {
 
         toolResponse.setCode(httpResponse.getErrcode());
         toolResponse.setInfo(httpResponse.getErrmsg());
-        toolResponse.setMsgid(httpResponse.getMsgid());
+        toolResponse.setMsgId(httpResponse.getMsgid());
 
         return toolResponse;
     }
