@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false" scan="true" scanPeriod="10 seconds">
+
+    <contextName>logback</contextName>
+
+    <!-- 日志输出路径 -->
+    <property name="LOG_PATH" value="${user.dir}/logs"/>
+
+    <!-- ========= 开发环境降噪 ========= -->
+    <springProfile name="dev">
+        <logger name="com.zaxxer.hikari" level="ERROR"/>
+        <logger name="org.redisson" level="ERROR"/>
+        <logger name="io.netty.resolver.dns" level="ERROR"/>
+        <logger name="org.springframework.amqp" level="ERROR"/>
+        <logger name="org.hibernate.validator.internal.util" level="ERROR"/>
+        <logger name="org.springframework.boot.web.servlet.context" level="ERROR"/>
+        <logger name="org.springframework.boot.web.embedded.tomcat" level="ERROR"/>
+        <logger name="org.springframework.ai.vectorstore.pgvector" level="ERROR"/>
+        <logger name="org.apache.coyote.http11" level="ERROR"/>
+        <logger name="org.apache.catalina" level="ERROR"/>
+        <logger name="org.apache.tomcat" level="ERROR"/>
+    </springProfile>
+
+    <!-- ========= 转换规则 ========= -->
+    <conversionRule conversionWord="clr" class="org.springframework.boot.logging.logback.ColorConverter"/>
+    <conversionRule conversionWord="wex" class="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter"/>
+    <conversionRule conversionWord="wEx" class="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
+
+    <!-- ========= 控制台输出 ========= -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%-8.-8thread] %-5p %-40logger{40} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- ========= 文件输出（按月滚动） ========= -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+        <!-- 当前正在写的文件 -->
+        <file>${LOG_PATH}/app.log</file>
+
+        <!-- 按时间滚动策略 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/%d{yyyy-MM}/app.%d{yyyy-MM}.log</fileNamePattern>
+            <maxHistory>12</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%-8.-8thread] %-5p %-40logger{40} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- ========= INFO 级别输出 ========= -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
+</configuration>
