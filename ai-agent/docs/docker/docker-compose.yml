@@ -1,0 +1,130 @@
+version: "3.9"
+
+networks:
+  ai-agent:
+    driver: bridge
+
+services:
+
+  # ===================== PostgreSQL =====================
+  pgvector:
+    image: pgvector/pgvector:pg16
+    container_name: pgvector
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      TZ: ${TZ}
+    volumes:
+      - ${HOME}/docker/pgvector/data:/var/lib/postgresql/data
+      - ../pgvector/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -h localhost -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    networks:
+      - ai-agent
+
+  # ===================== MySQL =====================
+  mysql:
+    image: mysql:8.0.40
+    container_name: mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      TZ: ${TZ}
+    volumes:
+      - ${HOME}/docker/mysql/data:/var/lib/mysql
+      - ${HOME}/docker/mysql/conf:/etc/mysql/conf.d:ro
+      - ${HOME}/docker/mysql/logs:/logs
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    networks:
+      - ai-agent
+
+  # ===================== Redis =====================
+  redis:
+    image: redis:8.0.1
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --requirepass
+      - ${REDIS_PASSWORD}
+    volumes:
+      - ${HOME}/docker/redis/data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping" ]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    networks:
+      - ai-agent
+
+  # ===================== RabbitMQ =====================
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      TZ: ${TZ}
+    volumes:
+      - ${HOME}/docker/rabbitmq/data:/var/lib/rabbitmq
+      - ${HOME}/docker/rabbitmq/log:/var/log/rabbitmq
+      - ${HOME}/docker/rabbitmq/plugins/rabbitmq_delayed_message_exchange-3.13.0.ez:/opt/rabbitmq/plugins/rabbitmq_delayed_message_exchange-3.13.0.ez
+    command: >
+      bash -c "
+      rabbitmq-plugins enable --offline rabbitmq_delayed_message_exchange &&
+      rabbitmq-server
+      "
+    networks:
+      - ai-agent
+
+  # ===================== OneApi =====================
+  one-api:
+    image: justsong/one-api:latest
+    container_name: one-api
+    platform: linux/amd64
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      TZ: ${TZ}
+      SQL_DSN: ${ONEAPI_DB_USER}:${ONEAPI_DB_PASS}@tcp(mysql:3306)/${ONEAPI_DB_NAME}?charset=utf8mb4&parseTime=True&loc=Local
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - ai-agent
+
+  # ===================== Ollama =====================
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    volumes:
+      - ${HOME}/docker/ollama:/root/.ollama
+    ports:
+      - "11434:11434"
+    networks:
+      - ai-agent
