@@ -17,8 +17,8 @@ public class NoticeWeComToolResponse {
     @JsonPropertyDescription("企业微信调用状态信息")
     private String info;
 
-    @JsonProperty(required = true, value = "msgid")
-    @JsonPropertyDescription("企业微信发送的消息 id")
-    private String msgid;
+    @JsonProperty(required = true, value = "msgId")
+    @JsonPropertyDescription("企业微信发送的消息id")
+    private String msgId;
 
 }

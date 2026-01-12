@@ -47,7 +47,7 @@ public class PostCsdnPort implements IPostCsdnPort {
         if (!result.isSuccessful()) {
             String err = result.errorBody() == null ? "<empty>" : result.errorBody().string();
             toolResponse.setCode(result.code());
-            toolResponse.setMsg("CSDN HTTP 请求失败: " + err);
+            toolResponse.setInfo("CSDN HTTP 请求失败: " + err);
             return toolResponse;
         }
 
@@ -55,19 +55,19 @@ public class PostCsdnPort implements IPostCsdnPort {
 
         if (httpResponse == null) {
             toolResponse.setCode(500);
-            toolResponse.setMsg("CSDN HTTP 响应体为空");
+            toolResponse.setInfo("CSDN HTTP 响应体为空");
             return toolResponse;
         }
         if (httpResponse.getData() == null) {
             toolResponse.setCode(httpResponse.getCode());
-            toolResponse.setMsg("CSDN HTTP 响应数据为空: " + httpResponse.getMsg());
+            toolResponse.setInfo("CSDN HTTP 响应数据为空: " + httpResponse.getMsg());
             return toolResponse;
         }
 
         toolResponse.setCode(httpResponse.getCode());
-        toolResponse.setMsg(httpResponse.getMsg());
+        toolResponse.setInfo(httpResponse.getMsg());
         toolResponse.setUrl(httpResponse.getData().getUrl());
-        toolResponse.setId(httpResponse.getData().getId());
+        toolResponse.setArticleId(httpResponse.getData().getId());
         toolResponse.setQrcode(httpResponse.getData().getQrcode());
 
         return toolResponse;
