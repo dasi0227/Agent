@@ -21,7 +21,7 @@ services:
       TZ: ${TZ}
     volumes:
       - ${HOME}/docker/pgvector/data:/var/lib/postgresql/data
-      - ../pgvector/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ../pgvector/init.sql:/docker-entrypoint-initdb.d/table.sql:ro
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -h localhost -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 5s
@@ -75,31 +75,6 @@ services:
     networks:
       - ai-agent
 
-  # ===================== RabbitMQ =====================
-  rabbitmq:
-    image: rabbitmq:3.13-management
-    container_name: rabbitmq
-    hostname: rabbitmq
-    restart: always
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
-      TZ: ${TZ}
-    volumes:
-      - ${HOME}/docker/rabbitmq/data:/var/lib/rabbitmq
-      - ${HOME}/docker/rabbitmq/log:/var/log/rabbitmq
-      - ${HOME}/docker/rabbitmq/plugins/rabbitmq_delayed_message_exchange-3.13.0.ez:/opt/rabbitmq/plugins/rabbitmq_delayed_message_exchange-3.13.0.ez
-    command: >
-      bash -c "
-      rabbitmq-plugins enable --offline rabbitmq_delayed_message_exchange &&
-      rabbitmq-server
-      "
-    networks:
-      - ai-agent
-
   # ===================== OneApi =====================
   one-api:
     image: justsong/one-api:latest
@@ -126,5 +101,30 @@ services:
       - ${HOME}/docker/ollama:/root/.ollama
     ports:
       - "11434:11434"
+    networks:
+      - ai-agent
+
+  # ===================== RabbitMQ =====================
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      TZ: ${TZ}
+    volumes:
+      - ${HOME}/docker/rabbitmq/data:/var/lib/rabbitmq
+      - ${HOME}/docker/rabbitmq/log:/var/log/rabbitmq
+      - ${HOME}/docker/rabbitmq/plugins/rabbitmq_delayed_message_exchange-3.13.0.ez:/opt/rabbitmq/plugins/rabbitmq_delayed_message_exchange-3.13.0.ez
+    command: >
+      bash -c "
+      rabbitmq-plugins enable --offline rabbitmq_delayed_message_exchange &&
+      rabbitmq-server
+      "
     networks:
       - ai-agent

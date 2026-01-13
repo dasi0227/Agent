@@ -1,11 +1,11 @@
-package com.dasi.infrastructure.properties;
+package com.dasi.properties;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data
-@ConfigurationProperties(prefix = "thread.pool.executor.config", ignoreInvalidFields = true)
-public class ThreadPoolConfigProperties {
+@ConfigurationProperties(prefix = "thread.pool.executor", ignoreInvalidFields = true)
+public class ThreadPoolProperties {
 
     /** 核心线程数 */
     private Integer corePoolSize = 20;
