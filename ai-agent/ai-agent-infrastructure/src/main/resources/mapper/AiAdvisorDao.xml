@@ -3,7 +3,6 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dasi.infrastructure.persistent.dao.IAiAdvisorDao">
     <resultMap id="dataMap" type="com.dasi.infrastructure.persistent.po.AiAdvisor">
-        <id column="id" property="id"/>
         <result column="advisor_id" property="advisorId"/>
         <result column="advisor_name" property="advisorName"/>
         <result column="advisor_type" property="advisorType"/>
@@ -11,7 +10,18 @@
         <result column="advisor_order" property="advisorOrder"/>
         <result column="advisor_param" property="advisorParam"/>
         <result column="advisor_status" property="advisorStatus"/>
-        <result column="create_time" property="createTime"/>
-        <result column="update_time" property="updateTime"/>
     </resultMap>
+
+    <select id="queryByAdvisorId" resultMap="dataMap">
+        SELECT
+            advisor_id,
+            advisor_name,
+            advisor_type,
+            advisor_desc,
+            advisor_order,
+            advisor_param,
+            advisor_status
+        FROM ai_advisor
+        WHERE advisor_id = #{advisorId}
+    </select>
 </mapper>

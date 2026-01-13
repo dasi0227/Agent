@@ -1,10 +1,11 @@
 package com.dasi.infrastructure.persistent.po;
 
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 /** 顾问配置表 */
 @Data
@@ -24,11 +25,11 @@ public class AiAdvisor {
     /** 顾问类型 */
     private String advisorType;
 
-    /** 顾问描述 */
-    private String advisorDesc;
-
     /** 顾问顺序号 */
     private Integer advisorOrder;
+
+    /** 顾问描述 */
+    private String advisorDesc;
 
     /** 顾问参数配置 */
     private String advisorParam;

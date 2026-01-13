@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface IAiApiDao {
-    AiApi selectByApiId(String apiId);
 
-    void insertAiAPI(AiApi aiApi);
+    AiApi queryByApiId(String apiId);
+
 }

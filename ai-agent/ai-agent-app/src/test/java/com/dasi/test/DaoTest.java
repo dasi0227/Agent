@@ -20,19 +20,9 @@ public class DaoTest {
     @Test
     public void testAiApiDao() {
 
-        String apiId = "test-" + System.currentTimeMillis();
+        String apiId = "test";
 
-        AiApi aiApi = new AiApi();
-        aiApi.setApiId(apiId);
-        aiApi.setApiBaseUrl("https://api.test.com");
-        aiApi.setApiKey("test-key-123");
-        aiApi.setApiCompletionsPath("/v1/chat/completions");
-        aiApi.setApiEmbeddingsPath("/v1/embeddings");
-        aiApi.setApiStatus(1);
-
-        aiApiDao.insertAiAPI(aiApi);
-
-        AiApi result = aiApiDao.selectByApiId(apiId);
+        AiApi result = aiApiDao.queryByApiId(apiId);
 
         log.info("查询结果：{}", result);
     }
