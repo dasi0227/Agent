@@ -1,0 +1,41 @@
+package com.dasi.infrastructure.persistent.po;
+
+import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+/** 智能体任务调度配置表 */
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class AiTask {
+    /** 自增 id */
+    private Long id;
+
+    /** 智能体 id */
+    private String agentId;
+
+    /** 任务名称 */
+    private String taskName;
+
+    /** 任务时间表达式 */
+    private String taskCron;
+
+    /** 任务描述 */
+    private String taskDesc;
+
+    /** 任务参数配置 */
+    private String taskParam;
+
+    /** 状态：0-禁用，1-启用 */
+    private Integer taskStatus;
+
+    /** 创建时间 */
+    private LocalDateTime createTime;
+
+    /** 更新时间 */
+    private LocalDateTime updateTime;
+}
