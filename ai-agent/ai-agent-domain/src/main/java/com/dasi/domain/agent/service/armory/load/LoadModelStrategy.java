@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import static com.dasi.domain.agent.model.enumeration.AiEnum.API;
+import static com.dasi.domain.agent.model.enumeration.AiEnum.MODEL;
+
 @Slf4j
 @Service("loadModelStrategy")
 public class LoadModelStrategy implements ILoadStrategy {
@@ -27,15 +30,25 @@ public class LoadModelStrategy implements ILoadStrategy {
     public void loadData(ArmoryCommandEntity armoryCommandEntity, ArmoryStrategyFactory.DynamicContext dynamicContext) {
         List<String> modelIdList = armoryCommandEntity.getCommandIdList();
 
-        CompletableFuture<List<AiApiVO>> aiApiListFuture = CompletableFuture.supplyAsync(() -> {
-            log.info("查询配置数据(ai_api)：{}", modelIdList);
-            return agentRepository.queryAiApiVOListByModelIdList(modelIdList);
-        }, threadPoolExecutor);
+        CompletableFuture<List<AiApiVO>> aiApiListFuture = CompletableFuture.supplyAsync(
+                () -> agentRepository.queryAiApiVOListByModelIdList(modelIdList), threadPoolExecutor);
 
-        CompletableFuture<List<AiModelVO>> aiModelListFuture = CompletableFuture.supplyAsync(() -> {
-            log.info("查询配置数据(ai_model)：{}", modelIdList);
-            return agentRepository.queryAiModelVOListByModelIdList(modelIdList);
-        }, threadPoolExecutor);
+        CompletableFuture<List<AiModelVO>> aiModelListFuture = CompletableFuture.supplyAsync(
+                () -> agentRepository.queryAiModelVOListByModelIdList(modelIdList), threadPoolExecutor);
+
+        CompletableFuture.allOf(
+                aiApiListFuture,
+                aiModelListFuture
+        ).join();
+
+        List<AiApiVO> aiApiList = aiApiListFuture.join();
+        List<AiModelVO> aiModelList = aiModelListFuture.join();
+
+        dynamicContext.setValue(API.getCode(), aiApiList);
+        dynamicContext.setValue(MODEL.getCode(), aiModelList);
+
+        log.info("【加载数据】ai_api={}", aiApiList);
+        log.info("【加载数据】ai_model={}", aiModelList);
 
     }
 

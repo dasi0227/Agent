@@ -137,6 +137,7 @@
                 <configuration>
                     <skipTests>true</skipTests>
                     <testFailureIgnore>false</testFailureIgnore>
+                    <argLine>-Xshare:off</argLine>
                     <includes>
                         <include>**/*Test.java</include>
                     </includes>

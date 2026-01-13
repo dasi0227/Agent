@@ -2,7 +2,7 @@ package com.dasi.infrastructure.adapter.repository;
 
 import com.alibaba.fastjson.JSON;
 import com.dasi.domain.agent.adapter.IAgentRepository;
-import com.dasi.domain.agent.model.enumeration.AiConfigType;
+import com.dasi.domain.agent.model.enumeration.AiEnum;
 import com.dasi.domain.agent.model.vo.*;
 import com.dasi.infrastructure.persistent.dao.*;
 import com.dasi.infrastructure.persistent.po.*;
@@ -17,7 +17,7 @@ import java.util.Set;
 
 import static com.dasi.domain.agent.model.enumeration.AiAdvisorType.CHAT_MEMORY;
 import static com.dasi.domain.agent.model.enumeration.AiAdvisorType.RAG_ANSWER;
-import static com.dasi.domain.agent.model.enumeration.AiConfigType.*;
+import static com.dasi.domain.agent.model.enumeration.AiEnum.*;
 
 @Slf4j
 @Repository
@@ -78,7 +78,7 @@ public class AgentRepository implements IAgentRepository {
                     continue;
                 }
 
-                switch (AiConfigType.fromCode(aiConfig.getTargetType())) {
+                switch (AiEnum.fromCode(aiConfig.getTargetType())) {
                     case MODEL:
                         modelId = aiConfig.getTargetId();
                         break;
