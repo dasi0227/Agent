@@ -1,10 +1,11 @@
 package com.dasi.infrastructure.persistent.po;
 
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 /** 工具配置表 */
 @Data
@@ -12,6 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AiMcp {
+
     /** 自增 id */
     private Long id;
 
@@ -25,13 +27,13 @@ public class AiMcp {
     private String mcpType;
 
     /** 工具路径 */
-    private String mcpUrl;
-
-    /** 工具描述 */
-    private String mcpDesc;
+    private String mcpPath;
 
     /** 请求超时时间 */
     private Integer mcpTimeout;
+
+    /** 工具描述 */
+    private String mcpDesc;
 
     /** 状态：0-禁用，1-启用 */
     private Integer mcpStatus;

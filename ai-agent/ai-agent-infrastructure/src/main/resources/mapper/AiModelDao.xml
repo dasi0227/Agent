@@ -3,13 +3,21 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dasi.infrastructure.persistent.dao.IAiModelDao">
     <resultMap id="dataMap" type="com.dasi.infrastructure.persistent.po.AiModel">
-        <id column="id" property="id"/>
         <result column="model_id" property="modelId"/>
         <result column="api_id" property="apiId"/>
         <result column="model_name" property="modelName"/>
         <result column="model_type" property="modelType"/>
         <result column="model_status" property="modelStatus"/>
-        <result column="create_time" property="createTime"/>
-        <result column="update_time" property="updateTime"/>
     </resultMap>
+
+    <select id="queryByModelId" resultMap="dataMap">
+        SELECT
+            model_id,
+            api_id,
+            model_name,
+            model_type,
+            model_status
+        FROM ai_model
+        WHERE model_id = #{modelId}
+    </select>
 </mapper>

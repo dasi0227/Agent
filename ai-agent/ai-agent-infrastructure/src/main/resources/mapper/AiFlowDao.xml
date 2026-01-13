@@ -3,11 +3,8 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dasi.infrastructure.persistent.dao.IAiFlowDao">
     <resultMap id="dataMap" type="com.dasi.infrastructure.persistent.po.AiFlow">
-        <id column="id" property="id"/>
         <result column="agent_id" property="agentId"/>
         <result column="client_id" property="clientId"/>
         <result column="flow_seq" property="flowSeq"/>
-        <result column="create_time" property="createTime"/>
-        <result column="update_time" property="updateTime"/>
     </resultMap>
 </mapper>

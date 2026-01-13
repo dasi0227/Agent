@@ -3,14 +3,24 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dasi.infrastructure.persistent.dao.IAiConfigDao">
     <resultMap id="dataMap" type="com.dasi.infrastructure.persistent.po.AiConfig">
-        <id column="id" property="id"/>
         <result column="source_type" property="sourceType"/>
         <result column="source_id" property="sourceId"/>
         <result column="target_type" property="targetType"/>
         <result column="target_id" property="targetId"/>
         <result column="config_param" property="configParam"/>
         <result column="config_status" property="configStatus"/>
-        <result column="create_time" property="createTime"/>
-        <result column="update_time" property="updateTime"/>
     </resultMap>
+
+    <select id="queryBySource" resultMap="dataMap">
+        SELECT
+            source_type,
+            source_id,
+            target_type,
+            target_id,
+            config_param,
+            config_status
+        FROM ai_config
+        WHERE source_type = #{sourceType}
+          AND source_id = #{sourceId}
+    </select>
 </mapper>

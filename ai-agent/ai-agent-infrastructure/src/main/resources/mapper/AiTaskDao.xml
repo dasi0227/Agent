@@ -3,14 +3,11 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dasi.infrastructure.persistent.dao.IAiTaskDao">
     <resultMap id="dataMap" type="com.dasi.infrastructure.persistent.po.AiTask">
-        <id column="id" property="id"/>
         <result column="agent_id" property="agentId"/>
         <result column="task_name" property="taskName"/>
         <result column="task_cron" property="taskCron"/>
         <result column="task_desc" property="taskDesc"/>
         <result column="task_param" property="taskParam"/>
         <result column="task_status" property="taskStatus"/>
-        <result column="create_time" property="createTime"/>
-        <result column="update_time" property="updateTime"/>
     </resultMap>
 </mapper>
