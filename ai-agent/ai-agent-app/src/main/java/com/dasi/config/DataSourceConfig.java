@@ -3,6 +3,7 @@ package com.dasi.config;
 import com.dasi.properties.HikariDataSourceProperties;
 import com.dasi.properties.MySQLDataSourceProperties;
 import com.dasi.properties.PostgreSQLDataSourceProperties;
+import com.dasi.properties.SQLDataSourceProperties;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
@@ -47,25 +48,15 @@ public class DataSourceConfig {
     /**
      * 合并单独配置和全局配置
      */
-    private HikariConfig buildHikariConfig(Object sqlProps, HikariDataSourceProperties hikariProps) {
+    private HikariConfig buildHikariConfig(SQLDataSourceProperties sqlProps, HikariDataSourceProperties hikariProps) {
         HikariConfig hikariConfig = new HikariConfig();
 
         // 1) 先填各自数据源的必填项
-        if (sqlProps instanceof MySQLDataSourceProperties mysqlProps) {
-            hikariConfig.setJdbcUrl(mysqlProps.getJdbcUrl());
-            hikariConfig.setUsername(mysqlProps.getUsername());
-            hikariConfig.setPassword(mysqlProps.getPassword());
-            hikariConfig.setDriverClassName(mysqlProps.getDriverClassName());
-            hikariConfig.setPoolName(mysqlProps.getPoolName());
-        } else if (sqlProps instanceof PostgreSQLDataSourceProperties postgresqlProps) {
-            hikariConfig.setJdbcUrl(postgresqlProps.getJdbcUrl());
-            hikariConfig.setUsername(postgresqlProps.getUsername());
-            hikariConfig.setPassword(postgresqlProps.getPassword());
-            hikariConfig.setDriverClassName(postgresqlProps.getDriverClassName());
-            hikariConfig.setPoolName(postgresqlProps.getPoolName());
-        } else {
-            throw new IllegalArgumentException("Unsupported datasource properties type: " + sqlProps.getClass());
-        }
+        hikariConfig.setJdbcUrl(sqlProps.getJdbcUrl());
+        hikariConfig.setUsername(sqlProps.getUsername());
+        hikariConfig.setPassword(sqlProps.getPassword());
+        hikariConfig.setDriverClassName(sqlProps.getDriverClassName());
+        hikariConfig.setPoolName(sqlProps.getPoolName());
 
         // 2) 再套全局 Hikari 配置
         hikariConfig.setMinimumIdle(hikariProps.getMinimumIdle());
@@ -85,8 +76,8 @@ public class DataSourceConfig {
         factoryBean.setDataSource(dataSource);
 
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        factoryBean.setConfigLocation(resolver.getResource("classpath:/mybatis/config/mybatis-config.xml"));
-        Resource[] mappers = resolver.getResources("classpath*:mybatis/mapper/**/*.xml");
+        factoryBean.setConfigLocation(resolver.getResource("classpath:mybatis-config.xml"));
+        Resource[] mappers = resolver.getResources("classpath*:mapper/**/*.xml");
         if (mappers.length > 0) {
             factoryBean.setMapperLocations(mappers);
         }
