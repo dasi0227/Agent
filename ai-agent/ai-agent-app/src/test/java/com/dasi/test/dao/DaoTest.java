@@ -1,4 +1,4 @@
-package com.dasi.test;
+package com.dasi.test.dao;
 
 import com.dasi.infrastructure.persistent.dao.IAiApiDao;
 import com.dasi.infrastructure.persistent.po.AiApi;

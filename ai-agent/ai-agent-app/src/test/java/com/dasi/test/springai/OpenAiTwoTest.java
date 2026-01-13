@@ -1,4 +1,4 @@
-package com.dasi.test;
+package com.dasi.test.springai;
 
 import io.modelcontextprotocol.client.McpClient;
 import io.modelcontextprotocol.client.McpSyncClient;
@@ -22,7 +22,7 @@ import java.time.Duration;
 @Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class AgentTest {
+public class OpenAiTwoTest {
 
     @Resource
     private ChatClient.Builder chatClientBuilder;

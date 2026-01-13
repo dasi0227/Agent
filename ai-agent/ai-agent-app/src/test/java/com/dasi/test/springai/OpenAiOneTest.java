@@ -1,4 +1,4 @@
-package com.dasi.test;
+package com.dasi.test.springai;
 
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class OpenAiTest {
+public class OpenAiOneTest {
 
     @Resource
     private OpenAiChatModel chatModel;
