@@ -103,11 +103,18 @@ INSERT INTO ai_advisor (advisor_id,
                         advisor_param,
                         advisor_status)
 VALUES ('advisor_demo_1',
-        'demo-advisor',
+        'ChatMemoryAdvisor',
         'ChatMemory',
-        'demo advisor',
+        '对话历史记忆',
         1,
         '{"maxMessages":5}',
+        1),
+       ('advisor_demo_2',
+        'RagAnswerAdvisor',
+        'RagAnswer',
+        'Rag 知识库',
+        2,
+        '{"topK":4,"filterExpression":"knowledge == ''dasi-info''"}',
         1);
 
 -- ai_config
@@ -124,6 +131,7 @@ VALUES ('client', 'client_demo_1', 'model', 'model_demo_2', NULL, 1),
        ('client', 'client_demo_1', 'mcp', 'mcp_sse_1', NULL, 1),
        ('client', 'client_demo_1', 'mcp', 'mcp_stdio_1', NULL, 1),
        ('client', 'client_demo_1', 'advisor', 'advisor_demo_1', NULL, 1),
+       ('client', 'client_demo_1', 'advisor', 'advisor_demo_2', NULL, 1),
        ('model', 'model_demo_2', 'mcp', 'mcp_sse_1', NULL, 1),
        ('model', 'model_demo_2', 'mcp', 'mcp_stdio_1', NULL, 1);
 

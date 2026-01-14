@@ -146,5 +146,27 @@ public class AgentTest {
         log.info("测试结果：{}", answer);
     }
 
+    @Test
+    public void test_aiClientUseRag() throws Exception {
+        StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.getRootNode();
+
+        ArmoryCommandEntity armoryCommandEntity = ArmoryCommandEntity.builder()
+                .commandType(CLIENT.getCode())
+                .commandIdList(List.of("client_demo_1"))
+                .build();
+
+        ArmoryStrategyFactory.DynamicContext dynamicContext = new ArmoryStrategyFactory.DynamicContext();
+
+        armoryStrategyHandler.apply(armoryCommandEntity, dynamicContext);
+
+        ChatClient chatClient = applicationContext.getBean(CLIENT.getBeanName("client_demo_1"), ChatClient.class);
+        String answer = chatClient.prompt()
+                .user("Dasi 是什么大学的学生？Dasi 喜欢吃什么？你认为 Dasi 可能是哪里人？")
+                .call()
+                .content();
+
+        log.info("测试结果：{}", answer);
+    }
+
 
 }
