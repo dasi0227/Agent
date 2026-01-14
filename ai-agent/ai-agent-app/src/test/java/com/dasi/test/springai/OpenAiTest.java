@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class OpenAiOneTest {
+public class OpenAiTest {
 
     @Resource
     private OpenAiChatModel chatModel;
