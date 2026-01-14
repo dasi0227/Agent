@@ -17,4 +17,19 @@ public enum AiAdvisorType {
 
     private String code;
 
+
+    public static AiAdvisorType fromCode(String code) {
+        if (code == null) {
+            throw new IllegalArgumentException("AiAdvisorType code is Null" );
+        }
+
+        for (AiAdvisorType type : values()) {
+            if (type.code.equals(code)) {
+                return type;
+            }
+        }
+
+        throw new IllegalArgumentException("Unknown AiAdvisorType code: " + code);
+    }
+
 }

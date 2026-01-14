@@ -40,7 +40,7 @@ public class AgentConfig {
         OpenAiEmbeddingModel openAiEmbeddingModel = new OpenAiEmbeddingModel(openAiApi, MetadataMode.EMBED, embeddingOptions);
 
         return PgVectorStore.builder(jdbcTemplate, openAiEmbeddingModel)
-                .initializeSchema(true)
+                .initializeSchema(false)
                 .schemaName(openAiProperties.getEmbedding().getSchemaName())
                 .vectorTableName(openAiProperties.getEmbedding().getTableName())
                 .build();

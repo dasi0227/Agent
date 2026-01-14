@@ -5,6 +5,7 @@ import com.dasi.domain.agent.model.entity.ArmoryCommandEntity;
 import com.dasi.domain.agent.model.vo.AiModelVO;
 import com.dasi.domain.agent.service.armory.factory.ArmoryStrategyFactory;
 import io.modelcontextprotocol.client.McpSyncClient;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.ai.openai.OpenAiChatModel;
@@ -16,11 +17,14 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.dasi.domain.agent.model.enumeration.AiEnum.*;
+import static com.dasi.domain.agent.model.enumeration.AiType.*;
 
 @Slf4j
 @Service
 public class AiModelNode extends AbstractArmoryNode {
+
+    @Resource
+    private AiAdvisorNode aiAdvisorNode;
 
     @Override
     protected String doApply(ArmoryCommandEntity armoryCommandEntity, ArmoryStrategyFactory.DynamicContext dynamicContext) throws Exception {
@@ -61,10 +65,9 @@ public class AiModelNode extends AbstractArmoryNode {
                     .build();
 
             // 注册 Bean 对象
-            String modelBeanName = API.getBeanName(aiModelVO.getModelId());
+            String modelBeanName = MODEL.getBeanName(aiModelVO.getModelId());
             registerBean(modelBeanName, OpenAiChatModel.class, chatModel);
-
-            log.info("【构建节点】AiModelNode：modelBeanName={}", modelBeanName);
+            log.info("【构建节点】AiModelNode：modelBeanName={}, modelType={}, modelName={}", modelBeanName, aiModelVO.getModelType(), aiModelVO.getModelName());
         }
 
         return router(armoryCommandEntity, dynamicContext);
@@ -72,7 +75,7 @@ public class AiModelNode extends AbstractArmoryNode {
 
     @Override
     public StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> get(ArmoryCommandEntity armoryCommandEntity, ArmoryStrategyFactory.DynamicContext dynamicContext) {
-        return defaultStrategyHandler;
+        return aiAdvisorNode;
     }
 
 }

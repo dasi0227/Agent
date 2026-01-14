@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.dasi.domain.agent.model.enumeration.AiEnum.API;
+import static com.dasi.domain.agent.model.enumeration.AiType.API;
 
 @Slf4j
 @Service
@@ -42,7 +42,7 @@ public class AiApiNode extends AbstractArmoryNode {
             // 注册 Bean 对象
             String apiBeanName = API.getBeanName(aiApiVO.getApiId());
             registerBean(apiBeanName, OpenAiApi.class, openAiApi);
-            log.info("【构建节点】AiApiNode：apiBeanName={}", apiBeanName);
+            log.info("【构建节点】AiApiNode：apiBeanName={}, baseUrl={}, apiKey={}", apiBeanName, aiApiVO.getApiBaseUrl(), aiApiVO.getApiKey());
         }
 
         return router(armoryCommandEntity, dynamicContext);

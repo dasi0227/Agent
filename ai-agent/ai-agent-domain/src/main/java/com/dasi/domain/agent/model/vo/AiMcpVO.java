@@ -29,14 +29,10 @@ public class AiMcpVO {
     /** 请求超时时间 */
     private Integer mcpTimeout;
 
-    /**
-     * 传输配置 - sse
-     */
+    /** 传输配置 - sse */
     private SseConfig sseConfig;
 
-    /**
-     * 传输配置 - stdio
-     */
+    /** 传输配置 - stdio */
     private StdioConfig stdioConfig;
 
     @Data

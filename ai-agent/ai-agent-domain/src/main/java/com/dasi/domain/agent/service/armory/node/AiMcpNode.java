@@ -18,7 +18,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
-import static com.dasi.domain.agent.model.enumeration.AiEnum.MCP;
+import static com.dasi.domain.agent.model.enumeration.AiType.MCP;
 
 @Slf4j
 @Service
@@ -57,20 +57,19 @@ public class AiMcpNode extends AbstractArmoryNode {
                             .build();
 
                     mcpSyncClient.initialize();
-                    log.info("【构建节点】AiMcpNode：sseConfig={}", sseConfig);
                 }
                 case STDIO -> {
                     AiMcpVO.StdioConfig stdioConfig = aiMcpVO.getStdioConfig();
                     Map<String, AiMcpVO.StdioConfig.Stdio> stdioMap = stdioConfig.getStdio();
                     AiMcpVO.StdioConfig.Stdio stdio = stdioMap.get(aiMcpVO.getMcpName());
 
-                    ServerParameters stdioParams = ServerParameters
+                    ServerParameters serverParameters = ServerParameters
                             .builder(stdio.getCommand())
                             .args(stdio.getArgs())
                             .env(stdio.getEnv())
                             .build();
 
-                    StdioClientTransport stdioClient = new StdioClientTransport(stdioParams);
+                    StdioClientTransport stdioClient = new StdioClientTransport(serverParameters);
 
                     mcpSyncClient = McpClient
                             .sync(stdioClient)
@@ -78,12 +77,12 @@ public class AiMcpNode extends AbstractArmoryNode {
                             .build();
 
                     mcpSyncClient.initialize();
-                    log.info("【构建节点】AiMcpNode：stdioConfig={}", stdioConfig);
                 }
             }
 
             String mcpBeanName = MCP.getBeanName(aiMcpVO.getMcpId());
             registerBean(mcpBeanName, McpSyncClient.class, mcpSyncClient);
+            log.info("【构建节点】AiMcpNode：mcpBeanName={}, mcpType={}, mcpName={}", mcpBeanName, aiMcpVO.getMcpType(), aiMcpVO.getMcpName());
         }
 
         return router(armoryCommandEntity, dynamicContext);

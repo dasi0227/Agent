@@ -3,6 +3,7 @@ package com.dasi.domain.agent.adapter;
 import com.dasi.domain.agent.model.vo.*;
 
 import java.util.List;
+import java.util.Map;
 
 public interface IAgentRepository {
 
@@ -10,7 +11,7 @@ public interface IAgentRepository {
 
     List<AiAdvisorVO> queryAiAdvisorVOListByClientIdList(List<String> clientIdList);
 
-    List<AiPromptVO> queryAiPromptVOListByClientIdList(List<String> clientIdList);
+    Map<String, AiPromptVO> queryAiPromptVOMapByClientIdList(List<String> clientIdList);
 
     List<AiMcpVO> queryAiMcpVOListByClientIdList(List<String> clientIdList);
 
