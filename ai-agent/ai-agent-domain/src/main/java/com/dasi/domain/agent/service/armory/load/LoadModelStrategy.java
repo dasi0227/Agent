@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import static com.dasi.domain.agent.model.enumeration.AiEnum.API;
-import static com.dasi.domain.agent.model.enumeration.AiEnum.MODEL;
+import static com.dasi.domain.agent.model.enumeration.AiType.API;
+import static com.dasi.domain.agent.model.enumeration.AiType.MODEL;
 
 @Slf4j
 @Service("loadModelStrategy")

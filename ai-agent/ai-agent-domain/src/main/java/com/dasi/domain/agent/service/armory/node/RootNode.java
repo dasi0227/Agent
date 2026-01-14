@@ -2,7 +2,7 @@ package com.dasi.domain.agent.service.armory.node;
 
 import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.dasi.domain.agent.model.entity.ArmoryCommandEntity;
-import com.dasi.domain.agent.model.enumeration.AiEnum;
+import com.dasi.domain.agent.model.enumeration.AiType;
 import com.dasi.domain.agent.service.armory.factory.ArmoryStrategyFactory;
 import com.dasi.domain.agent.service.armory.load.ILoadStrategy;
 import jakarta.annotation.Resource;
@@ -27,7 +27,7 @@ public class RootNode extends AbstractArmoryNode {
     @Override
     protected void multiThread(ArmoryCommandEntity armoryCommandEntity, ArmoryStrategyFactory.DynamicContext dynamicContext) {
         String commandType = armoryCommandEntity.getCommandType();
-        String loadStrategyKey = AiEnum.getLoadStrategyByCode(commandType);
+        String loadStrategyKey = AiType.getLoadStrategyByCode(commandType);
         ILoadStrategy loadStrategy = loadStrategyMap.get(loadStrategyKey);
         log.info("【加载数据】type={}", commandType);
         loadStrategy.loadData(armoryCommandEntity, dynamicContext);

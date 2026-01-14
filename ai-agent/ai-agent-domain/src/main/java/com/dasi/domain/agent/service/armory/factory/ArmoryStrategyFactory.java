@@ -19,7 +19,7 @@ public class ArmoryStrategyFactory {
     @Resource
     private RootNode rootNode;
 
-    public StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> armoryStrategyHandler(){
+    public StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> getRootNode(){
         return rootNode;
     }
 

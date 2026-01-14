@@ -9,10 +9,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import static com.dasi.domain.agent.model.enumeration.AiEnum.*;
+import static com.dasi.domain.agent.model.enumeration.AiType.*;
 
 @Slf4j
 @Service("loadClientStrategy")
@@ -37,8 +38,8 @@ public class LoadClientStrategy implements ILoadStrategy {
         CompletableFuture<List<AiMcpVO>> aiMcpListFuture = CompletableFuture.supplyAsync(
                 () -> agentRepository.queryAiMcpVOListByClientIdList(clientIdList), threadPoolExecutor);
 
-        CompletableFuture<List<AiPromptVO>> aiPromptListFuture = CompletableFuture.supplyAsync(
-                () -> agentRepository.queryAiPromptVOListByClientIdList(clientIdList), threadPoolExecutor);
+        CompletableFuture<Map<String, AiPromptVO>> aiPromptListFuture = CompletableFuture.supplyAsync(
+                () -> agentRepository.queryAiPromptVOMapByClientIdList(clientIdList), threadPoolExecutor);
 
         CompletableFuture<List<AiAdvisorVO>> aiAdvisorListFuture = CompletableFuture.supplyAsync(
                 () -> agentRepository.queryAiAdvisorVOListByClientIdList(clientIdList), threadPoolExecutor);
@@ -58,21 +59,21 @@ public class LoadClientStrategy implements ILoadStrategy {
         List<AiApiVO> aiApiList = aiApiListFuture.join();
         List<AiModelVO> aiModelList = aiModelListFuture.join();
         List<AiMcpVO> aiMcpList = aiMcpListFuture.join();
-        List<AiPromptVO> aiPromptList = aiPromptListFuture.join();
+        Map<String, AiPromptVO> aiPrompMap = aiPromptListFuture.join();
         List<AiAdvisorVO> aiAdvisorList = aiAdvisorListFuture.join();
         List<AiClientVO> aiClientList = aiClientListFuture.join();
 
         dynamicContext.setValue(API.getCode(), aiApiList);
         dynamicContext.setValue(MODEL.getCode(), aiModelList);
         dynamicContext.setValue(MCP.getCode(), aiMcpList);
-        dynamicContext.setValue(PROMPT.getCode(), aiPromptList);
+        dynamicContext.setValue(PROMPT.getCode(), aiPrompMap);
         dynamicContext.setValue(ADVISOR.getCode(), aiAdvisorList);
         dynamicContext.setValue(CLIENT.getCode(), aiClientList);
 
         log.info("【加载数据】ai_api={}", aiApiList);
         log.info("【加载数据】ai_model={}", aiModelList);
         log.info("【加载数据】ai_mcp={}", aiMcpList);
-        log.info("【加载数据】ai_prompt={}", aiPromptList);
+        log.info("【加载数据】ai_prompt={}", aiPrompMap);
         log.info("【加载数据】ai_advisor={}", aiAdvisorList);
         log.info("【加载数据】ai_client={}", aiClientList);
     }

@@ -90,3 +90,6 @@ lerna-debug.log*
 **/.tmp/
 **/tmp/
 **/.DS_Store
+
+# ==================== Personal ====================
+**/test-data.sql

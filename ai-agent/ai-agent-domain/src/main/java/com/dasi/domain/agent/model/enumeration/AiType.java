@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public enum AiEnum {
+public enum AiType {
 
     CLIENT("客户端", "client", "loadClientStrategy"),
     MODEL("对话模型", "model", "loadModelStrategy"),
@@ -23,18 +23,18 @@ public enum AiEnum {
 
     private String loadStrategy;
 
-    public static AiEnum fromCode(String code) {
+    public static AiType fromCode(String code) {
         if (code == null) {
-            throw new IllegalArgumentException("AiEnum code is Null" );
+            throw new IllegalArgumentException("AiType code is Null" );
         }
 
-        for (AiEnum type : values()) {
+        for (AiType type : values()) {
             if (type.code.equals(code)) {
                 return type;
             }
         }
 
-        throw new IllegalArgumentException("Unknown AiEnum code: " + code);
+        throw new IllegalArgumentException("Unknown AiType code: " + code);
     }
 
     public static String getLoadStrategyByCode(String code) {
