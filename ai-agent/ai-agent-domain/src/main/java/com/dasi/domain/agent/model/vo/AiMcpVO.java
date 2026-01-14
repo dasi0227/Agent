@@ -24,7 +24,7 @@ public class AiMcpVO {
     private String mcpType;
 
     /** 工具路径 */
-    private String mcpPath;
+    private String mcpConfig;
 
     /** 请求超时时间 */
     private Integer mcpTimeout;
@@ -45,7 +45,7 @@ public class AiMcpVO {
     @NoArgsConstructor
     public static class SseConfig {
         private String baseUri;
-        private String sseEndpoint;
+        private String sseEndPoint;
     }
 
     @Data

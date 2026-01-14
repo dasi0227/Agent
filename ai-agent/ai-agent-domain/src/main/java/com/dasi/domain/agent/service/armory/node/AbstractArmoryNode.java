@@ -1,4 +1,4 @@
-package com.dasi.domain.agent.service.armory;
+package com.dasi.domain.agent.service.armory.node;
 
 import cn.bugstack.wrench.design.framework.tree.AbstractMultiThreadStrategyRouter;
 import com.dasi.domain.agent.model.entity.ArmoryCommandEntity;
@@ -25,12 +25,10 @@ public abstract class AbstractArmoryNode extends AbstractMultiThreadStrategyRout
         // 1) 拿到 Bean 工厂
         DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) applicationContext.getAutowireCapableBeanFactory();
 
-        // 2) 销毁之前有的 Singleton
+        // 2) 销毁之前有的 Singleton 和 BeanDefinition
         if (beanFactory.containsSingleton(beanName)) {
             beanFactory.destroySingleton(beanName);
         }
-
-        // 3) 移除之前有的 BeanDefinition
         if (beanFactory.containsBeanDefinition(beanName)) {
             beanFactory.removeBeanDefinition(beanName);
         }

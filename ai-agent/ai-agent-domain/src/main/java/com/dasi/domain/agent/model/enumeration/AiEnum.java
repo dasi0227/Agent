@@ -9,19 +9,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public enum AiEnum {
 
-    CLIENT("客户端", "client", "ai_client_", "loadClientStrategy"),
-    MODEL("对话模型", "model", "ai_model_", "loadModelStrategy"),
-    API("接口", "api", "ai_api_", "loadApiStrategy"),
-    MCP("MCP 工具", "mcp", "ai_mcp_", "loadMcpStrategy"),
-    PROMPT("系统提示词", "prompt", "ai_prompt_", "loadPromptStrategy"),
-    ADVISOR("洗头膏顾问", "advisor", "ai_advisor_", "loadAdvisorStrategy"),
+    CLIENT("客户端", "client", "loadClientStrategy"),
+    MODEL("对话模型", "model", "loadModelStrategy"),
+    API("接口", "api", "loadApiStrategy"),
+    MCP("工具", "mcp","loadMcpStrategy"),
+    PROMPT("系统提示词", "prompt","loadPromptStrategy"),
+    ADVISOR("顾问", "advisor","loadAdvisorStrategy"),
     ;
 
     private String name;
 
     private String code;
-
-    private String beanNamePrefix;
 
     private String loadStrategy;
 
@@ -43,7 +41,8 @@ public enum AiEnum {
         return fromCode(code).getLoadStrategy();
     }
 
-    public String getBeanName(String apiId) {
-        return this.beanNamePrefix + apiId;
+    public String getBeanName(String id) {
+        return this.code + "_" + id;
     }
+
 }
