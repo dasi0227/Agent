@@ -58,7 +58,7 @@ CREATE TABLE `ai_mcp`
     `mcp_id`      VARCHAR(32)  NOT NULL UNIQUE COMMENT '工具 id',
     `mcp_name`    VARCHAR(32)  NOT NULL COMMENT '工具名称',
     `mcp_type`    VARCHAR(32)  NOT NULL COMMENT '工具类型',
-    `mcp_path`    VARCHAR(255) NOT NULL COMMENT '工具路径',
+    `mcp_config`  TEXT         NOT NULL COMMENT '工具配置',
     `mcp_desc`    VARCHAR(255) NOT NULL DEFAULT '暂无' COMMENT '工具描述',
     `mcp_timeout` INT          NOT NULL DEFAULT '180' COMMENT '请求超时时间',
     `mcp_status`  TINYINT      NOT NULL DEFAULT '1' COMMENT '状态：0-禁用，1-启用',

@@ -8,9 +8,11 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
@@ -20,6 +22,7 @@ import static com.dasi.domain.agent.model.enumeration.AiEnum.CLIENT;
 
 @Slf4j
 @RunWith(SpringRunner.class)
+@ActiveProfiles("test")
 @SpringBootTest
 public class AgentTest {
 
@@ -30,7 +33,7 @@ public class AgentTest {
     private ApplicationContext applicationContext;
 
     @Test
-    public void test_aiClientApiNode() throws Exception {
+    public void test_aiApiNode() throws Exception {
         StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.armoryStrategyHandler();
 
         ArmoryCommandEntity armoryCommandEntity = ArmoryCommandEntity.builder()
@@ -40,11 +43,30 @@ public class AgentTest {
 
         ArmoryStrategyFactory.DynamicContext dynamicContext = new ArmoryStrategyFactory.DynamicContext();
 
-        String apply = armoryStrategyHandler.apply(armoryCommandEntity, dynamicContext);
+        armoryStrategyHandler.apply(armoryCommandEntity, dynamicContext);
 
         OpenAiApi openAiApi = (OpenAiApi) applicationContext.getBean(API.getBeanName("api_demo_1"));
 
         log.info("测试结果：{}", openAiApi);
+    }
+
+    @Test
+    public void test_aiModelNode() throws Exception {
+        StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.armoryStrategyHandler();
+
+        ArmoryCommandEntity armoryCommandEntity = ArmoryCommandEntity.builder()
+                .commandType(CLIENT.getCode())
+                .commandIdList(List.of("client_demo_1"))
+                .build();
+
+        ArmoryStrategyFactory.DynamicContext dynamicContext = new ArmoryStrategyFactory.DynamicContext();
+
+        armoryStrategyHandler.apply(armoryCommandEntity, dynamicContext);
+
+        OpenAiChatModel chatModel = applicationContext.getBean(API.getBeanName("model_demo_1"), OpenAiChatModel.class);
+
+        log.info("测试结果：{}", chatModel);
+
     }
 
 

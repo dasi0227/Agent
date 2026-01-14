@@ -1,19 +1,19 @@
 package com.dasi.infrastructure.adapter.repository;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.dasi.domain.agent.adapter.IAgentRepository;
 import com.dasi.domain.agent.model.enumeration.AiEnum;
+import com.dasi.domain.agent.model.enumeration.AiMcpType;
 import com.dasi.domain.agent.model.vo.*;
 import com.dasi.infrastructure.persistent.dao.*;
 import com.dasi.infrastructure.persistent.po.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static com.dasi.domain.agent.model.enumeration.AiAdvisorType.CHAT_MEMORY;
 import static com.dasi.domain.agent.model.enumeration.AiAdvisorType.RAG_ANSWER;
@@ -65,7 +65,7 @@ public class AgentRepository implements IAgentRepository {
             }
 
             // 2. 查询客户端关联配置
-            List<AiConfig> aiConfigList = aiConfigDao.queryBySource(CLIENT.getCode(), clientId);
+            List<AiConfig> clientConfigList = aiConfigDao.queryBySource(CLIENT.getCode(), clientId);
 
             String modelId = null;
             List<String> promptIdList = new ArrayList<>();
@@ -73,23 +73,23 @@ public class AgentRepository implements IAgentRepository {
             List<String> advisorIdList = new ArrayList<>();
 
             // 3. 根据 Config 拿到各个 Id
-            for (AiConfig aiConfig : aiConfigList) {
-                if (aiConfig.getConfigStatus() == 0) {
+            for (AiConfig clientConfig : clientConfigList) {
+                if (clientConfig.getConfigStatus() == 0) {
                     continue;
                 }
 
-                switch (AiEnum.fromCode(aiConfig.getTargetType())) {
+                switch (AiEnum.fromCode(clientConfig.getTargetType())) {
                     case MODEL:
-                        modelId = aiConfig.getTargetId();
+                        modelId = clientConfig.getTargetId();
                         break;
                     case PROMPT:
-                        promptIdList.add(aiConfig.getTargetId());
+                        promptIdList.add(clientConfig.getTargetId());
                         break;
                     case MCP:
-                        mcpIdList.add(aiConfig.getTargetId());
+                        mcpIdList.add(clientConfig.getTargetId());
                         break;
                     case ADVISOR:
-                        advisorIdList.add(aiConfig.getTargetId());
+                        advisorIdList.add(clientConfig.getTargetId());
                         break;
                 }
             }
@@ -122,16 +122,16 @@ public class AgentRepository implements IAgentRepository {
 
         for (String clientId : clientIdList) {
 
-            List<AiConfig> aiConfigList = aiConfigDao.queryBySource(CLIENT.getCode(), clientId);
+            List<AiConfig> clientConfigList = aiConfigDao.queryBySource(CLIENT.getCode(), clientId);
 
-            for (AiConfig aiConfig : aiConfigList) {
+            for (AiConfig clientConfig : clientConfigList) {
                 // 1. 通过 Client 拿到 Config
-                if (!ADVISOR.getCode().equals(aiConfig.getTargetType()) || aiConfig.getConfigStatus() == 0) {
+                if (!ADVISOR.getCode().equals(clientConfig.getTargetType()) || clientConfig.getConfigStatus() == 0) {
                     continue;
                 }
 
                 // 2. 通过 Config 拿到 Advisor
-                String advisorId = aiConfig.getTargetId();
+                String advisorId = clientConfig.getTargetId();
                 AiAdvisor aiAdvisor = aiAdvisorDao.queryByAdvisorId(advisorId);
                 if (aiAdvisor == null || aiAdvisor.getAdvisorStatus() == 0) {
                     continue;
@@ -184,16 +184,16 @@ public class AgentRepository implements IAgentRepository {
 
         for (String clientId : clientIdList) {
 
-            List<AiConfig> aiConfigList = aiConfigDao.queryBySource(CLIENT.getCode(), clientId);
+            List<AiConfig> clientConfigList = aiConfigDao.queryBySource(CLIENT.getCode(), clientId);
 
-            for (AiConfig aiConfig : aiConfigList) {
+            for (AiConfig clientConfig : clientConfigList) {
                 // 1. 通过 Client 拿到 Config
-                if (!PROMPT.getCode().equals(aiConfig.getTargetType()) || aiConfig.getConfigStatus() == 0) {
+                if (!PROMPT.getCode().equals(clientConfig.getTargetType()) || clientConfig.getConfigStatus() == 0) {
                     continue;
                 }
 
                 // 2. 通过 Config 拿到 Prompt
-                String promptId = aiConfig.getTargetId();
+                String promptId = clientConfig.getTargetId();
                 AiPrompt aiPrompt = aiPromptDao.queryByPromptId(promptId);
                 if (aiPrompt == null || aiPrompt.getPromptStatus() == 0) {
                     continue;
@@ -228,30 +228,62 @@ public class AgentRepository implements IAgentRepository {
 
         for (String clientId : clientIdList) {
 
-            List<AiConfig> aiConfigList = aiConfigDao.queryBySource(CLIENT.getCode(), clientId);
+            List<AiConfig> clientConfigList = aiConfigDao.queryBySource(CLIENT.getCode(), clientId);
 
-            for (AiConfig aiConfig : aiConfigList) {
+            for (AiConfig clientConfig : clientConfigList) {
                 // 1. 通过 Client 拿到 Config
-                if (!MCP.getCode().equals(aiConfig.getTargetType()) || aiConfig.getConfigStatus() == 0) {
+                if (!MODEL.getCode().equals(clientConfig.getTargetType()) || clientConfig.getConfigStatus() == 0) {
                     continue;
                 }
 
-                // 2. 通过 Config 拿到 MCP
-                String mcpId = aiConfig.getTargetId();
-                AiMcp aiMcp = aiMcpDao.queryByMcpId(mcpId);
-                if (!aiMcpIdSet.add(aiMcp.getMcpId())) {
-                    continue;
-                }
+                // 2. 通过 Config 拿到 Model
+                String modelId = clientConfig.getTargetId();
 
-                // 3. 通过 MCP 拿到 VO
-                AiMcpVO aiMcpVO = AiMcpVO.builder()
-                        .mcpId(aiMcp.getMcpId())
-                        .mcpName(aiMcp.getMcpName())
-                        .mcpType(aiMcp.getMcpType())
-                        .mcpPath(aiMcp.getMcpPath())
-                        .mcpTimeout(aiMcp.getMcpTimeout())
-                        .build();
-                aiMcpVOList.add(aiMcpVO);
+                // 3. 通过 Model 拿到 Mcp
+                List<AiConfig> modelConfigList = aiConfigDao.queryBySource(MODEL.getCode(), modelId);
+                for (AiConfig modelConfig : modelConfigList) {
+
+                    if (!MCP.getCode().equals(modelConfig.getTargetType()) || modelConfig.getConfigStatus() == 0) {
+                        continue;
+                    }
+
+                    String mcpId = modelConfig.getTargetId();
+                    if (!aiMcpIdSet.add(mcpId)) {
+                        continue;
+                    }
+
+                    AiMcp aiMcp = aiMcpDao.queryByMcpId(mcpId);
+                    if (aiMcp == null || aiMcp.getMcpStatus() == 0) {
+                        continue;
+                    }
+
+                    AiMcpVO aiMcpVO = AiMcpVO.builder()
+                            .mcpId(aiMcp.getMcpId())
+                            .mcpName(aiMcp.getMcpName())
+                            .mcpType(aiMcp.getMcpType())
+                            .mcpConfig(aiMcp.getMcpConfig())
+                            .mcpTimeout(aiMcp.getMcpTimeout())
+                            .build();
+
+                    try {
+                        switch (AiMcpType.fromCode(aiMcp.getMcpType())) {
+                            case SSE -> {
+                                ObjectMapper objectMapper = new ObjectMapper();
+                                AiMcpVO.SseConfig sseConfig = objectMapper.readValue(aiMcp.getMcpConfig(), AiMcpVO.SseConfig.class);
+                                aiMcpVO.setSseConfig(sseConfig);
+                            }
+                            case STDIO -> {
+                                Map<String, AiMcpVO.StdioConfig.Stdio> stdio = JSON.parseObject(aiMcp.getMcpConfig(), new TypeReference<>() {});
+                                AiMcpVO.StdioConfig stdioConfig = new AiMcpVO.StdioConfig();
+                                stdioConfig.setStdio(stdio);
+                                aiMcpVO.setStdioConfig(stdioConfig);
+                            }
+                        }
+                        aiMcpVOList.add(aiMcpVO);
+                    } catch (Exception e) {
+                        log.error("【查询数据】失败：{}", e.getMessage());
+                    }
+                }
             }
         }
 
@@ -269,16 +301,16 @@ public class AgentRepository implements IAgentRepository {
 
         for (String clientId : clientIdList) {
 
-            List<AiConfig> aiConfigList = aiConfigDao.queryBySource(CLIENT.getCode(), clientId);
+            List<AiConfig> clientConfigList = aiConfigDao.queryBySource(CLIENT.getCode(), clientId);
 
-            for (AiConfig aiConfig : aiConfigList) {
+            for (AiConfig clientConfig : clientConfigList) {
                 // 1. 通过 Client 拿到 Config
-                if (!MODEL.getCode().equals(aiConfig.getTargetType()) || aiConfig.getConfigStatus() == 0) {
+                if (!MODEL.getCode().equals(clientConfig.getTargetType()) || clientConfig.getConfigStatus() == 0) {
                     continue;
                 }
 
                 // 2. 通过 Config 拿到 Model
-                String modelId = aiConfig.getTargetId();
+                String modelId = clientConfig.getTargetId();
                 AiModel aiModel = aiModelDao.queryByModelId(modelId);
                 if (aiModel == null || aiModel.getModelStatus() == 0) {
                     continue;
@@ -287,12 +319,22 @@ public class AgentRepository implements IAgentRepository {
                     continue;
                 }
 
-                // 3. 通过 Model 拿到 VO
+                // 3. 通过 Model 拿到 Mcp
+                List<String> mcpIdList = new ArrayList<>();
+                List<AiConfig> modelConfigList = aiConfigDao.queryBySource(MODEL.getCode(), modelId);
+                for (AiConfig modelConfig : modelConfigList) {
+                    if (MCP.getCode().equals(modelConfig.getTargetType()) && modelConfig.getConfigStatus() == 1) {
+                        mcpIdList.add(modelConfig.getTargetId());
+                    }
+                }
+
+                // 4. 通过 Model 拿到 VO
                 AiModelVO aiModelVO = AiModelVO.builder()
                         .modelId(aiModel.getModelId())
                         .apiId(aiModel.getApiId())
                         .modelName(aiModel.getModelName())
                         .modelType(aiModel.getModelType())
+                        .mcpIdList(mcpIdList)
                         .build();
                 aiModelVOList.add(aiModelVO);
             }
@@ -312,16 +354,16 @@ public class AgentRepository implements IAgentRepository {
 
         for (String clientId : clientIdList) {
 
-            List<AiConfig> aiConfigList = aiConfigDao.queryBySource(CLIENT.getCode(), clientId);
+            List<AiConfig> clientConfigList = aiConfigDao.queryBySource(CLIENT.getCode(), clientId);
 
-            for (AiConfig aiConfig : aiConfigList) {
+            for (AiConfig clientConfig : clientConfigList) {
                 // 1. 通过 Client 拿到 Config
-                if (!MODEL.getCode().equals(aiConfig.getTargetType()) || aiConfig.getConfigStatus() == 0) {
+                if (!MODEL.getCode().equals(clientConfig.getTargetType()) || clientConfig.getConfigStatus() == 0) {
                     continue;
                 }
 
                 // 2. 通过 Config 拿到 Model
-                String modelId = aiConfig.getTargetId();
+                String modelId = clientConfig.getTargetId();
                 AiModel aiModel = aiModelDao.queryByModelId(modelId);
                 if (aiModel == null || aiModel.getModelStatus() == 0) {
                     continue;

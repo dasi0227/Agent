@@ -54,7 +54,7 @@ INSERT INTO ai_mcp (
     mcp_id,
     mcp_name,
     mcp_type,
-    mcp_path,
+    mcp_config,
     mcp_desc,
     mcp_timeout,
     mcp_status
@@ -62,7 +62,7 @@ INSERT INTO ai_mcp (
     'mcp_demo_1',
     'demo-mcp',
     'sse',
-    'http://127.0.0.1:9001',
+    '{"baseUri":"http://127.0.0.1:9001","sseEndPoint":"/sse"}',
     'demo mcp',
     180,
     1
@@ -106,7 +106,8 @@ INSERT INTO ai_advisor (
 
 -- ai_config
 DELETE FROM ai_config
-WHERE source_type = 'client' AND source_id = 'client_demo_1';
+WHERE (source_type = 'client' AND source_id = 'client_demo_1')
+   OR (source_type = 'model' AND source_id = 'model_demo_1');
 INSERT INTO ai_config (
     source_type,
     source_id,
@@ -118,7 +119,8 @@ INSERT INTO ai_config (
     ('client', 'client_demo_1', 'model', 'model_demo_1', NULL, 1),
     ('client', 'client_demo_1', 'prompt', 'prompt_demo_1', NULL, 1),
     ('client', 'client_demo_1', 'mcp', 'mcp_demo_1', NULL, 1),
-    ('client', 'client_demo_1', 'advisor', 'advisor_demo_1', NULL, 1);
+    ('client', 'client_demo_1', 'advisor', 'advisor_demo_1', NULL, 1),
+    ('model', 'model_demo_1', 'mcp', 'mcp_demo_1', NULL, 1);
 
 -- ai_agent
 DELETE FROM ai_agent WHERE agent_id = 'agent_demo_1';

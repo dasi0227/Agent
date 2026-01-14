@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -22,5 +24,8 @@ public class AiModelVO {
 
     /** 模型类型 */
     private String modelType;
+
+    /** 工具列表 */
+    private List<String> mcpIdList;
 
 }

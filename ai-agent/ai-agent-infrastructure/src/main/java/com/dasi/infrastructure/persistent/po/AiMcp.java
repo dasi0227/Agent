@@ -27,7 +27,7 @@ public class AiMcp {
     private String mcpType;
 
     /** 工具路径 */
-    private String mcpPath;
+    private String mcpConfig;
 
     /** 请求超时时间 */
     private Integer mcpTimeout;
