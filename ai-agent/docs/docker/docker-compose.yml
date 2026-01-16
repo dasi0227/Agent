@@ -92,39 +92,54 @@ services:
     networks:
       - ai-agent
 
-  # ===================== Ollama =====================
-  ollama:
-    image: ollama/ollama:latest
-    container_name: ollama
-    restart: unless-stopped
-    volumes:
-      - ${HOME}/docker/ollama:/root/.ollama
+  open-web-search-mcp:
+    image: ghcr.io/aas-ee/open-web-search:latest
+    container_name: open-web-search-mcp
+    platform: linux/amd64
+    restart: always
     ports:
-      - "11434:11434"
+      - "9003:3000"
+    environment:
+      TZ: ${TZ}
+      DEFAULT_SEARCH_ENGINE: "Bing"
+      ENABLE_CORS: "true"
+      CORS_ORIGIN: "*"
     networks:
       - ai-agent
 
-  # ===================== RabbitMQ =====================
-  rabbitmq:
-    image: rabbitmq:3.13-management
-    container_name: rabbitmq
-    hostname: rabbitmq
-    restart: always
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
-      TZ: ${TZ}
-    volumes:
-      - ${HOME}/docker/rabbitmq/data:/var/lib/rabbitmq
-      - ${HOME}/docker/rabbitmq/log:/var/log/rabbitmq
-      - ${HOME}/docker/rabbitmq/plugins/rabbitmq_delayed_message_exchange-3.13.0.ez:/opt/rabbitmq/plugins/rabbitmq_delayed_message_exchange-3.13.0.ez
-    command: >
-      bash -c "
-      rabbitmq-plugins enable --offline rabbitmq_delayed_message_exchange &&
-      rabbitmq-server
-      "
-    networks:
-      - ai-agent
+#  # ===================== Ollama =====================
+#  ollama:
+#    image: ollama/ollama:latest
+#    container_name: ollama
+#    restart: unless-stopped
+#    volumes:
+#      - ${HOME}/docker/ollama:/root/.ollama
+#    ports:
+#      - "11434:11434"
+#    networks:
+#      - ai-agent
+#
+#  # ===================== RabbitMQ =====================
+#  rabbitmq:
+#    image: rabbitmq:3.13-management
+#    container_name: rabbitmq
+#    hostname: rabbitmq
+#    restart: always
+#    ports:
+#      - "5672:5672"
+#      - "15672:15672"
+#    environment:
+#      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+#      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+#      TZ: ${TZ}
+#    volumes:
+#      - ${HOME}/docker/rabbitmq/data:/var/lib/rabbitmq
+#      - ${HOME}/docker/rabbitmq/log:/var/log/rabbitmq
+#      - ${HOME}/docker/rabbitmq/plugins/rabbitmq_delayed_message_exchange-3.13.0.ez:/opt/rabbitmq/plugins/rabbitmq_delayed_message_exchange-3.13.0.ez
+#    command: >
+#      bash -c "
+#      rabbitmq-plugins enable --offline rabbitmq_delayed_message_exchange &&
+#      rabbitmq-server
+#      "
+#    networks:
+#      - ai-agent
