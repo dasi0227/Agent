@@ -15,10 +15,10 @@ import static com.dasi.domain.agent.model.enumeration.AiType.API;
 
 @Slf4j
 @Service
-public class AiApiNode extends AbstractArmoryNode {
+public class ArmoryAiApiNode extends AbstractArmoryNode {
 
     @Resource
-    private AiMcpNode aiMcpNode;
+    private ArmoryAiMcpNode armoryAiMcpNode;
 
     @Override
     protected String doApply(ArmoryCommandEntity armoryCommandEntity, ArmoryStrategyFactory.DynamicContext dynamicContext) throws Exception {
@@ -26,7 +26,7 @@ public class AiApiNode extends AbstractArmoryNode {
         List<AiApiVO> aiApiVOList = dynamicContext.getValue(API.getCode());
 
         if (aiApiVOList == null || aiApiVOList.isEmpty()) {
-            log.warn("【构建节点】AiApiNode：没有数据");
+            log.warn("【装配节点】ArmoryAiApiNode：没有数据");
             return router(armoryCommandEntity, dynamicContext);
         }
 
@@ -42,7 +42,7 @@ public class AiApiNode extends AbstractArmoryNode {
             // 注册 Bean 对象
             String apiBeanName = API.getBeanName(aiApiVO.getApiId());
             registerBean(apiBeanName, OpenAiApi.class, openAiApi);
-            log.info("【构建节点】AiApiNode：apiBeanName={}, baseUrl={}, apiKey={}", apiBeanName, aiApiVO.getApiBaseUrl(), aiApiVO.getApiKey());
+            log.info("【装配节点】ArmoryAiApiNode：apiBeanName={}, baseUrl={}, apiKey={}", apiBeanName, aiApiVO.getApiBaseUrl(), aiApiVO.getApiKey());
         }
 
         return router(armoryCommandEntity, dynamicContext);
@@ -50,7 +50,7 @@ public class AiApiNode extends AbstractArmoryNode {
 
     @Override
     public StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> get(ArmoryCommandEntity armoryCommandEntity, ArmoryStrategyFactory.DynamicContext dynamicContext) {
-        return aiMcpNode;
+        return armoryAiMcpNode;
     }
 
 }

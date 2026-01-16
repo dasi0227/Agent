@@ -44,6 +44,9 @@ public class AgentRepository implements IAgentRepository {
     @Resource
     private IAiMcpDao aiMcpDao;
 
+    @Resource
+    private IAiFlowDao aiFlowDao;
+
     @Override
     public List<AiClientVO> queryAiClientVOListByClientIdList(List<String> clientIdList) {
         if (clientIdList == null || clientIdList.isEmpty()) {
@@ -158,7 +161,8 @@ public class AgentRepository implements IAgentRepository {
                         } else if (RAG_ANSWER.getCode().equals(aiAdvisor.getAdvisorType())) {
                             ragAnswer = JSON.parseObject(advisorParam, AiAdvisorVO.RagAnswer.class);
                         }
-                    } catch (Exception ignored) {
+                    } catch (Exception e) {
+                        log.error("【查询数据】失败：{}", e.getMessage());
                     }
                 }
 
@@ -242,61 +246,47 @@ public class AgentRepository implements IAgentRepository {
 
             for (AiConfig clientConfig : clientConfigList) {
                 // 1. 通过 Client 拿到 Config
-                if (!MODEL.getCode().equals(clientConfig.getTargetType()) || clientConfig.getConfigStatus() == 0) {
+                if (!MCP.getCode().equals(clientConfig.getTargetType()) || clientConfig.getConfigStatus() == 0) {
                     continue;
                 }
 
-                // 2. 通过 Config 拿到 Model
-                String modelId = clientConfig.getTargetId();
-
-                // 3. 通过 Model 拿到 Mcp
-                List<AiConfig> modelConfigList = aiConfigDao.queryBySource(MODEL.getCode(), modelId);
-                if (modelConfigList == null || modelConfigList.isEmpty()) {
+                // 2. 通过 Config 拿到 MCP
+                String mcpId = clientConfig.getTargetId();
+                if (!aiMcpIdSet.add(mcpId)) {
                     continue;
                 }
 
-                for (AiConfig modelConfig : modelConfigList) {
+                // 3. 通过 Mcp 拿到 VO
+                AiMcp aiMcp = aiMcpDao.queryByMcpId(mcpId);
+                if (aiMcp == null || aiMcp.getMcpStatus() == 0) {
+                    continue;
+                }
 
-                    if (!MCP.getCode().equals(modelConfig.getTargetType()) || modelConfig.getConfigStatus() == 0) {
-                        continue;
-                    }
+                AiMcpVO aiMcpVO = AiMcpVO.builder()
+                        .mcpId(aiMcp.getMcpId())
+                        .mcpName(aiMcp.getMcpName())
+                        .mcpType(aiMcp.getMcpType())
+                        .mcpConfig(aiMcp.getMcpConfig())
+                        .mcpTimeout(aiMcp.getMcpTimeout())
+                        .build();
 
-                    String mcpId = modelConfig.getTargetId();
-                    if (!aiMcpIdSet.add(mcpId)) {
-                        continue;
-                    }
-
-                    AiMcp aiMcp = aiMcpDao.queryByMcpId(mcpId);
-                    if (aiMcp == null || aiMcp.getMcpStatus() == 0) {
-                        continue;
-                    }
-
-                    AiMcpVO aiMcpVO = AiMcpVO.builder()
-                            .mcpId(aiMcp.getMcpId())
-                            .mcpName(aiMcp.getMcpName())
-                            .mcpType(aiMcp.getMcpType())
-                            .mcpConfig(aiMcp.getMcpConfig())
-                            .mcpTimeout(aiMcp.getMcpTimeout())
-                            .build();
-
-                    try {
-                        switch (AiMcpType.fromCode(aiMcp.getMcpType())) {
-                            case SSE -> {
-                                ObjectMapper objectMapper = new ObjectMapper();
-                                AiMcpVO.SseConfig sseConfig = objectMapper.readValue(aiMcp.getMcpConfig(), AiMcpVO.SseConfig.class);
-                                aiMcpVO.setSseConfig(sseConfig);
-                            }
-                            case STDIO -> {
-                                Map<String, AiMcpVO.StdioConfig.Stdio> stdio = JSON.parseObject(aiMcp.getMcpConfig(), new TypeReference<>() {});
-                                AiMcpVO.StdioConfig stdioConfig = new AiMcpVO.StdioConfig();
-                                stdioConfig.setStdio(stdio);
-                                aiMcpVO.setStdioConfig(stdioConfig);
-                            }
+                try {
+                    switch (AiMcpType.fromCode(aiMcp.getMcpType())) {
+                        case SSE -> {
+                            ObjectMapper objectMapper = new ObjectMapper();
+                            AiMcpVO.SseConfig sseConfig = objectMapper.readValue(aiMcp.getMcpConfig(), AiMcpVO.SseConfig.class);
+                            aiMcpVO.setSseConfig(sseConfig);
                         }
-                        aiMcpVOList.add(aiMcpVO);
-                    } catch (Exception e) {
-                        log.error("【查询数据】失败：{}", e.getMessage());
+                        case STDIO -> {
+                            Map<String, AiMcpVO.StdioConfig.Stdio> stdio = JSON.parseObject(aiMcp.getMcpConfig(), new TypeReference<>() {});
+                            AiMcpVO.StdioConfig stdioConfig = new AiMcpVO.StdioConfig();
+                            stdioConfig.setStdio(stdio);
+                            aiMcpVO.setStdioConfig(stdioConfig);
+                        }
                     }
+                    aiMcpVOList.add(aiMcpVO);
+                } catch (Exception e) {
+                    log.error("【查询数据】失败：{}", e.getMessage());
                 }
             }
         }
@@ -482,5 +472,34 @@ public class AgentRepository implements IAgentRepository {
         }
 
         return aiApiVOList;
+    }
+
+    @Override
+    public Map<String, AiFlowVO> queryAiFlowVOMapByAgentId(String aiAgentId) {
+
+        if (aiAgentId == null || aiAgentId.isEmpty()) {
+            return Map.of();
+        }
+
+        List<AiFlow> aiFlowList = aiFlowDao.queryByAgentId(aiAgentId);
+
+        if (aiFlowList == null || aiFlowList.isEmpty()) {
+            return Map.of();
+        }
+
+        Map<String, AiFlowVO> aiFlowVOMap = new HashMap<>();
+        for (AiFlow aiFlow : aiFlowList) {
+            AiFlowVO aiFlowVO = AiFlowVO.builder()
+                        .agentId(aiFlow.getAgentId())
+                        .clientId(aiFlow.getClientId())
+                        .clientName(aiFlow.getClientName())
+                        .clientType(aiFlow.getClientType())
+                        .flowSeq(aiFlow.getFlowSeq())
+                        .build();
+
+            aiFlowVOMap.put(aiFlow.getClientType(), aiFlowVO);
+        }
+
+        return aiFlowVOMap;
     }
 }

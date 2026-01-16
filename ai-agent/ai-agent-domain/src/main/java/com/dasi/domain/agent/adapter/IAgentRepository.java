@@ -22,4 +22,7 @@ public interface IAgentRepository {
     List<AiModelVO> queryAiModelVOListByModelIdList(List<String> modelIdList);
 
     List<AiApiVO> queryAiApiVOListByModelIdList(List<String> modelIdList);
+
+    Map<String, AiFlowVO> queryAiFlowVOMapByAgentId(String aiAgentId);
+
 }

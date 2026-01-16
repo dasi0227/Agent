@@ -22,10 +22,10 @@ import static com.dasi.domain.agent.model.enumeration.AiType.MCP;
 
 @Slf4j
 @Service
-public class AiMcpNode extends AbstractArmoryNode {
+public class ArmoryAiMcpNode extends AbstractArmoryNode {
 
     @Resource
-    private AiModelNode aiModelNode;
+    private ArmoryAiModelNode armoryAiModelNode;
 
     @Override
     protected String doApply(ArmoryCommandEntity armoryCommandEntity, ArmoryStrategyFactory.DynamicContext dynamicContext) throws Exception {
@@ -33,7 +33,7 @@ public class AiMcpNode extends AbstractArmoryNode {
         List<AiMcpVO> aiMcpVOList = dynamicContext.getValue(MCP.getCode());
 
         if (aiMcpVOList == null || aiMcpVOList.isEmpty()) {
-            log.warn("【构建节点】AiMcpNode：没有数据");
+            log.warn("【装配节点】ArmoryAiMcpNode：没有数据");
             return router(armoryCommandEntity, dynamicContext);
         }
 
@@ -82,7 +82,7 @@ public class AiMcpNode extends AbstractArmoryNode {
 
             String mcpBeanName = MCP.getBeanName(aiMcpVO.getMcpId());
             registerBean(mcpBeanName, McpSyncClient.class, mcpSyncClient);
-            log.info("【构建节点】AiMcpNode：mcpBeanName={}, mcpType={}, mcpName={}", mcpBeanName, aiMcpVO.getMcpType(), aiMcpVO.getMcpName());
+            log.info("【装配节点】ArmoryAiMcpNode：mcpBeanName={}, mcpType={}, mcpName={}", mcpBeanName, aiMcpVO.getMcpType(), aiMcpVO.getMcpName());
         }
 
         return router(armoryCommandEntity, dynamicContext);
@@ -90,7 +90,7 @@ public class AiMcpNode extends AbstractArmoryNode {
 
     @Override
     public StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> get(ArmoryCommandEntity armoryCommandEntity, ArmoryStrategyFactory.DynamicContext dynamicContext) {
-        return aiModelNode;
+        return armoryAiModelNode;
     }
 
 }

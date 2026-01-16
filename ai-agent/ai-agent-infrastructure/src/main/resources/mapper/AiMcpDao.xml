@@ -12,7 +12,7 @@
         <result column="mcp_status" property="mcpStatus"/>
     </resultMap>
 
-    <select id="queryByMcpId" resultMap="dataMap">
+    <select id="queryByMcpId" parameterType="java.lang.String" resultMap="dataMap">
         SELECT mcp_id,
                mcp_name,
                mcp_type,

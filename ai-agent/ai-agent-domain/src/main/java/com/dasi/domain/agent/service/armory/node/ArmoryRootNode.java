@@ -13,14 +13,14 @@ import java.util.Map;
 
 @Slf4j
 @Service
-public class RootNode extends AbstractArmoryNode {
+public class ArmoryRootNode extends AbstractArmoryNode {
 
     private final Map<String, ILoadStrategy> loadStrategyMap;
 
     @Resource
-    private AiApiNode aiApiNode;
+    private ArmoryAiApiNode armoryAiApiNode;
 
-    public RootNode(Map<String, ILoadStrategy> loadStrategyMap) {
+    public ArmoryRootNode(Map<String, ILoadStrategy> loadStrategyMap) {
         this.loadStrategyMap = loadStrategyMap;
     }
 
@@ -35,13 +35,13 @@ public class RootNode extends AbstractArmoryNode {
 
     @Override
     protected String doApply(ArmoryCommandEntity armoryCommandEntity, ArmoryStrategyFactory.DynamicContext dynamicContext) throws Exception {
-        log.info("【构建节点】RootNode");
+        log.info("【装配节点】ArmoryRootNode");
         return router(armoryCommandEntity, dynamicContext);
     }
 
     @Override
     public StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> get(ArmoryCommandEntity armoryCommandEntity, ArmoryStrategyFactory.DynamicContext dynamicContext) {
-        return aiApiNode;
+        return armoryAiApiNode;
     }
 
 }

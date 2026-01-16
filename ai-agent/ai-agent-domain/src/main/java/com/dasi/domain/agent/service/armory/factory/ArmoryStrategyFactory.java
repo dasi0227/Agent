@@ -2,7 +2,7 @@ package com.dasi.domain.agent.service.armory.factory;
 
 import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.dasi.domain.agent.model.entity.ArmoryCommandEntity;
-import com.dasi.domain.agent.service.armory.node.RootNode;
+import com.dasi.domain.agent.service.armory.node.ArmoryRootNode;
 import jakarta.annotation.Resource;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,10 +17,10 @@ import java.util.Map;
 public class ArmoryStrategyFactory {
 
     @Resource
-    private RootNode rootNode;
+    private ArmoryRootNode armoryRootNode;
 
-    public StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> getRootNode(){
-        return rootNode;
+    public StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> getArmoryRootNode(){
+        return armoryRootNode;
     }
 
     @Data

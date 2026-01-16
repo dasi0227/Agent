@@ -1,20 +1,15 @@
-package com.dasi.infrastructure.persistent.po;
+package com.dasi.domain.agent.model.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
-/** 智能体-客户端关联表 */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AiFlow {
-    /** 主键ID */
-    private Long id;
+public class AiFlowVO {
 
     /** 智能体ID */
     private String agentId;
@@ -30,11 +25,5 @@ public class AiFlow {
 
     /** 序列号(执行顺序) */
     private Integer flowSeq;
-
-    /** 创建时间 */
-    private LocalDateTime createTime;
-
-    /** 更新时间 */
-    private LocalDateTime updateTime;
 
 }

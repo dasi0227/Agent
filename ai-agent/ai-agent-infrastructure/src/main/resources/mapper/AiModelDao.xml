@@ -10,7 +10,7 @@
         <result column="model_status" property="modelStatus"/>
     </resultMap>
 
-    <select id="queryByModelId" resultMap="dataMap">
+    <select id="queryByModelId" parameterType="java.lang.String" resultMap="dataMap">
         SELECT
             model_id,
             api_id,

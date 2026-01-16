@@ -21,7 +21,7 @@ import static com.dasi.domain.agent.model.enumeration.AiType.*;
 
 @Slf4j
 @Service
-public class AiClientNode extends AbstractArmoryNode {
+public class ArmoryAiClientNode extends AbstractArmoryNode {
 
     @Override
     protected String doApply(ArmoryCommandEntity armoryCommandEntity, ArmoryStrategyFactory.DynamicContext dynamicContext) throws Exception {
@@ -30,7 +30,7 @@ public class AiClientNode extends AbstractArmoryNode {
         List<AiClientVO> aiClientVOList = dynamicContext.getValue(CLIENT.getCode());
 
         if (aiClientVOList == null || aiClientVOList.isEmpty()) {
-            log.warn("【构建节点】AiClientNode：没有数据");
+            log.warn("【装配节点】ArmoryAiClientNode：没有数据");
             return router(armoryCommandEntity, dynamicContext);
         }
 
@@ -78,7 +78,7 @@ public class AiClientNode extends AbstractArmoryNode {
 
             String clientBeanName = CLIENT.getBeanName(aiClientVO.getClientId());
             registerBean(clientBeanName, ChatClient.class, chatClient);
-            log.info("【构建节点】AiClientNode：clientBeanName={}, clientName={}", clientBeanName, aiClientVO.getClientName());
+            log.info("【装配节点】ArmoryAiClientNode：clientBeanName={}, clientName={}", clientBeanName, aiClientVO.getClientName());
         }
 
         return router(armoryCommandEntity, dynamicContext);

@@ -70,12 +70,30 @@ public class LoadClientStrategy implements ILoadStrategy {
         dynamicContext.setValue(ADVISOR.getCode(), aiAdvisorList);
         dynamicContext.setValue(CLIENT.getCode(), aiClientList);
 
-        log.info("【加载数据】ai_api={}", aiApiList);
-        log.info("【加载数据】ai_model={}", aiModelList);
-        log.info("【加载数据】ai_mcp={}", aiMcpList);
-        log.info("【加载数据】ai_prompt={}", aiPrompMap);
-        log.info("【加载数据】ai_advisor={}", aiAdvisorList);
-        log.info("【加载数据】ai_client={}", aiClientList);
+        log.info("【加载数据】ai_api_ids={}, size={}",
+                aiApiList.stream().map(AiApiVO::getApiId).toList(),
+                aiApiList.size());
+
+        log.info("【加载数据】ai_model_ids={}, size={}",
+                aiModelList.stream().map(AiModelVO::getModelId).toList(),
+                aiModelList.size());
+
+        log.info("【加载数据】ai_mcp_ids={}, size={}",
+                aiMcpList.stream().map(AiMcpVO::getMcpId).toList(),
+                aiMcpList.size());
+
+        log.info("【加载数据】ai_prompt_ids={}, size={}",
+                aiPrompMap.values().stream().map(AiPromptVO::getPromptId).toList(),
+                aiPrompMap.size());
+
+        log.info("【加载数据】ai_advisor_ids={}, size={}",
+                aiAdvisorList.stream().map(AiAdvisorVO::getAdvisorId).toList(),
+                aiAdvisorList.size());
+
+        log.info("【加载数据】ai_client_ids={}, size={}",
+                aiClientList.stream().map(AiClientVO::getClientId).toList(),
+                aiClientList.size());
+
     }
 
 }
