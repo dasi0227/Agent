@@ -10,7 +10,7 @@
         <result column="prompt_status" property="promptStatus"/>
     </resultMap>
 
-    <select id="queryByPromptId" resultMap="dataMap">
+    <select id="queryByPromptId" parameterType="java.lang.String" resultMap="dataMap">
         SELECT
             prompt_id,
             prompt_name,
@@ -20,4 +20,10 @@
         FROM ai_prompt
         WHERE prompt_id = #{promptId}
     </select>
+
+    <update id="updatePromptContent">
+        UPDATE ai_prompt
+        SET prompt_content = #{promptContent}
+        WHERE prompt_id = #{promptId}
+    </update>
 </mapper>

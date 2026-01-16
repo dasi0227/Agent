@@ -159,6 +159,8 @@ CREATE TABLE `ai_flow`
     `id`          BIGINT      NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
     `agent_id`    VARCHAR(32) NOT NULL COMMENT '智能体ID',
     `client_id`   VARCHAR(32) NOT NULL COMMENT '客户端ID',
+    `client_name` VARCHAR(32) NOT NULL COMMENT '客户端名称',
+    `client_type` VARCHAR(32) NOT NULL COMMENT '客户端类型',
     `flow_seq`    TINYINT     NOT NULL COMMENT '序列号(执行顺序)',
     `create_time` DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',

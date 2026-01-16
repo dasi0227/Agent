@@ -21,10 +21,10 @@ import static com.dasi.domain.agent.model.enumeration.AiType.*;
 
 @Slf4j
 @Service
-public class AiModelNode extends AbstractArmoryNode {
+public class ArmoryAiModelNode extends AbstractArmoryNode {
 
     @Resource
-    private AiAdvisorNode aiAdvisorNode;
+    private ArmoryAiAdvisorNode armoryAiAdvisorNode;
 
     @Override
     protected String doApply(ArmoryCommandEntity armoryCommandEntity, ArmoryStrategyFactory.DynamicContext dynamicContext) throws Exception {
@@ -32,7 +32,7 @@ public class AiModelNode extends AbstractArmoryNode {
         List<AiModelVO> aiModelVOList = dynamicContext.getValue(MODEL.getCode());
 
         if (aiModelVOList == null || aiModelVOList.isEmpty()) {
-            log.warn("【构建节点】AiModelNode：没有数据");
+            log.warn("【装配节点】ArmoryAiModelNode：没有数据");
             return router(armoryCommandEntity, dynamicContext);
         }
 
@@ -42,7 +42,7 @@ public class AiModelNode extends AbstractArmoryNode {
             String apiBeanName = API.getBeanName(aiModelVO.getApiId());
             OpenAiApi openAiApi = getBean(apiBeanName);
             if (openAiApi == null) {
-                log.error("【构建节点】AiModelNode：不存在 API");
+                log.error("【装配节点】ArmoryAiModelNode：不存在 API");
             }
 
             // 获取当前 Model 关联的 MCP
@@ -67,7 +67,7 @@ public class AiModelNode extends AbstractArmoryNode {
             // 注册 Bean 对象
             String modelBeanName = MODEL.getBeanName(aiModelVO.getModelId());
             registerBean(modelBeanName, OpenAiChatModel.class, chatModel);
-            log.info("【构建节点】AiModelNode：modelBeanName={}, modelType={}, modelName={}", modelBeanName, aiModelVO.getModelType(), aiModelVO.getModelName());
+            log.info("【装配节点】ArmoryAiModelNode：modelBeanName={}, modelType={}, modelName={}", modelBeanName, aiModelVO.getModelType(), aiModelVO.getModelName());
         }
 
         return router(armoryCommandEntity, dynamicContext);
@@ -75,7 +75,7 @@ public class AiModelNode extends AbstractArmoryNode {
 
     @Override
     public StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> get(ArmoryCommandEntity armoryCommandEntity, ArmoryStrategyFactory.DynamicContext dynamicContext) {
-        return aiAdvisorNode;
+        return armoryAiAdvisorNode;
     }
 
 }

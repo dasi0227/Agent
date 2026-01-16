@@ -9,7 +9,7 @@
         <result column="client_status" property="clientStatus"/>
     </resultMap>
 
-    <select id="queryByClientId" resultMap="dataMap">
+    <select id="queryByClientId" parameterType="java.lang.String" resultMap="dataMap">
         SELECT
             client_id,
             client_name,

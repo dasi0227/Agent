@@ -47,8 +47,13 @@ public class LoadModelStrategy implements ILoadStrategy {
         dynamicContext.setValue(API.getCode(), aiApiList);
         dynamicContext.setValue(MODEL.getCode(), aiModelList);
 
-        log.info("【加载数据】ai_api={}", aiApiList);
-        log.info("【加载数据】ai_model={}", aiModelList);
+        log.info("【加载数据】ai_api_ids={}, size={}",
+                aiApiList.stream().map(AiApiVO::getApiId).toList(),
+                aiApiList.size());
+
+        log.info("【加载数据】ai_model_ids={}, size={}",
+                aiModelList.stream().map(AiModelVO::getModelId).toList(),
+                aiModelList.size());
 
     }
 

@@ -8,4 +8,6 @@ public interface IAiPromptDao {
 
     AiPrompt queryByPromptId(String promptId);
 
+    int updatePromptContent(String promptId, String promptContent);
+
 }

@@ -24,7 +24,7 @@ import static com.dasi.domain.agent.model.enumeration.AiType.CLIENT;
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
 @SpringBootTest
-public class AgentTest {
+public class ArmoryTest {
 
     @Resource
     private ArmoryStrategyFactory armoryStrategyFactory;
@@ -34,7 +34,7 @@ public class AgentTest {
 
     @Test
     public void test_aiApiNode() throws Exception {
-        StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.getRootNode();
+        StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.getArmoryRootNode();
 
         ArmoryCommandEntity armoryCommandEntity = ArmoryCommandEntity.builder()
                 .commandType(CLIENT.getCode())
@@ -52,7 +52,7 @@ public class AgentTest {
 
     @Test
     public void test_aiModelNode() throws Exception {
-        StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.getRootNode();
+        StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.getArmoryRootNode();
 
         ArmoryCommandEntity armoryCommandEntity = ArmoryCommandEntity.builder()
                 .commandType(CLIENT.getCode())
@@ -71,7 +71,7 @@ public class AgentTest {
 
     @Test
     public void test_aiClientNode() throws Exception {
-        StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.getRootNode();
+        StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.getArmoryRootNode();
 
         ArmoryCommandEntity armoryCommandEntity = ArmoryCommandEntity.builder()
                 .commandType(CLIENT.getCode())
@@ -90,7 +90,7 @@ public class AgentTest {
 
     @Test
     public void test_aiClientAskMath() throws Exception {
-        StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.getRootNode();
+        StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.getArmoryRootNode();
 
         ArmoryCommandEntity armoryCommandEntity = ArmoryCommandEntity.builder()
                 .commandType(CLIENT.getCode())
@@ -112,7 +112,7 @@ public class AgentTest {
 
     @Test
     public void test_aiClientUseMcp() throws Exception {
-        StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.getRootNode();
+        StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.getArmoryRootNode();
 
         ArmoryCommandEntity armoryCommandEntity = ArmoryCommandEntity.builder()
                 .commandType(CLIENT.getCode())
@@ -148,7 +148,7 @@ public class AgentTest {
 
     @Test
     public void test_aiClientUseRag() throws Exception {
-        StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.getRootNode();
+        StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.getArmoryRootNode();
 
         ArmoryCommandEntity armoryCommandEntity = ArmoryCommandEntity.builder()
                 .commandType(CLIENT.getCode())

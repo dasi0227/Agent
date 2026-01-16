@@ -11,7 +11,7 @@
         <result column="config_status" property="configStatus"/>
     </resultMap>
 
-    <select id="queryBySource" resultMap="dataMap">
+    <select id="queryBySource" parameterType="java.lang.String" resultMap="dataMap">
         SELECT
             source_type,
             source_id,

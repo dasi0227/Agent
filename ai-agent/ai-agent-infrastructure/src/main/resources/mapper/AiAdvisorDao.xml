@@ -12,7 +12,7 @@
         <result column="advisor_status" property="advisorStatus"/>
     </resultMap>
 
-    <select id="queryByAdvisorId" resultMap="dataMap">
+    <select id="queryByAdvisorId" parameterType="java.lang.String" resultMap="dataMap">
         SELECT
             advisor_id,
             advisor_name,

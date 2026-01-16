@@ -11,7 +11,7 @@
         <result column="api_status" property="apiStatus"/>
     </resultMap>
 
-    <select id="queryByApiId" resultMap="dataMap">
+    <select id="queryByApiId" parameterType="java.lang.String" resultMap="dataMap">
         SELECT
             api_id,
             api_base_url,

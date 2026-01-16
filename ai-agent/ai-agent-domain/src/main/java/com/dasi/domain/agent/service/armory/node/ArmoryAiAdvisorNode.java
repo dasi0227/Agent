@@ -21,13 +21,13 @@ import static com.dasi.domain.agent.model.enumeration.AiType.ADVISOR;
 
 @Slf4j
 @Service
-public class AiAdvisorNode extends AbstractArmoryNode {
+public class ArmoryAiAdvisorNode extends AbstractArmoryNode {
 
     @Resource
     private VectorStore vectorStore;
 
     @Resource
-    private AiClientNode aiClientNode;
+    private ArmoryAiClientNode armoryAiClientNode;
 
     @Override
     protected String doApply(ArmoryCommandEntity armoryCommandEntity, ArmoryStrategyFactory.DynamicContext dynamicContext) throws Exception {
@@ -35,7 +35,7 @@ public class AiAdvisorNode extends AbstractArmoryNode {
         List<AiAdvisorVO> aiAdvisorVOList = dynamicContext.getValue(ADVISOR.getCode());
 
         if (aiAdvisorVOList == null || aiAdvisorVOList.isEmpty()) {
-            log.warn("【构建节点】AiAdvisorNode：没有数据");
+            log.warn("【装配节点】ArmoryAiAdvisorNode：没有数据");
             return router(armoryCommandEntity, dynamicContext);
         }
 
@@ -62,7 +62,7 @@ public class AiAdvisorNode extends AbstractArmoryNode {
 
             String advisorBeanName = ADVISOR.getBeanName(aiAdvisorVO.getAdvisorId());
             registerBean(advisorBeanName, Advisor.class, advisor);
-            log.info("【构建节点】AiAdvisorNode：advisorBeanName={}, advisorType={}, advisorName={}", advisorBeanName, aiAdvisorVO.getAdvisorType(), aiAdvisorVO.getAdvisorName());
+            log.info("【装配节点】ArmoryAiAdvisorNode：advisorBeanName={}, advisorType={}, advisorName={}", advisorBeanName, aiAdvisorVO.getAdvisorType(), aiAdvisorVO.getAdvisorName());
         }
 
         return router(armoryCommandEntity, dynamicContext);
@@ -70,7 +70,7 @@ public class AiAdvisorNode extends AbstractArmoryNode {
 
     @Override
     public StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> get(ArmoryCommandEntity armoryCommandEntity, ArmoryStrategyFactory.DynamicContext dynamicContext) {
-        return aiClientNode;
+        return armoryAiClientNode;
     }
 
 
