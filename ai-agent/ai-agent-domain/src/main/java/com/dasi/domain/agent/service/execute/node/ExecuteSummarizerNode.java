@@ -1,6 +1,7 @@
 package com.dasi.domain.agent.service.execute.node;
 
 import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
+import com.alibaba.fastjson2.JSONObject;
 import com.dasi.domain.agent.model.entity.ExecuteAutoResultEntity;
 import com.dasi.domain.agent.model.entity.ExecuteRequestEntity;
 import com.dasi.domain.agent.model.vo.AiFlowVO;
@@ -60,7 +61,13 @@ public class ExecuteSummarizerNode extends AbstractExecuteNode {
                 .content();
 
         // 解析客户端结果
-        parseSummarizerResult(executeDynamicContext, summarizerResult, executeRequestEntity.getSessionId());
+        String summarizerJson = extractJson(summarizerResult);
+        JSONObject summarizerObject = parseJsonObject(summarizerResult);
+        if (summarizerObject == null) {
+            summarizerObject = new JSONObject();
+            summarizerObject.put(SUMMARIZER_OVERVIEW.getType(), summarizerJson);
+        }
+        parseSummarizerResult(executeDynamicContext, summarizerObject, executeRequestEntity.getSessionId());
 
         return router(executeRequestEntity, executeDynamicContext);
     }
@@ -70,12 +77,15 @@ public class ExecuteSummarizerNode extends AbstractExecuteNode {
         return defaultStrategyHandler;
     }
 
-    private void parseSummarizerResult(ExecuteDynamicContext executeDynamicContext, String summarizerResult, String sessionId) {
-        sendSummarizerResult(executeDynamicContext, SUMMARIZER_OVERVIEW.getType(), summarizerResult, sessionId);
+    private void parseSummarizerResult(ExecuteDynamicContext executeDynamicContext, JSONObject summarizerObject, String sessionId) {
+        if (summarizerObject == null) {
+            return;
+        }
+        sendSummarizerResult(executeDynamicContext, SUMMARIZER_OVERVIEW.getType(), summarizerObject.getString(SUMMARIZER_OVERVIEW.getType()), sessionId);
     }
 
     private void sendSummarizerResult(ExecuteDynamicContext executeDynamicContext, String sectionType, String sectionContent, String sessionId) {
-        if (!sectionType.isEmpty() && !sectionContent.isEmpty()) {
+        if (!sectionType.isEmpty() && sectionContent != null && !sectionContent.isEmpty()) {
             ExecuteAutoResultEntity executeAutoResultEntity = ExecuteAutoResultEntity.createSummarizerResult(
                     sectionType,
                     sectionContent,

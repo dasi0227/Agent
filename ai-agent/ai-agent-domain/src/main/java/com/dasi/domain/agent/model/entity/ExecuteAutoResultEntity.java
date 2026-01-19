@@ -51,7 +51,7 @@ public class ExecuteAutoResultEntity {
         return ExecuteAutoResultEntity.builder()
                 .clientType(clientType)
                 .sectionType(sectionType)
-                .sectionContent( sectionContent)
+                .sectionContent(sectionContent)
                 .step(step)
                 .completed(completed)
                 .timestamp(System.currentTimeMillis())
