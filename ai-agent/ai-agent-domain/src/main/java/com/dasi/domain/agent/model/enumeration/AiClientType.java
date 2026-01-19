@@ -17,6 +17,6 @@ public enum AiClientType {
 
     private String name;
 
-    private String code;
+    private String type;
 
 }

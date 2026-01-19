@@ -1,10 +1,10 @@
 package com.dasi.domain.agent.service.armory.node;
 
 import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
-import com.dasi.domain.agent.model.entity.ArmoryCommandEntity;
+import com.dasi.domain.agent.model.entity.ArmoryRequestEntity;
 import com.dasi.domain.agent.model.enumeration.AiMcpType;
 import com.dasi.domain.agent.model.vo.AiMcpVO;
-import com.dasi.domain.agent.service.armory.factory.ArmoryStrategyFactory;
+import com.dasi.domain.agent.service.armory.factory.ArmoryDynamicContext;
 import io.modelcontextprotocol.client.McpClient;
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.client.transport.HttpClientSseClientTransport;
@@ -28,13 +28,13 @@ public class ArmoryAiMcpNode extends AbstractArmoryNode {
     private ArmoryAiModelNode armoryAiModelNode;
 
     @Override
-    protected String doApply(ArmoryCommandEntity armoryCommandEntity, ArmoryStrategyFactory.DynamicContext dynamicContext) throws Exception {
+    protected String doApply(ArmoryRequestEntity armoryRequestEntity, ArmoryDynamicContext armoryDynamicContext) throws Exception {
 
-        List<AiMcpVO> aiMcpVOList = dynamicContext.getValue(MCP.getCode());
+        List<AiMcpVO> aiMcpVOList = armoryDynamicContext.getValue(MCP.getType());
 
         if (aiMcpVOList == null || aiMcpVOList.isEmpty()) {
             log.warn("【装配节点】ArmoryAiMcpNode：没有数据");
-            return router(armoryCommandEntity, dynamicContext);
+            return router(armoryRequestEntity, armoryDynamicContext);
         }
 
         for (AiMcpVO aiMcpVO : aiMcpVOList) {
@@ -85,11 +85,11 @@ public class ArmoryAiMcpNode extends AbstractArmoryNode {
             log.info("【装配节点】ArmoryAiMcpNode：mcpBeanName={}, mcpType={}, mcpName={}", mcpBeanName, aiMcpVO.getMcpType(), aiMcpVO.getMcpName());
         }
 
-        return router(armoryCommandEntity, dynamicContext);
+        return router(armoryRequestEntity, armoryDynamicContext);
     }
 
     @Override
-    public StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> get(ArmoryCommandEntity armoryCommandEntity, ArmoryStrategyFactory.DynamicContext dynamicContext) {
+    public StrategyHandler<ArmoryRequestEntity, ArmoryDynamicContext, String> get(ArmoryRequestEntity armoryRequestEntity, ArmoryDynamicContext armoryDynamicContext) {
         return armoryAiModelNode;
     }
 

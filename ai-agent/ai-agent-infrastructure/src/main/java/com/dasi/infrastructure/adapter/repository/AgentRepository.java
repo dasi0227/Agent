@@ -68,7 +68,7 @@ public class AgentRepository implements IAgentRepository {
             }
 
             // 2. 查询客户端关联配置
-            List<AiConfig> clientConfigList = aiConfigDao.queryBySource(CLIENT.getCode(), clientId);
+            List<AiConfig> clientConfigList = aiConfigDao.queryBySource(CLIENT.getType(), clientId);
             if (clientConfigList == null || clientConfigList.isEmpty()) {
                 continue;
             }
@@ -128,14 +128,14 @@ public class AgentRepository implements IAgentRepository {
 
         for (String clientId : clientIdList) {
 
-            List<AiConfig> clientConfigList = aiConfigDao.queryBySource(CLIENT.getCode(), clientId);
+            List<AiConfig> clientConfigList = aiConfigDao.queryBySource(CLIENT.getType(), clientId);
             if (clientConfigList == null || clientConfigList.isEmpty()) {
                 continue;
             }
 
             for (AiConfig clientConfig : clientConfigList) {
                 // 1. 通过 Client 拿到 Config
-                if (!ADVISOR.getCode().equals(clientConfig.getTargetType()) || clientConfig.getConfigStatus() == 0) {
+                if (!ADVISOR.getType().equals(clientConfig.getTargetType()) || clientConfig.getConfigStatus() == 0) {
                     continue;
                 }
 
@@ -156,9 +156,9 @@ public class AgentRepository implements IAgentRepository {
 
                 if (advisorParam != null && !advisorParam.trim().isEmpty()) {
                     try {
-                        if (CHAT_MEMORY.getCode().equals(aiAdvisor.getAdvisorType())) {
+                        if (CHAT_MEMORY.getType().equals(aiAdvisor.getAdvisorType())) {
                             chatMemory = JSON.parseObject(advisorParam, AiAdvisorVO.ChatMemory.class);
-                        } else if (RAG_ANSWER.getCode().equals(aiAdvisor.getAdvisorType())) {
+                        } else if (RAG_ANSWER.getType().equals(aiAdvisor.getAdvisorType())) {
                             ragAnswer = JSON.parseObject(advisorParam, AiAdvisorVO.RagAnswer.class);
                         }
                     } catch (Exception e) {
@@ -195,11 +195,11 @@ public class AgentRepository implements IAgentRepository {
 
         for (String clientId : clientIdList) {
 
-            List<AiConfig> clientConfigList = aiConfigDao.queryBySource(CLIENT.getCode(), clientId);
+            List<AiConfig> clientConfigList = aiConfigDao.queryBySource(CLIENT.getType(), clientId);
 
             for (AiConfig clientConfig : clientConfigList) {
                 // 1. 通过 Client 拿到 Config
-                if (!PROMPT.getCode().equals(clientConfig.getTargetType()) || clientConfig.getConfigStatus() == 0) {
+                if (!PROMPT.getType().equals(clientConfig.getTargetType()) || clientConfig.getConfigStatus() == 0) {
                     continue;
                 }
 
@@ -239,14 +239,14 @@ public class AgentRepository implements IAgentRepository {
 
         for (String clientId : clientIdList) {
 
-            List<AiConfig> clientConfigList = aiConfigDao.queryBySource(CLIENT.getCode(), clientId);
+            List<AiConfig> clientConfigList = aiConfigDao.queryBySource(CLIENT.getType(), clientId);
             if (clientConfigList == null || clientConfigList.isEmpty()) {
                 continue;
             }
 
             for (AiConfig clientConfig : clientConfigList) {
                 // 1. 通过 Client 拿到 Config
-                if (!MCP.getCode().equals(clientConfig.getTargetType()) || clientConfig.getConfigStatus() == 0) {
+                if (!MCP.getType().equals(clientConfig.getTargetType()) || clientConfig.getConfigStatus() == 0) {
                     continue;
                 }
 
@@ -305,14 +305,14 @@ public class AgentRepository implements IAgentRepository {
 
         for (String clientId : clientIdList) {
 
-            List<AiConfig> clientConfigList = aiConfigDao.queryBySource(CLIENT.getCode(), clientId);
+            List<AiConfig> clientConfigList = aiConfigDao.queryBySource(CLIENT.getType(), clientId);
             if (clientConfigList == null || clientConfigList.isEmpty()) {
                 continue;
             }
 
             for (AiConfig clientConfig : clientConfigList) {
                 // 1. 通过 Client 拿到 Config
-                if (!MODEL.getCode().equals(clientConfig.getTargetType()) || clientConfig.getConfigStatus() == 0) {
+                if (!MODEL.getType().equals(clientConfig.getTargetType()) || clientConfig.getConfigStatus() == 0) {
                     continue;
                 }
 
@@ -328,13 +328,13 @@ public class AgentRepository implements IAgentRepository {
 
                 // 3. 通过 Model 拿到 Mcp
                 List<String> mcpIdList = new ArrayList<>();
-                List<AiConfig> modelConfigList = aiConfigDao.queryBySource(MODEL.getCode(), modelId);
+                List<AiConfig> modelConfigList = aiConfigDao.queryBySource(MODEL.getType(), modelId);
 
                 if (modelConfigList == null || modelConfigList.isEmpty()) {
                     continue;
                 }
                 for (AiConfig modelConfig : modelConfigList) {
-                    if (MCP.getCode().equals(modelConfig.getTargetType()) && modelConfig.getConfigStatus() == 1) {
+                    if (MCP.getType().equals(modelConfig.getTargetType()) && modelConfig.getConfigStatus() == 1) {
                         mcpIdList.add(modelConfig.getTargetId());
                     }
                 }
@@ -365,14 +365,14 @@ public class AgentRepository implements IAgentRepository {
 
         for (String clientId : clientIdList) {
 
-            List<AiConfig> clientConfigList = aiConfigDao.queryBySource(CLIENT.getCode(), clientId);
+            List<AiConfig> clientConfigList = aiConfigDao.queryBySource(CLIENT.getType(), clientId);
             if (clientConfigList == null || clientConfigList.isEmpty()) {
                 continue;
             }
 
             for (AiConfig clientConfig : clientConfigList) {
                 // 1. 通过 Client 拿到 Config
-                if (!MODEL.getCode().equals(clientConfig.getTargetType()) || clientConfig.getConfigStatus() == 0) {
+                if (!MODEL.getType().equals(clientConfig.getTargetType()) || clientConfig.getConfigStatus() == 0) {
                     continue;
                 }
 

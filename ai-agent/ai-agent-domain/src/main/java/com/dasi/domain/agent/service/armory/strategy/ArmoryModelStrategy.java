@@ -1,10 +1,10 @@
-package com.dasi.domain.agent.service.armory.load;
+package com.dasi.domain.agent.service.armory.strategy;
 
 import com.dasi.domain.agent.adapter.IAgentRepository;
-import com.dasi.domain.agent.model.entity.ArmoryCommandEntity;
+import com.dasi.domain.agent.model.entity.ArmoryRequestEntity;
 import com.dasi.domain.agent.model.vo.AiApiVO;
 import com.dasi.domain.agent.model.vo.AiModelVO;
-import com.dasi.domain.agent.service.armory.factory.ArmoryStrategyFactory;
+import com.dasi.domain.agent.service.armory.factory.ArmoryDynamicContext;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ import static com.dasi.domain.agent.model.enumeration.AiType.MODEL;
 
 @Slf4j
 @Service("loadModelStrategy")
-public class LoadModelStrategy implements ILoadStrategy {
+public class ArmoryModelStrategy implements IArmoryStrategy {
 
     @Resource
     private IAgentRepository agentRepository;
@@ -27,8 +27,8 @@ public class LoadModelStrategy implements ILoadStrategy {
     private ThreadPoolExecutor threadPoolExecutor;
 
     @Override
-    public void loadData(ArmoryCommandEntity armoryCommandEntity, ArmoryStrategyFactory.DynamicContext dynamicContext) {
-        List<String> modelIdList = armoryCommandEntity.getCommandIdList();
+    public void armory(ArmoryRequestEntity armoryRequestEntity, ArmoryDynamicContext dynamicContext) {
+        List<String> modelIdList = armoryRequestEntity.getIdList();
 
         CompletableFuture<List<AiApiVO>> aiApiListFuture = CompletableFuture.supplyAsync(
                 () -> agentRepository.queryAiApiVOListByModelIdList(modelIdList), threadPoolExecutor);
@@ -44,8 +44,8 @@ public class LoadModelStrategy implements ILoadStrategy {
         List<AiApiVO> aiApiList = aiApiListFuture.join();
         List<AiModelVO> aiModelList = aiModelListFuture.join();
 
-        dynamicContext.setValue(API.getCode(), aiApiList);
-        dynamicContext.setValue(MODEL.getCode(), aiModelList);
+        dynamicContext.setValue(API.getType(), aiApiList);
+        dynamicContext.setValue(MODEL.getType(), aiModelList);
 
         log.info("【加载数据】ai_api_ids={}, size={}",
                 aiApiList.stream().map(AiApiVO::getApiId).toList(),

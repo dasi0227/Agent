@@ -15,7 +15,7 @@ public enum AiAdvisorType {
 
     private String name;
 
-    private String code;
+    private String type;
 
 
     public static AiAdvisorType fromCode(String code) {
@@ -24,7 +24,7 @@ public enum AiAdvisorType {
         }
 
         for (AiAdvisorType type : values()) {
-            if (type.code.equals(code)) {
+            if (type.type.equals(code)) {
                 return type;
             }
         }

@@ -1,10 +1,10 @@
 package com.dasi.domain.agent.service.armory.node;
 
 import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
-import com.dasi.domain.agent.model.entity.ArmoryCommandEntity;
+import com.dasi.domain.agent.model.entity.ArmoryRequestEntity;
 import com.dasi.domain.agent.model.enumeration.AiType;
-import com.dasi.domain.agent.service.armory.factory.ArmoryStrategyFactory;
-import com.dasi.domain.agent.service.armory.load.ILoadStrategy;
+import com.dasi.domain.agent.service.armory.factory.ArmoryDynamicContext;
+import com.dasi.domain.agent.service.armory.strategy.IArmoryStrategy;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,32 +15,32 @@ import java.util.Map;
 @Service
 public class ArmoryRootNode extends AbstractArmoryNode {
 
-    private final Map<String, ILoadStrategy> loadStrategyMap;
+    private final Map<String, IArmoryStrategy> loadStrategyMap;
 
     @Resource
     private ArmoryAiApiNode armoryAiApiNode;
 
-    public ArmoryRootNode(Map<String, ILoadStrategy> loadStrategyMap) {
+    public ArmoryRootNode(Map<String, IArmoryStrategy> loadStrategyMap) {
         this.loadStrategyMap = loadStrategyMap;
     }
 
     @Override
-    protected void multiThread(ArmoryCommandEntity armoryCommandEntity, ArmoryStrategyFactory.DynamicContext dynamicContext) {
-        String commandType = armoryCommandEntity.getCommandType();
+    protected void multiThread(ArmoryRequestEntity armoryRequestEntity, ArmoryDynamicContext armoryDynamicContext) {
+        String commandType = armoryRequestEntity.getRequestType();
         String loadStrategyKey = AiType.getLoadStrategyByCode(commandType);
-        ILoadStrategy loadStrategy = loadStrategyMap.get(loadStrategyKey);
-        log.info("【加载数据】type={}", commandType);
-        loadStrategy.loadData(armoryCommandEntity, dynamicContext);
+        IArmoryStrategy loadStrategy = loadStrategyMap.get(loadStrategyKey);
+        log.info("【加载数据】armoryRequestEntity={}", armoryRequestEntity);
+        loadStrategy.armory(armoryRequestEntity, armoryDynamicContext);
     }
 
     @Override
-    protected String doApply(ArmoryCommandEntity armoryCommandEntity, ArmoryStrategyFactory.DynamicContext dynamicContext) throws Exception {
+    protected String doApply(ArmoryRequestEntity armoryRequestEntity, ArmoryDynamicContext armoryDynamicContext) throws Exception {
         log.info("【装配节点】ArmoryRootNode");
-        return router(armoryCommandEntity, dynamicContext);
+        return router(armoryRequestEntity, armoryDynamicContext);
     }
 
     @Override
-    public StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> get(ArmoryCommandEntity armoryCommandEntity, ArmoryStrategyFactory.DynamicContext dynamicContext) {
+    public StrategyHandler<ArmoryRequestEntity, ArmoryDynamicContext, String> get(ArmoryRequestEntity armoryRequestEntity, ArmoryDynamicContext armoryDynamicContext) {
         return armoryAiApiNode;
     }
 

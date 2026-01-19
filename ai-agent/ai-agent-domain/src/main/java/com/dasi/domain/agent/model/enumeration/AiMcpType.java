@@ -15,7 +15,7 @@ public enum AiMcpType {
 
     private String name;
 
-    private String code;
+    private String type;
 
     public static AiMcpType fromCode(String code) {
         if (code == null) {
@@ -23,7 +23,7 @@ public enum AiMcpType {
         }
 
         for (AiMcpType type : values()) {
-            if (type.code.equals(code)) {
+            if (type.type.equals(code)) {
                 return type;
             }
         }

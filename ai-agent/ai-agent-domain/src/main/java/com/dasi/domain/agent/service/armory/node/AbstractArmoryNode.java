@@ -1,8 +1,8 @@
 package com.dasi.domain.agent.service.armory.node;
 
 import cn.bugstack.wrench.design.framework.tree.AbstractMultiThreadStrategyRouter;
-import com.dasi.domain.agent.model.entity.ArmoryCommandEntity;
-import com.dasi.domain.agent.service.armory.factory.ArmoryStrategyFactory;
+import com.dasi.domain.agent.model.entity.ArmoryRequestEntity;
+import com.dasi.domain.agent.service.armory.factory.ArmoryDynamicContext;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -11,13 +11,13 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 
 @Slf4j
-public abstract class AbstractArmoryNode extends AbstractMultiThreadStrategyRouter<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> {
+public abstract class AbstractArmoryNode extends AbstractMultiThreadStrategyRouter<ArmoryRequestEntity, ArmoryDynamicContext, String> {
 
     @Resource
     protected ApplicationContext applicationContext;
 
     @Override
-    protected void multiThread(ArmoryCommandEntity requestParameter, ArmoryStrategyFactory.DynamicContext dynamicContext) {
+    protected void multiThread(ArmoryRequestEntity armoryRequestEntity, ArmoryDynamicContext armoryDynamicContext) {
         // 缺省的，可以让继承类不一定非要实现该方法
     }
 

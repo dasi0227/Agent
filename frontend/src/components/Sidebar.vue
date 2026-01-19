@@ -78,7 +78,7 @@ const handleDelete = () => {
                 </div>
                 <div>
                     <div class="brand-name">Dasi Chat</div>
-                    <div class="brand-desc">轻量 · 智能 · 对话</div>
+                    <div class="brand-desc">RAG · MCP · AGENT</div>
                 </div>
             </div>
         </div>
@@ -221,13 +221,21 @@ const handleDelete = () => {
     flex: 1;
     overflow-y: auto;
     padding-right: 4px;
-    margin: 8px 0 12px;
+    margin: 8px 0;
     display: flex;
     flex-direction: column;
     gap: 8px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.sidebar-list::-webkit-scrollbar {
+    width: 0;
+    height: 0;
 }
 
 .chat-item {
+    width: 100%;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 12px;

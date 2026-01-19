@@ -5,16 +5,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ArmoryCommandEntity {
+public class ExecuteRequestEntity {
 
-    private String commandType;
+    private String aiAgentId;
 
-    private List<String> commandIdList;
+    private String userMessage;
+
+    private String sessionId;
+
+    private Integer maxStep;
 
 }
