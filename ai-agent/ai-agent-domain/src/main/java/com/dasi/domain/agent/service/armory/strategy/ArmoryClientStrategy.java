@@ -1,9 +1,9 @@
-package com.dasi.domain.agent.service.armory.load;
+package com.dasi.domain.agent.service.armory.strategy;
 
 import com.dasi.domain.agent.adapter.IAgentRepository;
-import com.dasi.domain.agent.model.entity.ArmoryCommandEntity;
+import com.dasi.domain.agent.model.entity.ArmoryRequestEntity;
 import com.dasi.domain.agent.model.vo.*;
-import com.dasi.domain.agent.service.armory.factory.ArmoryStrategyFactory;
+import com.dasi.domain.agent.service.armory.factory.ArmoryDynamicContext;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ import static com.dasi.domain.agent.model.enumeration.AiType.*;
 
 @Slf4j
 @Service("loadClientStrategy")
-public class LoadClientStrategy implements ILoadStrategy {
+public class ArmoryClientStrategy implements IArmoryStrategy {
     
     @Resource
     private IAgentRepository agentRepository;
@@ -26,8 +26,8 @@ public class LoadClientStrategy implements ILoadStrategy {
     private ThreadPoolExecutor threadPoolExecutor;
 
     @Override
-    public void loadData(ArmoryCommandEntity armoryCommandEntity, ArmoryStrategyFactory.DynamicContext dynamicContext) {
-        List<String> clientIdList = armoryCommandEntity.getCommandIdList();
+    public void armory(ArmoryRequestEntity armoryRequestEntity, ArmoryDynamicContext dynamicContext) {
+        List<String> clientIdList = armoryRequestEntity.getIdList();
 
         CompletableFuture<List<AiApiVO>> aiApiListFuture = CompletableFuture.supplyAsync(
                 () -> agentRepository.queryAiApiVOListByClientIdList(clientIdList), threadPoolExecutor);
@@ -63,12 +63,12 @@ public class LoadClientStrategy implements ILoadStrategy {
         List<AiAdvisorVO> aiAdvisorList = aiAdvisorListFuture.join();
         List<AiClientVO> aiClientList = aiClientListFuture.join();
 
-        dynamicContext.setValue(API.getCode(), aiApiList);
-        dynamicContext.setValue(MODEL.getCode(), aiModelList);
-        dynamicContext.setValue(MCP.getCode(), aiMcpList);
-        dynamicContext.setValue(PROMPT.getCode(), aiPrompMap);
-        dynamicContext.setValue(ADVISOR.getCode(), aiAdvisorList);
-        dynamicContext.setValue(CLIENT.getCode(), aiClientList);
+        dynamicContext.setValue(API.getType(), aiApiList);
+        dynamicContext.setValue(MODEL.getType(), aiModelList);
+        dynamicContext.setValue(MCP.getType(), aiMcpList);
+        dynamicContext.setValue(PROMPT.getType(), aiPrompMap);
+        dynamicContext.setValue(ADVISOR.getType(), aiAdvisorList);
+        dynamicContext.setValue(CLIENT.getType(), aiClientList);
 
         log.info("【加载数据】ai_api_ids={}, size={}",
                 aiApiList.stream().map(AiApiVO::getApiId).toList(),

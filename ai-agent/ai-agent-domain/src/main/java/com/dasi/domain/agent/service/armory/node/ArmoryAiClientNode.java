@@ -1,10 +1,10 @@
 package com.dasi.domain.agent.service.armory.node;
 
 import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
-import com.dasi.domain.agent.model.entity.ArmoryCommandEntity;
+import com.dasi.domain.agent.model.entity.ArmoryRequestEntity;
 import com.dasi.domain.agent.model.vo.AiClientVO;
 import com.dasi.domain.agent.model.vo.AiPromptVO;
-import com.dasi.domain.agent.service.armory.factory.ArmoryStrategyFactory;
+import com.dasi.domain.agent.service.armory.factory.ArmoryDynamicContext;
 import io.modelcontextprotocol.client.McpSyncClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -24,14 +24,14 @@ import static com.dasi.domain.agent.model.enumeration.AiType.*;
 public class ArmoryAiClientNode extends AbstractArmoryNode {
 
     @Override
-    protected String doApply(ArmoryCommandEntity armoryCommandEntity, ArmoryStrategyFactory.DynamicContext dynamicContext) throws Exception {
+    protected String doApply(ArmoryRequestEntity armoryRequestEntity, ArmoryDynamicContext armoryDynamicContext) throws Exception {
 
-        Map<String, AiPromptVO> aiPromptVOMap = dynamicContext.getValue(PROMPT.getCode());
-        List<AiClientVO> aiClientVOList = dynamicContext.getValue(CLIENT.getCode());
+        Map<String, AiPromptVO> aiPromptVOMap = armoryDynamicContext.getValue(PROMPT.getType());
+        List<AiClientVO> aiClientVOList = armoryDynamicContext.getValue(CLIENT.getType());
 
         if (aiClientVOList == null || aiClientVOList.isEmpty()) {
             log.warn("【装配节点】ArmoryAiClientNode：没有数据");
-            return router(armoryCommandEntity, dynamicContext);
+            return router(armoryRequestEntity, armoryDynamicContext);
         }
 
         for (AiClientVO aiClientVO : aiClientVOList) {
@@ -81,11 +81,11 @@ public class ArmoryAiClientNode extends AbstractArmoryNode {
             log.info("【装配节点】ArmoryAiClientNode：clientBeanName={}, clientName={}", clientBeanName, aiClientVO.getClientName());
         }
 
-        return router(armoryCommandEntity, dynamicContext);
+        return router(armoryRequestEntity, armoryDynamicContext);
     }
 
     @Override
-    public StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> get(ArmoryCommandEntity armoryCommandEntity, ArmoryStrategyFactory.DynamicContext dynamicContext) {
+    public StrategyHandler<ArmoryRequestEntity, ArmoryDynamicContext, String> get(ArmoryRequestEntity armoryRequestEntity, ArmoryDynamicContext armoryDynamicContext) {
         return defaultStrategyHandler;
     }
 

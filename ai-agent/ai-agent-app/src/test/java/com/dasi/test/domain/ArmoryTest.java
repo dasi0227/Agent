@@ -1,7 +1,8 @@
 package com.dasi.test.domain;
 
 import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
-import com.dasi.domain.agent.model.entity.ArmoryCommandEntity;
+import com.dasi.domain.agent.model.entity.ArmoryRequestEntity;
+import com.dasi.domain.agent.service.armory.factory.ArmoryDynamicContext;
 import com.dasi.domain.agent.service.armory.factory.ArmoryStrategyFactory;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -34,16 +35,16 @@ public class ArmoryTest {
 
     @Test
     public void test_aiApiNode() throws Exception {
-        StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.getArmoryRootNode();
+        StrategyHandler<ArmoryRequestEntity, ArmoryDynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.getArmoryRootNode();
 
-        ArmoryCommandEntity armoryCommandEntity = ArmoryCommandEntity.builder()
-                .commandType(CLIENT.getCode())
-                .commandIdList(List.of("client_demo_1"))
+        ArmoryRequestEntity armoryRequestEntity = ArmoryRequestEntity.builder()
+                .requestType(CLIENT.getType())
+                .idList(List.of("client_demo_1"))
                 .build();
 
-        ArmoryStrategyFactory.DynamicContext dynamicContext = new ArmoryStrategyFactory.DynamicContext();
+        ArmoryDynamicContext dynamicContext = new ArmoryDynamicContext();
 
-        armoryStrategyHandler.apply(armoryCommandEntity, dynamicContext);
+        armoryStrategyHandler.apply(armoryRequestEntity, dynamicContext);
 
         OpenAiApi openAiApi = (OpenAiApi) applicationContext.getBean(API.getBeanName("api_demo_1"));
 
@@ -52,16 +53,16 @@ public class ArmoryTest {
 
     @Test
     public void test_aiModelNode() throws Exception {
-        StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.getArmoryRootNode();
+        StrategyHandler<ArmoryRequestEntity, ArmoryDynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.getArmoryRootNode();
 
-        ArmoryCommandEntity armoryCommandEntity = ArmoryCommandEntity.builder()
-                .commandType(CLIENT.getCode())
-                .commandIdList(List.of("client_demo_1"))
+        ArmoryRequestEntity armoryRequestEntity = ArmoryRequestEntity.builder()
+                .requestType(CLIENT.getType())
+                .idList(List.of("client_demo_1"))
                 .build();
 
-        ArmoryStrategyFactory.DynamicContext dynamicContext = new ArmoryStrategyFactory.DynamicContext();
+        ArmoryDynamicContext dynamicContext = new ArmoryDynamicContext();
 
-        armoryStrategyHandler.apply(armoryCommandEntity, dynamicContext);
+        armoryStrategyHandler.apply(armoryRequestEntity, dynamicContext);
 
         OpenAiChatModel chatModel = applicationContext.getBean(API.getBeanName("model_demo_1"), OpenAiChatModel.class);
 
@@ -71,16 +72,16 @@ public class ArmoryTest {
 
     @Test
     public void test_aiClientNode() throws Exception {
-        StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.getArmoryRootNode();
+        StrategyHandler<ArmoryRequestEntity, ArmoryDynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.getArmoryRootNode();
 
-        ArmoryCommandEntity armoryCommandEntity = ArmoryCommandEntity.builder()
-                .commandType(CLIENT.getCode())
-                .commandIdList(List.of("client_demo_1"))
+        ArmoryRequestEntity armoryRequestEntity = ArmoryRequestEntity.builder()
+                .requestType(CLIENT.getType())
+                .idList(List.of("client_demo_1"))
                 .build();
 
-        ArmoryStrategyFactory.DynamicContext dynamicContext = new ArmoryStrategyFactory.DynamicContext();
+        ArmoryDynamicContext dynamicContext = new ArmoryDynamicContext();
 
-        armoryStrategyHandler.apply(armoryCommandEntity, dynamicContext);
+        armoryStrategyHandler.apply(armoryRequestEntity, dynamicContext);
 
         ChatClient chatClient = applicationContext.getBean(CLIENT.getBeanName("client_demo_1"), ChatClient.class);
 
@@ -90,16 +91,16 @@ public class ArmoryTest {
 
     @Test
     public void test_aiClientAskMath() throws Exception {
-        StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.getArmoryRootNode();
+        StrategyHandler<ArmoryRequestEntity, ArmoryDynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.getArmoryRootNode();
 
-        ArmoryCommandEntity armoryCommandEntity = ArmoryCommandEntity.builder()
-                .commandType(CLIENT.getCode())
-                .commandIdList(List.of("client_demo_1"))
+        ArmoryRequestEntity armoryRequestEntity = ArmoryRequestEntity.builder()
+                .requestType(CLIENT.getType())
+                .idList(List.of("client_demo_1"))
                 .build();
 
-        ArmoryStrategyFactory.DynamicContext dynamicContext = new ArmoryStrategyFactory.DynamicContext();
+        ArmoryDynamicContext dynamicContext = new ArmoryDynamicContext();
 
-        armoryStrategyHandler.apply(armoryCommandEntity, dynamicContext);
+        armoryStrategyHandler.apply(armoryRequestEntity, dynamicContext);
 
         ChatClient chatClient = applicationContext.getBean(CLIENT.getBeanName("client_demo_1"), ChatClient.class);
         String answer = chatClient.prompt()
@@ -112,16 +113,16 @@ public class ArmoryTest {
 
     @Test
     public void test_aiClientUseMcp() throws Exception {
-        StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.getArmoryRootNode();
+        StrategyHandler<ArmoryRequestEntity, ArmoryDynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.getArmoryRootNode();
 
-        ArmoryCommandEntity armoryCommandEntity = ArmoryCommandEntity.builder()
-                .commandType(CLIENT.getCode())
-                .commandIdList(List.of("client_demo_1"))
+        ArmoryRequestEntity armoryRequestEntity = ArmoryRequestEntity.builder()
+                .requestType(CLIENT.getType())
+                .idList(List.of("client_demo_1"))
                 .build();
 
-        ArmoryStrategyFactory.DynamicContext dynamicContext = new ArmoryStrategyFactory.DynamicContext();
+        ArmoryDynamicContext dynamicContext = new ArmoryDynamicContext();
 
-        armoryStrategyHandler.apply(armoryCommandEntity, dynamicContext);
+        armoryStrategyHandler.apply(armoryRequestEntity, dynamicContext);
 
         ChatClient chatClient = applicationContext.getBean(CLIENT.getBeanName("client_demo_1"), ChatClient.class);
         String answer = chatClient.prompt()
@@ -148,16 +149,16 @@ public class ArmoryTest {
 
     @Test
     public void test_aiClientUseRag() throws Exception {
-        StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.getArmoryRootNode();
+        StrategyHandler<ArmoryRequestEntity, ArmoryDynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.getArmoryRootNode();
 
-        ArmoryCommandEntity armoryCommandEntity = ArmoryCommandEntity.builder()
-                .commandType(CLIENT.getCode())
-                .commandIdList(List.of("client_demo_1"))
+        ArmoryRequestEntity armoryRequestEntity = ArmoryRequestEntity.builder()
+                .requestType(CLIENT.getType())
+                .idList(List.of("client_demo_1"))
                 .build();
 
-        ArmoryStrategyFactory.DynamicContext dynamicContext = new ArmoryStrategyFactory.DynamicContext();
+        ArmoryDynamicContext dynamicContext = new ArmoryDynamicContext();
 
-        armoryStrategyHandler.apply(armoryCommandEntity, dynamicContext);
+        armoryStrategyHandler.apply(armoryRequestEntity, dynamicContext);
 
         ChatClient chatClient = applicationContext.getBean(CLIENT.getBeanName("client_demo_1"), ChatClient.class);
         String answer = chatClient.prompt()

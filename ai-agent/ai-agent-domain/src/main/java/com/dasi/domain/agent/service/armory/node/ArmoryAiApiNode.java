@@ -1,9 +1,9 @@
 package com.dasi.domain.agent.service.armory.node;
 
 import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
-import com.dasi.domain.agent.model.entity.ArmoryCommandEntity;
+import com.dasi.domain.agent.model.entity.ArmoryRequestEntity;
 import com.dasi.domain.agent.model.vo.AiApiVO;
-import com.dasi.domain.agent.service.armory.factory.ArmoryStrategyFactory;
+import com.dasi.domain.agent.service.armory.factory.ArmoryDynamicContext;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.openai.api.OpenAiApi;
@@ -21,13 +21,13 @@ public class ArmoryAiApiNode extends AbstractArmoryNode {
     private ArmoryAiMcpNode armoryAiMcpNode;
 
     @Override
-    protected String doApply(ArmoryCommandEntity armoryCommandEntity, ArmoryStrategyFactory.DynamicContext dynamicContext) throws Exception {
+    protected String doApply(ArmoryRequestEntity armoryRequestEntity, ArmoryDynamicContext armoryDynamicContext) throws Exception {
 
-        List<AiApiVO> aiApiVOList = dynamicContext.getValue(API.getCode());
+        List<AiApiVO> aiApiVOList = armoryDynamicContext.getValue(API.getType());
 
         if (aiApiVOList == null || aiApiVOList.isEmpty()) {
             log.warn("【装配节点】ArmoryAiApiNode：没有数据");
-            return router(armoryCommandEntity, dynamicContext);
+            return router(armoryRequestEntity, armoryDynamicContext);
         }
 
         for (AiApiVO aiApiVO : aiApiVOList) {
@@ -45,11 +45,11 @@ public class ArmoryAiApiNode extends AbstractArmoryNode {
             log.info("【装配节点】ArmoryAiApiNode：apiBeanName={}, baseUrl={}, apiKey={}", apiBeanName, aiApiVO.getApiBaseUrl(), aiApiVO.getApiKey());
         }
 
-        return router(armoryCommandEntity, dynamicContext);
+        return router(armoryRequestEntity, armoryDynamicContext);
     }
 
     @Override
-    public StrategyHandler<ArmoryCommandEntity, ArmoryStrategyFactory.DynamicContext, String> get(ArmoryCommandEntity armoryCommandEntity, ArmoryStrategyFactory.DynamicContext dynamicContext) {
+    public StrategyHandler<ArmoryRequestEntity, ArmoryDynamicContext, String> get(ArmoryRequestEntity armoryRequestEntity, ArmoryDynamicContext armoryDynamicContext) {
         return armoryAiMcpNode;
     }
 

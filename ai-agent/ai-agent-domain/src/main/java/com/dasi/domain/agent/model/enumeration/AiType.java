@@ -19,7 +19,7 @@ public enum AiType {
 
     private String name;
 
-    private String code;
+    private String type;
 
     private String loadStrategy;
 
@@ -29,7 +29,7 @@ public enum AiType {
         }
 
         for (AiType type : values()) {
-            if (type.code.equals(code)) {
+            if (type.type.equals(code)) {
                 return type;
             }
         }
@@ -42,7 +42,7 @@ public enum AiType {
     }
 
     public String getBeanName(String id) {
-        return this.code + "_" + id;
+        return this.type + "_" + id;
     }
 
 }
