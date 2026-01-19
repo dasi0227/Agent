@@ -20,41 +20,23 @@ public class ExecutePerformerNode extends AbstractExecuteNode {
     @Override
     protected String doApply(ExecuteRequestEntity executeRequestEntity, ExecuteDynamicContext executeDynamicContext) throws Exception {
 
+        // 获取客户端
+        AiFlowVO aiFlowVO = executeDynamicContext.getAiFlowVOMap().get(PERFORMER.getType());
+        String clientBeanName = CLIENT.getBeanName(aiFlowVO.getClientId());
+        ChatClient performerClient = getBean(clientBeanName);
+
+        // 获取提示词
+        String flowPrompt = aiFlowVO.getFlowPrompt();
+
         String analyzerResult = executeDynamicContext.getValue("analyzerResult");
         if (analyzerResult == null || analyzerResult.trim().isEmpty()) {
             analyzerResult = "[任务分析专家异常，请你自行决定执行策略]";
         }
 
-        String performerPrompt = String.format("""
-                你是一名专业的 Performer 任务执行专家。
-                
-                你需要基于提供的信息，根据用户需求和任务分析专家的输出，实际执行具体的任务。
-                
-                执行要求：
-                1. 直接执行用户的具体需求（如搜索、检索、生成内容等）
-                2. 如果需要搜索网络信息，请实际进行搜索和检索
-                3. 如果需要生成计划、列表等，请直接生成完整内容
-                4. 提供具体的执行结果，而不只是描述过程
-                5. 确保执行结果能直接回答用户的问题
-                
-                参考信息：
-                【用户原始需求】%s
-                【任务分析专家】
-                %s
-                
-                输出格式要求（必须严格遵守）：
-                执行目标：[明确的执行目标]
-                执行过程：[实际执行的步骤和调用的工具]
-                执行结果：[执行成功和生成的内容]
-                """,
+        String performerPrompt = String.format(flowPrompt,
                 executeDynamicContext.getOriginalTask(),
                 analyzerResult
         );
-
-        // 获取客户端
-        AiFlowVO aiFlowVO = executeDynamicContext.getAiFlowVOMap().get(PERFORMER.getType());
-        String clientBeanName = CLIENT.getBeanName(aiFlowVO.getClientId());
-        ChatClient performerClient = getBean(clientBeanName);
 
         // 获取客户端结果
         String performerResult = performerClient

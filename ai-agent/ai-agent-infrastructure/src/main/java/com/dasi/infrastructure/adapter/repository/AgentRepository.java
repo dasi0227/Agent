@@ -330,12 +330,11 @@ public class AgentRepository implements IAgentRepository {
                 List<String> mcpIdList = new ArrayList<>();
                 List<AiConfig> modelConfigList = aiConfigDao.queryBySource(MODEL.getType(), modelId);
 
-                if (modelConfigList == null || modelConfigList.isEmpty()) {
-                    continue;
-                }
-                for (AiConfig modelConfig : modelConfigList) {
-                    if (MCP.getType().equals(modelConfig.getTargetType()) && modelConfig.getConfigStatus() == 1) {
-                        mcpIdList.add(modelConfig.getTargetId());
+                if (modelConfigList != null && !modelConfigList.isEmpty()) {
+                    for (AiConfig modelConfig : modelConfigList) {
+                        if (MCP.getType().equals(modelConfig.getTargetType()) && modelConfig.getConfigStatus() == 1) {
+                            mcpIdList.add(modelConfig.getTargetId());
+                        }
                     }
                 }
 
@@ -494,6 +493,7 @@ public class AgentRepository implements IAgentRepository {
                         .clientId(aiFlow.getClientId())
                         .clientName(aiFlow.getClientName())
                         .clientType(aiFlow.getClientType())
+                        .flowPrompt(aiFlow.getFlowPrompt())
                         .flowSeq(aiFlow.getFlowSeq())
                         .build();
 

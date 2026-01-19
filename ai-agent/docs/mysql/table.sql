@@ -161,7 +161,8 @@ CREATE TABLE `ai_flow`
     `client_id`   VARCHAR(32) NOT NULL COMMENT '客户端ID',
     `client_name` VARCHAR(32) NOT NULL COMMENT '客户端名称',
     `client_type` VARCHAR(32) NOT NULL COMMENT '客户端类型',
-    `flow_seq`    TINYINT     NOT NULL COMMENT '序列号(执行顺序)',
+    `flow_prompt` TEXT        NOT NULL COMMENT '工作流提示词',
+    `flow_seq`    TINYINT     NOT NULL COMMENT '工作流顺序',
     `create_time` DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     UNIQUE KEY `uk_agent_client_seq` (`agent_id`, `client_id`, `flow_seq`)

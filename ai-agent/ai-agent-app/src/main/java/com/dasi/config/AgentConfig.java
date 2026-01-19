@@ -62,7 +62,7 @@ public class AgentConfig implements ApplicationListener<ApplicationReadyEvent> {
 
     @Bean
     public TokenTextSplitter tokenTextSplitter() {
-        log.info("【初始化配置】分词器：tokenTextSplitter");
+        log.info("【初始化配置】TokenTextSplitter");
         return new TokenTextSplitter();
     }
 

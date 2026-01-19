@@ -87,13 +87,13 @@ public class DataSourceConfig {
 
     @Bean(name = "mysqlTemplate")
     public SqlSessionTemplate mysqlTemplate(@Qualifier("sqlSessionFactory") SqlSessionFactory sqlSessionFactory) {
-        log.info("【初始化配置】MySQL 操作模版：SqlSessionTemplate");
+        log.info("【初始化配置】SqlSessionTemplate");
         return new SqlSessionTemplate(sqlSessionFactory);
     }
 
     @Bean(name = "postgresqlTemplate")
     public JdbcTemplate postgresqlTemplate(@Qualifier("postgresqlDataSource") DataSource dataSource) {
-        log.info("【初始化配置】PostgreSQL 操作模版：JdbcTemplate");
+        log.info("【初始化配置】JdbcTemplate");
         return new JdbcTemplate(dataSource);
     }
 

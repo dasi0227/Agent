@@ -26,16 +26,15 @@ public class ArmoryRootNode extends AbstractArmoryNode {
 
     @Override
     protected void multiThread(ArmoryRequestEntity armoryRequestEntity, ArmoryDynamicContext armoryDynamicContext) {
-        String commandType = armoryRequestEntity.getRequestType();
-        String loadStrategyKey = AiType.getLoadStrategyByCode(commandType);
+        String requestType = armoryRequestEntity.getRequestType();
+        String loadStrategyKey = AiType.getLoadStrategyByCode(requestType);
         IArmoryStrategy loadStrategy = loadStrategyMap.get(loadStrategyKey);
-        log.info("【加载数据】armoryRequestEntity={}", armoryRequestEntity);
+        log.info("【加载数据】requestType={}", armoryRequestEntity.getRequestType());
         loadStrategy.armory(armoryRequestEntity, armoryDynamicContext);
     }
 
     @Override
     protected String doApply(ArmoryRequestEntity armoryRequestEntity, ArmoryDynamicContext armoryDynamicContext) throws Exception {
-        log.info("【装配节点】ArmoryRootNode");
         return router(armoryRequestEntity, armoryDynamicContext);
     }
 
