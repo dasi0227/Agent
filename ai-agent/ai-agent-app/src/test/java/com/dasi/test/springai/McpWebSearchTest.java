@@ -17,8 +17,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.Duration;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 @Slf4j
 @RunWith(SpringRunner.class)
@@ -56,26 +54,18 @@ public class McpWebSearchTest {
 
         mcpSyncClient.initialize();
 
-        try {
-            mcpSyncClient.initialize();
+        ToolCallback[] toolCallbacks = new SyncMcpToolCallbackProvider(mcpSyncClient).getToolCallbacks();
 
-            ToolCallback[] toolCallbacks = new SyncMcpToolCallbackProvider(mcpSyncClient).getToolCallbacks();
+        ChatClient chatClient = ChatClient.builder(chatModel)
+                .defaultToolCallbacks(toolCallbacks)
+                .build();
 
-            ChatClient chatClient = ChatClient.builder(chatModel)
-                    .defaultToolCallbacks(toolCallbacks)
-                    .build();
+        String answer = chatClient.prompt()
+                .user("你有什么工具可用，工具名和参数是什么")
+                .call()
+                .content();
 
-            String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-
-            String answer = chatClient.prompt()
-                    .user("今天是 %s，搜索今日 AI 新闻，给出 2 条结果，包含标题和链接。".formatted(date))
-                    .call()
-                    .content();
-
-            log.info("测试结果：{}", answer);
-        } finally {
-            mcpSyncClient.closeGracefully();
-        }
+        log.info("测试结果：{}", answer);
     }
 
 }

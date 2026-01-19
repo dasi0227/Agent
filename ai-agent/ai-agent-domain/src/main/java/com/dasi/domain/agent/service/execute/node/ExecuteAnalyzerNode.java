@@ -1,6 +1,7 @@
 package com.dasi.domain.agent.service.execute.node;
 
 import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
+import com.alibaba.fastjson2.JSONObject;
 import com.dasi.domain.agent.model.entity.ExecuteAutoResultEntity;
 import com.dasi.domain.agent.model.entity.ExecuteRequestEntity;
 import com.dasi.domain.agent.model.vo.AiFlowVO;
@@ -51,13 +52,21 @@ public class ExecuteAnalyzerNode extends AbstractExecuteNode {
                 .content();
 
         // 解析客户端结果
-        parseAnalyzerResult(executeDynamicContext, analyzerResult, executeRequestEntity.getSessionId());
+        String analyzerJson = extractJson(analyzerResult);
+        JSONObject analyzerObject = parseJsonObject(analyzerResult);
+        if (analyzerObject == null) {
+            analyzerObject = new JSONObject();
+            analyzerObject.put(ANALYZER_DEMAND.getType(), analyzerJson);
+        }
+        parseAnalyzerResult(executeDynamicContext, analyzerObject, executeRequestEntity.getSessionId());
 
         // 保存客户端结果
-        executeDynamicContext.setValue("analyzerResult", analyzerResult);
+        executeDynamicContext.setValue("analyzerResult", analyzerJson);
 
         // 检查客户端结果
-        if (analyzerResult.contains("COMPLETED") || analyzerResult.contains("100%")) {
+        String analyzerStatus = analyzerObject.getString(ANALYZER_STATUS.getType());
+        String analyzerProgress = analyzerObject.getString(ANALYZER_PROGRESS.getType());
+        if ("COMPLETED".equalsIgnoreCase(analyzerStatus) || "100".equals(analyzerProgress)) {
             executeDynamicContext.setCompleted(true);
             return router(executeRequestEntity, executeDynamicContext);
         }
@@ -83,53 +92,19 @@ public class ExecuteAnalyzerNode extends AbstractExecuteNode {
 
     }
 
-    private void parseAnalyzerResult(ExecuteDynamicContext executeDynamicContext, String analyzerResult, String sessionId) {
-
-        String[] lines = analyzerResult.split("\n");
-        String sectionType = "";
-        StringBuilder sectionContent = new StringBuilder();
-
-        for (String line : lines) {
-            line = line.trim();
-            if (line.isEmpty()) continue;
-
-            // 每次都发送上一次积累的 section
-            if (line.contains(ANALYZER_DEMAND.getName())) {
-                log.info("【执行节点】ExecuteAnalyzerNode：sectionType={}, sectionContent={}", sectionType, sectionContent);
-                sendAnalyzerResult(executeDynamicContext, sectionType, sectionContent.toString(), sessionId);
-                sectionType = ANALYZER_DEMAND.getType();
-                sectionContent = new StringBuilder();
-            } else if (line.contains(ANALYZER_HISTORY.getName())) {
-                log.info("【执行节点】ExecuteAnalyzerNode：sectionType={}, sectionContent={}", sectionType, sectionContent);
-                sendAnalyzerResult(executeDynamicContext, sectionType, sectionContent.toString(), sessionId);
-                sectionType = ANALYZER_HISTORY.getType();
-                sectionContent = new StringBuilder();
-            } else if (line.contains(ANALYZER_STRATEGY.getName())) {
-                log.info("【执行节点】ExecuteAnalyzerNode：sectionType={}, sectionContent={}", sectionType, sectionContent);
-                sendAnalyzerResult(executeDynamicContext, sectionType, sectionContent.toString(), sessionId);
-                sectionType = ANALYZER_STRATEGY.getType();
-                sectionContent = new StringBuilder();
-            } else if (line.contains(ANALYZER_PROGRESS.getName())) {
-                log.info("【执行节点】ExecuteAnalyzerNode：sectionType={}, sectionContent={}", sectionType, sectionContent);
-                sendAnalyzerResult(executeDynamicContext, sectionType, sectionContent.toString(), sessionId);
-                sectionType = ANALYZER_PROGRESS.getType();
-                sectionContent = new StringBuilder();
-            } else if (line.contains(ANALYZER_STATUS.getName())) {
-                log.info("【执行节点】ExecuteAnalyzerNode：sectionType={}, sectionContent={}", sectionType, sectionContent);
-                sendAnalyzerResult(executeDynamicContext, sectionType, sectionContent.toString(), sessionId);
-                sectionType = ANALYZER_STATUS.getType();
-                sectionContent = new StringBuilder();
-            } else {
-                sectionContent.append(line).append("\n");
-            }
+    private void parseAnalyzerResult(ExecuteDynamicContext executeDynamicContext, JSONObject analyzerObject, String sessionId) {
+        if (analyzerObject == null) {
+            return;
         }
-
-        // 发送最后的 section
-        sendAnalyzerResult(executeDynamicContext, sectionType, sectionContent.toString(), sessionId);
+        sendAnalyzerResult(executeDynamicContext, ANALYZER_DEMAND.getType(), analyzerObject.getString(ANALYZER_DEMAND.getType()), sessionId);
+        sendAnalyzerResult(executeDynamicContext, ANALYZER_HISTORY.getType(), analyzerObject.getString(ANALYZER_HISTORY.getType()), sessionId);
+        sendAnalyzerResult(executeDynamicContext, ANALYZER_STRATEGY.getType(), analyzerObject.getString(ANALYZER_STRATEGY.getType()), sessionId);
+        sendAnalyzerResult(executeDynamicContext, ANALYZER_PROGRESS.getType(), analyzerObject.getString(ANALYZER_PROGRESS.getType()), sessionId);
+        sendAnalyzerResult(executeDynamicContext, ANALYZER_STATUS.getType(), analyzerObject.getString(ANALYZER_STATUS.getType()), sessionId);
     }
 
     private void sendAnalyzerResult(ExecuteDynamicContext executeDynamicContext, String sectionType, String sectionContent, String sessionId) {
-        if (!sectionType.isEmpty() && !sectionContent.isEmpty()) {
+        if (!sectionType.isEmpty() && sectionContent != null && !sectionContent.isEmpty()) {
             ExecuteAutoResultEntity executeAutoResultEntity = ExecuteAutoResultEntity.createAnalyzerResult(
                     sectionType,
                     sectionContent,

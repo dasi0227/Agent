@@ -1,6 +1,7 @@
 package com.dasi.domain.agent.service.execute.node;
 
 import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
+import com.alibaba.fastjson2.JSONObject;
 import com.dasi.domain.agent.model.entity.ExecuteAutoResultEntity;
 import com.dasi.domain.agent.model.entity.ExecuteRequestEntity;
 import com.dasi.domain.agent.model.vo.AiFlowVO;
@@ -48,10 +49,16 @@ public class ExecutePerformerNode extends AbstractExecuteNode {
                 .content();
 
         // 解析客户端结果
-        parsePerformerResult(executeDynamicContext, performerResult, executeRequestEntity.getSessionId());
+        String performerJson = extractJson(performerResult);
+        JSONObject performerObject = parseJsonObject(performerResult);
+        if (performerObject == null) {
+            performerObject = new JSONObject();
+            performerObject.put(PERFORMER_RESULT.getType(), performerJson);
+        }
+        parsePerformerResult(executeDynamicContext, performerObject, executeRequestEntity.getSessionId());
 
         // 保存客户端结果
-        executeDynamicContext.setValue("performerResult", performerResult);
+        executeDynamicContext.setValue("performerResult", performerJson);
 
         return router(executeRequestEntity, executeDynamicContext);
     }
@@ -61,42 +68,17 @@ public class ExecutePerformerNode extends AbstractExecuteNode {
         return getBean("executeSupervisorNode");
     }
 
-    private void parsePerformerResult(ExecuteDynamicContext executeDynamicContext, String performerResult, String sessionId) {
-        String[] lines = performerResult.split("\n");
-        String sectionType = "";
-        StringBuilder sectionContent = new StringBuilder();
-
-        for (String line : lines) {
-            line = line.trim();
-            if (line.isEmpty()) continue;
-
-            // 每次都发送上一次积累的 section
-            if (line.contains(PERFORMER_TARGET.getName())) {
-                log.info("【执行节点】ExecutePerformerNode：sectionType={}, sectionContent={}", sectionType, sectionContent);
-                sendPerformerResult(executeDynamicContext, sectionType, sectionContent.toString(), sessionId);
-                sectionType = PERFORMER_TARGET.getType();
-                sectionContent = new StringBuilder();
-            } else if (line.contains(PERFORMER_PROCESS.getName())) {
-                log.info("【执行节点】ExecutePerformerNode：sectionType={}, sectionContent={}", sectionType, sectionContent);
-                sendPerformerResult(executeDynamicContext, sectionType, sectionContent.toString(), sessionId);
-                sectionType = PERFORMER_PROCESS.getType();
-                sectionContent = new StringBuilder();
-            } else if (line.contains(PERFORMER_RESULT.getName())) {
-                log.info("【执行节点】ExecutePerformerNode：sectionType={}, sectionContent={}", sectionType, sectionContent);
-                sendPerformerResult(executeDynamicContext, sectionType, sectionContent.toString(), sessionId);
-                sectionType = PERFORMER_RESULT.getType();
-                sectionContent = new StringBuilder();
-            } else {
-                sectionContent.append(line).append("\n");
-            }
+    private void parsePerformerResult(ExecuteDynamicContext executeDynamicContext, JSONObject performerObject, String sessionId) {
+        if (performerObject == null) {
+            return;
         }
-
-        // 发送最后的 section
-        sendPerformerResult(executeDynamicContext, sectionType, sectionContent.toString(), sessionId);
+        sendPerformerResult(executeDynamicContext, PERFORMER_TARGET.getType(), performerObject.getString(PERFORMER_TARGET.getType()), sessionId);
+        sendPerformerResult(executeDynamicContext, PERFORMER_PROCESS.getType(), performerObject.getString(PERFORMER_PROCESS.getType()), sessionId);
+        sendPerformerResult(executeDynamicContext, PERFORMER_RESULT.getType(), performerObject.getString(PERFORMER_RESULT.getType()), sessionId);
     }
 
     private void sendPerformerResult(ExecuteDynamicContext executeDynamicContext, String sectionType, String sectionContent, String sessionId) {
-        if (!sectionType.isEmpty() && !sectionContent.isEmpty()) {
+        if (!sectionType.isEmpty() && sectionContent != null && !sectionContent.isEmpty()) {
             ExecuteAutoResultEntity executeAutoResultEntity = ExecuteAutoResultEntity.createPerformerResult(
                     sectionType,
                     sectionContent,

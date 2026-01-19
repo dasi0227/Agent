@@ -1,6 +1,7 @@
 package com.dasi.domain.agent.service.execute.node;
 
 import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
+import com.alibaba.fastjson2.JSONObject;
 import com.dasi.domain.agent.model.entity.ExecuteAutoResultEntity;
 import com.dasi.domain.agent.model.entity.ExecuteRequestEntity;
 import com.dasi.domain.agent.model.vo.AiFlowVO;
@@ -54,21 +55,28 @@ public class ExecuteSupervisorNode extends AbstractExecuteNode {
                 .content();
 
         // 保存客户端结果
-        executeDynamicContext.setValue("supervisorResult", supervisorResult);
+        String supervisorJson = extractJson(supervisorResult);
+        executeDynamicContext.setValue("supervisorResult", supervisorJson);
 
         // 解析客户端结果
-        parseSupervisorResult(executeDynamicContext, supervisorResult, executeRequestEntity.getSessionId());
+        JSONObject supervisorObject = parseJsonObject(supervisorResult);
+        if (supervisorObject == null) {
+            supervisorObject = new JSONObject();
+            supervisorObject.put(SUPERVISOR_ISSUE.getType(), supervisorJson);
+        }
+        parseSupervisorResult(executeDynamicContext, supervisorObject, executeRequestEntity.getSessionId());
 
         // 检查客户端结果
-        if (supervisorResult.contains("FAIL")) {
+        String supervisorStatus = supervisorObject.getString(SUPERVISOR_STATUS.getType());
+        if ("FAIL".equalsIgnoreCase(supervisorStatus)) {
             log.info("【执行节点】ExecuteSupervisorNode：任务执行不合格");
             executeDynamicContext.setCompleted(false);
             executeDynamicContext.setCurrentTask("根据任务监督专家的输出重新执行任务");
-        } else if (supervisorResult.contains("OPTIMIZE")) {
+        } else if ("OPTIMIZE".equalsIgnoreCase(supervisorStatus)) {
             log.info("【执行节点】ExecuteSupervisorNode：任务执行有待优化");
             executeDynamicContext.setCompleted(false);
             executeDynamicContext.setCurrentTask("根据任务监督专家的输出优化执行任务");
-        } else if (supervisorResult.contains("PASS")) {
+        } else if ("PASS".equalsIgnoreCase(supervisorStatus)) {
             log.info("【执行节点】ExecuteSupervisorNode：任务执行合格");
             executeDynamicContext.setCompleted(true);
         }
@@ -99,7 +107,7 @@ public class ExecuteSupervisorNode extends AbstractExecuteNode {
         ExecuteSummarizerNode executeSummarizerNode = getBean("executeSummarizerNode");
 
         if (executeDynamicContext.getCompleted() == true) {
-            log.info("【执行节点】ExecuteSupervisorNode：任务监督已完成");
+            log.info("【执行节点】ExecuteSupervisorNode：任务监督达标");
             return executeSummarizerNode;
         } else if (executeDynamicContext.getStep() > executeDynamicContext.getMaxStep()) {
             log.info("【执行节点】ExecuteSupervisorNode：任务已到达最大步数");
@@ -109,53 +117,19 @@ public class ExecuteSupervisorNode extends AbstractExecuteNode {
         }
     }
 
-    private void parseSupervisorResult(ExecuteDynamicContext executeDynamicContext, String supervisorResult, String sessionId) {
-
-        String[] lines = supervisorResult.split("\n");
-        String sectionType = "";
-        StringBuilder sectionContent = new StringBuilder();
-
-        for (String line : lines) {
-            line = line.trim();
-            if (line.isEmpty()) continue;
-
-            // 每次都发送上一次积累的 section
-            if (line.contains(SUPERVISOR_ISSUE.getName())) {
-                log.info("【执行节点】ExecuteSupervisorNode：sectionType={}, sectionContent={}", sectionType, sectionContent);
-                sendSupervisorResult(executeDynamicContext, sectionType, sectionContent.toString(), sessionId);
-                sectionType = SUPERVISOR_ISSUE.getType();
-                sectionContent = new StringBuilder();
-            } else if (line.contains(SUPERVISOR_SUGGESTION.getName())) {
-                log.info("【执行节点】ExecuteSupervisorNode：sectionType={}, sectionContent={}", sectionType, sectionContent);
-                sendSupervisorResult(executeDynamicContext, sectionType, sectionContent.toString(), sessionId);
-                sectionType = SUPERVISOR_SUGGESTION.getType();
-                sectionContent = new StringBuilder();
-            } else if (line.contains(SUPERVISOR_SCORE.getName())) {
-                log.info("【执行节点】ExecuteSupervisorNode：sectionType={}, sectionContent={}", sectionType, sectionContent);
-                sendSupervisorResult(executeDynamicContext, sectionType, sectionContent.toString(), sessionId);
-                sectionType = SUPERVISOR_SCORE.getType();
-                sectionContent = new StringBuilder();
-            } else if (line.contains(SUPERVISOR_MATCH.getName())) {
-                log.info("【执行节点】ExecuteSupervisorNode：sectionType={}, sectionContent={}", sectionType, sectionContent);
-                sendSupervisorResult(executeDynamicContext, sectionType, sectionContent.toString(), sessionId);
-                sectionType = SUPERVISOR_MATCH.getType();
-                sectionContent = new StringBuilder();
-            }else if (line.contains(SUPERVISOR_STATUS.getName())) {
-                log.info("【执行节点】ExecuteSupervisorNode：sectionType={}, sectionContent={}", sectionType, sectionContent);
-                sendSupervisorResult(executeDynamicContext, sectionType, sectionContent.toString(), sessionId);
-                sectionType = SUPERVISOR_STATUS.getType();
-                sectionContent = new StringBuilder();
-            } else {
-                sectionContent.append(line).append("\n");
-            }
+    private void parseSupervisorResult(ExecuteDynamicContext executeDynamicContext, JSONObject supervisorObject, String sessionId) {
+        if (supervisorObject == null) {
+            return;
         }
-
-        // 发送最后的 section
-        sendSupervisorResult(executeDynamicContext, sectionType, sectionContent.toString(), sessionId);
+        sendSupervisorResult(executeDynamicContext, SUPERVISOR_ISSUE.getType(), supervisorObject.getString(SUPERVISOR_ISSUE.getType()), sessionId);
+        sendSupervisorResult(executeDynamicContext, SUPERVISOR_SUGGESTION.getType(), supervisorObject.getString(SUPERVISOR_SUGGESTION.getType()), sessionId);
+        sendSupervisorResult(executeDynamicContext, SUPERVISOR_SCORE.getType(), supervisorObject.getString(SUPERVISOR_SCORE.getType()), sessionId);
+        sendSupervisorResult(executeDynamicContext, SUPERVISOR_MATCH.getType(), supervisorObject.getString(SUPERVISOR_MATCH.getType()), sessionId);
+        sendSupervisorResult(executeDynamicContext, SUPERVISOR_STATUS.getType(), supervisorObject.getString(SUPERVISOR_STATUS.getType()), sessionId);
     }
 
     private void sendSupervisorResult(ExecuteDynamicContext executeDynamicContext, String sectionType, String sectionContent, String sessionId) {
-        if (!sectionType.isEmpty() && !sectionContent.isEmpty()) {
+        if (!sectionType.isEmpty() && sectionContent != null && !sectionContent.isEmpty()) {
             ExecuteAutoResultEntity executeAutoResultEntity = ExecuteAutoResultEntity.createSupervisorResult(
                     sectionType,
                     sectionContent,
