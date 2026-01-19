@@ -19,7 +19,7 @@ public class ThreadPoolConfig {
     @Bean
     @ConditionalOnMissingBean(ThreadPoolExecutor.class)
     public ThreadPoolExecutor threadPoolExecutor(ThreadPoolProperties properties) {
-        log.info("【初始化配置】线程池：threadPoolExecutor");
+        log.info("【初始化配置】ThreadPoolExecutor");
 
         // 实例化策略
         RejectedExecutionHandler handler = switch (properties.getPolicy()) {

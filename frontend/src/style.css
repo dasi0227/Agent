@@ -1,50 +1,46 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600&display=swap');
 
-:root {
-    --bg-page: #f4f6fb;
-    --text-primary: #1b2437;
-    --text-secondary: #5b6780;
-    --accent-color: #2f7cf6;
-    --border-color: #e3e8f0;
-    --shadow-soft: 0 12px 30px rgba(27, 36, 55, 0.08);
-    --header-height: 60px;
-    --footer-height: 30px;
-    --avatar-bg: linear-gradient(135deg, #e0f3ff, #c7e1ff);
-    --avatar-text: #0f172a;
-    --scrollbar-w: 0px;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-*,
-*::before,
-*::after {
-    box-sizing: border-box;
-}
+@layer base {
+    :root {
+        --bg-page: #f4f6fb;
+        --text-primary: #1b2437;
+        --text-secondary: #5b6780;
+        --accent-color: #2f7cf6;
+        --border-color: #e3e8f0;
+        --shadow-soft: 0 12px 30px rgba(27, 36, 55, 0.08);
+        --header-height: 60px;
+        --footer-height: 46px;
+        --avatar-bg: linear-gradient(135deg, #e0f3ff, #c7e1ff);
+        --avatar-text: #0f172a;
+        --scrollbar-w: 0px;
+    }
 
-body {
-    margin: 0;
-    font-family: 'Space Grotesk', 'Noto Sans SC', 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background: var(--bg-page);
-    color: var(--text-primary);
-    line-height: 1.5;
-}
+    *,
+    *::before,
+    *::after {
+        @apply box-border;
+    }
 
-button,
-input,
-select,
-textarea {
-    font-family: inherit;
-}
+    body {
+        @apply m-0 font-sans leading-[1.5];
+        background: var(--bg-page);
+        color: var(--text-primary);
+    }
 
-#app {
-    height: 100vh;
-}
+    #app {
+        @apply h-screen;
+    }
 
-.content-container {
-    width: 100%;
-    max-width: 900px;
-    margin: 0 auto;
-    padding-left: 24px;
-    padding-right: calc(24px + var(--scrollbar-w, 0px));
+    button,
+    input,
+    select,
+    textarea {
+        font-family: inherit;
+    }
 }
 
 ::-webkit-scrollbar {

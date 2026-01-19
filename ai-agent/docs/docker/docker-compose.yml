@@ -21,7 +21,7 @@ services:
       TZ: ${TZ}
     volumes:
       - ${HOME}/docker/pgvector/data:/var/lib/postgresql/data
-      - ../pgvector/init.sql:/docker-entrypoint-initdb.d/table.sql:ro
+      - ../pgvector/table.sql:/docker-entrypoint-initdb.d/table.sql:ro
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -h localhost -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 5s
@@ -45,7 +45,7 @@ services:
       - ${HOME}/docker/mysql/conf:/etc/mysql/conf.d:ro
       - ${HOME}/docker/mysql/logs:/logs
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -p${MYSQL_ROOT_PASSWORD} --silent"]
       interval: 5s
       timeout: 10s
       retries: 10
@@ -75,7 +75,7 @@ services:
     networks:
       - ai-agent
 
-  # ===================== OneApi =====================
+  # ===================== One-API =====================
   one-api:
     image: justsong/one-api:latest
     container_name: one-api
@@ -92,18 +92,59 @@ services:
     networks:
       - ai-agent
 
-  open-web-search-mcp:
-    image: ghcr.io/aas-ee/open-web-search:latest
-    container_name: open-web-search-mcp
-    platform: linux/amd64
+  elasticsearch:
+    image: elasticsearch:7.17.28
+    container_name: elasticsearch
     restart: always
-    ports:
-      - "9003:3000"
     environment:
+      - discovery.type=single-node
+      - cluster.name=docker-cluster
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - ${HOME}/docker/elasticsearch/data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=30s >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+    networks:
+      - ai-agent
+
+  logstash:
+    image: logstash:7.17.28
+    container_name: logstash
+    restart: always
+    environment:
+      LS_JAVA_OPTS: -Xms512m -Xmx512m
       TZ: ${TZ}
-      DEFAULT_SEARCH_ENGINE: "Bing"
-      ENABLE_CORS: "true"
-      CORS_ORIGIN: "*"
+      pipeline.ecs_compatibility: disabled
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ../logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+    ports:
+      - '9600:9600'
+      - '50000:50000/tcp'
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - ai-agent
+
+  kibana:
+    image: kibana:7.17.28
+    container_name: kibana
+    restart: always
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - I18N_LOCALE=zh-CN
+    ports:
+      - '5601:5601'
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
     networks:
       - ai-agent
 

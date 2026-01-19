@@ -23,7 +23,10 @@ public class AiFlowVO {
     /** 客户端ID */
     private String clientType;
 
-    /** 序列号(执行顺序) */
+    /** 工作流提示词 */
+    private String flowPrompt;
+
+    /** 工作流顺序 */
     private Integer flowSeq;
 
 }

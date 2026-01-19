@@ -7,6 +7,7 @@
         <result column="client_id" property="clientId"/>
         <result column="client_name" property="clientName"/>
         <result column="client_type" property="clientType"/>
+        <result column="flow_prompt" property="flowPrompt"/>
         <result column="flow_seq" property="flowSeq"/>
     </resultMap>
 
@@ -15,6 +16,7 @@
                client_id,
                client_name,
                client_type,
+               flow_prompt,
                flow_seq
         from ai_flow
         WHERE agent_id = #{agentId}

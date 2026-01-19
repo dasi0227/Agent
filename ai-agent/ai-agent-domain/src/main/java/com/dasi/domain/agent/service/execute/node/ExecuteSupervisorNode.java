@@ -20,8 +20,17 @@ public class ExecuteSupervisorNode extends AbstractExecuteNode {
     @Override
     protected String doApply(ExecuteRequestEntity executeRequestEntity, ExecuteDynamicContext executeDynamicContext) throws Exception {
 
+        // 获取客户端
+        AiFlowVO aiFlowVO = executeDynamicContext.getAiFlowVOMap().get(SUPERVISOR.getType());
+        String clientBeanName = CLIENT.getBeanName(aiFlowVO.getClientId());
+        ChatClient supervisorClient = getBean(clientBeanName);
+
+        // 获取提示词
+        String flowPrompt = aiFlowVO.getFlowPrompt();
+
         String analyzerResult = executeDynamicContext.getValue("analyzerResult");
         String performerResult = executeDynamicContext.getValue("performerResult");
+
         if (analyzerResult == null || analyzerResult.trim().isEmpty()) {
             analyzerResult = "[任务分析专家异常，请你依据用户原始需求分析]";
         }
@@ -29,39 +38,11 @@ public class ExecuteSupervisorNode extends AbstractExecuteNode {
             performerResult = "[任务执行专家异常，请你依据用户原始需求分析]";
         }
 
-        String supervisorPrompt = String.format("""
-                你是一名专业的 Supervisor 任务监督专家。
-                
-                你需要基于提供的信息，根据用户需求、任务分析专家和任务执行专家的输出，严格评估执行结果是否真正满足了用户的原始需求。
-                
-                监督要求：
-                1. 检查是否直接回答了用户的问题，提供了用户期望的具体结果
-                2. 评估内容的完整性和实用性
-                3. 判断是否只是描述过程而没有给出实际答案
-                
-                参考信息：
-                【用户原始需求】%s
-                【任务分析专家】
-                %s
-                【任务执行专家】
-                %s
-                
-                输出格式要求（必须严格遵守）：
-                问题识别：[发现的问题和不足，特别是是否偏离了用户真正的需求]
-                改进建议：[具体的改进建议，确保能直接满足用户需求]
-                质量评分：[1-10]分
-                需求匹配度：[1-100]%%
-                监督状态：[PASS/FAIL/OPTIMIZE]
-                """,
+        String supervisorPrompt = String.format(flowPrompt,
                 executeDynamicContext.getOriginalTask(),
                 analyzerResult,
                 performerResult
         );
-
-        // 获取客户端
-        AiFlowVO aiFlowVO = executeDynamicContext.getAiFlowVOMap().get(SUPERVISOR.getType());
-        String clientBeanName = CLIENT.getBeanName(aiFlowVO.getClientId());
-        ChatClient supervisorClient = getBean(clientBeanName);
 
         // 获取客户端结果
         String supervisorResult = supervisorClient
