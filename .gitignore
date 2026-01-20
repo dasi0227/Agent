@@ -92,4 +92,4 @@ lerna-debug.log*
 **/.DS_Store
 
 # ==================== Personal ====================
-**/test-data.sql
+**/*data.sql
