@@ -47,13 +47,14 @@ public class ExecuteAnalyzerNode extends AbstractExecuteNode {
                 .prompt(analyzerPrompt)
                 .advisors(a -> a
                         .param(CHAT_MEMORY_CONVERSATION_ID_KEY, executeRequestEntity.getSessionId())
-                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 1024))
+                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 32768))
                 .call()
                 .content();
 
         // 解析客户端结果
         String analyzerJson = extractJson(analyzerResult);
-        JSONObject analyzerObject = parseJsonObject(analyzerResult);
+        JSONObject analyzerObject = parseJsonObject(analyzerJson);
+        log.info("\n=========================================== Analyzer ===========================================\n{}", analyzerJson);
         if (analyzerObject == null) {
             analyzerObject = new JSONObject();
             analyzerObject.put(ANALYZER_DEMAND.getType(), analyzerJson);

@@ -20,7 +20,6 @@ public enum AiSectionType {
     SUPERVISOR_ISSUE("问题识别：", "supervisor_issue"),
     SUPERVISOR_SUGGESTION("改进建议：", "supervisor_suggestion"),
     SUPERVISOR_SCORE("质量评分：", "supervisor_score"),
-    SUPERVISOR_MATCH("需求匹配度：", "supervisor_match"),
     SUPERVISOR_STATUS("监督状态：", "supervisor_status"),
     SUMMARIZER_OVERVIEW("任务总结：", "summarizer_overview"),
     ;

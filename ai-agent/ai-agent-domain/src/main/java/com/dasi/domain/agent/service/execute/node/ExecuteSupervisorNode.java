@@ -50,21 +50,22 @@ public class ExecuteSupervisorNode extends AbstractExecuteNode {
                 .prompt(supervisorPrompt)
                 .advisors(a -> a
                         .param(CHAT_MEMORY_CONVERSATION_ID_KEY, executeRequestEntity.getSessionId())
-                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 1024))
+                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 4096))
                 .call()
                 .content();
 
-        // 保存客户端结果
-        String supervisorJson = extractJson(supervisorResult);
-        executeDynamicContext.setValue("supervisorResult", supervisorJson);
-
         // 解析客户端结果
-        JSONObject supervisorObject = parseJsonObject(supervisorResult);
+        String supervisorJson = extractJson(supervisorResult);
+        JSONObject supervisorObject = parseJsonObject(supervisorJson);
+        log.info("\n=========================================== Supervisor ===========================================\n{}", supervisorJson);
         if (supervisorObject == null) {
             supervisorObject = new JSONObject();
             supervisorObject.put(SUPERVISOR_ISSUE.getType(), supervisorJson);
         }
         parseSupervisorResult(executeDynamicContext, supervisorObject, executeRequestEntity.getSessionId());
+
+        // 保存客户端结果
+        executeDynamicContext.setValue("supervisorResult", supervisorJson);
 
         // 检查客户端结果
         String supervisorStatus = supervisorObject.getString(SUPERVISOR_STATUS.getType());
@@ -84,14 +85,17 @@ public class ExecuteSupervisorNode extends AbstractExecuteNode {
         // 更新客户端历史
         String executionHistory = String.format("""
                 === 第 %d 步执行记录 ===
-                【任务分析专家输出】%s
-                【任务执行专家输出】%s
-                【任务监督专家输出】%s
+                【任务分析专家】
+                %s
+                【任务执行专家】
+                %s
+                【任务监督专家】
+                %s
                 """,
                 executeDynamicContext.getStep(),
                 analyzerResult,
                 performerResult,
-                supervisorResult
+                supervisorJson
         );
 
         executeDynamicContext.getExecutionHistory().append(executionHistory);
@@ -124,7 +128,6 @@ public class ExecuteSupervisorNode extends AbstractExecuteNode {
         sendSupervisorResult(executeDynamicContext, SUPERVISOR_ISSUE.getType(), supervisorObject.getString(SUPERVISOR_ISSUE.getType()), sessionId);
         sendSupervisorResult(executeDynamicContext, SUPERVISOR_SUGGESTION.getType(), supervisorObject.getString(SUPERVISOR_SUGGESTION.getType()), sessionId);
         sendSupervisorResult(executeDynamicContext, SUPERVISOR_SCORE.getType(), supervisorObject.getString(SUPERVISOR_SCORE.getType()), sessionId);
-        sendSupervisorResult(executeDynamicContext, SUPERVISOR_MATCH.getType(), supervisorObject.getString(SUPERVISOR_MATCH.getType()), sessionId);
         sendSupervisorResult(executeDynamicContext, SUPERVISOR_STATUS.getType(), supervisorObject.getString(SUPERVISOR_STATUS.getType()), sessionId);
     }
 

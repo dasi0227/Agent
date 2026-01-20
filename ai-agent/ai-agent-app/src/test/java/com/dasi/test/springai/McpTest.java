@@ -11,6 +11,7 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.tool.ToolCallback;
+import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -22,7 +23,7 @@ import java.time.Duration;
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
 @SpringBootTest
-public class McpWebSearchTest {
+public class McpTest {
 
     @Resource
     private OpenAiChatModel chatModel;
@@ -36,8 +37,11 @@ public class McpWebSearchTest {
     @Value(value = "${mcp.web-search.api-key}")
     private String mcpWebSearchApiKey;
 
+    @Resource
+    private ToolCallbackProvider toolCallbackProvider;
+
     @Test
-    public void testMcpWebSearchBaidu() {
+    public void testMcpBaiduWebSearch() {
 
         String sseEndpoint = mcpWebSearchSseEndpoint + "?api_key=" + mcpWebSearchApiKey;
 
@@ -66,6 +70,22 @@ public class McpWebSearchTest {
                 .content();
 
         log.info("测试结果：{}", answer);
+    }
+
+    @Test
+    public void testMcpElasticSearch_ping() {
+
+        ChatClient chatClient = ChatClient.builder(chatModel)
+                .defaultToolCallbacks(toolCallbackProvider.getToolCallbacks())
+                .build();
+
+        String answer = chatClient.prompt()
+                .user("调用 list_indices 工具，返回索引列表（只输出结果）。")
+                .call()
+                .content();
+
+        log.info("测试结果：{}", answer);
+
     }
 
 }
