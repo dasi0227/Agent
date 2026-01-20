@@ -73,7 +73,7 @@ public class McpTest {
     }
 
     @Test
-    public void testMcpElasticSearch_ping() {
+    public void testMcpElasticSearch() {
 
         ChatClient chatClient = ChatClient.builder(chatModel)
                 .defaultToolCallbacks(toolCallbackProvider.getToolCallbacks())
@@ -81,6 +81,23 @@ public class McpTest {
 
         String answer = chatClient.prompt()
                 .user("调用 list_indices 工具，返回索引列表（只输出结果）。")
+                .call()
+                .content();
+
+        log.info("测试结果：{}", answer);
+
+    }
+
+
+    @Test
+    public void testMcpGrafana() {
+
+        ChatClient chatClient = ChatClient.builder(chatModel)
+                .defaultToolCallbacks(toolCallbackProvider.getToolCallbacks())
+                .build();
+
+        String answer = chatClient.prompt()
+                .user("列举你能调用的 grafana MCP 工具、参数和功能简述。")
                 .call()
                 .content();
 
