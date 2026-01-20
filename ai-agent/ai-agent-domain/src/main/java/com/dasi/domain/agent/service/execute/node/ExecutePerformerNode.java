@@ -44,13 +44,14 @@ public class ExecutePerformerNode extends AbstractExecuteNode {
                 .prompt(performerPrompt)
                 .advisors(a -> a
                         .param(CHAT_MEMORY_CONVERSATION_ID_KEY, executeRequestEntity.getSessionId())
-                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 1024))
+                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 16384))
                 .call()
                 .content();
 
         // 解析客户端结果
         String performerJson = extractJson(performerResult);
-        JSONObject performerObject = parseJsonObject(performerResult);
+        JSONObject performerObject = parseJsonObject(performerJson);
+        log.info("\n=========================================== Performer ===========================================\n{}", performerJson);
         if (performerObject == null) {
             performerObject = new JSONObject();
             performerObject.put(PERFORMER_RESULT.getType(), performerJson);

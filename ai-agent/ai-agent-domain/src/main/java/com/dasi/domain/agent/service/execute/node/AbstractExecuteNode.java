@@ -10,7 +10,7 @@ import com.dasi.domain.agent.service.execute.factory.ExecuteDynamicContext;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Slf4j
 public abstract class AbstractExecuteNode extends AbstractMultiThreadStrategyRouter<ExecuteRequestEntity, ExecuteDynamicContext, String> {
@@ -36,35 +36,55 @@ public abstract class AbstractExecuteNode extends AbstractMultiThreadStrategyRou
 
     protected void sendSseResult(ExecuteDynamicContext executeDynamicContext, ExecuteAutoResultEntity executeAutoResultEntity) {
 
+        SseEmitter sseEmitter = executeDynamicContext.getValue("sseEmitter");
+        if (sseEmitter == null) {
+            return;
+        }
+
         try {
-            ResponseBodyEmitter responseBodyEmitter = executeDynamicContext.getValue("responseBodyEmitter");
-            if (responseBodyEmitter != null) {
-                executeAutoResultEntity.setSectionContent(sanitizeSectionContent(executeAutoResultEntity.getSectionContent()));
-                String sseData = "data: " + JSON.toJSONString(executeAutoResultEntity) + "\n\n";
-                responseBodyEmitter.send(sseData);
-            }
+            sseEmitter.send(SseEmitter.event()
+                    .name("message")
+                    .id(String.valueOf(executeAutoResultEntity.getTimestamp()))
+                    .data(executeAutoResultEntity));
         } catch (Exception e) {
-            log.error("【Agent 执行】error={}", e.getMessage(), e);
+            log.error("【Agent 执行】发送 SSE 消息失败：{}", e.getMessage(), e);
         }
 
     }
 
     protected String extractJson(String content) {
-        if (content == null || content.trim().isEmpty()) {
+
+        try {
+            // 1) 去 think + 去代码块围栏
+            String cleaned = content
+                    .replaceAll("(?s)<think>.*?</think>", "")
+                    .replace("<think>", "")
+                    .replace("</think>", "")
+                    .trim();
+
+            // 2) 提取 JSON 块
+            int start = cleaned.indexOf('{');
+            int end = cleaned.lastIndexOf('}');
+            cleaned = cleaned.substring(start, end + 1).trim();
+
+            // 3) 更改冒号
+            cleaned = cleaned
+                    .replaceAll("：\\s*", ":")
+                    .replaceAll(":[ \\t]+", ": ")
+                    .replaceAll(":(?![ \\t\\r\\n])(?!(//))", ": ")
+                    .trim();
+
+            // 4) 更改换行
+            cleaned = cleaned.replace("\r\n", "\n").replace("\r", "\n");
+
+            return cleaned;
+        } catch (Exception e) {
+            log.warn("【Agent 执行】JSON 提取失败：{}", e.getMessage(), e);
             return "";
         }
-        String cleaned = content.replaceAll("(?s)<think>.*?</think>", "");
-        cleaned = cleaned.replace("<think>", "").replace("</think>", "").trim();
-        int start = cleaned.indexOf('{');
-        int end = cleaned.lastIndexOf('}');
-        if (start >= 0 && end > start) {
-            return cleaned.substring(start, end + 1).trim();
-        }
-        return cleaned;
     }
 
-    protected JSONObject parseJsonObject(String content) {
-        String json = extractJson(content);
+    protected JSONObject parseJsonObject(String json) {
         if (json.isEmpty()) {
             return null;
         }
@@ -74,15 +94,6 @@ public abstract class AbstractExecuteNode extends AbstractMultiThreadStrategyRou
             log.warn("【Agent 执行】JSON 解析失败：{}", e.getMessage(), e);
             return null;
         }
-    }
-
-    protected String sanitizeSectionContent(String content) {
-        if (content == null || content.isEmpty()) {
-            return content;
-        }
-        String normalized = content.replace("\r\n", "\n").replace("\r", "\n");
-        normalized = normalized.replace("\n", "\\n");
-        return normalized.replace("\t", "\\t");
     }
 
 }

@@ -1,10 +1,10 @@
 package com.dasi.domain.agent.service.execute.strategy;
 
 import com.dasi.domain.agent.model.entity.ExecuteRequestEntity;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 public interface IExecuteStrategy {
 
-    void execute(ExecuteRequestEntity executeRequestEntity, ResponseBodyEmitter emitter) throws Exception;
+    void execute(ExecuteRequestEntity executeRequestEntity, SseEmitter sseEmitter) throws Exception;
 
 }

@@ -29,28 +29,13 @@ public class ExecuteSummarizerNode extends AbstractExecuteNode {
         // 获取提示词
         String flowPrompt = aiFlowVO.getFlowPrompt();
 
-        String analyzerResult = executeDynamicContext.getValue("analyzerResult");
-        String performerResult = executeDynamicContext.getValue("performerResult");
-        String supervisorResult = executeDynamicContext.getValue("supervisorResult");
         String executionHistory = executeDynamicContext.getExecutionHistory().toString();
-        if (analyzerResult == null || analyzerResult.trim().isEmpty()) {
-            analyzerResult =  "[任务分析专家异常，请你依据用户原始需求回答]";
-        }
-        if (performerResult == null || performerResult.trim().isEmpty()) {
-            performerResult = "[任务执行专家异常，请你依据用户原始需求回答]";
-        }
-        if (supervisorResult == null || supervisorResult.trim().isEmpty()) {
-            supervisorResult = "[任务监督专家异常，请你依据用户原始需求回答]";
-        }
         if (executionHistory.isEmpty()) {
             executionHistory =  "[暂无记录]";
         }
 
         String summarizerPrompt = String.format(flowPrompt,
                 executeDynamicContext.getOriginalTask(),
-                analyzerResult,
-                performerResult,
-                supervisorResult,
                 executionHistory
         );
 
@@ -62,7 +47,8 @@ public class ExecuteSummarizerNode extends AbstractExecuteNode {
 
         // 解析客户端结果
         String summarizerJson = extractJson(summarizerResult);
-        JSONObject summarizerObject = parseJsonObject(summarizerResult);
+        JSONObject summarizerObject = parseJsonObject(summarizerJson);
+        log.info("\n=========================================== Summarizer ===========================================\n{}", summarizerJson);
         if (summarizerObject == null) {
             summarizerObject = new JSONObject();
             summarizerObject.put(SUMMARIZER_OVERVIEW.getType(), summarizerJson);
