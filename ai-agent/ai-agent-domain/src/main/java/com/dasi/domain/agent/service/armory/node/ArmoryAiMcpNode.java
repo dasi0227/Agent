@@ -82,7 +82,7 @@ public class ArmoryAiMcpNode extends AbstractArmoryNode {
 
             String mcpBeanName = MCP.getBeanName(aiMcpVO.getMcpId());
             registerBean(mcpBeanName, McpSyncClient.class, mcpSyncClient);
-            log.info("【装配节点】ArmoryAiMcpNode：mcpBeanName={}, mcpType={}, mcpName={}", mcpBeanName, aiMcpVO.getMcpType(), aiMcpVO.getMcpName());
+            log.info("【装配节点】ArmoryAiMcpNode：mcpBeanName={}, mcpType={}", mcpBeanName, aiMcpVO.getMcpType());
         }
 
         return router(armoryRequestEntity, armoryDynamicContext);

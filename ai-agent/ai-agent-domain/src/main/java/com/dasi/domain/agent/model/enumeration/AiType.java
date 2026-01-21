@@ -42,7 +42,7 @@ public enum AiType {
     }
 
     public String getBeanName(String id) {
-        return this.type + "_" + id;
+        return "bean_" + id;
     }
 
 }

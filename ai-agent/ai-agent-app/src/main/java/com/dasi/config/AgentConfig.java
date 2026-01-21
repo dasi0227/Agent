@@ -8,7 +8,6 @@ import com.dasi.infrastructure.persistent.dao.IAiFlowDao;
 import com.dasi.infrastructure.persistent.dao.IAiPromptDao;
 import com.dasi.properties.AgentAutoProperties;
 import com.dasi.properties.OpenAiProperties;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.MetadataMode;
 import org.springframework.ai.openai.OpenAiEmbeddingModel;
@@ -16,6 +15,7 @@ import org.springframework.ai.openai.OpenAiEmbeddingOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.ai.vectorstore.pgvector.PgVectorStore;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -24,11 +24,12 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.util.StreamUtils;
 
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
 import static com.dasi.domain.agent.model.enumeration.AiType.CLIENT;
@@ -71,10 +72,10 @@ public class AgentConfig implements ApplicationListener<ApplicationReadyEvent> {
         return new TokenTextSplitter();
     }
 
-    @Resource
+    @Autowired
     private AgentAutoProperties agentAutoProperties;
 
-    @Resource
+    @Autowired
     private ArmoryStrategyFactory armoryStrategyFactory;
 
     @Override
@@ -105,21 +106,15 @@ public class AgentConfig implements ApplicationListener<ApplicationReadyEvent> {
 
     }
 
-    @Resource
+    @Autowired
     private IAiPromptDao aiPromptDao;
 
-    @Resource
+    @Autowired
     private IAiFlowDao aiFlowDao;
 
     private void loadPrompt(List<String> clientIdList) {
 
-        Path systemPromptDir = Path.of("docs", "prompt", "system-prompt");
-        Path userPromptDir = Path.of("docs", "prompt", "user-prompt");
-
-        if (!Files.isDirectory(systemPromptDir) || !Files.isDirectory(userPromptDir)) {
-            log.error("【初始化配置】Prompt 文件夹不存在：systemPromptDir={}, userPromptDir={}", systemPromptDir.getFileName(), userPromptDir.getFileName());
-            throw new RuntimeException();
-        }
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
         for (String clientId : clientIdList) {
             try {
@@ -128,21 +123,31 @@ public class AgentConfig implements ApplicationListener<ApplicationReadyEvent> {
                 String promptId = "prompt_" + clientId.substring("client_".length());
                 String fileName = clientId + ".txt";
 
-                // 更新 systemPrompt
-                Path systemPromptFile = systemPromptDir.resolve(fileName);
-                String systemPromptContent = Files.readString(systemPromptFile, StandardCharsets.UTF_8);
+                // 解析文件路径
+                Resource systemPromptFile = resolver.getResource("classpath:prompt/system-prompt/" + fileName);
+                if (!systemPromptFile.exists()) {
+                    log.error("【初始化配置】Prompt 文件不存在：{}", systemPromptFile.getDescription());
+                    throw new IllegalStateException();
+                }
+
+                Resource userPromptFile = resolver.getResource("classpath:prompt/user-prompt/" + fileName);
+                if (!userPromptFile.exists()) {
+                    log.error("【初始化配置】Prompt 文件不存在：{}", userPromptFile.getDescription());
+                    throw new IllegalStateException();
+                }
+
+                // 更新 Prompt
+                String systemPromptContent = StreamUtils.copyToString(systemPromptFile.getInputStream(), StandardCharsets.UTF_8);
                 aiPromptDao.loadPromptContent(promptId, systemPromptContent);
 
-                // 更新 userPrompt
-                Path userPromptFile = userPromptDir.resolve(fileName);
-                String userPromptContent = Files.readString(userPromptFile, StandardCharsets.UTF_8);
+                String userPromptContent = StreamUtils.copyToString(userPromptFile.getInputStream(), StandardCharsets.UTF_8);
                 aiFlowDao.loadFlowPrompt(clientId, userPromptContent);
 
-                log.error("【初始化配置】加载 prompt：clientId={}", clientId);
+                log.info("【初始化配置】加载 Prompt：clientId={}", clientId);
 
             } catch (Exception e) {
                 log.error("【初始化配置】加载 prompt 失败：clientId={}", clientId, e);
-                throw new RuntimeException();
+                throw new IllegalStateException();
             }
         }
 

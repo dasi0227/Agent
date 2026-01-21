@@ -1,3 +1,0 @@
-curl -N -H "Accept: text/event-stream" -H "Content-Type: application/json" \
-    -d '{"aiAgentId":"agent_grafana","userMessage":"请你从 Grafana 通过 uid=sbapmwalker 拉取完整仪表盘信息，分析最近 15 分钟订单服务的整体健康情况，给出最可能的瓶颈点与下一步排查方向","sessionId":"grafana-1","maxStep":3}' \
-    http://localhost:8001/api/v1/agent/agent/auto

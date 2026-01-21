@@ -19,7 +19,7 @@ services:
       TZ: ${TZ}
     volumes:
       - ${HOME}/docker/pgvector/data:/var/lib/postgresql/data
-      - ../pgvector/table.sql:/docker-entrypoint-initdb.d/table.sql:ro
+      - ${PWD}/pgvector/table.sql:/docker-entrypoint-initdb.d/table.sql:ro
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -h localhost -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 5s
@@ -115,7 +115,7 @@ services:
       pipeline.ecs_compatibility: disabled
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ../logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+      - ${PWD}/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
     ports:
       - '9600:9600'
       - '50000:50000/tcp'
@@ -146,7 +146,7 @@ services:
       - "9090:9090"
     volumes:
       - ${HOME}/docker/prometheus/data:/prometheus
-      - ../prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ${PWD}/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     networks:
       - ai-agent
 
@@ -184,7 +184,7 @@ services:
     ports:
       - "9100:9100"
     volumes:
-      - ../node-exporter:/host/tmp:ro
+      - ${PWD}/node-exporter:/host/tmp:ro
     command:
       - "--collector.textfile.directory=/host/tmp"
     networks:

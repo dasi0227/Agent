@@ -26,7 +26,3 @@ curl -X POST "http://localhost:9200/test_log_2026.01.20/_bulk" \
 '
 
 curl -s "http://localhost:9200/test_log_2026.01.20/_count?pretty"
-
-curl -N -H "Accept: text/event-stream" -H "Content-Type: application/json" \
-  -d '{"aiAgentId":"agent_elk","userMessage":"请在索引 test_log_2026.01.20 中找出所有 ERROR，按 @timestamp 排序；按 errorType 分组统计数量，并给出每类错误的处理建议。","sessionId":"elk-1","maxStep":2}' \
-  http://localhost:8001/api/v1/agent/agent/auto

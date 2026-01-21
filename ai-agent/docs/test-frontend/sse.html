@@ -45,7 +45,13 @@
     </div>
     <div class="row" style="width:100%">
         <span class="label">UserMessage</span>
-        <input id="userMessage" value="请输入用户问题" placeholder="userMessage" />
+        <input id="userMessage" value="请在索引 test_log_2026.01.20 中找出所有 ERROR，按 @timestamp 排序；按 errorType 分组统计数量，并给出每类错误的处理建议。" placeholder="userMessage" />
+    </div>
+    <div class="row" style="width:100%">
+        <span class="label">UserMessage Examples</span>
+        <button class="preset" data-message="请在索引 test_log_2026.01.20 中找出所有 ERROR，按 @timestamp 排序；按 errorType 分组统计数量，并给出每类错误的处理建议。">elk</button>
+        <button class="preset" data-message="请总结今日AI新闻，今天是 2025.01.20">web</button>
+        <button class="preset" data-message="请你从 Grafana 通过 uid=sbapmwalker 拉取完整仪表盘信息，分析最近 15 分钟订单服务的整体健康情况，给出最可能的瓶颈点与下一步排查方向">grafana</button>
     </div>
     <div class="row" style="width:100%">
         <button id="connect">Connect</button>
@@ -131,10 +137,6 @@
             const meta = document.createElement('div');
             meta.className = 'meta';
 
-            const t1 = document.createElement('span');
-            t1.className = 'tag';
-            t1.innerHTML = 'event: <strong>' + (evtName || 'message') + '</strong>';
-
             const t3 = document.createElement('span');
             t3.className = 'tag';
             const ct = data && data.clientType ? data.clientType : '-';
@@ -146,9 +148,14 @@
             const st = (data && data.sectionType) ? data.sectionType : (extracted.sectionType || '-');
             t4.innerHTML = 'sectionType: <strong>' + st + '</strong>';
 
-            meta.appendChild(t1);
+            const t5 = document.createElement('span');
+            t5.className = 'tag';
+            const step = data && data.step != null ? data.step : '-';
+            t5.innerHTML = 'step: <strong>' + step + '</strong>';
+
             meta.appendChild(t3);
             meta.appendChild(t4);
+            meta.appendChild(t5);
 
             const pre = document.createElement('pre');
             pre.className = 'json';
@@ -251,6 +258,11 @@
         }
 
         elConnect.addEventListener('click', () => connectFetchPost());
+        document.querySelectorAll('.preset').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                elUserMessage.value = btn.dataset.message || '';
+            });
+        });
 
         elDisconnect.addEventListener('click', () => disconnect());
         elClear.addEventListener('click', () => clearLog());

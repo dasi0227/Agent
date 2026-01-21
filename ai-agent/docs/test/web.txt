@@ -1,3 +1,0 @@
-curl -N -H "Accept: text/event-stream" -H "Content-Type: application/json" \
-    -d '{"aiAgentId":"agent_web","userMessage":"请总结今日AI新闻，今天是 2025.01.20","sessionId":"web-1","maxStep":3}' \
-    http://localhost:8001/api/v1/agent/agent/auto

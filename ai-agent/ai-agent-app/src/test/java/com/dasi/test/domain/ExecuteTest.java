@@ -44,7 +44,7 @@ public class ExecuteTest {
 
     @Before
     public void updatePromptFromFiles() throws Exception {
-        Path promptDir = Paths.get("/Users/wyw/Desktop/Project/Agent/ai-agent/docs/prompt");
+        Path promptDir = Paths.get("ai-agent-app", "src", "main", "resources", "prompt");
         Map<String, String> promptFileMap = new LinkedHashMap<>();
         promptFileMap.put("prompt_analyzer_1", "analyzer.txt");
         promptFileMap.put("prompt_performer_1", "performer.txt");
