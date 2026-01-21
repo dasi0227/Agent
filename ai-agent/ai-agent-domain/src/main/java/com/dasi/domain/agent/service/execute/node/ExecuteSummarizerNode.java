@@ -39,20 +39,29 @@ public class ExecuteSummarizerNode extends AbstractExecuteNode {
                 executionHistory
         );
 
-        // 获取客户端结果
-        String summarizerResult = summarizerClient
-                .prompt(summarizerPrompt)
-                .call()
-                .content();
+        String summarizerJson;
+        JSONObject summarizerObject;
 
-        // 解析客户端结果
-        String summarizerJson = extractJson(summarizerResult);
-        JSONObject summarizerObject = parseJsonObject(summarizerJson);
-        log.info("\n=========================================== Summarizer ===========================================\n{}", summarizerJson);
-        if (summarizerObject == null) {
-            summarizerObject = new JSONObject();
-            summarizerObject.put(SUMMARIZER_OVERVIEW.getType(), summarizerJson);
+        try {
+            // 获取客户端结果
+            String summarizerResult = summarizerClient
+                    .prompt(summarizerPrompt)
+                    .call()
+                    .content();
+
+            // 解析客户端结果
+            summarizerJson = extractJson(summarizerResult);
+            summarizerObject = parseJsonObject(summarizerJson);
+            if (summarizerObject == null) {
+                throw new IllegalStateException("Summarizer 结果解析为空");
+            }
+        } catch (Exception e) {
+            log.error("【执行节点】ExecuteSummarizerNode：error={}", e.getMessage(), e);
+            summarizerObject = buildExceptionResult(SUMMARIZER.getExceptionType(), e.getMessage());
+            summarizerJson = summarizerObject.toJSONString();
         }
+
+        log.info("\n=========================================== Summarizer ===========================================\n{}", summarizerJson);
         parseSummarizerResult(executeDynamicContext, summarizerObject, executeRequestEntity.getSessionId());
 
         return router(executeRequestEntity, executeDynamicContext);
@@ -67,6 +76,7 @@ public class ExecuteSummarizerNode extends AbstractExecuteNode {
         if (summarizerObject == null) {
             return;
         }
+        sendSummarizerResult(executeDynamicContext, SUMMARIZER.getExceptionType(), summarizerObject.getString(SUMMARIZER.getExceptionType()), sessionId);
         sendSummarizerResult(executeDynamicContext, SUMMARIZER_OVERVIEW.getType(), summarizerObject.getString(SUMMARIZER_OVERVIEW.getType()), sessionId);
     }
 

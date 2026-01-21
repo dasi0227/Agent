@@ -97,7 +97,7 @@ public class McpTest {
                 .build();
 
         String answer = chatClient.prompt()
-                .user("列举你能调用的 grafana MCP 工具、参数和功能简述。")
+                .user("你可以告诉我 search_dashboards 必须提供的参数是什么？以及 get_dashboard_panel_queries 的返回内容是什么？")
                 .call()
                 .content();
 

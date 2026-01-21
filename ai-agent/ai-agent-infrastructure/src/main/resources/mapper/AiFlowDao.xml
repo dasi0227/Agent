@@ -22,4 +22,10 @@
         WHERE agent_id = #{agentId}
         ORDER BY flow_seq
     </select>
+
+    <update id="loadFlowPrompt">
+        UPDATE ai_flow
+        SET flow_prompt = #{flowPrompt}
+        WHERE client_id = #{clientId}
+    </update>
 </mapper>

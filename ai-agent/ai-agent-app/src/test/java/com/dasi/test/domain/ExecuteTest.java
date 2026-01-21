@@ -54,7 +54,7 @@ public class ExecuteTest {
         for (Map.Entry<String, String> entry : promptFileMap.entrySet()) {
             Path promptPath = promptDir.resolve(entry.getValue());
             String promptContent = Files.readString(promptPath, StandardCharsets.UTF_8);
-            aiPromptDao.updatePromptContent(entry.getKey(), promptContent);
+            aiPromptDao.loadPromptContent(entry.getKey(), promptContent);
             log.info("更新 prompt 内容：prompt_id={}", entry.getKey());
         }
     }

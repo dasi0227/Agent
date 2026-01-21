@@ -100,6 +100,30 @@
                 .replace(/\\"/g, '"');
         }
 
+        function pickExceptionField(obj) {
+            if (!obj || typeof obj !== 'object') return null;
+            for (const key of Object.keys(obj)) {
+                if (key.endsWith('_exception')) {
+                    return { key, value: obj[key] };
+                }
+            }
+            return null;
+        }
+
+        function extractContent(data, raw) {
+            if (data && data.sectionContent != null && data.sectionContent !== '') {
+                const maybeJson = safeJsonParse(data.sectionContent);
+                if (maybeJson) {
+                    const ex = pickExceptionField(maybeJson);
+                    if (ex) return { content: ex.value, sectionType: ex.key };
+                }
+                return { content: data.sectionContent, sectionType: data.sectionType };
+            }
+            const ex = pickExceptionField(data);
+            if (ex) return { content: ex.value, sectionType: ex.key };
+            return { content: raw || '', sectionType: data ? data.sectionType : undefined };
+        }
+
         function renderEvent(evtName, data, raw) {
             const card = document.createElement('div');
             card.className = 'card';
@@ -118,7 +142,8 @@
 
             const t4 = document.createElement('span');
             t4.className = 'tag';
-            const st = data && data.sectionType ? data.sectionType : '-';
+            const extracted = extractContent(data, raw);
+            const st = (data && data.sectionType) ? data.sectionType : (extracted.sectionType || '-');
             t4.innerHTML = 'sectionType: <strong>' + st + '</strong>';
 
             meta.appendChild(t1);
@@ -127,8 +152,7 @@
 
             const pre = document.createElement('pre');
             pre.className = 'json';
-            const content = data && data.sectionContent != null ? data.sectionContent : raw || '';
-            pre.textContent = formatText(content);
+            pre.textContent = formatText(extracted.content);
 
             card.appendChild(meta);
             card.appendChild(pre);

@@ -21,7 +21,7 @@
         WHERE prompt_id = #{promptId}
     </select>
 
-    <update id="updatePromptContent">
+    <update id="loadPromptContent">
         UPDATE ai_prompt
         SET prompt_content = #{promptContent}
         WHERE prompt_id = #{promptId}
