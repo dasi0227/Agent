@@ -45,23 +45,32 @@ public class ExecuteSupervisorNode extends AbstractExecuteNode {
                 performerResult
         );
 
-        // 获取客户端结果
-        String supervisorResult = supervisorClient
-                .prompt(supervisorPrompt)
-                .advisors(a -> a
-                        .param(CHAT_MEMORY_CONVERSATION_ID_KEY, executeRequestEntity.getSessionId())
-                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 4096))
-                .call()
-                .content();
+        String supervisorJson;
+        JSONObject supervisorObject;
 
-        // 解析客户端结果
-        String supervisorJson = extractJson(supervisorResult);
-        JSONObject supervisorObject = parseJsonObject(supervisorJson);
-        log.info("\n=========================================== Supervisor ===========================================\n{}", supervisorJson);
-        if (supervisorObject == null) {
-            supervisorObject = new JSONObject();
-            supervisorObject.put(SUPERVISOR_ISSUE.getType(), supervisorJson);
+        try {
+            // 获取客户端结果
+            String supervisorResult = supervisorClient
+                    .prompt(supervisorPrompt)
+                    .advisors(a -> a
+                            .param(CHAT_MEMORY_CONVERSATION_ID_KEY, executeRequestEntity.getSessionId())
+                            .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 4096))
+                    .call()
+                    .content();
+
+            // 解析客户端结果
+            supervisorJson = extractJson(supervisorResult);
+            supervisorObject = parseJsonObject(supervisorJson);
+            if (supervisorObject == null) {
+                throw new IllegalStateException("Supervisor 结果解析为空");
+            }
+        } catch (Exception e) {
+            log.error("【执行节点】ExecuteSupervisorNode：error={}", e.getMessage(), e);
+            supervisorObject = buildExceptionResult(SUPERVISOR.getExceptionType(), e.getMessage());
+            supervisorJson = supervisorObject.toJSONString();
         }
+
+        log.info("\n=========================================== Supervisor ===========================================\n{}", supervisorJson);
         parseSupervisorResult(executeDynamicContext, supervisorObject, executeRequestEntity.getSessionId());
 
         // 保存客户端结果
@@ -125,6 +134,7 @@ public class ExecuteSupervisorNode extends AbstractExecuteNode {
         if (supervisorObject == null) {
             return;
         }
+        sendSupervisorResult(executeDynamicContext, SUPERVISOR.getExceptionType(), supervisorObject.getString(SUPERVISOR.getExceptionType()), sessionId);
         sendSupervisorResult(executeDynamicContext, SUPERVISOR_ISSUE.getType(), supervisorObject.getString(SUPERVISOR_ISSUE.getType()), sessionId);
         sendSupervisorResult(executeDynamicContext, SUPERVISOR_SUGGESTION.getType(), supervisorObject.getString(SUPERVISOR_SUGGESTION.getType()), sessionId);
         sendSupervisorResult(executeDynamicContext, SUPERVISOR_SCORE.getType(), supervisorObject.getString(SUPERVISOR_SCORE.getType()), sessionId);

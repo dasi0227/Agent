@@ -7,5 +7,7 @@ import java.util.List;
 
 @Mapper
 public interface IAiConfigDao {
+
     List<AiConfig> queryBySource(String sourceType, String sourceId);
+
 }

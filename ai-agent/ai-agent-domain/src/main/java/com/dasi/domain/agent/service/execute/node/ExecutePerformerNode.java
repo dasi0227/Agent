@@ -39,23 +39,32 @@ public class ExecutePerformerNode extends AbstractExecuteNode {
                 analyzerResult
         );
 
-        // 获取客户端结果
-        String performerResult = performerClient
-                .prompt(performerPrompt)
-                .advisors(a -> a
-                        .param(CHAT_MEMORY_CONVERSATION_ID_KEY, executeRequestEntity.getSessionId())
-                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 16384))
-                .call()
-                .content();
+        String performerJson;
+        JSONObject performerObject;
 
-        // 解析客户端结果
-        String performerJson = extractJson(performerResult);
-        JSONObject performerObject = parseJsonObject(performerJson);
-        log.info("\n=========================================== Performer ===========================================\n{}", performerJson);
-        if (performerObject == null) {
-            performerObject = new JSONObject();
-            performerObject.put(PERFORMER_RESULT.getType(), performerJson);
+        try {
+            // 获取客户端结果
+            String performerResult = performerClient
+                    .prompt(performerPrompt)
+                    .advisors(a -> a
+                            .param(CHAT_MEMORY_CONVERSATION_ID_KEY, executeRequestEntity.getSessionId())
+                            .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 16384))
+                    .call()
+                    .content();
+
+            // 解析客户端结果
+            performerJson = extractJson(performerResult);
+            performerObject = parseJsonObject(performerJson);
+            if (performerObject == null) {
+                throw new IllegalStateException("Performer 结果解析为空");
+            }
+        } catch (Exception e) {
+            log.error("【执行节点】ExecutePerformerNode：error={}", e.getMessage(), e);
+            performerObject = buildExceptionResult(PERFORMER.getExceptionType(), e.getMessage());
+            performerJson = performerObject.toJSONString();
         }
+
+        log.info("\n=========================================== Performer ===========================================\n{}", performerJson);
         parsePerformerResult(executeDynamicContext, performerObject, executeRequestEntity.getSessionId());
 
         // 保存客户端结果
@@ -73,6 +82,7 @@ public class ExecutePerformerNode extends AbstractExecuteNode {
         if (performerObject == null) {
             return;
         }
+        sendPerformerResult(executeDynamicContext, PERFORMER.getExceptionType(), performerObject.getString(PERFORMER.getExceptionType()), sessionId);
         sendPerformerResult(executeDynamicContext, PERFORMER_TARGET.getType(), performerObject.getString(PERFORMER_TARGET.getType()), sessionId);
         sendPerformerResult(executeDynamicContext, PERFORMER_PROCESS.getType(), performerObject.getString(PERFORMER_PROCESS.getType()), sessionId);
         sendPerformerResult(executeDynamicContext, PERFORMER_RESULT.getType(), performerObject.getString(PERFORMER_RESULT.getType()), sessionId);

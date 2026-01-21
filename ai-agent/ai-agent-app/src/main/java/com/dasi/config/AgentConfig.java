@@ -4,6 +4,8 @@ import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.dasi.domain.agent.model.entity.ArmoryRequestEntity;
 import com.dasi.domain.agent.service.armory.factory.ArmoryDynamicContext;
 import com.dasi.domain.agent.service.armory.factory.ArmoryStrategyFactory;
+import com.dasi.infrastructure.persistent.dao.IAiFlowDao;
+import com.dasi.infrastructure.persistent.dao.IAiPromptDao;
 import com.dasi.properties.AgentAutoProperties;
 import com.dasi.properties.OpenAiProperties;
 import jakarta.annotation.Resource;
@@ -24,6 +26,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import static com.dasi.domain.agent.model.enumeration.AiType.CLIENT;
@@ -81,6 +86,8 @@ public class AgentConfig implements ApplicationListener<ApplicationReadyEvent> {
                 return;
             }
 
+            loadPrompt(clientIdList);
+
             log.info("【初始化配置】AI 客户端自动装配：{}", agentAutoProperties.getClientIdList());
 
             StrategyHandler<ArmoryRequestEntity, ArmoryDynamicContext, String> armoryRootNode = armoryStrategyFactory.getArmoryRootNode();
@@ -94,6 +101,49 @@ public class AgentConfig implements ApplicationListener<ApplicationReadyEvent> {
 
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+
+    }
+
+    @Resource
+    private IAiPromptDao aiPromptDao;
+
+    @Resource
+    private IAiFlowDao aiFlowDao;
+
+    private void loadPrompt(List<String> clientIdList) {
+
+        Path systemPromptDir = Path.of("docs", "prompt", "system-prompt");
+        Path userPromptDir = Path.of("docs", "prompt", "user-prompt");
+
+        if (!Files.isDirectory(systemPromptDir) || !Files.isDirectory(userPromptDir)) {
+            log.error("【初始化配置】Prompt 文件夹不存在：systemPromptDir={}, userPromptDir={}", systemPromptDir.getFileName(), userPromptDir.getFileName());
+            throw new RuntimeException();
+        }
+
+        for (String clientId : clientIdList) {
+            try {
+
+                // 解析 promptId 和 fileName
+                String promptId = "prompt_" + clientId.substring("client_".length());
+                String fileName = clientId + ".txt";
+
+                // 更新 systemPrompt
+                Path systemPromptFile = systemPromptDir.resolve(fileName);
+                String systemPromptContent = Files.readString(systemPromptFile, StandardCharsets.UTF_8);
+                aiPromptDao.loadPromptContent(promptId, systemPromptContent);
+
+                // 更新 userPrompt
+                Path userPromptFile = userPromptDir.resolve(fileName);
+                String userPromptContent = Files.readString(userPromptFile, StandardCharsets.UTF_8);
+                aiFlowDao.loadFlowPrompt(clientId, userPromptContent);
+
+                log.error("【初始化配置】加载 prompt：clientId={}", clientId);
+
+            } catch (Exception e) {
+                log.error("【初始化配置】加载 prompt 失败：clientId={}", clientId, e);
+                throw new RuntimeException();
+            }
         }
 
     }

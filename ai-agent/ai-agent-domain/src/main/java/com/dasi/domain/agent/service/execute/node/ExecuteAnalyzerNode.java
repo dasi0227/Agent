@@ -42,23 +42,33 @@ public class ExecuteAnalyzerNode extends AbstractExecuteNode {
                 executionHistory
         );
 
-        // 获取客户端结果
-        String analyzerResult = analyzerClient
-                .prompt(analyzerPrompt)
-                .advisors(a -> a
-                        .param(CHAT_MEMORY_CONVERSATION_ID_KEY, executeRequestEntity.getSessionId())
-                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 32768))
-                .call()
-                .content();
+        String analyzerJson;
+        JSONObject analyzerObject;
 
-        // 解析客户端结果
-        String analyzerJson = extractJson(analyzerResult);
-        JSONObject analyzerObject = parseJsonObject(analyzerJson);
-        log.info("\n=========================================== Analyzer ===========================================\n{}", analyzerJson);
-        if (analyzerObject == null) {
-            analyzerObject = new JSONObject();
-            analyzerObject.put(ANALYZER_DEMAND.getType(), analyzerJson);
+        try {
+            // 获取客户端结果
+            String analyzerResult = analyzerClient
+                    .prompt(analyzerPrompt)
+                    .advisors(a -> a
+                            .param(CHAT_MEMORY_CONVERSATION_ID_KEY, executeRequestEntity.getSessionId())
+                            .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 32768))
+                    .call()
+                    .content();
+
+            // 解析客户端结果
+            analyzerJson = extractJson(analyzerResult);
+            analyzerObject = parseJsonObject(analyzerJson);
+            if (analyzerObject == null) {
+                throw new IllegalStateException("Analyzer 结果解析为空");
+            }
+
+        } catch (Exception e) {
+            log.error("【执行节点】ExecuteAnalyzerNode：error={}", e.getMessage(), e);
+            analyzerObject = buildExceptionResult(ANALYZER.getExceptionType(), e.getMessage());
+            analyzerJson = analyzerObject.toJSONString();
         }
+
+        log.info("\n=========================================== Analyzer ===========================================\n{}", analyzerJson);
         parseAnalyzerResult(executeDynamicContext, analyzerObject, executeRequestEntity.getSessionId());
 
         // 保存客户端结果
@@ -97,6 +107,7 @@ public class ExecuteAnalyzerNode extends AbstractExecuteNode {
         if (analyzerObject == null) {
             return;
         }
+        sendAnalyzerResult(executeDynamicContext, ANALYZER.getExceptionType(), analyzerObject.getString(ANALYZER.getExceptionType()), sessionId);
         sendAnalyzerResult(executeDynamicContext, ANALYZER_DEMAND.getType(), analyzerObject.getString(ANALYZER_DEMAND.getType()), sessionId);
         sendAnalyzerResult(executeDynamicContext, ANALYZER_HISTORY.getType(), analyzerObject.getString(ANALYZER_HISTORY.getType()), sessionId);
         sendAnalyzerResult(executeDynamicContext, ANALYZER_STRATEGY.getType(), analyzerObject.getString(ANALYZER_STRATEGY.getType()), sessionId);

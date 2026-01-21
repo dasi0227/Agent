@@ -19,4 +19,8 @@ public enum AiClientType {
 
     private String type;
 
+    public String getExceptionType() {
+        return this.type + "_exception";
+    }
+
 }

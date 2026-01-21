@@ -53,7 +53,6 @@ public abstract class AbstractExecuteNode extends AbstractMultiThreadStrategyRou
     }
 
     protected String extractJson(String content) {
-
         try {
             // 1) 去 think + 去代码块围栏
             String cleaned = content
@@ -76,24 +75,27 @@ public abstract class AbstractExecuteNode extends AbstractMultiThreadStrategyRou
 
             // 4) 更改换行
             cleaned = cleaned.replace("\r\n", "\n").replace("\r", "\n");
-
             return cleaned;
         } catch (Exception e) {
             log.warn("【Agent 执行】JSON 提取失败：{}", e.getMessage(), e);
-            return "";
+            throw e;
         }
     }
 
     protected JSONObject parseJsonObject(String json) {
-        if (json.isEmpty()) {
-            return null;
-        }
         try {
             return JSON.parseObject(json);
         } catch (Exception e) {
             log.warn("【Agent 执行】JSON 解析失败：{}", e.getMessage(), e);
-            return null;
+            throw e;
         }
+    }
+
+    protected JSONObject buildExceptionResult(String key, String message) {
+        message = (message == null || message.isBlank()) ? "执行异常" : message;
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(key, message);
+        return jsonObject;
     }
 
 }
