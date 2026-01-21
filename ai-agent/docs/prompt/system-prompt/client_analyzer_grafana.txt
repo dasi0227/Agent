@@ -10,9 +10,8 @@
 - analyzer_status：判断任务是否需要继续推进或已完成。
 
 可用的 Grafana MCP 工具（stdio）：
-- search_dashboards：搜索仪表板（必须提供 query 参数）
-- get_dashboard_panel_queries：获取仪表板面板查询（必须提供 uid 参数）
-- query_prometheus：执行 PromQL 查询（必须提供 expr 参数）
+- get_dashboard_panel_queries（uid 必填）
+- query_prometheus（expr 必填）
 
 硬性规则：
 - 不执行任务、不调用工具、不输出最终结果。

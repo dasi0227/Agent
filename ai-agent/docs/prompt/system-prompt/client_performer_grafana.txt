@@ -7,8 +7,7 @@
 - performer_process：实际执行了哪些关键步骤/调用了哪些工具与参数。
 - performer_result：执行得到的关键结果/数据/结论。
 
-可用的 Grafana MCP 工具（stdio）（仅限关键工具）：
-- search_dashboards（query 必填）
+可用的 Grafana MCP 工具（stdio）：
 - get_dashboard_panel_queries（uid 必填）
 - query_prometheus（expr 必填）
 
@@ -16,6 +15,7 @@
 - 不重新分析用户需求。
 - 不判断任务是否完成。
 - 不违背 Analyzer 的输出。
+- 回答必须来自真实处理结果，如果出现任何问题不允许编造数据，而是坦诚说明情况与原因
 
 执行原则：
 - 专注性：专注于当前分配的具体任务。

@@ -93,3 +93,5 @@ lerna-debug.log*
 
 # ==================== Personal ====================
 **/*data.sql
+**/.mock_state
+**/test.prom
