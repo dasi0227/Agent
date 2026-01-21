@@ -1,26 +1,26 @@
 # HELP http_server_requests_seconds_count HTTP request count
 # TYPE http_server_requests_seconds_count counter
-http_server_requests_seconds_count{application="order-service",method="POST",uri="/api/orders",status="200",instance="order-1"} 7181
-http_server_requests_seconds_count{application="order-service",method="POST",uri="/api/orders",status="400",instance="order-1"} 1331
-http_server_requests_seconds_count{application="order-service",method="POST",uri="/api/orders",status="500",instance="order-1"} 122
-http_server_requests_seconds_count{application="order-service",method="GET",uri="/api/orders/{id}",status="200",instance="order-1"} 25075
-http_server_requests_seconds_count{application="order-service",method="GET",uri="/api/orders/{id}",status="404",instance="order-1"} 365
-http_server_requests_seconds_count{application="order-service",method="POST",uri="/api/payments",status="200",instance="order-1"} 6856
-http_server_requests_seconds_count{application="order-service",method="POST",uri="/api/payments",status="502",instance="order-1"} 111
+http_server_requests_seconds_count{application="order-service",method="POST",uri="/api/orders",status="200",instance="order-1"} 7819
+http_server_requests_seconds_count{application="order-service",method="POST",uri="/api/orders",status="400",instance="order-1"} 1501
+http_server_requests_seconds_count{application="order-service",method="POST",uri="/api/orders",status="500",instance="order-1"} 141
+http_server_requests_seconds_count{application="order-service",method="GET",uri="/api/orders/{id}",status="200",instance="order-1"} 27534
+http_server_requests_seconds_count{application="order-service",method="GET",uri="/api/orders/{id}",status="404",instance="order-1"} 385
+http_server_requests_seconds_count{application="order-service",method="POST",uri="/api/payments",status="200",instance="order-1"} 7524
+http_server_requests_seconds_count{application="order-service",method="POST",uri="/api/payments",status="502",instance="order-1"} 123
 
 # HELP http_server_requests_seconds_sum HTTP request duration sum
 # TYPE http_server_requests_seconds_sum counter
-http_server_requests_seconds_sum{application="order-service",method="POST",uri="/api/orders",status="200",instance="order-1"} 1463.989
-http_server_requests_seconds_sum{application="order-service",method="POST",uri="/api/orders",status="400",instance="order-1"} 158.972
-http_server_requests_seconds_sum{application="order-service",method="POST",uri="/api/orders",status="500",instance="order-1"} 71.190
-http_server_requests_seconds_sum{application="order-service",method="GET",uri="/api/orders/{id}",status="200",instance="order-1"} 1382.407
-http_server_requests_seconds_sum{application="order-service",method="GET",uri="/api/orders/{id}",status="404",instance="order-1"} 17.992
-http_server_requests_seconds_sum{application="order-service",method="POST",uri="/api/payments",status="200",instance="order-1"} 1989.955
-http_server_requests_seconds_sum{application="order-service",method="POST",uri="/api/payments",status="502",instance="order-1"} 54.766
+http_server_requests_seconds_sum{application="order-service",method="POST",uri="/api/orders",status="200",instance="order-1"} 1604.319
+http_server_requests_seconds_sum{application="order-service",method="POST",uri="/api/orders",status="400",instance="order-1"} 180.673
+http_server_requests_seconds_sum{application="order-service",method="POST",uri="/api/orders",status="500",instance="order-1"} 81.868
+http_server_requests_seconds_sum{application="order-service",method="GET",uri="/api/orders/{id}",status="200",instance="order-1"} 1508.488
+http_server_requests_seconds_sum{application="order-service",method="GET",uri="/api/orders/{id}",status="404",instance="order-1"} 19.004
+http_server_requests_seconds_sum{application="order-service",method="POST",uri="/api/payments",status="200",instance="order-1"} 2212.111
+http_server_requests_seconds_sum{application="order-service",method="POST",uri="/api/payments",status="502",instance="order-1"} 62.236
 
 # HELP http_server_requests_active In-flight requests
 # TYPE http_server_requests_active gauge
-http_server_requests_active{application="order-service",instance="order-1"} 1
+http_server_requests_active{application="order-service",instance="order-1"} 25
 
 # HELP jvm_memory_max_bytes JVM memory max
 # TYPE jvm_memory_max_bytes gauge
@@ -30,41 +30,41 @@ jvm_memory_max_bytes{application="order-service",instance="order-1",area="nonhea
 
 # HELP jvm_memory_used_bytes JVM memory used
 # TYPE jvm_memory_used_bytes gauge
-jvm_memory_used_bytes{application="order-service",instance="order-1",area="heap",id="G1 Eden Space"} 436821894
-jvm_memory_used_bytes{application="order-service",instance="order-1",area="heap",id="G1 Old Gen"} 893723756
-jvm_memory_used_bytes{application="order-service",instance="order-1",area="nonheap",id="Metaspace"} 243415571
+jvm_memory_used_bytes{application="order-service",instance="order-1",area="heap",id="G1 Eden Space"} 436848626
+jvm_memory_used_bytes{application="order-service",instance="order-1",area="heap",id="G1 Old Gen"} 893717720
+jvm_memory_used_bytes{application="order-service",instance="order-1",area="nonheap",id="Metaspace"} 243409535
 
 # HELP jvm_memory_committed_bytes JVM memory committed
 # TYPE jvm_memory_committed_bytes gauge
-jvm_memory_committed_bytes{application="order-service",instance="order-1",area="heap",id="G1 Eden Space"} 456838438
-jvm_memory_committed_bytes{application="order-service",instance="order-1",area="heap",id="G1 Old Gen"} 923741209
-jvm_memory_committed_bytes{application="order-service",instance="order-1",area="nonheap",id="Metaspace"} 248433933
+jvm_memory_committed_bytes{application="order-service",instance="order-1",area="heap",id="G1 Eden Space"} 456851804
+jvm_memory_committed_bytes{application="order-service",instance="order-1",area="heap",id="G1 Old Gen"} 923721807
+jvm_memory_committed_bytes{application="order-service",instance="order-1",area="nonheap",id="Metaspace"} 248414531
 
 # HELP jvm_threads_daemon_threads JVM daemon threads
 # TYPE jvm_threads_daemon_threads gauge
-jvm_threads_daemon_threads{application="order-service",instance="order-1"} 30
+jvm_threads_daemon_threads{application="order-service",instance="order-1"} 40
 
 # HELP jvm_threads_live_threads JVM live threads
 # TYPE jvm_threads_live_threads gauge
-jvm_threads_live_threads{application="order-service",instance="order-1"} 70
+jvm_threads_live_threads{application="order-service",instance="order-1"} 60
 
 # HELP jvm_threads_peak_threads JVM peak threads
 # TYPE jvm_threads_peak_threads gauge
-jvm_threads_peak_threads{application="order-service",instance="order-1"} 77
+jvm_threads_peak_threads{application="order-service",instance="order-1"} 65
 
 # HELP jvm_gc_pause_seconds_count JVM GC pause count
 # TYPE jvm_gc_pause_seconds_count counter
-jvm_gc_pause_seconds_count{application="order-service",instance="order-1",action="end of minor GC",cause="G1 Evacuation Pause"} 596
-jvm_gc_pause_seconds_count{application="order-service",instance="order-1",action="end of major GC",cause="G1 Compaction Pause"} 472
+jvm_gc_pause_seconds_count{application="order-service",instance="order-1",action="end of minor GC",cause="G1 Evacuation Pause"} 654
+jvm_gc_pause_seconds_count{application="order-service",instance="order-1",action="end of major GC",cause="G1 Compaction Pause"} 541
 
 # HELP jvm_gc_pause_seconds_sum JVM GC pause sum
 # TYPE jvm_gc_pause_seconds_sum counter
-jvm_gc_pause_seconds_sum{application="order-service",instance="order-1",action="end of minor GC",cause="G1 Evacuation Pause"} 26.351
-jvm_gc_pause_seconds_sum{application="order-service",instance="order-1",action="end of major GC",cause="G1 Compaction Pause"} 213.531
+jvm_gc_pause_seconds_sum{application="order-service",instance="order-1",action="end of minor GC",cause="G1 Evacuation Pause"} 28.936
+jvm_gc_pause_seconds_sum{application="order-service",instance="order-1",action="end of major GC",cause="G1 Compaction Pause"} 245.308
 
 # HELP hikaricp_connections HikariCP connections
 # TYPE hikaricp_connections gauge
-hikaricp_connections{application="order-service",pool="HikariPool-1",instance="order-1"} 18
+hikaricp_connections{application="order-service",pool="HikariPool-1",instance="order-1"} 16
 
 # HELP up Target up
 # TYPE up gauge

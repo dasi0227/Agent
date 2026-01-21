@@ -94,9 +94,6 @@ public class ExecuteAnalyzerNode extends AbstractExecuteNode {
         if (executeDynamicContext.getCompleted() == true) {
             log.info("【执行节点】ExecuteAnalyzerNode：任务已完成");
             return executeSummarizerNode;
-        } else if (executeDynamicContext.getStep() > executeDynamicContext.getMaxStep()) {
-            log.info("【执行节点】ExecuteAnalyzerNode：任务已到达最大步数");
-            return executeSummarizerNode;
         } else {
             return executePerformerNode;
         }

@@ -21,7 +21,7 @@ public class ExecuteRootNode extends AbstractExecuteNode {
         // 客户端链
         executeDynamicContext.setAiFlowVOMap(aiFlowVOMap);
         // 当前步数
-        executeDynamicContext.setStep(0);
+        executeDynamicContext.setStep(1);
         // 最大步数
         executeDynamicContext.setMaxStep(executeRequestEntity.getMaxStep());
         // 是否完成
