@@ -67,7 +67,7 @@ public class ArmoryAiModelNode extends AbstractArmoryNode {
             // 注册 Bean 对象
             String modelBeanName = MODEL.getBeanName(aiModelVO.getModelId());
             registerBean(modelBeanName, OpenAiChatModel.class, chatModel);
-            log.info("【装配节点】ArmoryAiModelNode：modelBeanName={}, modelType={}, modelName={}", modelBeanName, aiModelVO.getModelType(), aiModelVO.getModelName());
+            log.info("【装配节点】ArmoryAiModelNode：modelBeanName={}, modelType={}", modelBeanName, aiModelVO.getModelType());
         }
 
         return router(armoryRequestEntity, armoryDynamicContext);

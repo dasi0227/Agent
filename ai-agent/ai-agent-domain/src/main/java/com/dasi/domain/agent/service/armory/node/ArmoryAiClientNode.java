@@ -78,7 +78,7 @@ public class ArmoryAiClientNode extends AbstractArmoryNode {
 
             String clientBeanName = CLIENT.getBeanName(aiClientVO.getClientId());
             registerBean(clientBeanName, ChatClient.class, chatClient);
-            log.info("【装配节点】ArmoryAiClientNode：clientBeanName={}, clientName={}", clientBeanName, aiClientVO.getClientName());
+            log.info("【装配节点】ArmoryAiClientNode：clientBeanName={}", clientBeanName);
         }
 
         return router(armoryRequestEntity, armoryDynamicContext);

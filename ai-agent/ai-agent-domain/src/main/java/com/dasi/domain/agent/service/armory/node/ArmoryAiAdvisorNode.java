@@ -62,7 +62,7 @@ public class ArmoryAiAdvisorNode extends AbstractArmoryNode {
 
             String advisorBeanName = ADVISOR.getBeanName(aiAdvisorVO.getAdvisorId());
             registerBean(advisorBeanName, Advisor.class, advisor);
-            log.info("【装配节点】ArmoryAiAdvisorNode：advisorBeanName={}, advisorType={}, advisorName={}", advisorBeanName, aiAdvisorVO.getAdvisorType(), aiAdvisorVO.getAdvisorName());
+            log.info("【装配节点】ArmoryAiAdvisorNode：advisorBeanName={}, advisorType={}", advisorBeanName, aiAdvisorVO.getAdvisorType());
         }
 
         return router(armoryRequestEntity, armoryDynamicContext);

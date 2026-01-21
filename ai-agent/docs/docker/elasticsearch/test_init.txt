@@ -1,0 +1,28 @@
+curl -X PUT "http://localhost:9200/test_log_2026.01.20"
+
+curl -X POST "http://localhost:9200/test_log_2026.01.20/_bulk" \
+  -H "Content-Type: application/x-ndjson" \
+  -d '
+{"index":{}}
+{"@timestamp":"2026-01-20T10:00:00+08:00","level":"INFO","service":"order-api","traceId":"tr-2001","orderId":"ORD-1001","message":"create order request received","status":200}
+{"index":{}}
+{"@timestamp":"2026-01-20T10:00:01+08:00","level":"INFO","service":"order-service","traceId":"tr-2001","orderId":"ORD-1001","message":"validate order passed"}
+{"index":{}}
+{"@timestamp":"2026-01-20T10:00:02+08:00","level":"INFO","service":"inventory-service","traceId":"tr-2001","orderId":"ORD-1001","message":"reserve stock start","latency_ms":35}
+{"index":{}}
+{"@timestamp":"2026-01-20T10:00:03+08:00","level":"WARN","service":"inventory-service","traceId":"tr-2001","orderId":"ORD-1001","message":"reserve stock slow","latency_ms":1200}
+{"index":{}}
+{"@timestamp":"2026-01-20T10:00:04+08:00","level":"ERROR","service":"inventory-service","traceId":"tr-2001","orderId":"ORD-1001","message":"reserve stock failed: insufficient stock","errorType":"OutOfStock","status":409}
+{"index":{}}
+{"@timestamp":"2026-01-20T10:00:05+08:00","level":"INFO","service":"order-service","traceId":"tr-2001","orderId":"ORD-1001","message":"cancel order due to stock failure","status":200}
+{"index":{}}
+{"@timestamp":"2026-01-20T10:01:10+08:00","level":"INFO","service":"payment-service","traceId":"tr-2002","orderId":"ORD-1002","message":"payment charge start","latency_ms":10}
+{"index":{}}
+{"@timestamp":"2026-01-20T10:01:40+08:00","level":"ERROR","service":"payment-service","traceId":"tr-2002","orderId":"ORD-1002","message":"payment gateway timeout","errorType":"Timeout","latency_ms":30000,"exception":"java.util.concurrent.TimeoutException: gateway timeout","status":504}
+{"index":{}}
+{"@timestamp":"2026-01-20T10:02:00+08:00","level":"INFO","service":"order-service","traceId":"tr-2002","orderId":"ORD-1002","message":"mark order as payment_pending_retry","status":200}
+{"index":{}}
+{"@timestamp":"2026-01-20T10:03:20+08:00","level":"ERROR","service":"order-service","traceId":"tr-2003","orderId":"ORD-1003","message":"create order failed: database connection refused","errorType":"DatabaseConnection","exception":"java.sql.SQLException: Connection refused","status":500}
+'
+
+curl -s "http://localhost:9200/test_log_2026.01.20/_count?pretty"

@@ -42,7 +42,7 @@ public class ArmoryAiApiNode extends AbstractArmoryNode {
             // 注册 Bean 对象
             String apiBeanName = API.getBeanName(aiApiVO.getApiId());
             registerBean(apiBeanName, OpenAiApi.class, openAiApi);
-            log.info("【装配节点】ArmoryAiApiNode：apiBeanName={}, baseUrl={}, apiKey={}", apiBeanName, aiApiVO.getApiBaseUrl(), aiApiVO.getApiKey());
+            log.info("【装配节点】ArmoryAiApiNode：apiBeanName={}, baseUrl={}", apiBeanName, aiApiVO.getApiBaseUrl());
         }
 
         return router(armoryRequestEntity, armoryDynamicContext);
