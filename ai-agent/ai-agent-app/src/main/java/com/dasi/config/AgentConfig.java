@@ -2,11 +2,12 @@ package com.dasi.config;
 
 import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.dasi.domain.agent.model.entity.ArmoryRequestEntity;
-import com.dasi.domain.agent.service.armory.factory.ArmoryDynamicContext;
-import com.dasi.domain.agent.service.armory.factory.ArmoryStrategyFactory;
+import com.dasi.domain.agent.service.armory.model.ArmoryContext;
+import com.dasi.domain.agent.service.armory.ArmoryStrategyFactory;
+import com.dasi.domain.agent.service.armory.IArmoryStrategy;
 import com.dasi.infrastructure.persistent.dao.IAiFlowDao;
 import com.dasi.infrastructure.persistent.dao.IAiPromptDao;
-import com.dasi.properties.AgentAutoProperties;
+import com.dasi.properties.AgentProperties;
 import com.dasi.properties.OpenAiProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.MetadataMode;
@@ -36,7 +37,7 @@ import static com.dasi.domain.agent.model.enumeration.AiType.CLIENT;
 
 @Slf4j
 @Configuration
-@EnableConfigurationProperties({OpenAiProperties.class, AgentAutoProperties.class})
+@EnableConfigurationProperties({OpenAiProperties.class, AgentProperties.class})
 public class AgentConfig implements ApplicationListener<ApplicationReadyEvent> {
 
     @Bean
@@ -73,44 +74,50 @@ public class AgentConfig implements ApplicationListener<ApplicationReadyEvent> {
     }
 
     @Autowired
-    private AgentAutoProperties agentAutoProperties;
+    private AgentProperties agentProperties;
 
     @Autowired
     private ArmoryStrategyFactory armoryStrategyFactory;
-
-    @Override
-    public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
-
-        try {
-            List<String> clientIdList = agentAutoProperties.getClientIdList();
-            if (clientIdList == null || clientIdList.isEmpty()) {
-                return;
-            }
-
-            loadPrompt(clientIdList);
-
-            log.info("【初始化配置】AI 客户端自动装配：{}", agentAutoProperties.getClientIdList());
-
-            StrategyHandler<ArmoryRequestEntity, ArmoryDynamicContext, String> armoryRootNode = armoryStrategyFactory.getArmoryRootNode();
-            ArmoryRequestEntity armoryRequestEntity = ArmoryRequestEntity.builder()
-                    .requestType(CLIENT.getType())
-                    .idList(clientIdList)
-                    .build();
-            ArmoryDynamicContext armoryDynamicContext = new ArmoryDynamicContext();
-
-            armoryRootNode.apply(armoryRequestEntity, armoryDynamicContext);
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-    }
 
     @Autowired
     private IAiPromptDao aiPromptDao;
 
     @Autowired
     private IAiFlowDao aiFlowDao;
+
+    @Override
+    public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
+
+        try {
+            List<String> clientIdList = agentProperties.getInitClientIdList();
+            if (clientIdList == null || clientIdList.isEmpty()) {
+                return;
+            }
+
+            loadPrompt(clientIdList);
+
+            ArmoryRequestEntity armoryRequestEntity = ArmoryRequestEntity.builder()
+                    .armoryType(CLIENT.getType())
+                    .idList(clientIdList)
+                    .build();
+            ArmoryContext armoryContext = new ArmoryContext();
+
+            IArmoryStrategy loadStrategy = armoryStrategyFactory.getArmoryStrategy(armoryRequestEntity.getArmoryType());
+            if (loadStrategy == null) {
+                log.warn("【初始化配置】未找到装配策略：armoryType={}", armoryRequestEntity.getArmoryType());
+                return;
+            }
+            loadStrategy.armory(armoryRequestEntity, armoryContext);
+
+            StrategyHandler<ArmoryRequestEntity, ArmoryContext, String> armoryRootNode = armoryStrategyFactory.getArmoryRootNode();
+            armoryRootNode.apply(armoryRequestEntity, armoryContext);
+
+        } catch (Exception e) {
+            log.error("【初始化配置】客户端初始化失败：error={}", e.getMessage(), e);
+            throw new RuntimeException();
+        }
+
+    }
 
     private void loadPrompt(List<String> clientIdList) {
 

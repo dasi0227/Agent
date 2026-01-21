@@ -1,10 +1,10 @@
 package com.dasi.api;
 
-import com.dasi.api.dto.AgentAutoRequestDTO;
+import com.dasi.api.dto.AgentRequestDTO;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 public interface IAgentService {
 
-    SseEmitter agentAuto(AgentAutoRequestDTO agentAutoRequestDTO);
+    SseEmitter agent(AgentRequestDTO agentRequestDTO);
 
 }

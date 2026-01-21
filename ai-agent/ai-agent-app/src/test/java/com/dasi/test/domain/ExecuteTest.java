@@ -3,10 +3,10 @@ package com.dasi.test.domain;
 import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.dasi.domain.agent.model.entity.ArmoryRequestEntity;
 import com.dasi.domain.agent.model.entity.ExecuteRequestEntity;
-import com.dasi.domain.agent.service.armory.factory.ArmoryDynamicContext;
-import com.dasi.domain.agent.service.armory.factory.ArmoryStrategyFactory;
-import com.dasi.domain.agent.service.execute.factory.ExecuteAutoStrategyFactory;
-import com.dasi.domain.agent.service.execute.factory.ExecuteDynamicContext;
+import com.dasi.domain.agent.service.armory.model.ArmoryContext;
+import com.dasi.domain.agent.service.armory.ArmoryStrategyFactory;
+import com.dasi.domain.agent.service.execute.loop.model.ExecuteLoopContext;
+import com.dasi.domain.agent.service.execute.loop.ExecuteLoopStrategy;
 import com.dasi.infrastructure.persistent.dao.IAiPromptDao;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +37,7 @@ public class ExecuteTest {
     private ArmoryStrategyFactory armoryStrategyFactory;
 
     @Resource
-    private ExecuteAutoStrategyFactory executeAutoStrategyFactory;
+    private ExecuteLoopStrategy executeLoopStrategy;
 
     @Resource
     private IAiPromptDao aiPromptDao;
@@ -61,18 +61,18 @@ public class ExecuteTest {
 
     @Test
     public void test_autoAgent() throws Exception {
-        StrategyHandler<ArmoryRequestEntity, ArmoryDynamicContext, String> armoryStrategyHandler = armoryStrategyFactory.getArmoryRootNode();
+        StrategyHandler<ArmoryRequestEntity, ArmoryContext, String> armoryStrategyHandler = armoryStrategyFactory.getArmoryRootNode();
 
         ArmoryRequestEntity armoryRequestEntity = ArmoryRequestEntity.builder()
-                .requestType(CLIENT.getType())
+                .armoryType(CLIENT.getType())
                 .idList(Arrays.asList("client_analyzer_1", "client_performer_1", "client_supervisor_1", "client_summarizer_1"))
                 .build();
 
-        ArmoryDynamicContext armoryDynamicContext = new ArmoryDynamicContext();
+        ArmoryContext armoryContext = new ArmoryContext();
 
-        armoryStrategyHandler.apply(armoryRequestEntity, armoryDynamicContext);
+        armoryStrategyHandler.apply(armoryRequestEntity, armoryContext);
 
-        StrategyHandler<ExecuteRequestEntity, ExecuteDynamicContext, String> executeHandler = executeAutoStrategyFactory.getExecuteRootNode();
+        StrategyHandler<ExecuteRequestEntity, ExecuteLoopContext, String> executeHandler = executeLoopStrategy.getExecuteRootNode();
 
         ExecuteRequestEntity executeRequestEntity = new ExecuteRequestEntity();
         executeRequestEntity.setAiAgentId("agent_demo_1");
@@ -80,9 +80,9 @@ public class ExecuteTest {
         executeRequestEntity.setSessionId("session-id-" + System.currentTimeMillis());
         executeRequestEntity.setMaxStep(3);
 
-        ExecuteDynamicContext executeDynamicContext = new ExecuteDynamicContext();
+        ExecuteLoopContext executeLoopContext = new ExecuteLoopContext();
 
-        executeHandler.apply(executeRequestEntity, executeDynamicContext);
+        executeHandler.apply(executeRequestEntity, executeLoopContext);
     }
 
 }

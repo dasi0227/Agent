@@ -3,7 +3,7 @@ package com.dasi.domain.agent.service.armory.node;
 import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.dasi.domain.agent.model.entity.ArmoryRequestEntity;
 import com.dasi.domain.agent.model.vo.AiApiVO;
-import com.dasi.domain.agent.service.armory.factory.ArmoryDynamicContext;
+import com.dasi.domain.agent.service.armory.model.ArmoryContext;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.openai.api.OpenAiApi;
@@ -21,13 +21,13 @@ public class ArmoryAiApiNode extends AbstractArmoryNode {
     private ArmoryAiMcpNode armoryAiMcpNode;
 
     @Override
-    protected String doApply(ArmoryRequestEntity armoryRequestEntity, ArmoryDynamicContext armoryDynamicContext) throws Exception {
+    protected String doApply(ArmoryRequestEntity armoryRequestEntity, ArmoryContext armoryContext) throws Exception {
 
-        List<AiApiVO> aiApiVOList = armoryDynamicContext.getValue(API.getType());
+        List<AiApiVO> aiApiVOList = armoryContext.getValue(API.getType());
 
         if (aiApiVOList == null || aiApiVOList.isEmpty()) {
             log.warn("【装配节点】ArmoryAiApiNode：没有数据");
-            return router(armoryRequestEntity, armoryDynamicContext);
+            return router(armoryRequestEntity, armoryContext);
         }
 
         for (AiApiVO aiApiVO : aiApiVOList) {
@@ -45,11 +45,11 @@ public class ArmoryAiApiNode extends AbstractArmoryNode {
             log.info("【装配节点】ArmoryAiApiNode：apiBeanName={}, baseUrl={}", apiBeanName, aiApiVO.getApiBaseUrl());
         }
 
-        return router(armoryRequestEntity, armoryDynamicContext);
+        return router(armoryRequestEntity, armoryContext);
     }
 
     @Override
-    public StrategyHandler<ArmoryRequestEntity, ArmoryDynamicContext, String> get(ArmoryRequestEntity armoryRequestEntity, ArmoryDynamicContext armoryDynamicContext) {
+    public StrategyHandler<ArmoryRequestEntity, ArmoryContext, String> get(ArmoryRequestEntity armoryRequestEntity, ArmoryContext armoryContext) {
         return armoryAiMcpNode;
     }
 

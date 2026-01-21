@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 public class ArmoryRequestEntity {
 
-    private String requestType;
+    private String armoryType;
 
     private List<String> idList;
 

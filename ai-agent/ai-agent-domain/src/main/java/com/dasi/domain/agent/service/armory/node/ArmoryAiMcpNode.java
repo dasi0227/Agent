@@ -4,7 +4,7 @@ import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.dasi.domain.agent.model.entity.ArmoryRequestEntity;
 import com.dasi.domain.agent.model.enumeration.AiMcpType;
 import com.dasi.domain.agent.model.vo.AiMcpVO;
-import com.dasi.domain.agent.service.armory.factory.ArmoryDynamicContext;
+import com.dasi.domain.agent.service.armory.model.ArmoryContext;
 import io.modelcontextprotocol.client.McpClient;
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.client.transport.HttpClientSseClientTransport;
@@ -28,13 +28,13 @@ public class ArmoryAiMcpNode extends AbstractArmoryNode {
     private ArmoryAiModelNode armoryAiModelNode;
 
     @Override
-    protected String doApply(ArmoryRequestEntity armoryRequestEntity, ArmoryDynamicContext armoryDynamicContext) throws Exception {
+    protected String doApply(ArmoryRequestEntity armoryRequestEntity, ArmoryContext armoryContext) throws Exception {
 
-        List<AiMcpVO> aiMcpVOList = armoryDynamicContext.getValue(MCP.getType());
+        List<AiMcpVO> aiMcpVOList = armoryContext.getValue(MCP.getType());
 
         if (aiMcpVOList == null || aiMcpVOList.isEmpty()) {
             log.warn("【装配节点】ArmoryAiMcpNode：没有数据");
-            return router(armoryRequestEntity, armoryDynamicContext);
+            return router(armoryRequestEntity, armoryContext);
         }
 
         for (AiMcpVO aiMcpVO : aiMcpVOList) {
@@ -85,11 +85,11 @@ public class ArmoryAiMcpNode extends AbstractArmoryNode {
             log.info("【装配节点】ArmoryAiMcpNode：mcpBeanName={}, mcpType={}", mcpBeanName, aiMcpVO.getMcpType());
         }
 
-        return router(armoryRequestEntity, armoryDynamicContext);
+        return router(armoryRequestEntity, armoryContext);
     }
 
     @Override
-    public StrategyHandler<ArmoryRequestEntity, ArmoryDynamicContext, String> get(ArmoryRequestEntity armoryRequestEntity, ArmoryDynamicContext armoryDynamicContext) {
+    public StrategyHandler<ArmoryRequestEntity, ArmoryContext, String> get(ArmoryRequestEntity armoryRequestEntity, ArmoryContext armoryContext) {
         return armoryAiModelNode;
     }
 

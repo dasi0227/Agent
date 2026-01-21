@@ -1,19 +1,19 @@
-package com.dasi.domain.agent.service.execute.node;
+package com.dasi.domain.agent.service.execute.loop.node;
 
 import cn.bugstack.wrench.design.framework.tree.AbstractMultiThreadStrategyRouter;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.dasi.domain.agent.adapter.IAgentRepository;
-import com.dasi.domain.agent.model.entity.ExecuteAutoResultEntity;
+import com.dasi.domain.agent.service.execute.loop.model.ExecuteLoopResult;
 import com.dasi.domain.agent.model.entity.ExecuteRequestEntity;
-import com.dasi.domain.agent.service.execute.factory.ExecuteDynamicContext;
+import com.dasi.domain.agent.service.execute.loop.model.ExecuteLoopContext;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Slf4j
-public abstract class AbstractExecuteNode extends AbstractMultiThreadStrategyRouter<ExecuteRequestEntity, ExecuteDynamicContext, String> {
+public abstract class AbstractExecuteNode extends AbstractMultiThreadStrategyRouter<ExecuteRequestEntity, ExecuteLoopContext, String> {
 
     @Resource
     protected ApplicationContext applicationContext;
@@ -26,7 +26,7 @@ public abstract class AbstractExecuteNode extends AbstractMultiThreadStrategyRou
     public static final String CHAT_MEMORY_RETRIEVE_SIZE_KEY = "chat_memory_retrieve_size";
 
     @Override
-    protected void multiThread(ExecuteRequestEntity executeRequestEntity, ExecuteDynamicContext executeDynamicContext) {
+    protected void multiThread(ExecuteRequestEntity executeRequestEntity, ExecuteLoopContext executeLoopContext) {
         // 缺省的，可以让继承类不一定非要实现该方法
     }
 
@@ -34,9 +34,9 @@ public abstract class AbstractExecuteNode extends AbstractMultiThreadStrategyRou
         return (T) applicationContext.getBean(beanName);
     }
 
-    protected void sendSseResult(ExecuteDynamicContext executeDynamicContext, ExecuteAutoResultEntity executeAutoResultEntity) {
+    protected void sendSseResult(ExecuteLoopContext executeLoopContext, ExecuteLoopResult executeLoopResult) {
 
-        SseEmitter sseEmitter = executeDynamicContext.getValue("sseEmitter");
+        SseEmitter sseEmitter = executeLoopContext.getValue("sseEmitter");
         if (sseEmitter == null) {
             return;
         }
@@ -44,8 +44,8 @@ public abstract class AbstractExecuteNode extends AbstractMultiThreadStrategyRou
         try {
             sseEmitter.send(SseEmitter.event()
                     .name("message")
-                    .id(String.valueOf(executeAutoResultEntity.getTimestamp()))
-                    .data(executeAutoResultEntity));
+                    .id(String.valueOf(executeLoopResult.getTimestamp()))
+                    .data(executeLoopResult));
         } catch (Exception e) {
             log.error("【Agent 执行】发送 SSE 消息失败：{}", e.getMessage(), e);
         }
