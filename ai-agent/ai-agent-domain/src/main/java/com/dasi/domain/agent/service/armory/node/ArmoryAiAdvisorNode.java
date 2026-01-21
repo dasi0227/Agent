@@ -4,8 +4,8 @@ import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.dasi.domain.agent.model.entity.ArmoryRequestEntity;
 import com.dasi.domain.agent.model.enumeration.AiAdvisorType;
 import com.dasi.domain.agent.model.vo.AiAdvisorVO;
-import com.dasi.domain.agent.service.armory.advisor.RagAnswerAdvisor;
-import com.dasi.domain.agent.service.armory.factory.ArmoryDynamicContext;
+import com.dasi.domain.agent.service.armory.model.RagAnswerAdvisor;
+import com.dasi.domain.agent.service.armory.model.ArmoryContext;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor;
@@ -30,13 +30,13 @@ public class ArmoryAiAdvisorNode extends AbstractArmoryNode {
     private ArmoryAiClientNode armoryAiClientNode;
 
     @Override
-    protected String doApply(ArmoryRequestEntity armoryRequestEntity, ArmoryDynamicContext armoryDynamicContext) throws Exception {
+    protected String doApply(ArmoryRequestEntity armoryRequestEntity, ArmoryContext armoryContext) throws Exception {
 
-        List<AiAdvisorVO> aiAdvisorVOList = armoryDynamicContext.getValue(ADVISOR.getType());
+        List<AiAdvisorVO> aiAdvisorVOList = armoryContext.getValue(ADVISOR.getType());
 
         if (aiAdvisorVOList == null || aiAdvisorVOList.isEmpty()) {
             log.warn("【装配节点】ArmoryAiAdvisorNode：没有数据");
-            return router(armoryRequestEntity, armoryDynamicContext);
+            return router(armoryRequestEntity, armoryContext);
         }
 
         for (AiAdvisorVO aiAdvisorVO : aiAdvisorVOList) {
@@ -65,11 +65,11 @@ public class ArmoryAiAdvisorNode extends AbstractArmoryNode {
             log.info("【装配节点】ArmoryAiAdvisorNode：advisorBeanName={}, advisorType={}", advisorBeanName, aiAdvisorVO.getAdvisorType());
         }
 
-        return router(armoryRequestEntity, armoryDynamicContext);
+        return router(armoryRequestEntity, armoryContext);
     }
 
     @Override
-    public StrategyHandler<ArmoryRequestEntity, ArmoryDynamicContext, String> get(ArmoryRequestEntity armoryRequestEntity, ArmoryDynamicContext armoryDynamicContext) {
+    public StrategyHandler<ArmoryRequestEntity, ArmoryContext, String> get(ArmoryRequestEntity armoryRequestEntity, ArmoryContext armoryContext) {
         return armoryAiClientNode;
     }
 

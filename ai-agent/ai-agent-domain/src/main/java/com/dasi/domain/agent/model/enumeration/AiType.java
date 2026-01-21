@@ -9,36 +9,30 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public enum AiType {
 
-    CLIENT("客户端", "client", "loadClientStrategy"),
-    MODEL("对话模型", "model", "loadModelStrategy"),
-    API("接口", "api", "loadApiStrategy"),
-    MCP("工具", "mcp","loadMcpStrategy"),
-    PROMPT("系统提示词", "prompt","loadPromptStrategy"),
-    ADVISOR("顾问", "advisor","loadAdvisorStrategy"),
+    CLIENT("客户端", "client"),
+    MODEL("对话模型", "model"),
+    API("接口", "api"),
+    MCP("工具", "mcp"),
+    PROMPT("系统提示词", "prompt"),
+    ADVISOR("顾问", "advisor"),
     ;
 
     private String name;
 
     private String type;
 
-    private String loadStrategy;
-
-    public static AiType fromCode(String code) {
-        if (code == null) {
-            throw new IllegalArgumentException("AiType code is Null" );
+    public static AiType fromType(String type) {
+        if (type == null) {
+            throw new IllegalArgumentException("AiType type is Null" );
         }
 
-        for (AiType type : values()) {
-            if (type.type.equals(code)) {
-                return type;
+        for (AiType value : values()) {
+            if (value.type.equals(type)) {
+                return value;
             }
         }
 
-        throw new IllegalArgumentException("Unknown AiType code: " + code);
-    }
-
-    public static String getLoadStrategyByCode(String code) {
-        return fromCode(code).getLoadStrategy();
+        throw new IllegalArgumentException("Unknown AiType type: " + type);
     }
 
     public String getBeanName(String id) {

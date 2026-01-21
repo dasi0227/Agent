@@ -1,11 +1,11 @@
-package com.dasi.domain.agent.service.execute.node;
+package com.dasi.domain.agent.service.execute.loop.node;
 
 import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.alibaba.fastjson2.JSONObject;
-import com.dasi.domain.agent.model.entity.ExecuteAutoResultEntity;
+import com.dasi.domain.agent.service.execute.loop.model.ExecuteLoopResult;
 import com.dasi.domain.agent.model.entity.ExecuteRequestEntity;
 import com.dasi.domain.agent.model.vo.AiFlowVO;
-import com.dasi.domain.agent.service.execute.factory.ExecuteDynamicContext;
+import com.dasi.domain.agent.service.execute.loop.model.ExecuteLoopContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
@@ -19,18 +19,18 @@ import static com.dasi.domain.agent.model.enumeration.AiType.CLIENT;
 public class ExecuteSupervisorNode extends AbstractExecuteNode {
 
     @Override
-    protected String doApply(ExecuteRequestEntity executeRequestEntity, ExecuteDynamicContext executeDynamicContext) throws Exception {
+    protected String doApply(ExecuteRequestEntity executeRequestEntity, ExecuteLoopContext executeLoopContext) throws Exception {
 
         // 获取客户端
-        AiFlowVO aiFlowVO = executeDynamicContext.getAiFlowVOMap().get(SUPERVISOR.getType());
+        AiFlowVO aiFlowVO = executeLoopContext.getAiFlowVOMap().get(SUPERVISOR.getType());
         String clientBeanName = CLIENT.getBeanName(aiFlowVO.getClientId());
         ChatClient supervisorClient = getBean(clientBeanName);
 
         // 获取提示词
         String flowPrompt = aiFlowVO.getFlowPrompt();
 
-        String analyzerResult = executeDynamicContext.getValue("analyzerResult");
-        String performerResult = executeDynamicContext.getValue("performerResult");
+        String analyzerResult = executeLoopContext.getValue("analyzerResult");
+        String performerResult = executeLoopContext.getValue("performerResult");
 
         if (analyzerResult == null || analyzerResult.trim().isEmpty()) {
             analyzerResult = "[任务分析专家异常，请你依据用户原始需求分析]";
@@ -40,7 +40,7 @@ public class ExecuteSupervisorNode extends AbstractExecuteNode {
         }
 
         String supervisorPrompt = String.format(flowPrompt,
-                executeDynamicContext.getOriginalTask(),
+                executeLoopContext.getOriginalTask(),
                 analyzerResult,
                 performerResult
         );
@@ -71,24 +71,24 @@ public class ExecuteSupervisorNode extends AbstractExecuteNode {
         }
 
         log.info("\n=========================================== Supervisor ===========================================\n{}", supervisorJson);
-        parseSupervisorResult(executeDynamicContext, supervisorObject, executeRequestEntity.getSessionId());
+        parseSupervisorResult(executeLoopContext, supervisorObject, executeRequestEntity.getSessionId());
 
         // 保存客户端结果
-        executeDynamicContext.setValue("supervisorResult", supervisorJson);
+        executeLoopContext.setValue("supervisorResult", supervisorJson);
 
         // 检查客户端结果
         String supervisorStatus = supervisorObject.getString(SUPERVISOR_STATUS.getType());
         if ("FAIL".equalsIgnoreCase(supervisorStatus)) {
             log.info("【执行节点】ExecuteSupervisorNode：任务执行不合格");
-            executeDynamicContext.setCompleted(false);
-            executeDynamicContext.setCurrentTask("根据任务监督专家的输出重新执行任务");
+            executeLoopContext.setCompleted(false);
+            executeLoopContext.setCurrentTask("根据任务监督专家的输出重新执行任务");
         } else if ("OPTIMIZE".equalsIgnoreCase(supervisorStatus)) {
             log.info("【执行节点】ExecuteSupervisorNode：任务执行有待优化");
-            executeDynamicContext.setCompleted(false);
-            executeDynamicContext.setCurrentTask("根据任务监督专家的输出优化执行任务");
+            executeLoopContext.setCompleted(false);
+            executeLoopContext.setCurrentTask("根据任务监督专家的输出优化执行任务");
         } else if ("PASS".equalsIgnoreCase(supervisorStatus)) {
             log.info("【执行节点】ExecuteSupervisorNode：任务执行合格");
-            executeDynamicContext.setCompleted(true);
+            executeLoopContext.setCompleted(true);
         }
 
         // 更新客户端历史
@@ -101,28 +101,28 @@ public class ExecuteSupervisorNode extends AbstractExecuteNode {
                 【任务监督专家】
                 %s
                 """,
-                executeDynamicContext.getStep(),
+                executeLoopContext.getStep(),
                 analyzerResult,
                 performerResult,
                 supervisorJson
         );
 
-        executeDynamicContext.getExecutionHistory().append(executionHistory);
-        executeDynamicContext.setStep(executeDynamicContext.getStep() + 1);
+        executeLoopContext.getExecutionHistory().append(executionHistory);
+        executeLoopContext.setStep(executeLoopContext.getStep() + 1);
 
-        return router(executeRequestEntity, executeDynamicContext);
+        return router(executeRequestEntity, executeLoopContext);
     }
 
     @Override
-    public StrategyHandler<ExecuteRequestEntity, ExecuteDynamicContext, String> get(ExecuteRequestEntity executeRequestEntity, ExecuteDynamicContext executeDynamicContext) throws Exception {
+    public StrategyHandler<ExecuteRequestEntity, ExecuteLoopContext, String> get(ExecuteRequestEntity executeRequestEntity, ExecuteLoopContext executeLoopContext) throws Exception {
 
         ExecuteAnalyzerNode executeAnalyzerNode = getBean("executeAnalyzerNode");
         ExecuteSummarizerNode executeSummarizerNode = getBean("executeSummarizerNode");
 
-        if (executeDynamicContext.getCompleted() == true) {
+        if (executeLoopContext.getCompleted() == true) {
             log.info("【执行节点】ExecuteSupervisorNode：任务监督达标");
             return executeSummarizerNode;
-        } else if (executeDynamicContext.getStep() > executeDynamicContext.getMaxStep()) {
+        } else if (executeLoopContext.getStep() > executeLoopContext.getMaxStep()) {
             log.info("【执行节点】ExecuteSupervisorNode：任务已到达最大步数");
             return executeSummarizerNode;
         } else {
@@ -130,27 +130,27 @@ public class ExecuteSupervisorNode extends AbstractExecuteNode {
         }
     }
 
-    private void parseSupervisorResult(ExecuteDynamicContext executeDynamicContext, JSONObject supervisorObject, String sessionId) {
+    private void parseSupervisorResult(ExecuteLoopContext executeLoopContext, JSONObject supervisorObject, String sessionId) {
         if (supervisorObject == null) {
             return;
         }
-        sendSupervisorResult(executeDynamicContext, SUPERVISOR.getExceptionType(), supervisorObject.getString(SUPERVISOR.getExceptionType()), sessionId);
-        sendSupervisorResult(executeDynamicContext, SUPERVISOR_ISSUE.getType(), supervisorObject.getString(SUPERVISOR_ISSUE.getType()), sessionId);
-        sendSupervisorResult(executeDynamicContext, SUPERVISOR_SUGGESTION.getType(), supervisorObject.getString(SUPERVISOR_SUGGESTION.getType()), sessionId);
-        sendSupervisorResult(executeDynamicContext, SUPERVISOR_SCORE.getType(), supervisorObject.getString(SUPERVISOR_SCORE.getType()), sessionId);
-        sendSupervisorResult(executeDynamicContext, SUPERVISOR_STATUS.getType(), supervisorObject.getString(SUPERVISOR_STATUS.getType()), sessionId);
+        sendSupervisorResult(executeLoopContext, SUPERVISOR.getExceptionType(), supervisorObject.getString(SUPERVISOR.getExceptionType()), sessionId);
+        sendSupervisorResult(executeLoopContext, SUPERVISOR_ISSUE.getType(), supervisorObject.getString(SUPERVISOR_ISSUE.getType()), sessionId);
+        sendSupervisorResult(executeLoopContext, SUPERVISOR_SUGGESTION.getType(), supervisorObject.getString(SUPERVISOR_SUGGESTION.getType()), sessionId);
+        sendSupervisorResult(executeLoopContext, SUPERVISOR_SCORE.getType(), supervisorObject.getString(SUPERVISOR_SCORE.getType()), sessionId);
+        sendSupervisorResult(executeLoopContext, SUPERVISOR_STATUS.getType(), supervisorObject.getString(SUPERVISOR_STATUS.getType()), sessionId);
     }
 
-    private void sendSupervisorResult(ExecuteDynamicContext executeDynamicContext, String sectionType, String sectionContent, String sessionId) {
+    private void sendSupervisorResult(ExecuteLoopContext executeLoopContext, String sectionType, String sectionContent, String sessionId) {
         if (!sectionType.isEmpty() && sectionContent != null && !sectionContent.isEmpty()) {
-            ExecuteAutoResultEntity executeAutoResultEntity = ExecuteAutoResultEntity.createSupervisorResult(
+            ExecuteLoopResult executeLoopResult = ExecuteLoopResult.createSupervisorResult(
                     sectionType,
                     sectionContent,
-                    executeDynamicContext.getStep(),
+                    executeLoopContext.getStep(),
                     sessionId
             );
 
-            sendSseResult(executeDynamicContext, executeAutoResultEntity);
+            sendSseResult(executeLoopContext, executeLoopResult);
         }
     }
 

@@ -4,7 +4,7 @@ import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.dasi.domain.agent.model.entity.ArmoryRequestEntity;
 import com.dasi.domain.agent.model.vo.AiClientVO;
 import com.dasi.domain.agent.model.vo.AiPromptVO;
-import com.dasi.domain.agent.service.armory.factory.ArmoryDynamicContext;
+import com.dasi.domain.agent.service.armory.model.ArmoryContext;
 import io.modelcontextprotocol.client.McpSyncClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -24,14 +24,14 @@ import static com.dasi.domain.agent.model.enumeration.AiType.*;
 public class ArmoryAiClientNode extends AbstractArmoryNode {
 
     @Override
-    protected String doApply(ArmoryRequestEntity armoryRequestEntity, ArmoryDynamicContext armoryDynamicContext) throws Exception {
+    protected String doApply(ArmoryRequestEntity armoryRequestEntity, ArmoryContext armoryContext) throws Exception {
 
-        Map<String, AiPromptVO> aiPromptVOMap = armoryDynamicContext.getValue(PROMPT.getType());
-        List<AiClientVO> aiClientVOList = armoryDynamicContext.getValue(CLIENT.getType());
+        Map<String, AiPromptVO> aiPromptVOMap = armoryContext.getValue(PROMPT.getType());
+        List<AiClientVO> aiClientVOList = armoryContext.getValue(CLIENT.getType());
 
         if (aiClientVOList == null || aiClientVOList.isEmpty()) {
             log.warn("【装配节点】ArmoryAiClientNode：没有数据");
-            return router(armoryRequestEntity, armoryDynamicContext);
+            return router(armoryRequestEntity, armoryContext);
         }
 
         for (AiClientVO aiClientVO : aiClientVOList) {
@@ -81,11 +81,11 @@ public class ArmoryAiClientNode extends AbstractArmoryNode {
             log.info("【装配节点】ArmoryAiClientNode：clientBeanName={}", clientBeanName);
         }
 
-        return router(armoryRequestEntity, armoryDynamicContext);
+        return router(armoryRequestEntity, armoryContext);
     }
 
     @Override
-    public StrategyHandler<ArmoryRequestEntity, ArmoryDynamicContext, String> get(ArmoryRequestEntity armoryRequestEntity, ArmoryDynamicContext armoryDynamicContext) {
+    public StrategyHandler<ArmoryRequestEntity, ArmoryContext, String> get(ArmoryRequestEntity armoryRequestEntity, ArmoryContext armoryContext) {
         return defaultStrategyHandler;
     }
 

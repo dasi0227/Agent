@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AgentAutoRequestDTO {
+public class AgentRequestDTO {
 
     private String aiAgentId;
 

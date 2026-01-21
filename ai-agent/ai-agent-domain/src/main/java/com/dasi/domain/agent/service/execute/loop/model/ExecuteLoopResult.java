@@ -1,4 +1,4 @@
-package com.dasi.domain.agent.model.entity;
+package com.dasi.domain.agent.service.execute.loop.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +11,7 @@ import static com.dasi.domain.agent.model.enumeration.AiClientType.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ExecuteAutoResultEntity {
+public class ExecuteLoopResult {
 
     private String clientType;
 
@@ -27,28 +27,28 @@ public class ExecuteAutoResultEntity {
 
     private String sessionId;
 
-    public static ExecuteAutoResultEntity createAnalyzerResult(String sectionType, String sectionContent, Integer step, String sessionId) {
+    public static ExecuteLoopResult createAnalyzerResult(String sectionType, String sectionContent, Integer step, String sessionId) {
         return createResult(ANALYZER.getType(), sectionType, sectionContent, step, false, sessionId);
     }
 
-    public static ExecuteAutoResultEntity createPerformerResult(String sectionType, String sectionContent, Integer step, String sessionId) {
+    public static ExecuteLoopResult createPerformerResult(String sectionType, String sectionContent, Integer step, String sessionId) {
         return createResult(PERFORMER.getType(), sectionType, sectionContent, step, false, sessionId);
     }
 
-    public static ExecuteAutoResultEntity createSupervisorResult(String sectionType, String sectionContent, Integer step, String sessionId) {
+    public static ExecuteLoopResult createSupervisorResult(String sectionType, String sectionContent, Integer step, String sessionId) {
         return createResult(SUPERVISOR.getType(), sectionType, sectionContent, step, false, sessionId);
     }
 
-    public static ExecuteAutoResultEntity createSummarizerResult(String sectionType, String sectionContent, Integer step, String sessionId) {
+    public static ExecuteLoopResult createSummarizerResult(String sectionType, String sectionContent, Integer step, String sessionId) {
         return createResult(SUMMARIZER.getType(), sectionType, sectionContent, step, false, sessionId);
     }
 
-    public static ExecuteAutoResultEntity createCompleteResult(String sectionContent, String sessionId) {
+    public static ExecuteLoopResult createCompleteResult(String sectionContent, String sessionId) {
         return createResult("complete", null, sectionContent, null, true, sessionId);
     }
 
-    public static ExecuteAutoResultEntity createResult(String clientType, String sectionType, String sectionContent, Integer step, Boolean completed, String sessionId) {
-        return ExecuteAutoResultEntity.builder()
+    public static ExecuteLoopResult createResult(String clientType, String sectionType, String sectionContent, Integer step, Boolean completed, String sessionId) {
+        return ExecuteLoopResult.builder()
                 .clientType(clientType)
                 .sectionType(sectionType)
                 .sectionContent(sectionContent)

@@ -84,7 +84,7 @@ public class AgentRepository implements IAgentRepository {
                     continue;
                 }
 
-                switch (AiType.fromCode(clientConfig.getTargetType())) {
+                switch (AiType.fromType(clientConfig.getTargetType())) {
                     case MODEL:
                         modelId = clientConfig.getTargetId();
                         break;

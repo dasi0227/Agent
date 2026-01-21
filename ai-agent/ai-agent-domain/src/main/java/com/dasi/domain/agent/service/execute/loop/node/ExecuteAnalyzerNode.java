@@ -1,11 +1,11 @@
-package com.dasi.domain.agent.service.execute.node;
+package com.dasi.domain.agent.service.execute.loop.node;
 
 import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.alibaba.fastjson2.JSONObject;
-import com.dasi.domain.agent.model.entity.ExecuteAutoResultEntity;
+import com.dasi.domain.agent.service.execute.loop.model.ExecuteLoopResult;
 import com.dasi.domain.agent.model.entity.ExecuteRequestEntity;
 import com.dasi.domain.agent.model.vo.AiFlowVO;
-import com.dasi.domain.agent.service.execute.factory.ExecuteDynamicContext;
+import com.dasi.domain.agent.service.execute.loop.model.ExecuteLoopContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
@@ -19,26 +19,26 @@ import static com.dasi.domain.agent.model.enumeration.AiType.CLIENT;
 public class ExecuteAnalyzerNode extends AbstractExecuteNode {
 
     @Override
-    protected String doApply(ExecuteRequestEntity executeRequestEntity, ExecuteDynamicContext executeDynamicContext) throws Exception {
+    protected String doApply(ExecuteRequestEntity executeRequestEntity, ExecuteLoopContext executeLoopContext) throws Exception {
 
         // 获取客户端
-        AiFlowVO aiFlowVO = executeDynamicContext.getAiFlowVOMap().get(ANALYZER.getType());
+        AiFlowVO aiFlowVO = executeLoopContext.getAiFlowVOMap().get(ANALYZER.getType());
         String clientBeanName = CLIENT.getBeanName(aiFlowVO.getClientId());
         ChatClient analyzerClient = getBean(clientBeanName);
 
         // 获取提示词
         String flowPrompt = aiFlowVO.getFlowPrompt();
 
-        String executionHistory = executeDynamicContext.getExecutionHistory().toString();
+        String executionHistory = executeLoopContext.getExecutionHistory().toString();
         if (executionHistory.isEmpty()) {
             executionHistory =  "[暂无记录]";
         }
 
         String analyzerPrompt = String.format(flowPrompt,
-                executeDynamicContext.getStep(),
-                executeDynamicContext.getMaxStep(),
-                executeDynamicContext.getOriginalTask(),
-                executeDynamicContext.getCurrentTask(),
+                executeLoopContext.getStep(),
+                executeLoopContext.getMaxStep(),
+                executeLoopContext.getOriginalTask(),
+                executeLoopContext.getCurrentTask(),
                 executionHistory
         );
 
@@ -69,29 +69,29 @@ public class ExecuteAnalyzerNode extends AbstractExecuteNode {
         }
 
         log.info("\n=========================================== Analyzer ===========================================\n{}", analyzerJson);
-        parseAnalyzerResult(executeDynamicContext, analyzerObject, executeRequestEntity.getSessionId());
+        parseAnalyzerResult(executeLoopContext, analyzerObject, executeRequestEntity.getSessionId());
 
         // 保存客户端结果
-        executeDynamicContext.setValue("analyzerResult", analyzerJson);
+        executeLoopContext.setValue("analyzerResult", analyzerJson);
 
         // 检查客户端结果
         String analyzerStatus = analyzerObject.getString(ANALYZER_STATUS.getType());
         String analyzerProgress = analyzerObject.getString(ANALYZER_PROGRESS.getType());
         if ("COMPLETED".equalsIgnoreCase(analyzerStatus) || "100".equals(analyzerProgress)) {
-            executeDynamicContext.setCompleted(true);
-            return router(executeRequestEntity, executeDynamicContext);
+            executeLoopContext.setCompleted(true);
+            return router(executeRequestEntity, executeLoopContext);
         }
 
-        return router(executeRequestEntity, executeDynamicContext);
+        return router(executeRequestEntity, executeLoopContext);
     }
 
     @Override
-    public StrategyHandler<ExecuteRequestEntity, ExecuteDynamicContext, String> get(ExecuteRequestEntity executeRequestEntity, ExecuteDynamicContext executeDynamicContext) throws Exception {
+    public StrategyHandler<ExecuteRequestEntity, ExecuteLoopContext, String> get(ExecuteRequestEntity executeRequestEntity, ExecuteLoopContext executeLoopContext) throws Exception {
 
         ExecutePerformerNode executePerformerNode = getBean("executePerformerNode");
         ExecuteSummarizerNode executeSummarizerNode = getBean("executeSummarizerNode");
 
-        if (executeDynamicContext.getCompleted() == true) {
+        if (executeLoopContext.getCompleted() == true) {
             log.info("【执行节点】ExecuteAnalyzerNode：任务已完成");
             return executeSummarizerNode;
         } else {
@@ -100,28 +100,28 @@ public class ExecuteAnalyzerNode extends AbstractExecuteNode {
 
     }
 
-    private void parseAnalyzerResult(ExecuteDynamicContext executeDynamicContext, JSONObject analyzerObject, String sessionId) {
+    private void parseAnalyzerResult(ExecuteLoopContext executeLoopContext, JSONObject analyzerObject, String sessionId) {
         if (analyzerObject == null) {
             return;
         }
-        sendAnalyzerResult(executeDynamicContext, ANALYZER.getExceptionType(), analyzerObject.getString(ANALYZER.getExceptionType()), sessionId);
-        sendAnalyzerResult(executeDynamicContext, ANALYZER_DEMAND.getType(), analyzerObject.getString(ANALYZER_DEMAND.getType()), sessionId);
-        sendAnalyzerResult(executeDynamicContext, ANALYZER_HISTORY.getType(), analyzerObject.getString(ANALYZER_HISTORY.getType()), sessionId);
-        sendAnalyzerResult(executeDynamicContext, ANALYZER_STRATEGY.getType(), analyzerObject.getString(ANALYZER_STRATEGY.getType()), sessionId);
-        sendAnalyzerResult(executeDynamicContext, ANALYZER_PROGRESS.getType(), analyzerObject.getString(ANALYZER_PROGRESS.getType()), sessionId);
-        sendAnalyzerResult(executeDynamicContext, ANALYZER_STATUS.getType(), analyzerObject.getString(ANALYZER_STATUS.getType()), sessionId);
+        sendAnalyzerResult(executeLoopContext, ANALYZER.getExceptionType(), analyzerObject.getString(ANALYZER.getExceptionType()), sessionId);
+        sendAnalyzerResult(executeLoopContext, ANALYZER_DEMAND.getType(), analyzerObject.getString(ANALYZER_DEMAND.getType()), sessionId);
+        sendAnalyzerResult(executeLoopContext, ANALYZER_HISTORY.getType(), analyzerObject.getString(ANALYZER_HISTORY.getType()), sessionId);
+        sendAnalyzerResult(executeLoopContext, ANALYZER_STRATEGY.getType(), analyzerObject.getString(ANALYZER_STRATEGY.getType()), sessionId);
+        sendAnalyzerResult(executeLoopContext, ANALYZER_PROGRESS.getType(), analyzerObject.getString(ANALYZER_PROGRESS.getType()), sessionId);
+        sendAnalyzerResult(executeLoopContext, ANALYZER_STATUS.getType(), analyzerObject.getString(ANALYZER_STATUS.getType()), sessionId);
     }
 
-    private void sendAnalyzerResult(ExecuteDynamicContext executeDynamicContext, String sectionType, String sectionContent, String sessionId) {
+    private void sendAnalyzerResult(ExecuteLoopContext executeLoopContext, String sectionType, String sectionContent, String sessionId) {
         if (!sectionType.isEmpty() && sectionContent != null && !sectionContent.isEmpty()) {
-            ExecuteAutoResultEntity executeAutoResultEntity = ExecuteAutoResultEntity.createAnalyzerResult(
+            ExecuteLoopResult executeLoopResult = ExecuteLoopResult.createAnalyzerResult(
                     sectionType,
                     sectionContent,
-                    executeDynamicContext.getStep(),
+                    executeLoopContext.getStep(),
                     sessionId
             );
 
-            sendSseResult(executeDynamicContext, executeAutoResultEntity);
+            sendSseResult(executeLoopContext, executeLoopResult);
         }
     }
 

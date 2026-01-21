@@ -4,7 +4,8 @@ import com.dasi.domain.agent.adapter.IAgentRepository;
 import com.dasi.domain.agent.model.entity.ArmoryRequestEntity;
 import com.dasi.domain.agent.model.vo.AiApiVO;
 import com.dasi.domain.agent.model.vo.AiModelVO;
-import com.dasi.domain.agent.service.armory.factory.ArmoryDynamicContext;
+import com.dasi.domain.agent.service.armory.IArmoryStrategy;
+import com.dasi.domain.agent.service.armory.model.ArmoryContext;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,7 @@ import static com.dasi.domain.agent.model.enumeration.AiType.API;
 import static com.dasi.domain.agent.model.enumeration.AiType.MODEL;
 
 @Slf4j
-@Service("loadModelStrategy")
+@Service("armoryModelStrategy")
 public class ArmoryModelStrategy implements IArmoryStrategy {
 
     @Resource
@@ -27,7 +28,7 @@ public class ArmoryModelStrategy implements IArmoryStrategy {
     private ThreadPoolExecutor threadPoolExecutor;
 
     @Override
-    public void armory(ArmoryRequestEntity armoryRequestEntity, ArmoryDynamicContext dynamicContext) {
+    public void armory(ArmoryRequestEntity armoryRequestEntity, ArmoryContext dynamicContext) {
         List<String> modelIdList = armoryRequestEntity.getIdList();
 
         CompletableFuture<List<AiApiVO>> aiApiListFuture = CompletableFuture.supplyAsync(

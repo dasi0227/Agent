@@ -1,9 +1,9 @@
 package com.dasi.trigger.http;
 
 import com.dasi.api.IAgentService;
-import com.dasi.api.dto.AgentAutoRequestDTO;
+import com.dasi.api.dto.AgentRequestDTO;
 import com.dasi.domain.agent.model.entity.ExecuteRequestEntity;
-import com.dasi.domain.agent.service.execute.strategy.IExecuteStrategy;
+import com.dasi.domain.agent.service.execute.IExecuteStrategy;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,15 +21,15 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class AgentController implements IAgentService {
 
     @Resource
-    @Qualifier("executeAutoStrategy")
-    private IExecuteStrategy executeAutoStrategy;
+    @Qualifier("executeLoopStrategy")
+    private IExecuteStrategy executeLoopStrategy;
 
     @javax.annotation.Resource
     private ThreadPoolExecutor threadPoolExecutor;
 
     @Override
-    @PostMapping(value = "/agent/auto", produces = "text/event-stream")
-    public SseEmitter agentAuto(@RequestBody AgentAutoRequestDTO agentAutoRequestDTO) {
+    @PostMapping(value = "/agent", produces = "text/event-stream")
+    public SseEmitter agent(@RequestBody AgentRequestDTO agentRequestDTO) {
 
 
         // 1. 创建流式输出对象
@@ -37,15 +37,15 @@ public class AgentController implements IAgentService {
 
         // 2. 构建执行命令实体
         ExecuteRequestEntity executeRequestEntity = ExecuteRequestEntity.builder()
-                .aiAgentId(agentAutoRequestDTO.getAiAgentId())
-                .userMessage(agentAutoRequestDTO.getUserMessage())
-                .sessionId(agentAutoRequestDTO.getSessionId())
-                .maxStep(agentAutoRequestDTO.getMaxStep())
+                .aiAgentId(agentRequestDTO.getAiAgentId())
+                .userMessage(agentRequestDTO.getUserMessage())
+                .sessionId(agentRequestDTO.getSessionId())
+                .maxStep(agentRequestDTO.getMaxStep())
                 .build();
 
         threadPoolExecutor.execute(() -> {
             try {
-                executeAutoStrategy.execute(executeRequestEntity, sseEmitter);
+                executeLoopStrategy.execute(executeRequestEntity, sseEmitter);
             } catch (Exception e) {
                 try {
                     log.error("【Agent 执行】error={}", e.getMessage(), e);

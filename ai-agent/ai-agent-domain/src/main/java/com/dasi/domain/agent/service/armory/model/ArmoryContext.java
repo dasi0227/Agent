@@ -1,6 +1,5 @@
-package com.dasi.domain.agent.service.execute.factory;
+package com.dasi.domain.agent.service.armory.model;
 
-import com.dasi.domain.agent.model.vo.AiFlowVO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,21 +12,7 @@ import java.util.Map;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ExecuteDynamicContext {
-
-    private int step;
-
-    private Boolean completed;
-
-    private int maxStep;
-
-    private String originalTask;
-
-    private String currentTask;
-
-    private StringBuilder executionHistory;
-
-    private Map<String, AiFlowVO> aiFlowVOMap;
+public class ArmoryContext {
 
     private Map<String, Object> dataObjects = new HashMap<>();
 

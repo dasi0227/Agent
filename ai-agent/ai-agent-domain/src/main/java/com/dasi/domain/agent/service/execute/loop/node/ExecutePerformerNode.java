@@ -1,11 +1,11 @@
-package com.dasi.domain.agent.service.execute.node;
+package com.dasi.domain.agent.service.execute.loop.node;
 
 import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.alibaba.fastjson2.JSONObject;
-import com.dasi.domain.agent.model.entity.ExecuteAutoResultEntity;
+import com.dasi.domain.agent.service.execute.loop.model.ExecuteLoopResult;
 import com.dasi.domain.agent.model.entity.ExecuteRequestEntity;
 import com.dasi.domain.agent.model.vo.AiFlowVO;
-import com.dasi.domain.agent.service.execute.factory.ExecuteDynamicContext;
+import com.dasi.domain.agent.service.execute.loop.model.ExecuteLoopContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
@@ -19,23 +19,23 @@ import static com.dasi.domain.agent.model.enumeration.AiType.CLIENT;
 public class ExecutePerformerNode extends AbstractExecuteNode {
 
     @Override
-    protected String doApply(ExecuteRequestEntity executeRequestEntity, ExecuteDynamicContext executeDynamicContext) throws Exception {
+    protected String doApply(ExecuteRequestEntity executeRequestEntity, ExecuteLoopContext executeLoopContext) throws Exception {
 
         // 获取客户端
-        AiFlowVO aiFlowVO = executeDynamicContext.getAiFlowVOMap().get(PERFORMER.getType());
+        AiFlowVO aiFlowVO = executeLoopContext.getAiFlowVOMap().get(PERFORMER.getType());
         String clientBeanName = CLIENT.getBeanName(aiFlowVO.getClientId());
         ChatClient performerClient = getBean(clientBeanName);
 
         // 获取提示词
         String flowPrompt = aiFlowVO.getFlowPrompt();
 
-        String analyzerResult = executeDynamicContext.getValue("analyzerResult");
+        String analyzerResult = executeLoopContext.getValue("analyzerResult");
         if (analyzerResult == null || analyzerResult.trim().isEmpty()) {
             analyzerResult = "[任务分析专家异常，请你自行决定执行策略]";
         }
 
         String performerPrompt = String.format(flowPrompt,
-                executeDynamicContext.getOriginalTask(),
+                executeLoopContext.getOriginalTask(),
                 analyzerResult
         );
 
@@ -65,39 +65,39 @@ public class ExecutePerformerNode extends AbstractExecuteNode {
         }
 
         log.info("\n=========================================== Performer ===========================================\n{}", performerJson);
-        parsePerformerResult(executeDynamicContext, performerObject, executeRequestEntity.getSessionId());
+        parsePerformerResult(executeLoopContext, performerObject, executeRequestEntity.getSessionId());
 
         // 保存客户端结果
-        executeDynamicContext.setValue("performerResult", performerJson);
+        executeLoopContext.setValue("performerResult", performerJson);
 
-        return router(executeRequestEntity, executeDynamicContext);
+        return router(executeRequestEntity, executeLoopContext);
     }
 
     @Override
-    public StrategyHandler<ExecuteRequestEntity, ExecuteDynamicContext, String> get(ExecuteRequestEntity executeRequestEntity, ExecuteDynamicContext executeDynamicContext) throws Exception {
+    public StrategyHandler<ExecuteRequestEntity, ExecuteLoopContext, String> get(ExecuteRequestEntity executeRequestEntity, ExecuteLoopContext executeLoopContext) throws Exception {
         return getBean("executeSupervisorNode");
     }
 
-    private void parsePerformerResult(ExecuteDynamicContext executeDynamicContext, JSONObject performerObject, String sessionId) {
+    private void parsePerformerResult(ExecuteLoopContext executeLoopContext, JSONObject performerObject, String sessionId) {
         if (performerObject == null) {
             return;
         }
-        sendPerformerResult(executeDynamicContext, PERFORMER.getExceptionType(), performerObject.getString(PERFORMER.getExceptionType()), sessionId);
-        sendPerformerResult(executeDynamicContext, PERFORMER_TARGET.getType(), performerObject.getString(PERFORMER_TARGET.getType()), sessionId);
-        sendPerformerResult(executeDynamicContext, PERFORMER_PROCESS.getType(), performerObject.getString(PERFORMER_PROCESS.getType()), sessionId);
-        sendPerformerResult(executeDynamicContext, PERFORMER_RESULT.getType(), performerObject.getString(PERFORMER_RESULT.getType()), sessionId);
+        sendPerformerResult(executeLoopContext, PERFORMER.getExceptionType(), performerObject.getString(PERFORMER.getExceptionType()), sessionId);
+        sendPerformerResult(executeLoopContext, PERFORMER_TARGET.getType(), performerObject.getString(PERFORMER_TARGET.getType()), sessionId);
+        sendPerformerResult(executeLoopContext, PERFORMER_PROCESS.getType(), performerObject.getString(PERFORMER_PROCESS.getType()), sessionId);
+        sendPerformerResult(executeLoopContext, PERFORMER_RESULT.getType(), performerObject.getString(PERFORMER_RESULT.getType()), sessionId);
     }
 
-    private void sendPerformerResult(ExecuteDynamicContext executeDynamicContext, String sectionType, String sectionContent, String sessionId) {
+    private void sendPerformerResult(ExecuteLoopContext executeLoopContext, String sectionType, String sectionContent, String sessionId) {
         if (!sectionType.isEmpty() && sectionContent != null && !sectionContent.isEmpty()) {
-            ExecuteAutoResultEntity executeAutoResultEntity = ExecuteAutoResultEntity.createPerformerResult(
+            ExecuteLoopResult executeLoopResult = ExecuteLoopResult.createPerformerResult(
                     sectionType,
                     sectionContent,
-                    executeDynamicContext.getStep(),
+                    executeLoopContext.getStep(),
                     sessionId
             );
 
-            sendSseResult(executeDynamicContext, executeAutoResultEntity);
+            sendSseResult(executeLoopContext, executeLoopResult);
         }
     }
 
