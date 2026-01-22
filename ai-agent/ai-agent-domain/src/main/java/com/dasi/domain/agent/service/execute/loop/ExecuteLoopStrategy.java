@@ -1,10 +1,9 @@
 package com.dasi.domain.agent.service.execute.loop;
 
-import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.dasi.domain.agent.model.entity.ExecuteRequestEntity;
+import com.dasi.domain.agent.model.entity.ExecuteResponseEntity;
 import com.dasi.domain.agent.service.execute.ExecuteContext;
 import com.dasi.domain.agent.service.execute.IExecuteStrategy;
-import com.dasi.domain.agent.model.entity.ExecuteResponseEntity;
 import com.dasi.domain.agent.service.execute.loop.node.ExecuteLoopRootNode;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -17,10 +16,6 @@ public class ExecuteLoopStrategy implements IExecuteStrategy {
 
     @Resource
     private ExecuteLoopRootNode executeLoopRootNode;
-
-    public StrategyHandler<ExecuteRequestEntity, ExecuteContext, String> getExecuteRootNode() {
-        return executeLoopRootNode;
-    }
 
     @Override
     public void execute(ExecuteRequestEntity executeRequestEntity, SseEmitter sseEmitter) throws Exception {
@@ -39,6 +34,12 @@ public class ExecuteLoopStrategy implements IExecuteStrategy {
         } catch (Exception e) {
             log.error("【Agent 执行】error={}", e.getMessage(), e);
         }
+
+    }
+
+    @Override
+    public String getType() {
+        return "loop";
     }
 
 }

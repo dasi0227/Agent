@@ -9,6 +9,10 @@ import java.util.List;
 @ConfigurationProperties(prefix = "agent",  ignoreInvalidFields = true)
 public class AgentProperties {
 
-    private List<String> initClientIdList;
+    private Boolean enable;
+
+    private List<String> modelIdList;
+
+    private List<String> clientIdList;
 
 }

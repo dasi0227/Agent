@@ -11,12 +11,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 
+import static com.dasi.domain.agent.model.enumeration.AiClientType.ANALYZER;
+import static com.dasi.domain.agent.model.enumeration.AiClientType.PERFORMER;
+import static com.dasi.domain.agent.model.enumeration.AiClientType.SUMMARIZER;
 import static com.dasi.domain.agent.model.enumeration.AiClientType.SUPERVISOR;
 import static com.dasi.domain.agent.model.enumeration.AiSectionType.*;
 import static com.dasi.domain.agent.model.enumeration.AiType.CLIENT;
 
 @Slf4j
-@Service(value = "executeSupervisorNode")
+@Service(value = "supervisorNode")
 public class ExecuteSupervisorNode extends AbstractExecuteNode {
 
     @Override
@@ -25,8 +28,17 @@ public class ExecuteSupervisorNode extends AbstractExecuteNode {
         String supervisorJson;
         JSONObject supervisorObject;
 
-        try {
+        String analyzerResponse = executeContext.getValue(ANALYZER.getContextKey());
+        String performerResponse = executeContext.getValue(PERFORMER.getContextKey());
 
+        if (analyzerResponse == null || analyzerResponse.trim().isEmpty()) {
+            analyzerResponse = "[任务分析专家异常，请你依据用户原始需求分析]";
+        }
+        if (performerResponse == null || performerResponse.trim().isEmpty()) {
+            performerResponse = "[任务执行专家异常，请你依据用户原始需求分析]";
+        }
+
+        try {
             // 获取客户端
             AiFlowVO aiFlowVO = executeContext.getAiFlowVOMap().get(SUPERVISOR.getType());
             String clientBeanName = CLIENT.getBeanName(aiFlowVO.getClientId());
@@ -34,26 +46,14 @@ public class ExecuteSupervisorNode extends AbstractExecuteNode {
 
             // 获取提示词
             String flowPrompt = aiFlowVO.getFlowPrompt();
-
-            String analyzerResult = executeContext.getValue("analyzerResult");
-            String performerResult = executeContext.getValue("performerResult");
-
-            if (analyzerResult == null || analyzerResult.trim().isEmpty()) {
-                analyzerResult = "[任务分析专家异常，请你依据用户原始需求分析]";
-            }
-            if (performerResult == null || performerResult.trim().isEmpty()) {
-                performerResult = "[任务执行专家异常，请你依据用户原始需求分析]";
-            }
-
             String supervisorPrompt = String.format(flowPrompt,
                     executeContext.getUserMessage(),
-                    analyzerResult,
-                    performerResult
+                    analyzerResponse,
+                    performerResponse
             );
 
-
             // 获取客户端结果
-            String supervisorResult = supervisorClient
+            String supervisorResponse = supervisorClient
                     .prompt(supervisorPrompt)
                     .advisors(a -> a
                             .param(CHAT_MEMORY_CONVERSATION_ID_KEY, executeRequestEntity.getSessionId())
@@ -62,42 +62,25 @@ public class ExecuteSupervisorNode extends AbstractExecuteNode {
                     .content();
 
             // 解析客户端结果
-            supervisorJson = extractJson(supervisorResult);
+            supervisorJson = extractJson(supervisorResponse, "{}");
             supervisorObject = parseJsonObject(supervisorJson);
             if (supervisorObject == null) {
                 throw new IllegalStateException("Supervisor 结果解析为空");
             }
 
-            // 更新客户端历史
-            String executionHistory = String.format("""
-                        === 第 %d 轮执行记录 ===
-                        【任务分析专家】
-                        %s
-                        【任务执行专家】
-                        %s
-                        【任务监督专家】
-                        %s
-                        """,
-                    executeContext.getRound(),
-                    analyzerResult,
-                    performerResult,
-                    supervisorJson
-            );
-
-            executeContext.getExecutionHistory().append(executionHistory);
-            executeContext.setRound(executeContext.getRound() + 1);
-
         } catch (Exception e) {
             log.error("【执行节点】ExecuteSupervisorNode：error={}", e.getMessage(), e);
-            supervisorObject = buildExceptionResult(SUPERVISOR.getExceptionType(), e.getMessage());
+            supervisorObject = buildExceptionObject(SUPERVISOR.getExceptionType(), e.getMessage());
             supervisorJson = supervisorObject.toJSONString();
         }
 
         log.info("\n=========================================== Supervisor ===========================================\n{}", supervisorJson);
-        parseSupervisorResult(executeContext, supervisorObject, executeRequestEntity.getSessionId());
+
+        // 发送客户端结果
+        parseSupervisorResponse(executeContext, supervisorObject, executeRequestEntity.getSessionId());
 
         // 保存客户端结果
-        executeContext.setValue("supervisorResult", supervisorJson);
+        executeContext.setValue(SUPERVISOR.getContextKey(), supervisorJson);
 
         // 检查客户端结果
         String supervisorStatus = supervisorObject.getString(SUPERVISOR_STATUS.getType());
@@ -114,14 +97,33 @@ public class ExecuteSupervisorNode extends AbstractExecuteNode {
             executeContext.setCompleted(true);
         }
 
+        // 更新客户端历史
+        String executionHistory = String.format("""
+                        === 第 %d 轮执行记录 ===
+                        【任务分析专家】
+                        %s
+                        【任务执行专家】
+                        %s
+                        【任务监督专家】
+                        %s
+                        """,
+                executeContext.getRound(),
+                analyzerResponse,
+                performerResponse,
+                supervisorJson
+        );
+
+        executeContext.getExecutionHistory().append(executionHistory);
+        executeContext.setRound(executeContext.getRound() + 1);
+
         return router(executeRequestEntity, executeContext);
     }
 
     @Override
     public StrategyHandler<ExecuteRequestEntity, ExecuteContext, String> get(ExecuteRequestEntity executeRequestEntity, ExecuteContext executeContext) throws Exception {
 
-        ExecuteAnalyzerNode executeAnalyzerNode = getBean("executeAnalyzerNode");
-        ExecuteSummarizerNode executeSummarizerNode = getBean("executeSummarizerNode");
+        ExecuteAnalyzerNode executeAnalyzerNode = getBean(ANALYZER.getNodeName());
+        ExecuteSummarizerNode executeSummarizerNode = getBean(SUMMARIZER.getNodeName());
 
         if (executeContext.getCompleted() == true) {
             log.info("【执行节点】ExecuteSupervisorNode：任务监督达标");
@@ -134,18 +136,18 @@ public class ExecuteSupervisorNode extends AbstractExecuteNode {
         }
     }
 
-    private void parseSupervisorResult(ExecuteContext executeContext, JSONObject supervisorObject, String sessionId) {
+    private void parseSupervisorResponse(ExecuteContext executeContext, JSONObject supervisorObject, String sessionId) {
         if (supervisorObject == null) {
             return;
         }
-        sendSupervisorResult(executeContext, SUPERVISOR.getExceptionType(), supervisorObject.getString(SUPERVISOR.getExceptionType()), sessionId);
-        sendSupervisorResult(executeContext, SUPERVISOR_ISSUE.getType(), supervisorObject.getString(SUPERVISOR_ISSUE.getType()), sessionId);
-        sendSupervisorResult(executeContext, SUPERVISOR_SUGGESTION.getType(), supervisorObject.getString(SUPERVISOR_SUGGESTION.getType()), sessionId);
-        sendSupervisorResult(executeContext, SUPERVISOR_SCORE.getType(), supervisorObject.getString(SUPERVISOR_SCORE.getType()), sessionId);
-        sendSupervisorResult(executeContext, SUPERVISOR_STATUS.getType(), supervisorObject.getString(SUPERVISOR_STATUS.getType()), sessionId);
+        sendSupervisorResponse(executeContext, SUPERVISOR.getExceptionType(), supervisorObject.getString(SUPERVISOR.getExceptionType()), sessionId);
+        sendSupervisorResponse(executeContext, SUPERVISOR_ISSUE.getType(), supervisorObject.getString(SUPERVISOR_ISSUE.getType()), sessionId);
+        sendSupervisorResponse(executeContext, SUPERVISOR_SUGGESTION.getType(), supervisorObject.getString(SUPERVISOR_SUGGESTION.getType()), sessionId);
+        sendSupervisorResponse(executeContext, SUPERVISOR_SCORE.getType(), supervisorObject.getString(SUPERVISOR_SCORE.getType()), sessionId);
+        sendSupervisorResponse(executeContext, SUPERVISOR_STATUS.getType(), supervisorObject.getString(SUPERVISOR_STATUS.getType()), sessionId);
     }
 
-    private void sendSupervisorResult(ExecuteContext executeContext, String sectionType, String sectionContent, String sessionId) {
+    private void sendSupervisorResponse(ExecuteContext executeContext, String sectionType, String sectionContent, String sessionId) {
         if (!sectionType.isEmpty() && sectionContent != null && !sectionContent.isEmpty()) {
             ExecuteResponseEntity executeResponseEntity = ExecuteResponseEntity.createSupervisorResponse(
                     sectionType,
@@ -154,7 +156,7 @@ public class ExecuteSupervisorNode extends AbstractExecuteNode {
                     sessionId
             );
 
-            sendSseResult(executeContext, executeResponseEntity);
+            sendSseMessage(executeContext, executeResponseEntity);
         }
     }
 

@@ -26,4 +26,12 @@ public enum AiClientType {
         return this.type + "_exception";
     }
 
+    public String getContextKey() {
+        return this.type + "_response";
+    }
+
+    public String getNodeName() {
+        return this.type + "Node";
+    }
+
 }

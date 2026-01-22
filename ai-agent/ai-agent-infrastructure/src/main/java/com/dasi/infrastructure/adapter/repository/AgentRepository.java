@@ -491,7 +491,6 @@ public class AgentRepository implements IAgentRepository {
             AiFlowVO aiFlowVO = AiFlowVO.builder()
                         .agentId(aiFlow.getAgentId())
                         .clientId(aiFlow.getClientId())
-                        .clientName(aiFlow.getClientName())
                         .clientType(aiFlow.getClientType())
                         .flowPrompt(aiFlow.getFlowPrompt())
                         .flowSeq(aiFlow.getFlowSeq())

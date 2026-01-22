@@ -6,4 +6,6 @@ public interface IArmoryStrategy {
 
     void armory(ArmoryRequestEntity armoryRequestEntity, ArmoryContext dynamicContext);
 
+    String getType();
+
 }

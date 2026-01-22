@@ -5,6 +5,7 @@ import com.dasi.domain.agent.model.entity.ArmoryRequestEntity;
 import com.dasi.domain.agent.service.armory.ArmoryContext;
 import com.dasi.domain.agent.service.armory.ArmoryStrategyFactory;
 import com.dasi.domain.agent.service.armory.IArmoryStrategy;
+import com.dasi.infrastructure.persistent.dao.IAiClientDao;
 import com.dasi.infrastructure.persistent.dao.IAiFlowDao;
 import com.dasi.infrastructure.persistent.dao.IAiPromptDao;
 import com.dasi.properties.AgentProperties;
@@ -34,6 +35,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static com.dasi.domain.agent.model.enumeration.AiType.CLIENT;
+import static com.dasi.domain.agent.model.enumeration.AiType.MODEL;
 
 @Slf4j
 @Configuration
@@ -80,6 +82,9 @@ public class AgentConfig implements ApplicationListener<ApplicationReadyEvent> {
     private ArmoryStrategyFactory armoryStrategyFactory;
 
     @Autowired
+    private IAiClientDao aiClientDao;
+
+    @Autowired
     private IAiPromptDao aiPromptDao;
 
     @Autowired
@@ -87,41 +92,21 @@ public class AgentConfig implements ApplicationListener<ApplicationReadyEvent> {
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
-
-        try {
-            List<String> clientIdList = agentProperties.getInitClientIdList();
-            if (clientIdList == null || clientIdList.isEmpty()) {
-                return;
-            }
-
-            loadPrompt(clientIdList);
-
-            ArmoryRequestEntity armoryRequestEntity = ArmoryRequestEntity.builder()
-                    .armoryType(CLIENT.getType())
-                    .idList(clientIdList)
-                    .build();
-            ArmoryContext armoryContext = new ArmoryContext();
-
-            IArmoryStrategy loadStrategy = armoryStrategyFactory.getArmoryStrategy(armoryRequestEntity.getArmoryType());
-            if (loadStrategy == null) {
-                log.warn("【初始化配置】未找到装配策略：armoryType={}", armoryRequestEntity.getArmoryType());
-                return;
-            }
-            loadStrategy.armory(armoryRequestEntity, armoryContext);
-
-            StrategyHandler<ArmoryRequestEntity, ArmoryContext, String> armoryRootNode = armoryStrategyFactory.getArmoryRootNode();
-            armoryRootNode.apply(armoryRequestEntity, armoryContext);
-
-        } catch (Exception e) {
-            log.error("【初始化配置】客户端初始化失败：error={}", e.getMessage(), e);
-            throw new RuntimeException();
+        loadPrompt();
+        if (Boolean.TRUE.equals(agentProperties.getEnable())) {
+            armoryAuto(agentProperties.getModelIdList(), MODEL.getType());
+            armoryAuto(agentProperties.getClientIdList(), CLIENT.getType());
         }
-
     }
 
-    private void loadPrompt(List<String> clientIdList) {
+    private void loadPrompt() {
 
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        List<String> clientIdList = aiClientDao.queryClientIdList();
+
+        if (clientIdList == null || clientIdList.isEmpty()) {
+            return;
+        }
 
         for (String clientId : clientIdList) {
             try {
@@ -157,7 +142,35 @@ public class AgentConfig implements ApplicationListener<ApplicationReadyEvent> {
                 throw new IllegalStateException();
             }
         }
+    }
 
+    private void armoryAuto(List<String> idList, String armoryType) {
+
+        try {
+
+            if (idList == null || idList.isEmpty()) {
+                return;
+            }
+
+            IArmoryStrategy loadStrategy = armoryStrategyFactory.getArmoryStrategyByType(armoryType);
+            StrategyHandler<ArmoryRequestEntity, ArmoryContext, String> armoryRootNode = armoryStrategyFactory.getArmoryRootNode();
+            if (loadStrategy == null || armoryRootNode == null) {
+                return;
+            }
+
+            ArmoryRequestEntity armoryRequestEntity = ArmoryRequestEntity.builder()
+                    .armoryType(armoryType)
+                    .idList(idList)
+                    .build();
+            ArmoryContext armoryContext = new ArmoryContext();
+
+            loadStrategy.armory(armoryRequestEntity, armoryContext);
+            armoryRootNode.apply(armoryRequestEntity, armoryContext);
+
+        } catch (Exception e) {
+            log.error("【初始化配置】自动装配客户端失败：error={}", e.getMessage(), e);
+            throw new RuntimeException();
+        }
     }
 
 }

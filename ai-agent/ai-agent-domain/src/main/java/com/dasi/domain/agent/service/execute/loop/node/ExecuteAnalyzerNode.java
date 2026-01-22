@@ -12,11 +12,13 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 
 import static com.dasi.domain.agent.model.enumeration.AiClientType.ANALYZER;
+import static com.dasi.domain.agent.model.enumeration.AiClientType.PERFORMER;
+import static com.dasi.domain.agent.model.enumeration.AiClientType.SUMMARIZER;
 import static com.dasi.domain.agent.model.enumeration.AiSectionType.*;
 import static com.dasi.domain.agent.model.enumeration.AiType.CLIENT;
 
 @Slf4j
-@Service(value = "executeAnalyzerNode")
+@Service(value = "analyzerNode")
 public class ExecuteAnalyzerNode extends AbstractExecuteNode {
 
     @Override
@@ -24,6 +26,11 @@ public class ExecuteAnalyzerNode extends AbstractExecuteNode {
 
         String analyzerJson;
         JSONObject analyzerObject;
+
+        String executionHistory = executeContext.getExecutionHistory().toString();
+        if (executionHistory.isEmpty()) {
+            executionHistory = "[暂无记录]";
+        }
 
         try {
 
@@ -34,12 +41,6 @@ public class ExecuteAnalyzerNode extends AbstractExecuteNode {
 
             // 获取提示词
             String flowPrompt = aiFlowVO.getFlowPrompt();
-
-            String executionHistory = executeContext.getExecutionHistory().toString();
-            if (executionHistory.isEmpty()) {
-                executionHistory = "[暂无记录]";
-            }
-
             String analyzerPrompt = String.format(flowPrompt,
                     executeContext.getRound(),
                     executeContext.getMaxRound(),
@@ -49,16 +50,16 @@ public class ExecuteAnalyzerNode extends AbstractExecuteNode {
             );
 
             // 获取客户端结果
-            String analyzerResult = analyzerClient
+            String analyzerResponse = analyzerClient
                     .prompt(analyzerPrompt)
                     .advisors(a -> a
                             .param(CHAT_MEMORY_CONVERSATION_ID_KEY, executeRequestEntity.getSessionId())
-                            .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 32768))
+                            .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 1024))
                     .call()
                     .content();
 
             // 解析客户端结果
-            analyzerJson = extractJson(analyzerResult);
+            analyzerJson = extractJson(analyzerResponse, "{}");
             analyzerObject = parseJsonObject(analyzerJson);
             if (analyzerObject == null) {
                 throw new IllegalStateException("Analyzer 结果解析为空");
@@ -66,15 +67,17 @@ public class ExecuteAnalyzerNode extends AbstractExecuteNode {
 
         } catch (Exception e) {
             log.error("【执行节点】ExecuteAnalyzerNode：error={}", e.getMessage(), e);
-            analyzerObject = buildExceptionResult(ANALYZER.getExceptionType(), e.getMessage());
+            analyzerObject = buildExceptionObject(ANALYZER.getExceptionType(), e.getMessage());
             analyzerJson = analyzerObject.toJSONString();
         }
 
         log.info("\n=========================================== Analyzer ===========================================\n{}", analyzerJson);
-        parseAnalyzerResult(executeContext, analyzerObject, executeRequestEntity.getSessionId());
+
+        // 发送客户端结果
+        parseAnalyzerResponse(executeContext, analyzerObject, executeRequestEntity.getSessionId());
 
         // 保存客户端结果
-        executeContext.setValue("analyzerResult", analyzerJson);
+        executeContext.setValue(ANALYZER.getContextKey(), analyzerJson);
 
         // 检查客户端结果
         String analyzerStatus = analyzerObject.getString(ANALYZER_STATUS.getType());
@@ -90,8 +93,8 @@ public class ExecuteAnalyzerNode extends AbstractExecuteNode {
     @Override
     public StrategyHandler<ExecuteRequestEntity, ExecuteContext, String> get(ExecuteRequestEntity executeRequestEntity, ExecuteContext executeContext) throws Exception {
 
-        ExecutePerformerNode executePerformerNode = getBean("executePerformerNode");
-        ExecuteSummarizerNode executeSummarizerNode = getBean("executeSummarizerNode");
+        ExecutePerformerNode executePerformerNode = getBean(PERFORMER.getNodeName());
+        ExecuteSummarizerNode executeSummarizerNode = getBean(SUMMARIZER.getNodeName());
 
         if (executeContext.getCompleted() == true) {
             log.info("【执行节点】ExecuteAnalyzerNode：任务已完成");
@@ -102,19 +105,19 @@ public class ExecuteAnalyzerNode extends AbstractExecuteNode {
 
     }
 
-    private void parseAnalyzerResult(ExecuteContext executeContext, JSONObject analyzerObject, String sessionId) {
+    private void parseAnalyzerResponse(ExecuteContext executeContext, JSONObject analyzerObject, String sessionId) {
         if (analyzerObject == null) {
             return;
         }
-        sendAnalyzerResult(executeContext, ANALYZER.getExceptionType(), analyzerObject.getString(ANALYZER.getExceptionType()), sessionId);
-        sendAnalyzerResult(executeContext, ANALYZER_DEMAND.getType(), analyzerObject.getString(ANALYZER_DEMAND.getType()), sessionId);
-        sendAnalyzerResult(executeContext, ANALYZER_HISTORY.getType(), analyzerObject.getString(ANALYZER_HISTORY.getType()), sessionId);
-        sendAnalyzerResult(executeContext, ANALYZER_STRATEGY.getType(), analyzerObject.getString(ANALYZER_STRATEGY.getType()), sessionId);
-        sendAnalyzerResult(executeContext, ANALYZER_PROGRESS.getType(), analyzerObject.getString(ANALYZER_PROGRESS.getType()), sessionId);
-        sendAnalyzerResult(executeContext, ANALYZER_STATUS.getType(), analyzerObject.getString(ANALYZER_STATUS.getType()), sessionId);
+        sendAnalyzerResponse(executeContext, ANALYZER.getExceptionType(), analyzerObject.getString(ANALYZER.getExceptionType()), sessionId);
+        sendAnalyzerResponse(executeContext, ANALYZER_DEMAND.getType(), analyzerObject.getString(ANALYZER_DEMAND.getType()), sessionId);
+        sendAnalyzerResponse(executeContext, ANALYZER_HISTORY.getType(), analyzerObject.getString(ANALYZER_HISTORY.getType()), sessionId);
+        sendAnalyzerResponse(executeContext, ANALYZER_STRATEGY.getType(), analyzerObject.getString(ANALYZER_STRATEGY.getType()), sessionId);
+        sendAnalyzerResponse(executeContext, ANALYZER_PROGRESS.getType(), analyzerObject.getString(ANALYZER_PROGRESS.getType()), sessionId);
+        sendAnalyzerResponse(executeContext, ANALYZER_STATUS.getType(), analyzerObject.getString(ANALYZER_STATUS.getType()), sessionId);
     }
 
-    private void sendAnalyzerResult(ExecuteContext executeContext, String sectionType, String sectionContent, String sessionId) {
+    private void sendAnalyzerResponse(ExecuteContext executeContext, String sectionType, String sectionContent, String sessionId) {
         if (!sectionType.isEmpty() && sectionContent != null && !sectionContent.isEmpty()) {
             ExecuteResponseEntity executeResponseEntity = ExecuteResponseEntity.createAnalyzerResponse(
                     sectionType,
@@ -123,7 +126,7 @@ public class ExecuteAnalyzerNode extends AbstractExecuteNode {
                     sessionId
             );
 
-            sendSseResult(executeContext, executeResponseEntity);
+            sendSseMessage(executeContext, executeResponseEntity);
         }
     }
 

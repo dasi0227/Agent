@@ -6,10 +6,14 @@ import com.dasi.domain.agent.model.vo.AiFlowVO;
 import com.dasi.domain.agent.service.execute.AbstractExecuteNode;
 import com.dasi.domain.agent.service.execute.ExecuteContext;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
+import static com.dasi.domain.agent.model.enumeration.AiClientType.ANALYZER;
+
 @Slf4j
+@Service
 public class ExecuteLoopRootNode extends AbstractExecuteNode {
 
     @Override
@@ -22,7 +26,7 @@ public class ExecuteLoopRootNode extends AbstractExecuteNode {
         // 当前轮数
         executeContext.setRound(1);
         // 最大轮数
-        executeContext.setMaxRound(executeRequestEntity.getMaxStep());
+        executeContext.setMaxRound(executeRequestEntity.getMaxRound());
         // 是否完成
         executeContext.setCompleted(false);
         // 执行历史
@@ -36,7 +40,7 @@ public class ExecuteLoopRootNode extends AbstractExecuteNode {
 
     @Override
     public StrategyHandler<ExecuteRequestEntity, ExecuteContext, String> get(ExecuteRequestEntity executeRequestEntity, ExecuteContext executeContext) throws Exception {
-        return getBean("executeAnalyzerNode");
+        return getBean(ANALYZER.getNodeName());
     }
 
 }

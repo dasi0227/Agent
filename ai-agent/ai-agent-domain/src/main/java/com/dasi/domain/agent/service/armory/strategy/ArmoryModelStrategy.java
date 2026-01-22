@@ -58,4 +58,9 @@ public class ArmoryModelStrategy implements IArmoryStrategy {
 
     }
 
+    @Override
+    public String getType() {
+        return "model";
+    }
+
 }

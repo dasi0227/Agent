@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
+import static com.dasi.domain.agent.model.enumeration.AiClientType.INSPECTOR;
+
 @Slf4j
 @Service
 public class ExecuteStepRootNode extends AbstractExecuteNode {
@@ -32,7 +34,7 @@ public class ExecuteStepRootNode extends AbstractExecuteNode {
 
     @Override
     public StrategyHandler<ExecuteRequestEntity, ExecuteContext, String> get(ExecuteRequestEntity executeRequestEntity, ExecuteContext executeContext) throws Exception {
-        return getBean("executeInspectorNode");
+        return getBean(INSPECTOR.getNodeName());
     }
 
 }

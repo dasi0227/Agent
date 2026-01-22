@@ -19,7 +19,7 @@ import static com.dasi.domain.agent.model.enumeration.AiType.*;
 @Slf4j
 @Service("armoryClientStrategy")
 public class ArmoryClientStrategy implements IArmoryStrategy {
-    
+
     @Resource
     private IAgentRepository agentRepository;
 
@@ -96,6 +96,11 @@ public class ArmoryClientStrategy implements IArmoryStrategy {
                 aiClientList.stream().map(AiClientVO::getClientId).toList(),
                 aiClientList.size());
 
+    }
+
+    @Override
+    public String getType() {
+        return "client";
     }
 
 }

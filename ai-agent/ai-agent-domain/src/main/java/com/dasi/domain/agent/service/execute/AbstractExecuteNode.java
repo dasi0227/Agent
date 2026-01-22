@@ -2,6 +2,7 @@ package com.dasi.domain.agent.service.execute;
 
 import cn.bugstack.wrench.design.framework.tree.AbstractMultiThreadStrategyRouter;
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.dasi.domain.agent.adapter.IAgentRepository;
 import com.dasi.domain.agent.model.entity.ExecuteResponseEntity;
@@ -33,7 +34,7 @@ public abstract class AbstractExecuteNode extends AbstractMultiThreadStrategyRou
         return (T) applicationContext.getBean(beanName);
     }
 
-    protected void sendSseResult(ExecuteContext executeContext, ExecuteResponseEntity executeResponseEntity) {
+    protected void sendSseMessage(ExecuteContext executeContext, ExecuteResponseEntity executeResponseEntity) {
 
         SseEmitter sseEmitter = executeContext.getValue("sseEmitter");
         if (sseEmitter == null) {
@@ -51,7 +52,7 @@ public abstract class AbstractExecuteNode extends AbstractMultiThreadStrategyRou
 
     }
 
-    protected String extractJson(String content) {
+    protected String extractJson(String content, String schema) {
         try {
             // 1) 去 think + 去代码块围栏
             String cleaned = content
@@ -61,9 +62,15 @@ public abstract class AbstractExecuteNode extends AbstractMultiThreadStrategyRou
                     .trim();
 
             // 2) 提取 JSON 块
-            int start = cleaned.indexOf('{');
-            int end = cleaned.lastIndexOf('}');
-            cleaned = cleaned.substring(start, end + 1).trim();
+            if ("{}".equals(schema)) {
+                int start = cleaned.indexOf('{');
+                int end = cleaned.lastIndexOf('}');
+                cleaned = cleaned.substring(start, end + 1).trim();
+            } else if ("[]".equals(schema)) {
+                int start = cleaned.indexOf('[');
+                int end = cleaned.lastIndexOf(']');
+                cleaned = cleaned.substring(start, end + 1).trim();
+            }
 
             // 3) 更改冒号
             cleaned = cleaned
@@ -90,11 +97,26 @@ public abstract class AbstractExecuteNode extends AbstractMultiThreadStrategyRou
         }
     }
 
-    protected JSONObject buildExceptionResult(String key, String message) {
+    protected JSONArray parseJsonArray(String json) {
+        try {
+            return JSON.parseArray(json);
+        } catch (Exception e) {
+            log.warn("【Agent 执行】JSON 解析失败：{}", e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    protected JSONObject buildExceptionObject(String key, String message) {
         message = (message == null || message.isBlank()) ? "执行异常" : message;
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(key, message);
         return jsonObject;
+    }
+
+    protected JSONArray buildExceptionArray(String key, String message) {
+        JSONArray jsonArray = new JSONArray();
+        jsonArray.add(buildExceptionObject(key, message));
+        return jsonArray;
     }
 
 }
