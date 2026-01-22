@@ -5,7 +5,7 @@ import com.dasi.domain.agent.model.entity.ArmoryRequestEntity;
 import com.dasi.domain.agent.model.vo.AiApiVO;
 import com.dasi.domain.agent.model.vo.AiModelVO;
 import com.dasi.domain.agent.service.armory.IArmoryStrategy;
-import com.dasi.domain.agent.service.armory.model.ArmoryContext;
+import com.dasi.domain.agent.service.armory.ArmoryContext;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

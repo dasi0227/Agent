@@ -1,4 +1,4 @@
-package com.dasi.domain.agent.service.execute.loop.model;
+package com.dasi.domain.agent.service.execute;
 
 import com.dasi.domain.agent.model.vo.AiFlowVO;
 import lombok.AllArgsConstructor;
@@ -13,22 +13,35 @@ import java.util.Map;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ExecuteLoopContext {
+public class ExecuteContext {
 
-    private int step;
+    // ================== 适用于 Loop ==================
+    /** 轮次 */
+    private int round;
 
+    /** 最大轮次 */
+    private int maxRound;
+
+    /** 是否完成 */
     private Boolean completed;
 
-    private int maxStep;
-
-    private String originalTask;
-
+    /** 当前任务 */
     private String currentTask;
 
+    // ================== 适用于 Step ==================
+
+
+    // ================== 通用 ==================
+    /** 执行历史 */
     private StringBuilder executionHistory;
 
+    /** 用户需求 */
+    private String userMessage;
+
+    /** 执行工作流 */
     private Map<String, AiFlowVO> aiFlowVOMap;
 
+    // ================== 上下文存储 ==================
     private Map<String, Object> dataObjects = new HashMap<>();
 
     public <T> void setValue(String key, T value) {

@@ -1,4 +1,4 @@
-package com.dasi.domain.agent.service.armory.model;
+package com.dasi.domain.agent.service.armory.advisor;
 
 import org.springframework.ai.chat.client.ChatClientRequest;
 import org.springframework.ai.chat.client.ChatClientResponse;

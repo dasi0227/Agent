@@ -1,4 +1,4 @@
-package com.dasi.domain.agent.service.armory.model;
+package com.dasi.domain.agent.service.armory;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

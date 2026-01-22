@@ -9,10 +9,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public enum AiClientType {
 
-    ANALYZER("任务分析和状态判断", "analyzer"),
-    PERFORMER("具体任务执行", "performer"),
-    SUPERVISOR("质量检查和优化", "supervisor"),
-    SUMMARIZER("任务总结记录", "summarizer"),
+    ANALYZER("任务分析专家", "analyzer"),
+    PERFORMER("任务执行专家", "performer"),
+    SUPERVISOR("任务监督专家", "supervisor"),
+    SUMMARIZER("任务总结专家", "summarizer"),
+    INSPECTOR("任务审查专家", "inspector"),
+    PLANNER("任务规划专家", "planner"),
+    RUNNER("任务运行专家", "runner"),
     ;
 
     private String name;
