@@ -4,7 +4,7 @@ import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.dasi.domain.agent.model.entity.ArmoryRequestEntity;
 import com.dasi.domain.agent.model.vo.AiClientVO;
 import com.dasi.domain.agent.model.vo.AiPromptVO;
-import com.dasi.domain.agent.service.armory.model.ArmoryContext;
+import com.dasi.domain.agent.service.armory.ArmoryContext;
 import io.modelcontextprotocol.client.McpSyncClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;

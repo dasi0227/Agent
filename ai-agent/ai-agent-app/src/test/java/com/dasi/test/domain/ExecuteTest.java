@@ -3,9 +3,9 @@ package com.dasi.test.domain;
 import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.dasi.domain.agent.model.entity.ArmoryRequestEntity;
 import com.dasi.domain.agent.model.entity.ExecuteRequestEntity;
-import com.dasi.domain.agent.service.armory.model.ArmoryContext;
+import com.dasi.domain.agent.service.armory.ArmoryContext;
 import com.dasi.domain.agent.service.armory.ArmoryStrategyFactory;
-import com.dasi.domain.agent.service.execute.loop.model.ExecuteLoopContext;
+import com.dasi.domain.agent.service.execute.ExecuteContext;
 import com.dasi.domain.agent.service.execute.loop.ExecuteLoopStrategy;
 import com.dasi.infrastructure.persistent.dao.IAiPromptDao;
 import jakarta.annotation.Resource;
@@ -72,7 +72,7 @@ public class ExecuteTest {
 
         armoryStrategyHandler.apply(armoryRequestEntity, armoryContext);
 
-        StrategyHandler<ExecuteRequestEntity, ExecuteLoopContext, String> executeHandler = executeLoopStrategy.getExecuteRootNode();
+        StrategyHandler<ExecuteRequestEntity, ExecuteContext, String> executeHandler = executeLoopStrategy.getExecuteRootNode();
 
         ExecuteRequestEntity executeRequestEntity = new ExecuteRequestEntity();
         executeRequestEntity.setAiAgentId("agent_demo_1");
@@ -80,9 +80,9 @@ public class ExecuteTest {
         executeRequestEntity.setSessionId("session-id-" + System.currentTimeMillis());
         executeRequestEntity.setMaxStep(3);
 
-        ExecuteLoopContext executeLoopContext = new ExecuteLoopContext();
+        ExecuteContext executeContext = new ExecuteContext();
 
-        executeHandler.apply(executeRequestEntity, executeLoopContext);
+        executeHandler.apply(executeRequestEntity, executeContext);
     }
 
 }

@@ -1,11 +1,10 @@
-package com.dasi.domain.agent.service.execute.loop;
+package com.dasi.domain.agent.service.execute.step;
 
-import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.dasi.domain.agent.model.entity.ExecuteRequestEntity;
+import com.dasi.domain.agent.model.entity.ExecuteResponseEntity;
 import com.dasi.domain.agent.service.execute.ExecuteContext;
 import com.dasi.domain.agent.service.execute.IExecuteStrategy;
-import com.dasi.domain.agent.model.entity.ExecuteResponseEntity;
-import com.dasi.domain.agent.service.execute.loop.node.ExecuteLoopRootNode;
+import com.dasi.domain.agent.service.execute.step.node.ExecuteStepRootNode;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,14 +12,10 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Slf4j
 @Service
-public class ExecuteLoopStrategy implements IExecuteStrategy {
+public class ExecuteStepStrategy implements IExecuteStrategy {
 
     @Resource
-    private ExecuteLoopRootNode executeLoopRootNode;
-
-    public StrategyHandler<ExecuteRequestEntity, ExecuteContext, String> getExecuteRootNode() {
-        return executeLoopRootNode;
-    }
+    private ExecuteStepRootNode executeStepRootNode;
 
     @Override
     public void execute(ExecuteRequestEntity executeRequestEntity, SseEmitter sseEmitter) throws Exception {
@@ -28,8 +23,8 @@ public class ExecuteLoopStrategy implements IExecuteStrategy {
         ExecuteContext executeContext = new ExecuteContext();
         executeContext.setValue("sseEmitter", sseEmitter);
 
-        log.info("【Agent 执行】执行 LoopStrategy");
-        executeLoopRootNode.apply(executeRequestEntity, executeContext);
+        log.info("【Agent 执行】执行 StepStrategy");
+        executeStepRootNode.apply(executeRequestEntity, executeContext);
 
         try {
             ExecuteResponseEntity completeResult = ExecuteResponseEntity.createCompleteResponse("执行完成", executeRequestEntity.getSessionId());
@@ -40,5 +35,6 @@ public class ExecuteLoopStrategy implements IExecuteStrategy {
             log.error("【Agent 执行】error={}", e.getMessage(), e);
         }
     }
+
 
 }

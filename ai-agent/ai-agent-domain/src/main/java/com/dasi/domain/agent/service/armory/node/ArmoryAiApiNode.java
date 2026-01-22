@@ -3,7 +3,7 @@ package com.dasi.domain.agent.service.armory.node;
 import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.dasi.domain.agent.model.entity.ArmoryRequestEntity;
 import com.dasi.domain.agent.model.vo.AiApiVO;
-import com.dasi.domain.agent.service.armory.model.ArmoryContext;
+import com.dasi.domain.agent.service.armory.ArmoryContext;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.openai.api.OpenAiApi;
