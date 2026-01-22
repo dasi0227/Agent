@@ -46,7 +46,7 @@
         <span class="label">ExecuteType</span>
         <div class="toggle" id="executeType">
             <button type="button" class="mode-btn active" data-value="loop">loop</button>
-            <button type="button" class="mode-btn" data-value="round">round</button>
+            <button type="button" class="mode-btn" data-value="step">step</button>
         </div>
     </div>
     <div class="row" style="width:100%">
@@ -164,8 +164,10 @@
 
             const t5 = document.createElement('span');
             t5.className = 'tag';
-            const step = data && data.step != null ? data.step : '-';
-            t5.innerHTML = 'step: <strong>' + step + '</strong>';
+            const round = data && data.round != null
+                ? data.round
+                : (data && data.step != null ? data.step : '-');
+            t5.innerHTML = 'round: <strong>' + round + '</strong>';
 
             meta.appendChild(t3);
             meta.appendChild(t4);

@@ -89,7 +89,6 @@ public class ExecuteInspectorNode extends AbstractExecuteNode {
                 if (!sectionContent.isEmpty()) {
                     sendInspectorResponse(executeContext, INSPECTOR_MCP.getType(), sectionContent, sessionId);
                 }
-                log.info("MCP 工具\n：{}", sectionContent);
             }
         }
     }
