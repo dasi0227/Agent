@@ -7,4 +7,6 @@ public interface IExecuteStrategy {
 
     void execute(ExecuteRequestEntity executeRequestEntity, SseEmitter sseEmitter) throws Exception;
 
+    String getType();
+
 }

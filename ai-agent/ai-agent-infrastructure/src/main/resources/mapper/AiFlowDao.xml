@@ -5,7 +5,6 @@
     <resultMap id="dataMap" type="com.dasi.infrastructure.persistent.po.AiFlow">
         <result column="agent_id" property="agentId"/>
         <result column="client_id" property="clientId"/>
-        <result column="client_name" property="clientName"/>
         <result column="client_type" property="clientType"/>
         <result column="flow_prompt" property="flowPrompt"/>
         <result column="flow_seq" property="flowSeq"/>
@@ -14,7 +13,6 @@
     <select id="queryByAgentId" parameterType="java.lang.String" resultMap="dataMap">
         select agent_id,
                client_id,
-               client_name,
                client_type,
                flow_prompt,
                flow_seq

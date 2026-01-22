@@ -11,6 +11,9 @@
         input{min-width:320px;flex:1}
         button{cursor:pointer}
         button:disabled{opacity:.5;cursor:not-allowed}
+        .toggle{display:flex;gap:8px}
+        .toggle button{min-width:72px}
+        .toggle button.active{border-color:#34d399;color:#34d399;box-shadow:0 0 0 1px rgba(52,211,153,.35)}
         main{padding:12px 14px}
         .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
         .label{min-width:96px;color:#a8b3cf;font-size:12px}
@@ -29,7 +32,7 @@
 <header>
     <div class="row" style="width:100%">
         <span class="label">URL</span>
-        <input id="url" value="http://localhost:8001/api/v1/agent/agent/auto" />
+        <input id="url" value="http://localhost:8001/api/v1/agent/execute" />
     </div>
     <div class="row" style="width:100%">
         <span class="label">AgentId</span>
@@ -40,18 +43,28 @@
         <input id="sessionId" value="-s-1" placeholder="sessionId" />
     </div>
     <div class="row" style="width:100%">
-        <span class="label">MaxStep</span>
-        <input id="maxStep" type="number" value="2" placeholder="maxStep" />
+        <span class="label">ExecuteType</span>
+        <div class="toggle" id="executeType">
+            <button type="button" class="mode-btn active" data-value="loop">loop</button>
+            <button type="button" class="mode-btn" data-value="round">round</button>
+        </div>
+    </div>
+    <div class="row" style="width:100%">
+        <span class="label">MaxRound</span>
+        <input id="maxRound" type="number" value="2" placeholder="maxRound" />
     </div>
     <div class="row" style="width:100%">
         <span class="label">UserMessage</span>
-        <input id="userMessage" value="请在索引 test_log_2026.01.20 中找出所有 ERROR，按 @timestamp 排序；按 errorType 分组统计数量，并给出每类错误的处理建议。" placeholder="userMessage" />
+        <input id="userMessage" value="请总结今日AI新闻，今天是 2025.01.20" placeholder="userMessage" />
     </div>
     <div class="row" style="width:100%">
-        <span class="label">UserMessage Examples</span>
-        <button class="preset" data-message="请在索引 test_log_2026.01.20 中找出所有 ERROR，按 @timestamp 排序；按 errorType 分组统计数量，并给出每类错误的处理建议。">elk</button>
-        <button class="preset" data-message="请总结今日AI新闻，今天是 2025.01.20">web</button>
-        <button class="preset" data-message="请你从 Grafana 通过 uid=sbapmwalker 拉取完整仪表盘信息，分析最近 15 分钟订单服务的整体健康情况，给出最可能的瓶颈点与下一步排查方向">grafana</button>
+        <span class="label">Examples</span>
+        <div class="toggle">
+            <button class="preset mode-btn" data-message="请在索引 test_log_2026.01.20 中找出所有 ERROR，按 @timestamp 排序；按 errorType 分组统计数量，并给出每类错误的处理建议。">elk</button>
+            <button class="preset mode-btn active" data-message="请总结今日AI新闻，今天是 2025.01.20">web</button>
+            <button class="preset mode-btn" data-message="请你从 Grafana 通过 uid=sbapmwalker 拉取完整仪表盘信息，分析最近 15 分钟订单服务的整体健康情况，给出最可能的瓶颈点与下一步排查方向">grafana</button>
+            <button class="preset mode-btn" data-message="我需要你发布一篇关于 Java 和 Spring 的趣味小故事到 CSDN 上，要求文风具有贴吧老哥的味道，同时将返回的 url 和故事标题、概述同步发送到企业微信的应用消息，最后将前两步的返回数据保存到 Users/wyw/Downloads/ 下的 test.txt，你可以调用 MCP 工具实现，这是 userMessage">article</button>
+        </div>
     </div>
     <div class="row" style="width:100%">
         <button id="connect">Connect</button>
@@ -69,7 +82,8 @@
         const elUrl = document.getElementById('url');
         const elAiAgentId = document.getElementById('aiAgentId');
         const elSessionId = document.getElementById('sessionId');
-        const elMaxStep = document.getElementById('maxStep');
+        const elExecuteType = document.getElementById('executeType');
+        const elMaxRound = document.getElementById('maxRound');
         const elUserMessage = document.getElementById('userMessage');
         const elConnect = document.getElementById('connect');
         const elDisconnect = document.getElementById('disconnect');
@@ -187,18 +201,22 @@
             elDisconnect.disabled = false;
 
             const url = elUrl.value.trim();
-            const maxStep = parseInt(elMaxStep.value.trim(), 10);
-            if (Number.isNaN(maxStep)) {
+            const maxRound = parseInt(elMaxRound.value.trim(), 10);
+            if (Number.isNaN(maxRound)) {
                 elConnect.disabled = false;
                 elDisconnect.disabled = true;
                 return;
             }
 
+            const activeType = elExecuteType.querySelector('.mode-btn.active');
+            const executeType = activeType ? activeType.dataset.value : 'loop';
+
             const payloadObj = {
+                executeType: executeType,
                 aiAgentId: elAiAgentId.value.trim(),
                 userMessage: elUserMessage.value.trim(),
                 sessionId: elSessionId.value.trim(),
-                maxStep: maxStep
+                maxRound: maxRound
             };
 
             aborter = new AbortController();
@@ -258,8 +276,16 @@
         }
 
         elConnect.addEventListener('click', () => connectFetchPost());
+        elExecuteType.querySelectorAll('.mode-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                elExecuteType.querySelectorAll('.mode-btn').forEach((b) => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
         document.querySelectorAll('.preset').forEach((btn) => {
             btn.addEventListener('click', () => {
+                document.querySelectorAll('.preset').forEach((b) => b.classList.remove('active'));
+                btn.classList.add('active');
                 elUserMessage.value = btn.dataset.message || '';
             });
         });

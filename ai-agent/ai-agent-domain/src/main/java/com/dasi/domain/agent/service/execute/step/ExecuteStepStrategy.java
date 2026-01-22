@@ -36,5 +36,9 @@ public class ExecuteStepStrategy implements IExecuteStrategy {
         }
     }
 
+    @Override
+    public String getType() {
+        return "step";
+    }
 
 }

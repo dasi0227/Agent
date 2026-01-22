@@ -61,7 +61,7 @@ public class ArmoryAiMcpNode extends AbstractArmoryNode {
                 case STDIO -> {
                     AiMcpVO.StdioConfig stdioConfig = aiMcpVO.getStdioConfig();
                     Map<String, AiMcpVO.StdioConfig.Stdio> stdioMap = stdioConfig.getStdio();
-                    AiMcpVO.StdioConfig.Stdio stdio = stdioMap.get(aiMcpVO.getMcpName());
+                    AiMcpVO.StdioConfig.Stdio stdio = stdioMap.get(aiMcpVO.getMcpId());
 
                     ServerParameters serverParameters = ServerParameters
                             .builder(stdio.getCommand())

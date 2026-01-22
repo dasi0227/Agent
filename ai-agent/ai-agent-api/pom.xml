@@ -26,6 +26,12 @@
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-core</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.dasi</groupId>
+            <artifactId>ai-agent-types</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

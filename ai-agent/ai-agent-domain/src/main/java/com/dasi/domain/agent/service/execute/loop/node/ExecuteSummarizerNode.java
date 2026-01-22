@@ -16,7 +16,7 @@ import static com.dasi.domain.agent.model.enumeration.AiSectionType.SUMMARIZER_O
 import static com.dasi.domain.agent.model.enumeration.AiType.CLIENT;
 
 @Slf4j
-@Service(value = "executeSummarizerNode")
+@Service(value = "summarizerNode")
 public class ExecuteSummarizerNode extends AbstractExecuteNode {
 
     @Override
@@ -24,6 +24,11 @@ public class ExecuteSummarizerNode extends AbstractExecuteNode {
 
         String summarizerJson;
         JSONObject summarizerObject;
+
+        String executionHistory = executeContext.getExecutionHistory().toString();
+        if (executionHistory.isEmpty()) {
+            executionHistory = "[暂无记录]";
+        }
 
         try {
 
@@ -34,25 +39,19 @@ public class ExecuteSummarizerNode extends AbstractExecuteNode {
 
             // 获取提示词
             String flowPrompt = aiFlowVO.getFlowPrompt();
-
-            String executionHistory = executeContext.getExecutionHistory().toString();
-            if (executionHistory.isEmpty()) {
-                executionHistory = "[暂无记录]";
-            }
-
             String summarizerPrompt = String.format(flowPrompt,
                     executeContext.getUserMessage(),
                     executionHistory
             );
 
             // 获取客户端结果
-            String summarizerResult = summarizerClient
+            String summarizerResponse = summarizerClient
                     .prompt(summarizerPrompt)
                     .call()
                     .content();
 
             // 解析客户端结果
-            summarizerJson = extractJson(summarizerResult);
+            summarizerJson = extractJson(summarizerResponse, "{}");
             summarizerObject = parseJsonObject(summarizerJson);
             if (summarizerObject == null) {
                 throw new IllegalStateException("Summarizer 结果解析为空");
@@ -60,12 +59,14 @@ public class ExecuteSummarizerNode extends AbstractExecuteNode {
 
         } catch (Exception e) {
             log.error("【执行节点】ExecuteSummarizerNode：error={}", e.getMessage(), e);
-            summarizerObject = buildExceptionResult(SUMMARIZER.getExceptionType(), e.getMessage());
+            summarizerObject = buildExceptionObject(SUMMARIZER.getExceptionType(), e.getMessage());
             summarizerJson = summarizerObject.toJSONString();
         }
 
         log.info("\n=========================================== Summarizer ===========================================\n{}", summarizerJson);
-        parseSummarizerResult(executeContext, summarizerObject, executeRequestEntity.getSessionId());
+
+        // 发送客户端结果
+        parseSummarizerResponse(executeContext, summarizerObject, executeRequestEntity.getSessionId());
 
         return router(executeRequestEntity, executeContext);
     }
@@ -75,15 +76,15 @@ public class ExecuteSummarizerNode extends AbstractExecuteNode {
         return defaultStrategyHandler;
     }
 
-    private void parseSummarizerResult(ExecuteContext executeContext, JSONObject summarizerObject, String sessionId) {
+    private void parseSummarizerResponse(ExecuteContext executeContext, JSONObject summarizerObject, String sessionId) {
         if (summarizerObject == null) {
             return;
         }
-        sendSummarizerResult(executeContext, SUMMARIZER.getExceptionType(), summarizerObject.getString(SUMMARIZER.getExceptionType()), sessionId);
-        sendSummarizerResult(executeContext, SUMMARIZER_OVERVIEW.getType(), summarizerObject.getString(SUMMARIZER_OVERVIEW.getType()), sessionId);
+        sendSummarizerResponse(executeContext, SUMMARIZER.getExceptionType(), summarizerObject.getString(SUMMARIZER.getExceptionType()), sessionId);
+        sendSummarizerResponse(executeContext, SUMMARIZER_OVERVIEW.getType(), summarizerObject.getString(SUMMARIZER_OVERVIEW.getType()), sessionId);
     }
 
-    private void sendSummarizerResult(ExecuteContext executeContext, String sectionType, String sectionContent, String sessionId) {
+    private void sendSummarizerResponse(ExecuteContext executeContext, String sectionType, String sectionContent, String sessionId) {
         if (!sectionType.isEmpty() && sectionContent != null && !sectionContent.isEmpty()) {
             ExecuteResponseEntity executeResponseEntity = ExecuteResponseEntity.createSummarizerResponse(
                     sectionType,
@@ -92,7 +93,7 @@ public class ExecuteSummarizerNode extends AbstractExecuteNode {
                     sessionId
             );
 
-            sendSseResult(executeContext, executeResponseEntity);
+            sendSseMessage(executeContext, executeResponseEntity);
         }
     }
 

@@ -22,15 +22,8 @@ public class ArmoryStrategyFactory {
     public ArmoryStrategyFactory(Map<String, IArmoryStrategy> armoryStrategyMap) {
 
         for (Map.Entry<String, IArmoryStrategy> entry : armoryStrategyMap.entrySet()) {
-
-            if (entry.getKey().equals("armoryClientStrategy")) {
-                type2StrategyMap.put("client", entry.getValue());
-            } else if (entry.getKey().equals("armoryModelStrategy")) {
-                type2StrategyMap.put("model", entry.getValue());
-            } else {
-                log.warn("【初始化配置】未知装配策略: {}", entry.getKey());
-            }
-
+            IArmoryStrategy armoryStrategy = entry.getValue();
+            type2StrategyMap.put(armoryStrategy.getType(), armoryStrategy);
         }
 
     }
@@ -39,7 +32,7 @@ public class ArmoryStrategyFactory {
         return armoryRootNode;
     }
 
-    public IArmoryStrategy getArmoryStrategy(String type){
+    public IArmoryStrategy getArmoryStrategyByType(String type){
         return type2StrategyMap.get(type);
     }
 

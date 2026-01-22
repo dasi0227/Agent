@@ -18,4 +18,10 @@
         FROM ai_client
         WHERE client_id = #{clientId}
     </select>
+
+    <select id="queryClientIdList" resultType="java.lang.String">
+        SELECT
+            client_id
+        FROM ai_client;
+    </select>
 </mapper>

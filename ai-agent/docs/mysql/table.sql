@@ -159,7 +159,6 @@ CREATE TABLE `ai_flow`
     `id`          BIGINT      NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
     `agent_id`    VARCHAR(32) NOT NULL COMMENT '智能体ID',
     `client_id`   VARCHAR(32) NOT NULL COMMENT '客户端ID',
-    `client_name` VARCHAR(32) NOT NULL COMMENT '客户端名称',
     `client_type` VARCHAR(32) NOT NULL COMMENT '客户端类型',
     `flow_prompt` TEXT        NOT NULL COMMENT '工作流提示词',
     `flow_seq`    TINYINT     NOT NULL COMMENT '工作流顺序',

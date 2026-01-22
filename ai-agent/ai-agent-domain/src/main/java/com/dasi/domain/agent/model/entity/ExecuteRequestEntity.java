@@ -17,6 +17,6 @@ public class ExecuteRequestEntity {
 
     private String sessionId;
 
-    private Integer maxStep;
+    private Integer maxRound;
 
 }
