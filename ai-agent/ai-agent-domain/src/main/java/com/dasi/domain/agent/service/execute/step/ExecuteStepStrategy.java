@@ -23,7 +23,7 @@ public class ExecuteStepStrategy implements IExecuteStrategy {
         ExecuteContext executeContext = new ExecuteContext();
         executeContext.setValue("sseEmitter", sseEmitter);
 
-        log.info("【Agent 执行】执行 StepStrategy");
+        log.info("【Agent 执行】策略=StepStrategy");
         executeStepRootNode.apply(executeRequestEntity, executeContext);
 
         try {

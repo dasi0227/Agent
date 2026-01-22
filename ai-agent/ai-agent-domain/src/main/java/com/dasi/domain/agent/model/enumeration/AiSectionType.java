@@ -22,7 +22,8 @@ public enum AiSectionType {
     SUPERVISOR_SCORE("质量评分", "supervisor_score"),
     SUPERVISOR_STATUS("监督状态", "supervisor_status"),
     SUMMARIZER_OVERVIEW("任务总结", "summarizer_overview"),
-    INSPECTOR_MCP("MCP 工具", "inspector_mcp")
+    INSPECTOR_MCP("MCP 工具", "inspector_mcp"),
+    PLANNER_STEP("任务步骤", "planner_step"),
     ;
 
     private String name;

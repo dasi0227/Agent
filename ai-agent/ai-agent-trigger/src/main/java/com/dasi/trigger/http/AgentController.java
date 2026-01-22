@@ -90,7 +90,7 @@ public class AgentController implements IAgentService {
 
         threadPoolExecutor.execute(() -> {
             try {
-                log.info("【Agent 执行】开始：type={}", executeType);
+                log.info("【Agent 执行】类型={}", executeType);
                 executeStrategy.execute(executeRequestEntity, sseEmitter);
             } catch (Exception e) {
                 try {

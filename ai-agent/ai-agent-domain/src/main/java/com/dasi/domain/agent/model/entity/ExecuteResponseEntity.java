@@ -49,6 +49,10 @@ public class ExecuteResponseEntity {
         return createResponse(INSPECTOR.getType(), sectionType, sectionContent, null, null,false, sessionId);
     }
 
+    public static ExecuteResponseEntity createPlannerResponse(String sectionType, String sectionContent, String sessionId) {
+        return createResponse(PLANNER.getType(), sectionType, sectionContent, null, null,false, sessionId);
+    }
+
     public static ExecuteResponseEntity createCompleteResponse(String sectionContent, String sessionId) {
         return createResponse("complete", null, sectionContent, null, null,true, sessionId);
     }
@@ -65,5 +69,6 @@ public class ExecuteResponseEntity {
                 .sessionId(sessionId)
                 .build();
     }
+
 
 }
