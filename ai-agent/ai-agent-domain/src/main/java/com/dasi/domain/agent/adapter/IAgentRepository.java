@@ -25,4 +25,6 @@ public interface IAgentRepository {
 
     Map<String, AiFlowVO> queryAiFlowVOMapByAgentId(String aiAgentId);
 
+    String queryExecuteTypeByAgentId(String aiAgentId);
+
 }

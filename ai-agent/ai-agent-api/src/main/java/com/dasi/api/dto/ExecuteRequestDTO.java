@@ -16,9 +16,6 @@ import jakarta.validation.constraints.NotNull;
 public class ExecuteRequestDTO {
 
     @NotBlank
-    private String executeType;
-
-    @NotBlank
     private String aiAgentId;
 
     @NotBlank

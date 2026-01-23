@@ -127,6 +127,7 @@ CREATE TABLE `ai_agent`
     `agent_id`      VARCHAR(32)  NOT NULL UNIQUE COMMENT '全局 id',
     `agent_name`    VARCHAR(32)  NOT NULL COMMENT '智能体名称',
     `agent_channel` VARCHAR(32)  NULL     DEFAULT NULL COMMENT '智能体渠道',
+    `agent_type`    VARCHAR(32)  NOT NULL DEFAULT 'loop' COMMENT '智能体类型',
     `agent_desc`    VARCHAR(255) NOT NULL DEFAULT '暂无' COMMENT '智能体描述',
     `agent_status`  TINYINT      NOT NULL DEFAULT '1' COMMENT '状态：0-禁用，1-启用',
     `create_time`   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

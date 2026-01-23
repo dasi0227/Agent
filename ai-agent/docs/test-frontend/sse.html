@@ -43,13 +43,6 @@
         <input id="sessionId" value="-s-1" placeholder="sessionId" />
     </div>
     <div class="row" style="width:100%">
-        <span class="label">ExecuteType</span>
-        <div class="toggle" id="executeType">
-            <button type="button" class="mode-btn active" data-value="loop">loop</button>
-            <button type="button" class="mode-btn" data-value="step">step</button>
-        </div>
-    </div>
-    <div class="row" style="width:100%">
         <span class="label">MaxRound</span>
         <input id="maxRound" type="number" value="2" placeholder="maxRound" />
     </div>
@@ -86,7 +79,6 @@
         const elUrl = document.getElementById('url');
         const elAiAgentId = document.getElementById('aiAgentId');
         const elSessionId = document.getElementById('sessionId');
-        const elExecuteType = document.getElementById('executeType');
         const elMaxRound = document.getElementById('maxRound');
         const elMaxRetry = document.getElementById('maxRetry');
         const elUserMessage = document.getElementById('userMessage');
@@ -216,11 +208,7 @@
                 return;
             }
 
-            const activeType = elExecuteType.querySelector('.mode-btn.active');
-            const executeType = activeType ? activeType.dataset.value : 'loop';
-
             const payloadObj = {
-                executeType: executeType,
                 aiAgentId: elAiAgentId.value.trim(),
                 userMessage: elUserMessage.value.trim(),
                 sessionId: elSessionId.value.trim(),
@@ -285,12 +273,6 @@
         }
 
         elConnect.addEventListener('click', () => connectFetchPost());
-        elExecuteType.querySelectorAll('.mode-btn').forEach((btn) => {
-            btn.addEventListener('click', () => {
-                elExecuteType.querySelectorAll('.mode-btn').forEach((b) => b.classList.remove('active'));
-                btn.classList.add('active');
-            });
-        });
         document.querySelectorAll('.preset').forEach((btn) => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.preset').forEach((b) => b.classList.remove('active'));

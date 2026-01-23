@@ -24,6 +24,9 @@ public class AiAgent {
     /** 智能体渠道 */
     private String agentChannel;
 
+    /** 智能体类型 */
+    private String agentType;
+
     /** 智能体描述 */
     private String agentDesc;
 
