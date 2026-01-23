@@ -39,7 +39,7 @@ public class ExecuteSummarizerNode extends AbstractExecuteNode {
 
             // 获取提示词
             String flowPrompt = aiFlowVO.getFlowPrompt();
-            String summarizerPrompt = String.format(flowPrompt,
+            String summarizerPrompt = flowPrompt.formatted(
                     executeContext.getUserMessage(),
                     executionHistory
             );

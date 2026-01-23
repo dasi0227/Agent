@@ -31,4 +31,8 @@ public class ExecuteRequestDTO {
     @Min(1)
     private Integer maxRound;
 
+    @NotNull
+    @Min(1)
+    private Integer maxRetry;
+
 }

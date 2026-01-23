@@ -46,7 +46,7 @@ public class ExecuteSupervisorNode extends AbstractExecuteNode {
 
             // 获取提示词
             String flowPrompt = aiFlowVO.getFlowPrompt();
-            String supervisorPrompt = String.format(flowPrompt,
+            String supervisorPrompt = flowPrompt.formatted(
                     executeContext.getUserMessage(),
                     analyzerResponse,
                     performerResponse

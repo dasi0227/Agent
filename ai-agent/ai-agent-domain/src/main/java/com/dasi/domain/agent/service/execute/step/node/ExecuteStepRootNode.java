@@ -27,6 +27,8 @@ public class ExecuteStepRootNode extends AbstractExecuteNode {
         executeContext.setExecutionHistory(new StringBuilder());
         // 用户原始需求
         executeContext.setUserMessage(executeRequestEntity.getUserMessage());
+        // 最大重试次数
+        executeContext.setMaxRetry(executeRequestEntity.getMaxRetry());
 
         log.info("【执行节点】ExecutePlanRootNode：userMessage={}", executeRequestEntity.getUserMessage());
         return router(executeRequestEntity, executeContext);
