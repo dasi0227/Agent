@@ -24,6 +24,9 @@ public enum AiSectionType {
     SUMMARIZER_OVERVIEW("任务总结", "summarizer_overview"),
     INSPECTOR_MCP("MCP 工具", "inspector_mcp"),
     PLANNER_STEP("任务步骤", "planner_step"),
+    RUNNER_RESULT("运行结果", "runner_result"),
+    RUNNER_STATUS("运行状态", "runner_status"),
+    REPLIER_OVERVIEW("任务回复", "replier_overview")
     ;
 
     private String name;

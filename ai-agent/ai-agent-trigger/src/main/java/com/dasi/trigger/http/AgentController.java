@@ -83,6 +83,7 @@ public class AgentController implements IAgentService {
                 .userMessage(executeRequestDTO.getUserMessage())
                 .sessionId(executeRequestDTO.getSessionId())
                 .maxRound(executeRequestDTO.getMaxRound())
+                .maxRetry(executeRequestDTO.getMaxRetry())
                 .build();
 
         // 3. 拿到具体的执行策略

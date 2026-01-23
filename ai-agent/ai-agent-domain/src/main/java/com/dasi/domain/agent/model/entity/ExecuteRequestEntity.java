@@ -19,4 +19,6 @@ public class ExecuteRequestEntity {
 
     private Integer maxRound;
 
+    private Integer maxRetry;
+
 }

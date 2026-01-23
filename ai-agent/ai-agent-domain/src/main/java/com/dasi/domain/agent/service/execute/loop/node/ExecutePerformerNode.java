@@ -40,7 +40,7 @@ public class ExecutePerformerNode extends AbstractExecuteNode {
 
             // 获取提示词
             String flowPrompt = aiFlowVO.getFlowPrompt();
-            String performerPrompt = String.format(flowPrompt,
+            String performerPrompt = flowPrompt.formatted(
                     executeContext.getUserMessage(),
                     analyzerResponse
             );

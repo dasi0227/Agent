@@ -23,52 +23,56 @@ public class ExecuteResponseEntity {
 
     private Integer step;
 
-    private Boolean completed;
-
     private Long timestamp;
 
     private String sessionId;
 
     public static ExecuteResponseEntity createAnalyzerResponse(String sectionType, String sectionContent, Integer round, String sessionId) {
-        return createResponse(ANALYZER.getType(), sectionType, sectionContent, round, null,false, sessionId);
+        return createResponse(ANALYZER.getType(), sectionType, sectionContent, round, null, sessionId);
     }
 
     public static ExecuteResponseEntity createPerformerResponse(String sectionType, String sectionContent, Integer round, String sessionId) {
-        return createResponse(PERFORMER.getType(), sectionType, sectionContent, round, null,false, sessionId);
+        return createResponse(PERFORMER.getType(), sectionType, sectionContent, round, null, sessionId);
     }
 
     public static ExecuteResponseEntity createSupervisorResponse(String sectionType, String sectionContent, Integer round, String sessionId) {
-        return createResponse(SUPERVISOR.getType(), sectionType, sectionContent, round, null,false, sessionId);
+        return createResponse(SUPERVISOR.getType(), sectionType, sectionContent, round, null, sessionId);
     }
 
     public static ExecuteResponseEntity createSummarizerResponse(String sectionType, String sectionContent, Integer round, String sessionId) {
-        return createResponse(SUMMARIZER.getType(), sectionType, sectionContent, round, null,false, sessionId);
+        return createResponse(SUMMARIZER.getType(), sectionType, sectionContent, round, null, sessionId);
     }
 
     public static ExecuteResponseEntity createInspectorResponse(String sectionType, String sectionContent, String sessionId) {
-        return createResponse(INSPECTOR.getType(), sectionType, sectionContent, null, null,false, sessionId);
+        return createResponse(INSPECTOR.getType(), sectionType, sectionContent, null, null, sessionId);
     }
 
     public static ExecuteResponseEntity createPlannerResponse(String sectionType, String sectionContent, String sessionId) {
-        return createResponse(PLANNER.getType(), sectionType, sectionContent, null, null,false, sessionId);
+        return createResponse(PLANNER.getType(), sectionType, sectionContent, null, null, sessionId);
+    }
+
+    public static ExecuteResponseEntity createRunnerResponse(String sectionType, String sectionContent, Integer step, String sessionId) {
+        return createResponse(RUNNER.getType(), sectionType, sectionContent, null, step, sessionId);
+    }
+
+    public static ExecuteResponseEntity createReplierResponse(String sectionType, String sectionContent, String sessionId) {
+        return createResponse(REPLIER.getType(), sectionType, sectionContent, null, null, sessionId);
     }
 
     public static ExecuteResponseEntity createCompleteResponse(String sectionContent, String sessionId) {
-        return createResponse("complete", null, sectionContent, null, null,true, sessionId);
+        return createResponse("complete", null, sectionContent, null, null, sessionId);
     }
 
-    public static ExecuteResponseEntity createResponse(String clientType, String sectionType, String sectionContent, Integer round, Integer step, Boolean completed, String sessionId) {
+    public static ExecuteResponseEntity createResponse(String clientType, String sectionType, String sectionContent, Integer round, Integer step, String sessionId) {
         return ExecuteResponseEntity.builder()
                 .clientType(clientType)
                 .sectionType(sectionType)
                 .sectionContent(sectionContent)
                 .round(round)
                 .step(step)
-                .completed(completed)
                 .timestamp(System.currentTimeMillis())
                 .sessionId(sessionId)
                 .build();
     }
-
 
 }

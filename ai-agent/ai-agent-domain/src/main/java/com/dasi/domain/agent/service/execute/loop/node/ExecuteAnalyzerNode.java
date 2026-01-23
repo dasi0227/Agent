@@ -41,7 +41,7 @@ public class ExecuteAnalyzerNode extends AbstractExecuteNode {
 
             // 获取提示词
             String flowPrompt = aiFlowVO.getFlowPrompt();
-            String analyzerPrompt = String.format(flowPrompt,
+            String analyzerPrompt = flowPrompt.formatted(
                     executeContext.getRound(),
                     executeContext.getMaxRound(),
                     executeContext.getUserMessage(),

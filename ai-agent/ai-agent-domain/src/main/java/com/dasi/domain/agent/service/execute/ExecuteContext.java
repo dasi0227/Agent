@@ -17,10 +17,10 @@ public class ExecuteContext {
 
     // ================== 适用于 Loop ==================
     /** 轮次 */
-    private int round;
+    private Integer round;
 
     /** 最大轮次 */
-    private int maxRound;
+    private Integer maxRound;
 
     /** 是否完成 */
     private Boolean completed;
@@ -30,6 +30,9 @@ public class ExecuteContext {
 
     // ================== 适用于 Step ==================
 
+    private Integer step;
+
+    private Integer maxRetry;
 
     // ================== 通用 ==================
     /** 执行历史 */

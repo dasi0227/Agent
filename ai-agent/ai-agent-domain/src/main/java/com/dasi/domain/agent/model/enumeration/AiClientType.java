@@ -16,6 +16,7 @@ public enum AiClientType {
     INSPECTOR("任务审查专家", "inspector"),
     PLANNER("任务规划专家", "planner"),
     RUNNER("任务运行专家", "runner"),
+    REPLIER("任务回复专家", "replier"),
     ;
 
     private String name;

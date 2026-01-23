@@ -36,7 +36,7 @@ public class ExecuteInspectorNode extends AbstractExecuteNode {
 
             // 获取提示词
             String flowPrompt = aiFlowVO.getFlowPrompt();
-            String inspectorPrompt = String.format(flowPrompt,
+            String inspectorPrompt = flowPrompt.formatted(
                     executeContext.getUserMessage()
             );
 

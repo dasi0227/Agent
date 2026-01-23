@@ -54,6 +54,10 @@
         <input id="maxRound" type="number" value="2" placeholder="maxRound" />
     </div>
     <div class="row" style="width:100%">
+        <span class="label">MaxRetry</span>
+        <input id="maxRetry" type="number" value="2" placeholder="maxRetry" />
+    </div>
+    <div class="row" style="width:100%">
         <span class="label">UserMessage</span>
         <input id="userMessage" value="请总结今日AI新闻，今天是 2025.01.20" placeholder="userMessage" />
     </div>
@@ -84,6 +88,7 @@
         const elSessionId = document.getElementById('sessionId');
         const elExecuteType = document.getElementById('executeType');
         const elMaxRound = document.getElementById('maxRound');
+        const elMaxRetry = document.getElementById('maxRetry');
         const elUserMessage = document.getElementById('userMessage');
         const elConnect = document.getElementById('connect');
         const elDisconnect = document.getElementById('disconnect');
@@ -204,7 +209,8 @@
 
             const url = elUrl.value.trim();
             const maxRound = parseInt(elMaxRound.value.trim(), 10);
-            if (Number.isNaN(maxRound)) {
+            const maxRetry = parseInt(elMaxRetry.value.trim(), 10);
+            if (Number.isNaN(maxRound) || Number.isNaN(maxRetry)) {
                 elConnect.disabled = false;
                 elDisconnect.disabled = true;
                 return;
@@ -218,7 +224,8 @@
                 aiAgentId: elAiAgentId.value.trim(),
                 userMessage: elUserMessage.value.trim(),
                 sessionId: elSessionId.value.trim(),
-                maxRound: maxRound
+                maxRound: maxRound,
+                maxRetry: maxRetry
             };
 
             aborter = new AbortController();

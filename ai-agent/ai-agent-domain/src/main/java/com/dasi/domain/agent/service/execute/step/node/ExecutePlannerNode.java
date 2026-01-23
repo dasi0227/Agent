@@ -42,13 +42,13 @@ public class ExecutePlannerNode extends AbstractExecuteNode {
 
             // 获取提示词
             String flowPrompt = aiFlowVO.getFlowPrompt();
-            String plannerPrompt = String.format(flowPrompt,
+            String plannerPrompt = flowPrompt.formatted(
                     executeContext.getUserMessage(),
                     inspectorResponse
             );
 
             // 获取客户端结果
-            String plannerResult = plannerClient
+            String plannerResponse = plannerClient
                     .prompt(plannerPrompt)
                     .advisors(a -> a
                             .param(CHAT_MEMORY_CONVERSATION_ID_KEY, executeRequestEntity.getSessionId())
@@ -57,7 +57,7 @@ public class ExecutePlannerNode extends AbstractExecuteNode {
                     .content();
 
             // 解析客户端结果
-            plannerJson = extractJson(plannerResult, "[]");
+            plannerJson = extractJson(plannerResponse, "[]");
             plannerArray = parseJsonArray(plannerJson);
             if (plannerArray == null) {
                 throw new IllegalStateException("Planner 结果解析为空");
@@ -79,8 +79,7 @@ public class ExecutePlannerNode extends AbstractExecuteNode {
 
     @Override
     public StrategyHandler<ExecuteRequestEntity, ExecuteContext, String> get(ExecuteRequestEntity executeRequestEntity, ExecuteContext executeContext) throws Exception {
-        return defaultStrategyHandler;
-//        return getBean(RUNNER.getNodeName());
+        return getBean(RUNNER.getNodeName());
     }
 
     private void parsePlannerResponse(ExecuteContext executeContext, JSONArray plannerArray, String sessionId) {
