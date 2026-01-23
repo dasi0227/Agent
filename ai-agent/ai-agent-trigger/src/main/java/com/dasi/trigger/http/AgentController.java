@@ -72,7 +72,7 @@ public class AgentController implements IAgentService {
     @PostMapping(value = "/execute", produces = "text/event-stream")
     public SseEmitter execute(@Valid @RequestBody ExecuteRequestDTO executeRequestDTO) {
 
-        String executeType = executeRequestDTO.getExecuteType();
+        String aiAgentId = executeRequestDTO.getAiAgentId();
 
         // 1. 创建流式输出对象
         SseEmitter sseEmitter = new SseEmitter(0L);
@@ -87,11 +87,11 @@ public class AgentController implements IAgentService {
                 .build();
 
         // 3. 拿到具体的执行策略
-        IExecuteStrategy executeStrategy = executeStrategyFactory.getStrategyByType(executeType);
+        IExecuteStrategy executeStrategy = executeStrategyFactory.getStrategyByAgentId(aiAgentId);
 
         threadPoolExecutor.execute(() -> {
             try {
-                log.info("【Agent 执行】类型={}", executeType);
+                log.info("【Agent 执行】开始");
                 executeStrategy.execute(executeRequestEntity, sseEmitter);
             } catch (Exception e) {
                 try {
@@ -103,7 +103,7 @@ public class AgentController implements IAgentService {
                     log.error("【Agent 执行】error={}", e.getMessage(), e);
                 }
             } finally {
-                log.info("【Agent 执行】结束：type={}", executeType);
+                log.info("【Agent 执行】结束");
                 sseEmitter.complete();
             }
         });

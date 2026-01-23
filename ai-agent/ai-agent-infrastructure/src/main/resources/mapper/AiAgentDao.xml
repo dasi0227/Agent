@@ -6,7 +6,14 @@
         <result column="agent_id" property="agentId"/>
         <result column="agent_name" property="agentName"/>
         <result column="agent_channel" property="agentChannel"/>
+        <result column="agent_type" property="agentType"/>
         <result column="agent_desc" property="agentDesc"/>
         <result column="agent_status" property="agentStatus"/>
     </resultMap>
+
+    <select id="queryTypeByAgentId" resultType="java.lang.String">
+        SELECT agent_type
+        FROM ai_agent
+        WHERE agent_id = #{aiAgentId}
+    </select>
 </mapper>

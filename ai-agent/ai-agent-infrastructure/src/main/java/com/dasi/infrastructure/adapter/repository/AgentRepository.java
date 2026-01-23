@@ -47,6 +47,9 @@ public class AgentRepository implements IAgentRepository {
     @Resource
     private IAiFlowDao aiFlowDao;
 
+    @Resource
+    private IAiAgentDao aiAgentDao;
+
     @Override
     public List<AiClientVO> queryAiClientVOListByClientIdList(List<String> clientIdList) {
         if (clientIdList == null || clientIdList.isEmpty()) {
@@ -500,5 +503,10 @@ public class AgentRepository implements IAgentRepository {
         }
 
         return aiFlowVOMap;
+    }
+
+    @Override
+    public String queryExecuteTypeByAgentId(String aiAgentId) {
+        return aiAgentDao.queryTypeByAgentId(aiAgentId);
     }
 }
