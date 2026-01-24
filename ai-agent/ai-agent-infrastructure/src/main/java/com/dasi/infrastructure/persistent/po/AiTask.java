@@ -1,10 +1,11 @@
 package com.dasi.infrastructure.persistent.po;
 
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 /** 智能体任务调度配置表 */
 @Data
@@ -15,11 +16,11 @@ public class AiTask {
     /** 自增 id */
     private Long id;
 
+    /** 任务 id */
+    private String taskId;
+
     /** 智能体 id */
     private String agentId;
-
-    /** 任务名称 */
-    private String taskName;
 
     /** 任务时间表达式 */
     private String taskCron;

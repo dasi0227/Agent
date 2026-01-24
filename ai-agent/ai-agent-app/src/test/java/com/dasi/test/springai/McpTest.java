@@ -12,7 +12,6 @@ import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -28,20 +27,15 @@ public class McpTest {
     @Resource
     private OpenAiChatModel chatModel;
 
-    @Value(value = "${mcp.web-search.base-uri}")
-    private String mcpWebSearchBaseUri;
-
-    @Value(value = "${mcp.web-search.sse-endpoint}")
-    private String mcpWebSearchSseEndpoint;
-
-    @Value(value = "${mcp.web-search.api-key}")
-    private String mcpWebSearchApiKey;
-
     @Resource
     private ToolCallbackProvider toolCallbackProvider;
 
     @Test
     public void testMcpBaiduWebSearch() {
+
+        String mcpWebSearchSseEndpoint = "";
+        String mcpWebSearchApiKey =  "";
+        String mcpWebSearchBaseUri = "";
 
         String sseEndpoint = mcpWebSearchSseEndpoint + "?api_key=" + mcpWebSearchApiKey;
 
@@ -98,6 +92,40 @@ public class McpTest {
 
         String answer = chatClient.prompt()
                 .user("你可以告诉我 search_dashboards 必须提供的参数是什么？以及 get_dashboard_panel_queries 的返回内容是什么？")
+                .call()
+                .content();
+
+        log.info("测试结果：{}", answer);
+
+    }
+
+    @Test
+    public void testMcpWeCom() {
+
+        ChatClient chatClient = ChatClient.builder(chatModel)
+                .defaultToolCallbacks(toolCallbackProvider.getToolCallbacks())
+                .build();
+
+        String answer = chatClient.prompt()
+//                .user("告诉我你有什么 MCP 工具可以用")
+                .user("发送一条测试消息到企业微信，类型为纯文本，其中内容需要包括 A 标签和换行符")
+                .call()
+                .content();
+
+        log.info("测试结果：{}", answer);
+
+    }
+
+    @Test
+    public void testMcpAMAP() {
+
+        ChatClient chatClient = ChatClient.builder(chatModel)
+                .defaultToolCallbacks(toolCallbackProvider.getToolCallbacks())
+                .build();
+
+        String answer = chatClient.prompt()
+//                .user("告诉我你有什么 MCP 工具可以用")
+                .user("获取广东省广州市的天气预报信息")
                 .call()
                 .content();
 

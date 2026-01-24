@@ -1,8 +1,8 @@
 package com.dasi;
 
-import com.dasi.mcp.tool.NoticeWeComTool;
-import com.dasi.sse.gateway.INoticeWeComHttp;
-import com.dasi.type.properties.NoticeWeComProperties;
+import com.dasi.mcp.tool.WeComTool;
+import com.dasi.sse.http.IWeComHttp;
+import com.dasi.type.properties.WeComProperties;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.tool.method.MethodToolCallbackProvider;
 import org.springframework.boot.SpringApplication;
@@ -20,18 +20,18 @@ public class McpServerWeComApplication {
 
     // 把 HTTP 接口变成一个可以被 Spring 调用的 Java 对象
     @Bean
-    public INoticeWeComHttp noticeWeComHttp(NoticeWeComProperties noticeWeComProperties) {
+    public IWeComHttp createHttp(WeComProperties weComProperties) {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(noticeWeComProperties.getBaseUrl())
+                .baseUrl(weComProperties.getBaseUrl())
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build();
-        return retrofit.create(INoticeWeComHttp.class);
+        return retrofit.create(IWeComHttp.class);
     }
 
     // 把 MCP 接口变成一个可以被 Spring 调用的 Java 对象
     @Bean
-    public ToolCallbackProvider csdnTools(NoticeWeComTool noticeWeComTool) {
-        return MethodToolCallbackProvider.builder().toolObjects(noticeWeComTool).build();
+    public ToolCallbackProvider createTool(WeComTool weComTool) {
+        return MethodToolCallbackProvider.builder().toolObjects(weComTool).build();
     }
 
 

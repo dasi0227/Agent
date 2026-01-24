@@ -22,7 +22,7 @@ logging:
   config: classpath:logback-spring.xml
 
 wecom:
-  base-url: https://qyapi.weixin.qq.com
+  base-url: https://qyapi.weixin.qq.com/
   agentid: ${AGENT_ID}
   corpid: ${CORP_ID}
   corpsecret: ${CORP_SECRET}

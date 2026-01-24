@@ -23,7 +23,7 @@ logging:
   config: classpath:logback-spring.xml
 
 csdn:
-  base-url: https://bizapi.csdn.net
+  base-url: https://bizapi.csdn.net/
   categories: AI文章放送
   tags: java
   cookie: ${CSDN_COOKIE}

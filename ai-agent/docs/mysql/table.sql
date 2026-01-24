@@ -141,8 +141,8 @@ DROP TABLE IF EXISTS `ai_task`;
 CREATE TABLE `ai_task`
 (
     `id`          BIGINT       NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT '自增 id',
+    `task_id`     VARCHAR(32)  NOT NULL COMMENT '任务 id',
     `agent_id`    VARCHAR(32)  NOT NULL COMMENT '智能体 id',
-    `task_name`   VARCHAR(32)  NOT NULL COMMENT '任务名称',
     `task_cron`   VARCHAR(32)  NOT NULL COMMENT '任务时间表达式',
     `task_desc`   VARCHAR(255) NOT NULL DEFAULT '暂无' COMMENT '任务描述',
     `task_param`  TEXT         NULL     DEFAULT NULL COMMENT '任务参数配置',
