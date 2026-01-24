@@ -10,6 +10,7 @@ import com.dasi.sse.dto.SendMessageHttpResponse;
 import com.dasi.sse.dto.SendTextHttpRequest;
 import com.dasi.sse.http.IWeComHttp;
 import com.dasi.type.properties.WeComProperties;
+import com.dasi.type.util.CacheUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,10 +18,15 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 import java.io.IOException;
+import java.time.Duration;
 
 @Slf4j
 @Service
 public class WeComPort implements IWeComPort {
+
+    private static final String ACCESS_TOKEN_CACHE_KEY = "WeComAccessToken";
+    private static final int ACCESS_TOKEN_SKEW_SECONDS = 60;
+    private static final int ACCESS_TOKEN_FALLBACK_SECONDS = 60;
 
     @Resource
     private WeComProperties weComProperties;
@@ -28,7 +34,15 @@ public class WeComPort implements IWeComPort {
     @Resource
     private IWeComHttp weComHttp;
 
+    @Resource
+    private CacheUtil cacheUtil;
+
     private String getAccessToken() throws IOException {
+
+        String cachedToken = cacheUtil.getWithTtl(ACCESS_TOKEN_CACHE_KEY, String.class);
+        if (cachedToken != null && !cachedToken.isBlank()) {
+            return cachedToken;
+        }
 
         Call<GetAccessTokenResponse> call = weComHttp.getAccessToken(
                 weComProperties.getCorpid(),
@@ -60,6 +74,16 @@ public class WeComPort implements IWeComPort {
             log.error("WeCom 获取 access_token 的内容为空");
             return null;
         }
+
+        long ttlSeconds;
+        Integer expiresIn = httpResponse.getExpires_in();
+        if (expiresIn == null || expiresIn <= 0) {
+            ttlSeconds = ACCESS_TOKEN_FALLBACK_SECONDS;
+        } else {
+            ttlSeconds = Math.max(1L, expiresIn - ACCESS_TOKEN_SKEW_SECONDS);
+        }
+
+        cacheUtil.putWithTtl(ACCESS_TOKEN_CACHE_KEY, accessToken, Duration.ofSeconds(ttlSeconds));
 
         log.info("调用 HTTP 获取企业微信令牌：token={}", accessToken);
 
