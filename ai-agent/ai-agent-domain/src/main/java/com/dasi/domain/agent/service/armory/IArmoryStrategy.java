@@ -4,7 +4,7 @@ import com.dasi.domain.agent.model.entity.ArmoryRequestEntity;
 
 public interface IArmoryStrategy {
 
-    void armory(ArmoryRequestEntity armoryRequestEntity, ArmoryContext dynamicContext);
+    void armory(ArmoryRequestEntity armoryRequestEntity, ArmoryContext armoryContext);
 
     String getType();
 
