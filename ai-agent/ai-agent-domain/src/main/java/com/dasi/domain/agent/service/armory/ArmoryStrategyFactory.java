@@ -7,8 +7,8 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
@@ -17,7 +17,7 @@ public class ArmoryStrategyFactory {
     @Resource
     private ArmoryRootNode armoryRootNode;
 
-    private final Map<String, IArmoryStrategy> type2StrategyMap = new HashMap<>();
+    private final Map<String, IArmoryStrategy> type2StrategyMap = new ConcurrentHashMap<>();
 
     public ArmoryStrategyFactory(Map<String, IArmoryStrategy> armoryStrategyMap) {
 

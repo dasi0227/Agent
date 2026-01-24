@@ -27,4 +27,8 @@ public interface IAgentRepository {
 
     String queryExecuteTypeByAgentId(String aiAgentId);
 
+    List<AiTaskVO> queryTaskVOList();
+
+    void updateTaskStatus(String taskId, Integer taskStatus);
+
 }

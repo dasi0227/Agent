@@ -1,7 +1,7 @@
 package com.dasi.infrastructure.adapter.repository;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.TypeReference;
 import com.dasi.domain.agent.adapter.IAgentRepository;
 import com.dasi.domain.agent.model.enumeration.AiMcpType;
 import com.dasi.domain.agent.model.enumeration.AiType;
@@ -49,6 +49,9 @@ public class AgentRepository implements IAgentRepository {
 
     @Resource
     private IAiAgentDao aiAgentDao;
+
+    @Resource
+    private IAiTaskDao aiTaskDao;
 
     @Override
     public List<AiClientVO> queryAiClientVOListByClientIdList(List<String> clientIdList) {
@@ -166,6 +169,7 @@ public class AgentRepository implements IAgentRepository {
                         }
                     } catch (Exception e) {
                         log.error("【查询数据】失败：{}", e.getMessage());
+                        throw new IllegalStateException(e);
                     }
                 }
 
@@ -281,7 +285,8 @@ public class AgentRepository implements IAgentRepository {
                             aiMcpVO.setSseConfig(sseConfig);
                         }
                         case STDIO -> {
-                            Map<String, AiMcpVO.StdioConfig.Stdio> stdio = JSON.parseObject(aiMcp.getMcpConfig(), new TypeReference<>() {});
+                            Map<String, AiMcpVO.StdioConfig.Stdio> stdio = JSON.parseObject(aiMcp.getMcpConfig(), new TypeReference<>() {
+                            });
                             AiMcpVO.StdioConfig stdioConfig = new AiMcpVO.StdioConfig();
                             stdioConfig.setStdio(stdio);
                             aiMcpVO.setStdioConfig(stdioConfig);
@@ -290,6 +295,7 @@ public class AgentRepository implements IAgentRepository {
                     aiMcpVOList.add(aiMcpVO);
                 } catch (Exception e) {
                     log.error("【查询数据】失败：{}", e.getMessage());
+                    throw new IllegalStateException(e);
                 }
             }
         }
@@ -492,12 +498,12 @@ public class AgentRepository implements IAgentRepository {
         Map<String, AiFlowVO> aiFlowVOMap = new HashMap<>();
         for (AiFlow aiFlow : aiFlowList) {
             AiFlowVO aiFlowVO = AiFlowVO.builder()
-                        .agentId(aiFlow.getAgentId())
-                        .clientId(aiFlow.getClientId())
-                        .clientType(aiFlow.getClientType())
-                        .flowPrompt(aiFlow.getFlowPrompt())
-                        .flowSeq(aiFlow.getFlowSeq())
-                        .build();
+                    .agentId(aiFlow.getAgentId())
+                    .clientId(aiFlow.getClientId())
+                    .clientType(aiFlow.getClientType())
+                    .flowPrompt(aiFlow.getFlowPrompt())
+                    .flowSeq(aiFlow.getFlowSeq())
+                    .build();
 
             aiFlowVOMap.put(aiFlow.getClientType(), aiFlowVO);
         }
@@ -508,5 +514,36 @@ public class AgentRepository implements IAgentRepository {
     @Override
     public String queryExecuteTypeByAgentId(String aiAgentId) {
         return aiAgentDao.queryTypeByAgentId(aiAgentId);
+    }
+
+    @Override
+    public List<AiTaskVO> queryTaskVOList() {
+
+        return aiTaskDao.queryTaskList()
+                .stream()
+                .map(aiTask -> AiTaskVO.builder()
+                        .agentId(aiTask.getAgentId())
+                        .taskId(aiTask.getTaskId())
+                        .taskCron(aiTask.getTaskCron())
+                        .taskDesc(aiTask.getTaskDesc())
+                        .taskParam(parseTaskParam(aiTask.getTaskParam(), aiTask.getTaskId()))
+                        .taskStatus(aiTask.getTaskStatus())
+                        .build())
+                .toList();
+    }
+
+    private AiTaskVO.TaskParam parseTaskParam(String taskParam, String taskId) {
+        try {
+            if (taskParam == null || taskParam.isBlank()) throw new IllegalStateException("taskParam 为空，taskId=" + taskId);
+            return JSON.parseObject(taskParam, AiTaskVO.TaskParam.class);
+        } catch (Exception e) {
+            log.error("【查询数据】失败：{}", e.getMessage());
+            throw new IllegalStateException(e);
+        }
+    }
+
+    @Override
+    public void updateTaskStatus(String taskId, Integer taskStatus) {
+        aiTaskDao.updateTaskStatus(taskId, taskStatus);
     }
 }

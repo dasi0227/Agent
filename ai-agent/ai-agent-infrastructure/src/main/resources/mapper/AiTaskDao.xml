@@ -4,10 +4,22 @@
 <mapper namespace="com.dasi.infrastructure.persistent.dao.IAiTaskDao">
     <resultMap id="dataMap" type="com.dasi.infrastructure.persistent.po.AiTask">
         <result column="agent_id" property="agentId"/>
-        <result column="task_name" property="taskName"/>
+        <result column="task_id" property="taskId"/>
         <result column="task_cron" property="taskCron"/>
         <result column="task_desc" property="taskDesc"/>
         <result column="task_param" property="taskParam"/>
         <result column="task_status" property="taskStatus"/>
     </resultMap>
+
+    <select id="queryTaskList" resultMap="dataMap">
+        SELECT task_id, agent_id, task_cron, task_desc, task_param, task_status
+        FROM ai_task
+        WHERE task_status = 1
+    </select>
+
+    <update id="updateTaskStatus">
+        UPDATE ai_task
+        SET task_status = #{taskStatus}
+        WHERE task_id = #{taskId}
+    </update>
 </mapper>
