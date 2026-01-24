@@ -27,9 +27,13 @@ public class ArmoryClientStrategy implements IArmoryStrategy {
     private ThreadPoolExecutor threadPoolExecutor;
 
     @Override
-    public void armory(ArmoryRequestEntity armoryRequestEntity, ArmoryContext dynamicContext) {
+    public void armory(ArmoryRequestEntity armoryRequestEntity, ArmoryContext armoryContext) {
 
         List<String> clientIdList = armoryRequestEntity.getIdList();
+        if (clientIdList == null || clientIdList.isEmpty()) {
+            log.warn("【装配数据】Agent 装配：clientIdList 为空");
+            throw new IllegalStateException("装配数据时 clientIdList 为空");
+        }
 
         CompletableFuture<List<AiApiVO>> aiApiListFuture = CompletableFuture.supplyAsync(
                 () -> agentRepository.queryAiApiVOListByClientIdList(clientIdList), threadPoolExecutor);
@@ -65,12 +69,12 @@ public class ArmoryClientStrategy implements IArmoryStrategy {
         List<AiAdvisorVO> aiAdvisorList = aiAdvisorListFuture.join();
         List<AiClientVO> aiClientList = aiClientListFuture.join();
 
-        dynamicContext.setValue(API.getType(), aiApiList);
-        dynamicContext.setValue(MODEL.getType(), aiModelList);
-        dynamicContext.setValue(MCP.getType(), aiMcpList);
-        dynamicContext.setValue(PROMPT.getType(), aiPrompMap);
-        dynamicContext.setValue(ADVISOR.getType(), aiAdvisorList);
-        dynamicContext.setValue(CLIENT.getType(), aiClientList);
+        armoryContext.setValue(API.getType(), aiApiList);
+        armoryContext.setValue(MODEL.getType(), aiModelList);
+        armoryContext.setValue(MCP.getType(), aiMcpList);
+        armoryContext.setValue(PROMPT.getType(), aiPrompMap);
+        armoryContext.setValue(ADVISOR.getType(), aiAdvisorList);
+        armoryContext.setValue(CLIENT.getType(), aiClientList);
 
         log.info("【加载数据】ai_api_ids={}, size={}",
                 aiApiList.stream().map(AiApiVO::getApiId).toList(),

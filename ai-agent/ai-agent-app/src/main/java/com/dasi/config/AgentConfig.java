@@ -1,10 +1,6 @@
 package com.dasi.config;
 
-import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
-import com.dasi.domain.agent.model.entity.ArmoryRequestEntity;
-import com.dasi.domain.agent.service.armory.ArmoryContext;
-import com.dasi.domain.agent.service.armory.ArmoryStrategyFactory;
-import com.dasi.domain.agent.service.armory.IArmoryStrategy;
+import com.dasi.domain.agent.service.dispatch.IDispatchService;
 import com.dasi.infrastructure.persistent.dao.IAiClientDao;
 import com.dasi.infrastructure.persistent.dao.IAiFlowDao;
 import com.dasi.infrastructure.persistent.dao.IAiPromptDao;
@@ -34,8 +30,7 @@ import org.springframework.util.StreamUtils;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static com.dasi.domain.agent.model.enumeration.AiType.CLIENT;
-import static com.dasi.domain.agent.model.enumeration.AiType.MODEL;
+import static com.dasi.domain.agent.model.enumeration.AiType.*;
 
 @Slf4j
 @Configuration
@@ -79,7 +74,7 @@ public class AgentConfig implements ApplicationListener<ApplicationReadyEvent> {
     private AgentProperties agentProperties;
 
     @Autowired
-    private ArmoryStrategyFactory armoryStrategyFactory;
+    private IDispatchService dispatchService;
 
     @Autowired
     private IAiClientDao aiClientDao;
@@ -94,8 +89,9 @@ public class AgentConfig implements ApplicationListener<ApplicationReadyEvent> {
     public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
         loadPrompt();
         if (Boolean.TRUE.equals(agentProperties.getEnable())) {
-            armoryAuto(agentProperties.getModelIdList(), MODEL.getType());
-            armoryAuto(agentProperties.getClientIdList(), CLIENT.getType());
+            autoArmory(agentProperties.getAgentIdList(), AGENT.getType());
+            autoArmory(agentProperties.getClientIdList(), CLIENT.getType());
+            autoArmory(agentProperties.getModelIdList(), MODEL.getType());
         }
     }
 
@@ -144,29 +140,11 @@ public class AgentConfig implements ApplicationListener<ApplicationReadyEvent> {
         }
     }
 
-    private void armoryAuto(List<String> idList, String armoryType) {
+    private void autoArmory(List<String> idList, String armoryType) {
 
         try {
-
-            if (idList == null || idList.isEmpty()) {
-                return;
-            }
-
-            IArmoryStrategy loadStrategy = armoryStrategyFactory.getArmoryStrategyByType(armoryType);
-            StrategyHandler<ArmoryRequestEntity, ArmoryContext, String> armoryRootNode = armoryStrategyFactory.getArmoryRootNode();
-            if (loadStrategy == null || armoryRootNode == null) {
-                return;
-            }
-
-            ArmoryRequestEntity armoryRequestEntity = ArmoryRequestEntity.builder()
-                    .armoryType(armoryType)
-                    .idList(idList)
-                    .build();
-            ArmoryContext armoryContext = new ArmoryContext();
-
-            loadStrategy.armory(armoryRequestEntity, armoryContext);
-            armoryRootNode.apply(armoryRequestEntity, armoryContext);
-
+            if (idList == null || idList.isEmpty()) return;
+            dispatchService.dispatchArmoryStrategy(armoryType, idList);
         } catch (Exception e) {
             log.error("【初始化配置】自动装配客户端失败：error={}", e.getMessage(), e);
             throw new RuntimeException();

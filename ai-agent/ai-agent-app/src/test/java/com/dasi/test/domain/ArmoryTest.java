@@ -42,9 +42,9 @@ public class ArmoryTest {
                 .idList(List.of("client_demo_1"))
                 .build();
 
-        ArmoryContext dynamicContext = new ArmoryContext();
+        ArmoryContext armoryContext = new ArmoryContext();
 
-        armoryStrategyHandler.apply(armoryRequestEntity, dynamicContext);
+        armoryStrategyHandler.apply(armoryRequestEntity, armoryContext);
 
         OpenAiApi openAiApi = (OpenAiApi) applicationContext.getBean(API.getBeanName("api_demo_1"));
 
@@ -60,9 +60,9 @@ public class ArmoryTest {
                 .idList(List.of("client_demo_1"))
                 .build();
 
-        ArmoryContext dynamicContext = new ArmoryContext();
+        ArmoryContext armoryContext = new ArmoryContext();
 
-        armoryStrategyHandler.apply(armoryRequestEntity, dynamicContext);
+        armoryStrategyHandler.apply(armoryRequestEntity, armoryContext);
 
         OpenAiChatModel chatModel = applicationContext.getBean(API.getBeanName("model_demo_1"), OpenAiChatModel.class);
 
@@ -79,9 +79,9 @@ public class ArmoryTest {
                 .idList(List.of("client_demo_1"))
                 .build();
 
-        ArmoryContext dynamicContext = new ArmoryContext();
+        ArmoryContext armoryContext = new ArmoryContext();
 
-        armoryStrategyHandler.apply(armoryRequestEntity, dynamicContext);
+        armoryStrategyHandler.apply(armoryRequestEntity, armoryContext);
 
         ChatClient chatClient = applicationContext.getBean(CLIENT.getBeanName("client_demo_1"), ChatClient.class);
 
@@ -98,9 +98,9 @@ public class ArmoryTest {
                 .idList(List.of("client_demo_1"))
                 .build();
 
-        ArmoryContext dynamicContext = new ArmoryContext();
+        ArmoryContext armoryContext = new ArmoryContext();
 
-        armoryStrategyHandler.apply(armoryRequestEntity, dynamicContext);
+        armoryStrategyHandler.apply(armoryRequestEntity, armoryContext);
 
         ChatClient chatClient = applicationContext.getBean(CLIENT.getBeanName("client_demo_1"), ChatClient.class);
         String answer = chatClient.prompt()
@@ -120,9 +120,9 @@ public class ArmoryTest {
                 .idList(List.of("client_demo_1"))
                 .build();
 
-        ArmoryContext dynamicContext = new ArmoryContext();
+        ArmoryContext armoryContext = new ArmoryContext();
 
-        armoryStrategyHandler.apply(armoryRequestEntity, dynamicContext);
+        armoryStrategyHandler.apply(armoryRequestEntity, armoryContext);
 
         ChatClient chatClient = applicationContext.getBean(CLIENT.getBeanName("client_demo_1"), ChatClient.class);
         String answer = chatClient.prompt()
@@ -156,9 +156,9 @@ public class ArmoryTest {
                 .idList(List.of("client_demo_1"))
                 .build();
 
-        ArmoryContext dynamicContext = new ArmoryContext();
+        ArmoryContext armoryContext = new ArmoryContext();
 
-        armoryStrategyHandler.apply(armoryRequestEntity, dynamicContext);
+        armoryStrategyHandler.apply(armoryRequestEntity, armoryContext);
 
         ChatClient chatClient = applicationContext.getBean(CLIENT.getBeanName("client_demo_1"), ChatClient.class);
         String answer = chatClient.prompt()

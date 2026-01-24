@@ -15,6 +15,7 @@ public enum AiType {
     MCP("工具", "mcp"),
     PROMPT("系统提示词", "prompt"),
     ADVISOR("顾问", "advisor"),
+    AGENT("智能体", "agent"),
     ;
 
     private String name;

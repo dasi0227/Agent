@@ -15,4 +15,6 @@ public class AgentProperties {
 
     private List<String> clientIdList;
 
+    private List<String> agentIdList;
+
 }
