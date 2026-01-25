@@ -1,6 +1,6 @@
 package com.dasi.trigger.handler;
 
-import com.dasi.types.model.Result;
+import com.dasi.types.dto.result.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;

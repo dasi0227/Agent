@@ -4,6 +4,6 @@ public interface IRedisService {
 
     <T> void setValue(String key, T value);
 
-    <T> T getValue(String key, Class<T> type);
+    <T> T getValue(String key);
 
 }

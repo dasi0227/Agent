@@ -1,16 +1,18 @@
 package com.dasi.api;
 
-import com.dasi.types.model.Result;
+import com.dasi.types.dto.request.ChatRequest;
+import com.dasi.types.dto.response.ModelResponse;
+import com.dasi.types.dto.result.Result;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
 
 public interface IChatService {
 
-    String complete(String model, String message);
+    String complete(ChatRequest chatRequest);
 
-    Flux<String> stream(String model, String message);
+    Flux<String> stream(ChatRequest chatRequest);
 
-    Result<List<String>> queryModelIdList();
+    Result<List<ModelResponse>> queryModelResponseList();
 
 }

@@ -75,6 +75,11 @@ const currentModel = computed({
     set: (value) => settingsStore.updateSettings({ model: value })
 });
 
+const currentModelLabel = computed(() => {
+    const match = models.value.find((item) => item.value === currentModel.value);
+    return match?.label || currentModel.value;
+});
+
 const currentRagTag = computed({
     get: () => settingsStore.ragTag,
     set: (value) => settingsStore.updateSettings({ ragTag: value })
@@ -169,11 +174,30 @@ const fetchModels = async () => {
               : Array.isArray(resp?.data)
                 ? resp.data
                 : [];
-        const unique = Array.from(new Set(list.filter((item) => typeof item === 'string' && item)));
+        const normalized = list
+            .map((item) => {
+                if (typeof item === 'string') {
+                    return { label: item, value: item };
+                }
+                if (item && typeof item === 'object') {
+                    const modelId = item.modelId || item.id || '';
+                    const modelName = item.modelName || item.name || modelId;
+                    if (!modelId) return null;
+                    return { label: modelName || modelId, value: modelId };
+                }
+                return null;
+            })
+            .filter(Boolean);
+        const seen = new Set();
+        const unique = normalized.filter((item) => {
+            if (seen.has(item.value)) return false;
+            seen.add(item.value);
+            return true;
+        });
         if (unique.length > 0) {
-            models.value = unique.map((item) => ({ label: item, value: item }));
-            if (!unique.includes(currentModel.value)) {
-                currentModel.value = unique[0];
+            models.value = unique;
+            if (!unique.some((item) => item.value === currentModel.value)) {
+                currentModel.value = unique[0].value;
             }
         }
     } catch (error) {
@@ -233,9 +257,8 @@ const runComplete = async (content, controller) => {
     const assistantMessage = chatStore.addAssistantMessage({ pending: true, content: '', think: '' });
     try {
         const response = await fetchComplete({
-            model: currentModel.value,
-            message: content,
-            ragTag: currentRagTag.value,
+            modelId: currentModel.value,
+            userMessage: content,
             signal: controller.signal
         });
         const text = pickContentFromResult(response);
@@ -297,9 +320,8 @@ const runStream = async (content, controller) => {
 
     try {
         await fetchStream({
-            model: currentModel.value,
-            message: content,
-            ragTag: currentRagTag.value,
+            modelId: currentModel.value,
+            userMessage: content,
             signal: controller.signal,
             onData: (payload) => {
                 const data = payload?.result || payload;
@@ -558,7 +580,7 @@ const handleUpload = async () => {
                             class="inline-flex min-h-[36px] min-w-[200px] cursor-pointer items-center justify-between gap-[10px] rounded-[12px] border border-[var(--border-color)] bg-white px-[12px] py-[8px] shadow-[0_12px_30px_rgba(27,36,55,0.08)]"
                             @click="toggleModelDropdown"
                         >
-                            <span class="font-bold text-[var(--text-primary)]">{{ currentModel }}</span>
+                            <span class="font-bold text-[var(--text-primary)]">{{ currentModelLabel }}</span>
                             <span
                                 class="text-[var(--text-secondary)] transition-transform duration-200"
                                 :class="{ 'rotate-180': modelDropdownOpen }"

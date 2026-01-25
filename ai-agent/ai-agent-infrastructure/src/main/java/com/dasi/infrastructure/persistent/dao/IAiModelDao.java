@@ -9,6 +9,6 @@ import java.util.List;
 public interface IAiModelDao {
     AiModel queryByModelId(String modelId);
 
-    List<String> queryModelIdList();
+    List<AiModel> queryModelList();
 
 }

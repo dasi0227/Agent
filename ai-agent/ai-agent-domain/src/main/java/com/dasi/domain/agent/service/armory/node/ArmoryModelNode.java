@@ -4,27 +4,24 @@ import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.dasi.domain.agent.model.entity.ArmoryRequestEntity;
 import com.dasi.domain.agent.model.vo.AiModelVO;
 import com.dasi.domain.agent.service.armory.ArmoryContext;
-import io.modelcontextprotocol.client.McpSyncClient;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
-import org.springframework.ai.tool.ToolCallback;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import static com.dasi.domain.agent.model.enumeration.AiType.*;
+import static com.dasi.domain.agent.model.enumeration.AiType.API;
+import static com.dasi.domain.agent.model.enumeration.AiType.MODEL;
 
 @Slf4j
 @Service
 public class ArmoryModelNode extends AbstractArmoryNode {
 
     @Resource
-    private ArmoryAdvisorNode armoryAdvisorNode;
+    private ArmoryMcpNode armoryMcpNode;
 
     @Override
     protected String doApply(ArmoryRequestEntity armoryRequestEntity, ArmoryContext armoryContext) throws Exception {
@@ -45,19 +42,9 @@ public class ArmoryModelNode extends AbstractArmoryNode {
                 log.error("【装配节点】ArmoryModelNode：不存在 API");
             }
 
-            // 获取当前 Model 关联的 MCP
-            List<McpSyncClient> mcpSyncClientList = new ArrayList<>();
-            for (String mcpId : aiModelVO.getMcpIdList()) {
-                String mcpBeanName = MCP.getBeanName(mcpId);
-                McpSyncClient mcpSyncClient = getBean(mcpBeanName);
-                mcpSyncClientList.add(mcpSyncClient);
-            }
-            ToolCallback[] toolCallbacks = new SyncMcpToolCallbackProvider(mcpSyncClientList).getToolCallbacks();
-
             // 实例化
             OpenAiChatOptions openAiChatOptions = OpenAiChatOptions.builder()
                     .model(aiModelVO.getModelName())
-                    .toolCallbacks(toolCallbacks)
                     .build();
             OpenAiChatModel chatModel = OpenAiChatModel.builder()
                     .openAiApi(openAiApi)
@@ -75,7 +62,10 @@ public class ArmoryModelNode extends AbstractArmoryNode {
 
     @Override
     public StrategyHandler<ArmoryRequestEntity, ArmoryContext, String> get(ArmoryRequestEntity armoryRequestEntity, ArmoryContext armoryContext) {
-        return armoryAdvisorNode;
+        if (armoryRequestEntity.getArmoryType().equals(MODEL.getType())) {
+            return defaultStrategyHandler;
+        }
+        return armoryMcpNode;
     }
 
 }

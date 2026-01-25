@@ -4,8 +4,8 @@ import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.dasi.domain.agent.model.entity.ArmoryRequestEntity;
 import com.dasi.domain.agent.model.enumeration.AiAdvisorType;
 import com.dasi.domain.agent.model.vo.AiAdvisorVO;
-import com.dasi.domain.agent.service.armory.advisor.RagAnswerAdvisor;
 import com.dasi.domain.agent.service.armory.ArmoryContext;
+import com.dasi.domain.agent.service.armory.advisor.RagAnswerAdvisor;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor;
@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 import static com.dasi.domain.agent.model.enumeration.AiType.ADVISOR;
-import static com.dasi.domain.agent.model.enumeration.AiType.MODEL;
 
 @Slf4j
 @Service
@@ -71,9 +70,6 @@ public class ArmoryAdvisorNode extends AbstractArmoryNode {
 
     @Override
     public StrategyHandler<ArmoryRequestEntity, ArmoryContext, String> get(ArmoryRequestEntity armoryRequestEntity, ArmoryContext armoryContext) {
-        if (armoryRequestEntity.getArmoryType().equals(MODEL.getType())) {
-            return defaultStrategyHandler;
-        }
         return armoryClientNode;
     }
 

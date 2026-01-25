@@ -19,6 +19,11 @@
         <logger name="org.apache.coyote.http11" level="ERROR"/>
         <logger name="org.apache.catalina" level="ERROR"/>
         <logger name="org.apache.tomcat" level="ERROR"/>
+        <logger name="org.springframework.ai.retry.RetryUtils" level="ERROR"/>
+        <logger name="org.hibernate" level="ERROR"/>
+        <logger name="io.modelcontextprotocol.client" level="ERROR"/>
+        <logger name="org.springframework.web.servlet" level="ERROR"/>
+        <logger name="org.springframework.data.repository.config" level="ERROR"/>
     </springProfile>
 
     <!-- ========= 转换规则 ========= -->

@@ -1,4 +1,4 @@
-package com.dasi.types.model;
+package com.dasi.types.dto.result;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
