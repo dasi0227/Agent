@@ -234,6 +234,32 @@ const handleKeydown = (event) => {
     }
 };
 
+const extractStreamParts = (payload) => {
+    const data = payload?.result ?? payload;
+    const finishReason = data?.finishReason || payload?.finishReason || null;
+    if (typeof data === 'string') {
+        return { token: data, finishReason };
+    }
+    if (!data || typeof data !== 'object') {
+        return { token: '', finishReason };
+    }
+    if (Array.isArray(data.choices) && data.choices.length > 0) {
+        const choice = data.choices[0] || {};
+        const delta = choice.delta || choice.message || {};
+    const answer = delta.content || delta.text || '';
+    return {
+        answer,
+        finishReason: choice.finish_reason || finishReason,
+        direct: true
+    };
+    }
+    const answer = data.content || data.text || data.output?.content || data.output?.text || '';
+    if (answer) {
+        return { answer, finishReason, direct: true };
+    }
+    return { token: pickContentFromResult(data), finishReason };
+};
+
 const sendMessage = async () => {
     const content = inputValue.value.trim();
     if (!content || sending.value) return;
@@ -262,10 +288,10 @@ const runComplete = async (content, controller) => {
             signal: controller.signal
         });
         const text = pickContentFromResult(response);
-        const { think, answer } = parseThinkText(text);
+        const { answer } = parseThinkText(text);
         chatStore.updateAssistantMessage(assistantMessage.id, {
             content: answer || '（无内容）',
-            think,
+            think: '',
             pending: false,
             error: null
         });
@@ -293,7 +319,20 @@ const runStream = async (content, controller) => {
     const finishStream = () => {
         if (closed) return;
         closed = true;
-        chatStore.updateAssistantMessage(assistantMessage.id, { pending: false });
+        if (accumulator.carry) {
+            if (accumulator.inThink) {
+                // discard remaining think fragment
+            } else {
+                accumulator.answer += accumulator.carry;
+            }
+            accumulator.carry = '';
+        }
+        const answerText = accumulator.answer?.trim() || '';
+        chatStore.updateAssistantMessage(assistantMessage.id, {
+            content: answerText || accumulator.answer,
+            think: '',
+            pending: false
+        });
         chatStore.setSending(false);
         chatStore.setAbortController(null);
         scrollToBottom(true);
@@ -324,14 +363,18 @@ const runStream = async (content, controller) => {
             userMessage: content,
             signal: controller.signal,
             onData: (payload) => {
-                const data = payload?.result || payload;
-                const token = pickContentFromResult(data);
-                const finishReason = data?.finishReason || payload?.finishReason;
-                if (token) {
+                const { token, answer, direct, finishReason } = extractStreamParts(payload);
+                if (direct) {
+                    if (answer) {
+                        accumulator.answer += answer;
+                    }
+                } else if (token) {
                     applyStreamToken(accumulator, token);
+                }
+                if (direct || token) {
                     chatStore.updateAssistantMessage(assistantMessage.id, {
                         content: accumulator.answer,
-                        think: accumulator.think,
+                        think: '',
                         pending: true,
                         error: null
                     });
@@ -377,8 +420,6 @@ const saveSettings = () => {
     showSettings.value = false;
 };
 
-const hasThink = (message) => Boolean(message?.think && message.think.trim());
-const getThink = (message) => (message?.think ? message.think.trim() : '');
 const getContent = (message) => (message?.content ? message.content.toString().trimStart() : '');
 
 const toggleModelDropdown = () => {
@@ -694,12 +735,6 @@ const handleUpload = async () => {
                                     message.pending ? 'border-dashed' : 'border-solid'
                                 ]"
                             >
-                                <div
-                                    v-if="hasThink(message)"
-                                    class="mb-[6px] rounded-[8px] border border-dashed border-[var(--border-color)] bg-[#f3f4f6] px-[10px] py-[8px] text-[12px] text-[#7b8190]"
-                                >
-                                    {{ getThink(message) }}
-                                </div>
                                 <div
                                     v-if="message.pending && message.role === 'assistant' && !message.content"
                                     class="inline-flex items-center gap-[8px]"

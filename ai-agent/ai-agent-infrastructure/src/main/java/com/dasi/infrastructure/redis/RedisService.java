@@ -1,25 +1,23 @@
 package com.dasi.infrastructure.redis;
 
 import jakarta.annotation.Resource;
-import org.redisson.api.RBucket;
-import org.redisson.api.RedissonClient;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class RedisService implements IRedisService {
 
     @Resource
-    private RedissonClient redissonClient;
+    private RedisTemplate<String, Object> redisTemplate;
 
-    @Override
     public <T> void setValue(String key, T value) {
-        redissonClient.<T>getBucket(key).set(value);
+        redisTemplate.opsForValue().set(key, value);
     }
 
     @Override
     public <T> T getValue(String key) {
-        RBucket<?> bucket = redissonClient.getBucket(key);
-        return (T) bucket.get();
+        return (T) redisTemplate.opsForValue().get(key);
     }
-
 }

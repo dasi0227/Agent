@@ -3,7 +3,7 @@ package com.dasi.trigger.http;
 import com.dasi.api.IChatService;
 import com.dasi.domain.chat.service.query.IQueryService;
 import com.dasi.types.dto.request.ChatRequest;
-import com.dasi.types.dto.response.ModelResponse;
+import com.dasi.types.dto.response.ChatModelResponse;
 import com.dasi.types.dto.result.Result;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -76,8 +76,8 @@ public class ChatController implements IChatService {
 
     @GetMapping("/model-list")
     @Override
-    public Result<List<ModelResponse>> queryModelResponseList() {
-        List<ModelResponse> modelIdList = queryService.queryModelResponseList();
+    public Result<List<ChatModelResponse>> queryChatModelResponseList() {
+        List<ChatModelResponse> modelIdList = queryService.queryChatModelResponseList();
         return Result.success(modelIdList);
     }
 

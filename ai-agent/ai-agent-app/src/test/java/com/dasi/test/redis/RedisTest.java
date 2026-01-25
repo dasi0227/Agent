@@ -3,7 +3,7 @@ package com.dasi.test.redis;
 import com.dasi.infrastructure.persistent.po.AiApi;
 import com.dasi.infrastructure.persistent.po.AiClient;
 import com.dasi.infrastructure.redis.IRedisService;
-import com.dasi.types.dto.response.ModelResponse;
+import com.dasi.types.dto.response.ChatModelResponse;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
@@ -53,7 +53,7 @@ public class RedisTest {
                 .createTime(LocalDateTime.now())
                 .updateTime(LocalDateTime.now())
                 .build();
-        ModelResponse modelValue = ModelResponse.builder()
+        ChatModelResponse modelValue = ChatModelResponse.builder()
                 .modelId("model_test")
                 .modelName("Test Model")
                 .build();
@@ -93,7 +93,7 @@ public class RedisTest {
         Integer intResult = redisService.getValue(intKey);
         Long longResult = redisService.getValue(longKey);
         AiApi apiResult = redisService.getValue(apiKey);
-        ModelResponse modelResult = redisService.getValue(modelKey);
+        ChatModelResponse modelResult = redisService.getValue(modelKey);
         List<AiClient> clientListResult = redisService.getValue(clientListKey);
 
         log.info("listResult={}", listResult);
