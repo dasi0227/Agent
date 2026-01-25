@@ -4,7 +4,7 @@ import com.dasi.domain.chat.repository.IChatRepository;
 import com.dasi.infrastructure.persistent.dao.IAiModelDao;
 import com.dasi.infrastructure.persistent.po.AiModel;
 import com.dasi.infrastructure.redis.IRedisService;
-import com.dasi.types.dto.response.ModelResponse;
+import com.dasi.types.dto.response.ChatModelResponse;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Repository;
 
@@ -23,28 +23,28 @@ public class ChatRepository implements IChatRepository {
     private IRedisService redisService;
 
     @Override
-    public List<ModelResponse> queryModelResponseList() {
-        List<ModelResponse> modelResponseList = redisService.getValue(MODEL_LIST_KEY);
-        if (modelResponseList != null) {
-            return modelResponseList;
+    public List<ChatModelResponse> queryChatModelResponseList() {
+        List<ChatModelResponse> chatModelResponseList = redisService.getValue(MODEL_LIST_KEY);
+        if (chatModelResponseList != null) {
+            return chatModelResponseList;
         }
 
-        List<AiModel> aiModelList = aiModelDao.queryModelList();
+        List<AiModel> aiModelList = aiModelDao.queryChatModelList();
         if (aiModelList == null || aiModelList.isEmpty()) {
-            modelResponseList = new ArrayList<>();
-            redisService.setValue(MODEL_LIST_KEY, modelResponseList);
-            return modelResponseList;
+            chatModelResponseList = new ArrayList<>();
+            redisService.setValue(MODEL_LIST_KEY, chatModelResponseList);
+            return chatModelResponseList;
         }
 
-        modelResponseList = aiModelList.stream()
-                .map(aiModel -> ModelResponse.builder()
+        chatModelResponseList = aiModelList.stream()
+                .map(aiModel -> ChatModelResponse.builder()
                         .modelId(aiModel.getModelId())
                         .modelName(aiModel.getModelName())
                         .build())
                 .toList();
 
-        redisService.setValue(MODEL_LIST_KEY, modelResponseList);
-        return modelResponseList;
+        redisService.setValue(MODEL_LIST_KEY, chatModelResponseList);
+        return chatModelResponseList;
     }
 
 }

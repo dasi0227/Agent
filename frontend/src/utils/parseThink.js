@@ -8,47 +8,60 @@ export const parseThinkText = (text) => {
             answer: ''
         };
     }
-    const match = text.match(/<think>([\s\S]*?)<\/think>/);
-    if (!match) {
-        return {
-            think: '',
-            answer: text
-        };
-    }
-    const think = match[1] || '';
-    const answer = text.replace(match[0], '');
+    const answer = text.replace(/<think>[\s\S]*?<\/think>/g, '');
     return {
-        think: think.trim(),
+        think: '',
         answer: answer.trim()
     };
 };
 
 export const createStreamAccumulator = () => ({
     inThink: false,
-    think: '',
-    answer: ''
+    answer: '',
+    carry: ''
 });
+
+const findPartialSuffix = (text, tag) => {
+    const max = Math.min(tag.length - 1, text.length);
+    for (let len = max; len > 0; len -= 1) {
+        if (tag.startsWith(text.slice(-len))) {
+            return len;
+        }
+    }
+    return 0;
+};
 
 export const applyStreamToken = (accumulator, token) => {
     if (!token) {
         return accumulator;
     }
-    let remaining = token;
+    let remaining = `${accumulator.carry || ''}${token}`;
+    accumulator.carry = '';
     while (remaining.length > 0) {
         if (accumulator.inThink) {
             const endIndex = remaining.indexOf(THINK_END);
             if (endIndex === -1) {
-                accumulator.think += remaining;
+                const partial = findPartialSuffix(remaining, THINK_END);
+                if (partial > 0) {
+                    accumulator.carry = remaining.slice(-partial);
+                } else {
+                    accumulator.carry = '';
+                }
                 remaining = '';
             } else {
-                accumulator.think += remaining.slice(0, endIndex);
                 accumulator.inThink = false;
                 remaining = remaining.slice(endIndex + THINK_END.length);
             }
         } else {
             const startIndex = remaining.indexOf(THINK_START);
             if (startIndex === -1) {
-                accumulator.answer += remaining;
+                const partial = findPartialSuffix(remaining, THINK_START);
+                if (partial > 0) {
+                    accumulator.answer += remaining.slice(0, -partial);
+                    accumulator.carry = remaining.slice(-partial);
+                } else {
+                    accumulator.answer += remaining;
+                }
                 remaining = '';
             } else {
                 accumulator.answer += remaining.slice(0, startIndex);

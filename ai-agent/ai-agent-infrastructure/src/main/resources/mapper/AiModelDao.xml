@@ -11,25 +11,23 @@
     </resultMap>
 
     <select id="queryByModelId" parameterType="java.lang.String" resultMap="dataMap">
-        SELECT
-            model_id,
-            api_id,
-            model_name,
-            model_type,
-            model_status
+        SELECT model_id,
+               api_id,
+               model_name,
+               model_type,
+               model_status
         FROM ai_model
         WHERE model_id = #{modelId}
     </select>
 
-    <select id="queryModelList" resultMap="dataMap">
-        SELECT
-            model_id,
-            api_id,
-            model_name,
-            model_type,
-            model_status
+    <select id="queryChatModelList" resultMap="dataMap">
+        SELECT model_id,
+               api_id,
+               model_name,
+               model_type,
+               model_status
         FROM ai_model
-        WHERE model_status = 1
+        WHERE model_status = 1 AND model_type = 'chat'
     </select>
 
 
