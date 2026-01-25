@@ -15,10 +15,10 @@ import static com.dasi.domain.agent.model.enumeration.AiType.API;
 
 @Slf4j
 @Service
-public class ArmoryAiApiNode extends AbstractArmoryNode {
+public class ArmoryApiNode extends AbstractArmoryNode {
 
     @Resource
-    private ArmoryAiMcpNode armoryAiMcpNode;
+    private ArmoryMcpNode armoryMcpNode;
 
     @Override
     protected String doApply(ArmoryRequestEntity armoryRequestEntity, ArmoryContext armoryContext) throws Exception {
@@ -26,7 +26,7 @@ public class ArmoryAiApiNode extends AbstractArmoryNode {
         List<AiApiVO> aiApiVOList = armoryContext.getValue(API.getType());
 
         if (aiApiVOList == null || aiApiVOList.isEmpty()) {
-            log.warn("【装配节点】ArmoryAiApiNode：没有数据");
+            log.warn("【装配节点】ArmoryApiNode：没有数据");
             return router(armoryRequestEntity, armoryContext);
         }
 
@@ -42,7 +42,7 @@ public class ArmoryAiApiNode extends AbstractArmoryNode {
             // 注册 Bean 对象
             String apiBeanName = API.getBeanName(aiApiVO.getApiId());
             registerBean(apiBeanName, OpenAiApi.class, openAiApi);
-            log.info("【装配节点】ArmoryAiApiNode：apiBeanName={}, baseUrl={}", apiBeanName, aiApiVO.getApiBaseUrl());
+            log.info("【装配节点】ArmoryApiNode：apiBeanName={}, baseUrl={}", apiBeanName, aiApiVO.getApiBaseUrl());
         }
 
         return router(armoryRequestEntity, armoryContext);
@@ -50,7 +50,7 @@ public class ArmoryAiApiNode extends AbstractArmoryNode {
 
     @Override
     public StrategyHandler<ArmoryRequestEntity, ArmoryContext, String> get(ArmoryRequestEntity armoryRequestEntity, ArmoryContext armoryContext) {
-        return armoryAiMcpNode;
+        return armoryMcpNode;
     }
 
 }

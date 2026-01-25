@@ -1,4 +1,4 @@
-package com.dasi.infrastructure.adapter.repository;
+package com.dasi.infrastructure.repository;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
@@ -24,34 +24,34 @@ import static com.dasi.domain.agent.model.enumeration.AiType.*;
 public class AgentRepository implements IAgentRepository {
 
     @Resource
-    private IAiAdvisorDao aiAdvisorDao;
+    private IAiAdvisorDao advisorDao;
 
     @Resource
-    private IAiApiDao aiApiDao;
+    private IAiApiDao apiDao;
 
     @Resource
-    private IAiConfigDao aiConfigDao;
+    private IAiConfigDao configDao;
 
     @Resource
-    private IAiClientDao aiClientDao;
+    private IAiClientDao clientDao;
 
     @Resource
-    private IAiModelDao aiModelDao;
+    private IAiModelDao modelDao;
 
     @Resource
-    private IAiPromptDao aiPromptDao;
+    private IAiPromptDao promptDao;
 
     @Resource
-    private IAiMcpDao aiMcpDao;
+    private IAiMcpDao mcpDao;
 
     @Resource
-    private IAiFlowDao aiFlowDao;
+    private IAiFlowDao flowDao;
 
     @Resource
-    private IAiAgentDao aiAgentDao;
+    private IAiAgentDao agentDao;
 
     @Resource
-    private IAiTaskDao aiTaskDao;
+    private IAiTaskDao taskDao;
 
     @Override
     public List<AiClientVO> queryAiClientVOListByClientIdList(List<String> clientIdList) {
@@ -68,13 +68,13 @@ public class AgentRepository implements IAgentRepository {
             }
 
             // 1. 查询客户端基本信息
-            AiClient aiClient = aiClientDao.queryByClientId(clientId);
+            AiClient aiClient = clientDao.queryByClientId(clientId);
             if (aiClient == null || aiClient.getClientStatus() == 0) {
                 continue;
             }
 
             // 2. 查询客户端关联配置
-            List<AiConfig> clientConfigList = aiConfigDao.queryBySource(CLIENT.getType(), clientId);
+            List<AiConfig> clientConfigList = configDao.queryBySource(CLIENT.getType(), clientId);
             if (clientConfigList == null || clientConfigList.isEmpty()) {
                 continue;
             }
@@ -134,7 +134,7 @@ public class AgentRepository implements IAgentRepository {
 
         for (String clientId : clientIdList) {
 
-            List<AiConfig> clientConfigList = aiConfigDao.queryBySource(CLIENT.getType(), clientId);
+            List<AiConfig> clientConfigList = configDao.queryBySource(CLIENT.getType(), clientId);
             if (clientConfigList == null || clientConfigList.isEmpty()) {
                 continue;
             }
@@ -147,7 +147,7 @@ public class AgentRepository implements IAgentRepository {
 
                 // 2. 通过 Config 拿到 Advisor
                 String advisorId = clientConfig.getTargetId();
-                AiAdvisor aiAdvisor = aiAdvisorDao.queryByAdvisorId(advisorId);
+                AiAdvisor aiAdvisor = advisorDao.queryByAdvisorId(advisorId);
                 if (aiAdvisor == null || aiAdvisor.getAdvisorStatus() == 0) {
                     continue;
                 }
@@ -202,7 +202,7 @@ public class AgentRepository implements IAgentRepository {
 
         for (String clientId : clientIdList) {
 
-            List<AiConfig> clientConfigList = aiConfigDao.queryBySource(CLIENT.getType(), clientId);
+            List<AiConfig> clientConfigList = configDao.queryBySource(CLIENT.getType(), clientId);
 
             for (AiConfig clientConfig : clientConfigList) {
                 // 1. 通过 Client 拿到 Config
@@ -215,7 +215,7 @@ public class AgentRepository implements IAgentRepository {
                 if (!aiPromptIdSet.add(promptId)) {
                     continue;
                 }
-                AiPrompt aiPrompt = aiPromptDao.queryByPromptId(promptId);
+                AiPrompt aiPrompt = promptDao.queryByPromptId(promptId);
                 if (aiPrompt == null || aiPrompt.getPromptStatus() == 0) {
                     continue;
                 }
@@ -246,7 +246,7 @@ public class AgentRepository implements IAgentRepository {
 
         for (String clientId : clientIdList) {
 
-            List<AiConfig> clientConfigList = aiConfigDao.queryBySource(CLIENT.getType(), clientId);
+            List<AiConfig> clientConfigList = configDao.queryBySource(CLIENT.getType(), clientId);
             if (clientConfigList == null || clientConfigList.isEmpty()) {
                 continue;
             }
@@ -264,7 +264,7 @@ public class AgentRepository implements IAgentRepository {
                 }
 
                 // 3. 通过 Mcp 拿到 VO
-                AiMcp aiMcp = aiMcpDao.queryByMcpId(mcpId);
+                AiMcp aiMcp = mcpDao.queryByMcpId(mcpId);
                 if (aiMcp == null || aiMcp.getMcpStatus() == 0) {
                     continue;
                 }
@@ -314,7 +314,7 @@ public class AgentRepository implements IAgentRepository {
 
         for (String clientId : clientIdList) {
 
-            List<AiConfig> clientConfigList = aiConfigDao.queryBySource(CLIENT.getType(), clientId);
+            List<AiConfig> clientConfigList = configDao.queryBySource(CLIENT.getType(), clientId);
             if (clientConfigList == null || clientConfigList.isEmpty()) {
                 continue;
             }
@@ -327,7 +327,7 @@ public class AgentRepository implements IAgentRepository {
 
                 // 2. 通过 Config 拿到 Model
                 String modelId = clientConfig.getTargetId();
-                AiModel aiModel = aiModelDao.queryByModelId(modelId);
+                AiModel aiModel = modelDao.queryByModelId(modelId);
                 if (aiModel == null || aiModel.getModelStatus() == 0) {
                     continue;
                 }
@@ -337,7 +337,7 @@ public class AgentRepository implements IAgentRepository {
 
                 // 3. 通过 Model 拿到 Mcp
                 List<String> mcpIdList = new ArrayList<>();
-                List<AiConfig> modelConfigList = aiConfigDao.queryBySource(MODEL.getType(), modelId);
+                List<AiConfig> modelConfigList = configDao.queryBySource(MODEL.getType(), modelId);
 
                 if (modelConfigList != null && !modelConfigList.isEmpty()) {
                     for (AiConfig modelConfig : modelConfigList) {
@@ -373,7 +373,7 @@ public class AgentRepository implements IAgentRepository {
 
         for (String clientId : clientIdList) {
 
-            List<AiConfig> clientConfigList = aiConfigDao.queryBySource(CLIENT.getType(), clientId);
+            List<AiConfig> clientConfigList = configDao.queryBySource(CLIENT.getType(), clientId);
             if (clientConfigList == null || clientConfigList.isEmpty()) {
                 continue;
             }
@@ -386,13 +386,13 @@ public class AgentRepository implements IAgentRepository {
 
                 // 2. 通过 Config 拿到 Model
                 String modelId = clientConfig.getTargetId();
-                AiModel aiModel = aiModelDao.queryByModelId(modelId);
+                AiModel aiModel = modelDao.queryByModelId(modelId);
                 if (aiModel == null || aiModel.getModelStatus() == 0) {
                     continue;
                 }
 
                 // 3. 通过 Model 拿到 Api
-                AiApi aiApi = aiApiDao.queryByApiId(aiModel.getApiId());
+                AiApi aiApi = apiDao.queryByApiId(aiModel.getApiId());
                 if (aiApi == null || aiApi.getApiStatus() == 0) {
                     continue;
                 }
@@ -425,7 +425,7 @@ public class AgentRepository implements IAgentRepository {
         Set<String> aiModelIdSet = new HashSet<>();
 
         for (String modelId : modelIdList) {
-            AiModel aiModel = aiModelDao.queryByModelId(modelId);
+            AiModel aiModel = modelDao.queryByModelId(modelId);
             if (aiModel == null || aiModel.getModelStatus() == 0) {
                 continue;
             }
@@ -455,12 +455,12 @@ public class AgentRepository implements IAgentRepository {
         Set<String> aiApiIdSet = new HashSet<>();
 
         for (String modelId : modelIdList) {
-            AiModel aiModel = aiModelDao.queryByModelId(modelId);
+            AiModel aiModel = modelDao.queryByModelId(modelId);
             if (aiModel == null || aiModel.getModelStatus() == 0) {
                 continue;
             }
 
-            AiApi aiApi = aiApiDao.queryByApiId(aiModel.getApiId());
+            AiApi aiApi = apiDao.queryByApiId(aiModel.getApiId());
             if (aiApi == null || aiApi.getApiStatus() == 0) {
                 continue;
             }
@@ -489,7 +489,7 @@ public class AgentRepository implements IAgentRepository {
             return Map.of();
         }
 
-        List<AiFlow> aiFlowList = aiFlowDao.queryByAgentId(aiAgentId);
+        List<AiFlow> aiFlowList = flowDao.queryByAgentId(aiAgentId);
 
         if (aiFlowList == null || aiFlowList.isEmpty()) {
             return Map.of();
@@ -513,13 +513,13 @@ public class AgentRepository implements IAgentRepository {
 
     @Override
     public String queryExecuteTypeByAgentId(String aiAgentId) {
-        return aiAgentDao.queryTypeByAgentId(aiAgentId);
+        return agentDao.queryTypeByAgentId(aiAgentId);
     }
 
     @Override
     public List<AiTaskVO> queryTaskVOList() {
 
-        return aiTaskDao.queryTaskList()
+        return taskDao.queryTaskList()
                 .stream()
                 .map(aiTask -> AiTaskVO.builder()
                         .agentId(aiTask.getAgentId())
@@ -544,6 +544,6 @@ public class AgentRepository implements IAgentRepository {
 
     @Override
     public void updateTaskStatus(String taskId, Integer taskStatus) {
-        aiTaskDao.updateTaskStatus(taskId, taskStatus);
+        taskDao.updateTaskStatus(taskId, taskStatus);
     }
 }

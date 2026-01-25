@@ -20,4 +20,10 @@
         FROM ai_model
         WHERE model_id = #{modelId}
     </select>
+
+    <select id="queryModelIdList" resultType="java.lang.String">
+        SELECT model_id
+        FROM ai_model
+        WHERE model_status = 1;
+    </select>
 </mapper>

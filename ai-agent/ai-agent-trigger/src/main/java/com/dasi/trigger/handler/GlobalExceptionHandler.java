@@ -1,4 +1,4 @@
-package com.dasi.trigger.http;
+package com.dasi.trigger.handler;
 
 import com.dasi.types.model.Result;
 import lombok.extern.slf4j.Slf4j;
