@@ -1,11 +1,11 @@
 package com.dasi.trigger.http;
 
 import com.dasi.api.IAgentService;
-import com.dasi.api.dto.ArmoryRequestDTO;
-import com.dasi.api.dto.ExecuteRequestDTO;
 import com.dasi.domain.agent.model.entity.ExecuteRequestEntity;
 import com.dasi.domain.agent.service.dispatch.IDispatchService;
-import com.dasi.types.model.Result;
+import com.dasi.types.dto.request.ArmoryRequest;
+import com.dasi.types.dto.request.ExecuteRequest;
+import com.dasi.types.dto.result.Result;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -27,10 +27,10 @@ public class AgentController implements IAgentService {
 
     @Override
     @PostMapping(value = "/armory")
-    public Result<Void> armory(@Valid @RequestBody ArmoryRequestDTO armoryRequestDTO) {
+    public Result<Void> armory(@Valid @RequestBody ArmoryRequest armoryRequest) {
 
-        String armoryType = armoryRequestDTO.getArmoryType();
-        List<String> idList = armoryRequestDTO.getIdList();
+        String armoryType = armoryRequest.getArmoryType();
+        List<String> idList = armoryRequest.getIdList();
 
         dispatchService.dispatchArmoryStrategy(armoryType, idList);
 
@@ -39,16 +39,16 @@ public class AgentController implements IAgentService {
 
     @Override
     @PostMapping(value = "/execute", produces = "text/event-stream")
-    public SseEmitter execute(@Valid @RequestBody ExecuteRequestDTO executeRequestDTO) {
+    public SseEmitter execute(@Valid @RequestBody ExecuteRequest executeRequest) {
 
         SseEmitter sseEmitter = new SseEmitter(0L);
 
         ExecuteRequestEntity executeRequestEntity = ExecuteRequestEntity.builder()
-                .aiAgentId(executeRequestDTO.getAiAgentId())
-                .userMessage(executeRequestDTO.getUserMessage())
-                .sessionId(executeRequestDTO.getSessionId())
-                .maxRound(executeRequestDTO.getMaxRound())
-                .maxRetry(executeRequestDTO.getMaxRetry())
+                .aiAgentId(executeRequest.getAiAgentId())
+                .userMessage(executeRequest.getUserMessage())
+                .sessionId(executeRequest.getSessionId())
+                .maxRound(executeRequest.getMaxRound())
+                .maxRetry(executeRequest.getMaxRetry())
                 .build();
 
         dispatchService.dispatchExecuteStrategy(executeRequestEntity, sseEmitter);

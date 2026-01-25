@@ -1,14 +1,14 @@
 package com.dasi.api;
 
-import com.dasi.api.dto.ArmoryRequestDTO;
-import com.dasi.api.dto.ExecuteRequestDTO;
-import com.dasi.types.model.Result;
+import com.dasi.types.dto.request.ArmoryRequest;
+import com.dasi.types.dto.request.ExecuteRequest;
+import com.dasi.types.dto.result.Result;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 public interface IAgentService {
 
-    SseEmitter execute(ExecuteRequestDTO executeRequestDTO);
+    SseEmitter execute(ExecuteRequest executeRequest);
 
-    Result<Void> armory(ArmoryRequestDTO armoryRequestDTO);
+    Result<Void> armory(ArmoryRequest armoryRequest);
 
 }

@@ -1,6 +1,7 @@
 package com.dasi.infrastructure.redis;
 
 import jakarta.annotation.Resource;
+import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +17,9 @@ public class RedisService implements IRedisService {
     }
 
     @Override
-    public <T> T getValue(String key, Class<T> type) {
-        Object value = redissonClient.getBucket(key).get();
-        return value == null ? null : type.cast(value);
+    public <T> T getValue(String key) {
+        RBucket<?> bucket = redissonClient.getBucket(key);
+        return (T) bucket.get();
     }
+
 }

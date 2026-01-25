@@ -18,7 +18,7 @@ import static com.dasi.domain.agent.model.enumeration.AiType.API;
 public class ArmoryApiNode extends AbstractArmoryNode {
 
     @Resource
-    private ArmoryMcpNode armoryMcpNode;
+    private ArmoryModelNode armoryModelNode;
 
     @Override
     protected String doApply(ArmoryRequestEntity armoryRequestEntity, ArmoryContext armoryContext) throws Exception {
@@ -50,7 +50,7 @@ public class ArmoryApiNode extends AbstractArmoryNode {
 
     @Override
     public StrategyHandler<ArmoryRequestEntity, ArmoryContext, String> get(ArmoryRequestEntity armoryRequestEntity, ArmoryContext armoryContext) {
-        return armoryMcpNode;
+        return armoryModelNode;
     }
 
 }

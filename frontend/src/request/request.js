@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:8001';
+const BASE_URL = 'http://localhost:8066';
 const REQUEST_TIMEOUT = 600000;
 const SETTINGS_KEY = 'chat_settings';
 
@@ -85,13 +85,18 @@ http.interceptors.response.use(
     }
 );
 
-export async function streamFetch(url, onData, onError, onDone, signal) {
+export async function streamFetch(url, body, onData, onError, onDone, signal) {
     const controller = new AbortController();
     const activeSignal = signal || controller.signal;
-    const headers = { Accept: 'text/event-stream' };
+    const headers = { Accept: 'text/event-stream', 'Content-Type': 'application/json' };
     try {
-        console.log(`[stream] GET ${url}`);
-        const response = await fetch(url, { headers, signal: activeSignal });
+        console.log(`[stream] POST ${url}`);
+        const response = await fetch(url, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(body || {}),
+            signal: activeSignal
+        });
         if (!response.ok || !response.body) {
             throw new Error(`流式请求失败: ${response.status}`);
         }
@@ -142,7 +147,12 @@ const processEventChunk = (chunk, onData, onError) => {
     try {
         const json = JSON.parse(payload);
         onData && onData(json);
+        return;
     } catch (error) {
+        if (onData) {
+            onData(payload);
+            return;
+        }
         onError && onError(normalizeError(error));
     }
 };

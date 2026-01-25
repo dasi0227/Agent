@@ -2,15 +2,15 @@ package com.dasi.trigger.http;
 
 import com.dasi.api.IChatService;
 import com.dasi.domain.chat.service.query.IQueryService;
-import com.dasi.types.model.Result;
+import com.dasi.types.dto.request.ChatRequest;
+import com.dasi.types.dto.response.ModelResponse;
+import com.dasi.types.dto.result.Result;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.vectorstore.pgvector.PgVectorStore;
 import org.springframework.context.ApplicationContext;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
@@ -32,14 +32,17 @@ public class ChatController implements IChatService {
     @Resource
     private IQueryService queryService;
 
-    @GetMapping("/complete")
+    @PostMapping("/complete")
     @Override
-    public String complete(String modelId, String message) {
-        String beanName = MODEL.getBeanName(modelId);
+    public String complete(@RequestBody ChatRequest chatRequest) {
+
+        String modelId = chatRequest.getModelId();
+        String userMessage = chatRequest.getUserMessage();
 
         try {
+            String beanName = MODEL.getBeanName(modelId);
             ChatModel chatModel = applicationContext.getBean(beanName, ChatModel.class);
-            String response = chatModel.call(message).trim();
+            String response = chatModel.call(userMessage).trim();
             if (response.isEmpty()) {
                 return CHAT_ERROR_RESPONSE;
             }
@@ -50,14 +53,17 @@ public class ChatController implements IChatService {
         }
     }
 
-    @GetMapping("/stream")
+    @PostMapping("/stream")
     @Override
-    public Flux<String> stream(String modelId, String message) {
-        String beanName = MODEL.getBeanName(modelId);
+    public Flux<String> stream(@RequestBody ChatRequest chatRequest) {
+
+        String modelId = chatRequest.getModelId();
+        String userMessage = chatRequest.getUserMessage();
 
         try {
+            String beanName = MODEL.getBeanName(modelId);
             ChatModel chatModel = applicationContext.getBean(beanName, ChatModel.class);
-            return chatModel.stream(message)
+            return chatModel.stream(userMessage)
                     .onErrorResume(e -> {
                         log.error("【模型对话】模型 stream 对话失败：modelId={}", modelId, e);
                         return Flux.just(CHAT_ERROR_RESPONSE);
@@ -68,11 +74,11 @@ public class ChatController implements IChatService {
         }
     }
 
+    @GetMapping("/model-list")
     @Override
-    public Result<List<String>> queryModelIdList() {
-        List<String> modelIdList = queryService.queryModelIdList();
+    public Result<List<ModelResponse>> queryModelResponseList() {
+        List<ModelResponse> modelIdList = queryService.queryModelResponseList();
         return Result.success(modelIdList);
     }
-
 
 }
