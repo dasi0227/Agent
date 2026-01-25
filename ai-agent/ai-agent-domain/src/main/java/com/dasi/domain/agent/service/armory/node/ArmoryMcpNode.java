@@ -22,10 +22,10 @@ import static com.dasi.domain.agent.model.enumeration.AiType.MCP;
 
 @Slf4j
 @Service
-public class ArmoryAiMcpNode extends AbstractArmoryNode {
+public class ArmoryMcpNode extends AbstractArmoryNode {
 
     @Resource
-    private ArmoryAiModelNode armoryAiModelNode;
+    private ArmoryModelNode armoryModelNode;
 
     @Override
     protected String doApply(ArmoryRequestEntity armoryRequestEntity, ArmoryContext armoryContext) throws Exception {
@@ -33,7 +33,7 @@ public class ArmoryAiMcpNode extends AbstractArmoryNode {
         List<AiMcpVO> aiMcpVOList = armoryContext.getValue(MCP.getType());
 
         if (aiMcpVOList == null || aiMcpVOList.isEmpty()) {
-            log.warn("【装配节点】ArmoryAiMcpNode：没有数据");
+            log.warn("【装配节点】ArmoryMcpNode：没有数据");
             return router(armoryRequestEntity, armoryContext);
         }
 
@@ -82,7 +82,7 @@ public class ArmoryAiMcpNode extends AbstractArmoryNode {
 
             String mcpBeanName = MCP.getBeanName(aiMcpVO.getMcpId());
             registerBean(mcpBeanName, McpSyncClient.class, mcpSyncClient);
-            log.info("【装配节点】ArmoryAiMcpNode：mcpBeanName={}, mcpType={}", mcpBeanName, aiMcpVO.getMcpType());
+            log.info("【装配节点】ArmoryMcpNode：mcpBeanName={}, mcpType={}", mcpBeanName, aiMcpVO.getMcpType());
         }
 
         return router(armoryRequestEntity, armoryContext);
@@ -90,7 +90,7 @@ public class ArmoryAiMcpNode extends AbstractArmoryNode {
 
     @Override
     public StrategyHandler<ArmoryRequestEntity, ArmoryContext, String> get(ArmoryRequestEntity armoryRequestEntity, ArmoryContext armoryContext) {
-        return armoryAiModelNode;
+        return armoryModelNode;
     }
 
 }

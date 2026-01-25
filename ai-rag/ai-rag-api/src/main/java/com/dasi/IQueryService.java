@@ -6,8 +6,8 @@ import java.util.List;
 
 public interface IQueryService {
 
-    public Result<List<String>> queryRagTagList();
+    Result<List<String>> queryRagTagList();
 
-    public Result<List<String>> queryChatModelList();
+    Result<List<String>> queryChatModelList();
 
 }

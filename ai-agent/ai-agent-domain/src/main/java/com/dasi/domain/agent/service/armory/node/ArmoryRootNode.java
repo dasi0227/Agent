@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 public class ArmoryRootNode extends AbstractArmoryNode {
 
     @Resource
-    private ArmoryAiApiNode armoryAiApiNode;
+    private ArmoryApiNode armoryApiNode;
 
     @Override
     protected String doApply(ArmoryRequestEntity armoryRequestEntity, ArmoryContext armoryContext) throws Exception {
@@ -22,7 +22,7 @@ public class ArmoryRootNode extends AbstractArmoryNode {
 
     @Override
     public StrategyHandler<ArmoryRequestEntity, ArmoryContext, String> get(ArmoryRequestEntity armoryRequestEntity, ArmoryContext armoryContext) {
-        return armoryAiApiNode;
+        return armoryApiNode;
     }
 
 }

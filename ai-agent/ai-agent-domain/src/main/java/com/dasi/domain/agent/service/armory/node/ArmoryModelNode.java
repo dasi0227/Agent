@@ -21,10 +21,10 @@ import static com.dasi.domain.agent.model.enumeration.AiType.*;
 
 @Slf4j
 @Service
-public class ArmoryAiModelNode extends AbstractArmoryNode {
+public class ArmoryModelNode extends AbstractArmoryNode {
 
     @Resource
-    private ArmoryAiAdvisorNode armoryAiAdvisorNode;
+    private ArmoryAdvisorNode armoryAdvisorNode;
 
     @Override
     protected String doApply(ArmoryRequestEntity armoryRequestEntity, ArmoryContext armoryContext) throws Exception {
@@ -32,7 +32,7 @@ public class ArmoryAiModelNode extends AbstractArmoryNode {
         List<AiModelVO> aiModelVOList = armoryContext.getValue(MODEL.getType());
 
         if (aiModelVOList == null || aiModelVOList.isEmpty()) {
-            log.warn("【装配节点】ArmoryAiModelNode：没有数据");
+            log.warn("【装配节点】ArmoryModelNode：没有数据");
             return router(armoryRequestEntity, armoryContext);
         }
 
@@ -42,7 +42,7 @@ public class ArmoryAiModelNode extends AbstractArmoryNode {
             String apiBeanName = API.getBeanName(aiModelVO.getApiId());
             OpenAiApi openAiApi = getBean(apiBeanName);
             if (openAiApi == null) {
-                log.error("【装配节点】ArmoryAiModelNode：不存在 API");
+                log.error("【装配节点】ArmoryModelNode：不存在 API");
             }
 
             // 获取当前 Model 关联的 MCP
@@ -67,7 +67,7 @@ public class ArmoryAiModelNode extends AbstractArmoryNode {
             // 注册 Bean 对象
             String modelBeanName = MODEL.getBeanName(aiModelVO.getModelId());
             registerBean(modelBeanName, OpenAiChatModel.class, chatModel);
-            log.info("【装配节点】ArmoryAiModelNode：modelBeanName={}, modelType={}", modelBeanName, aiModelVO.getModelType());
+            log.info("【装配节点】ArmoryModelNode：modelBeanName={}, modelType={}", modelBeanName, aiModelVO.getModelType());
         }
 
         return router(armoryRequestEntity, armoryContext);
@@ -75,7 +75,7 @@ public class ArmoryAiModelNode extends AbstractArmoryNode {
 
     @Override
     public StrategyHandler<ArmoryRequestEntity, ArmoryContext, String> get(ArmoryRequestEntity armoryRequestEntity, ArmoryContext armoryContext) {
-        return armoryAiAdvisorNode;
+        return armoryAdvisorNode;
     }
 
 }
