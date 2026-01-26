@@ -12,15 +12,20 @@
     </resultMap>
 
     <select id="queryBySource" parameterType="java.lang.String" resultMap="dataMap">
-        SELECT
-            source_type,
-            source_id,
-            target_type,
-            target_id,
-            config_param,
-            config_status
+        SELECT source_type,
+               source_id,
+               target_type,
+               target_id,
+               config_param,
+               config_status
         FROM ai_config
         WHERE source_type = #{sourceType}
           AND source_id = #{sourceId}
+    </select>
+
+    <select id="queryIdListByTargetType" resultType="java.lang.String">
+        SELECT source_id
+        FROM ai_config
+        WHERE target_type = #{targetType}
     </select>
 </mapper>

@@ -13,33 +13,27 @@
     </resultMap>
 
     <select id="queryByClientId" parameterType="java.lang.String" resultMap="dataMap">
-        SELECT
-            client_id,
-            client_type,
-            model_id,
-            model_name,
-            client_name,
-            client_desc,
-            client_status
+        SELECT client_id,
+               client_type,
+               model_id,
+               model_name,
+               client_name,
+               client_desc,
+               client_status
         FROM ai_client
         WHERE client_id = #{clientId}
     </select>
 
-    <select id="queryClientList" resultMap="dataMap">
-        SELECT
-            client_id,
-            client_type,
-            model_id,
-            model_name,
-            client_name,
-            client_desc,
-            client_status
+    <select id="queryChatClientList" resultMap="dataMap">
+        SELECT client_id,
+               client_type,
+               model_id,
+               model_name,
+               client_name,
+               client_desc,
+               client_status
         FROM ai_client
+        WHERE client_type = 'chat'
     </select>
 
-    <select id="queryClientIdList" resultType="java.lang.String">
-        SELECT
-            client_id
-        FROM ai_client;
-    </select>
 </mapper>

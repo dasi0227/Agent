@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class ChatRequest {
 
     @NotBlank
-    private String modelId;
+    private String clientId;
 
     @NotBlank
     private String userMessage;

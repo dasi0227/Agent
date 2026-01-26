@@ -17,7 +17,7 @@ import { useChatStore, useSettingsStore } from '../router/pinia';
 const chatStore = useChatStore();
 const settingsStore = useSettingsStore();
 
-const models = ref([{ label: 'deepseek-r1:1.5b', value: 'deepseek-r1:1.5b' }]);
+const models = ref([]);
 const ragTags = ref([{ label: '不使用知识库', value: '' }]);
 
 const messageScrollRef = ref(null);
@@ -77,7 +77,8 @@ const currentModel = computed({
 
 const currentModelLabel = computed(() => {
     const match = models.value.find((item) => item.value === currentModel.value);
-    return match?.label || currentModel.value;
+    if (match?.label) return match.label;
+    return models.value.length === 0 ? '暂无模型' : currentModel.value;
 });
 
 const currentRagTag = computed({
@@ -180,10 +181,10 @@ const fetchModels = async () => {
                     return { label: item, value: item };
                 }
                 if (item && typeof item === 'object') {
-                    const modelId = item.modelId || item.id || '';
-                    const modelName = item.modelName || item.name || modelId;
-                    if (!modelId) return null;
-                    return { label: modelName || modelId, value: modelId };
+                    const clientId = item.clientId || item.modelId || item.id || '';
+                    const modelName = item.modelName || item.name || clientId;
+                    if (!clientId) return null;
+                    return { label: modelName || clientId, value: clientId };
                 }
                 return null;
             })
@@ -262,7 +263,7 @@ const extractStreamParts = (payload) => {
 
 const sendMessage = async () => {
     const content = inputValue.value.trim();
-    if (!content || sending.value) return;
+    if (!content || sending.value || !currentModel.value) return;
     const mode = settingsStore.type || 'complete';
     chatStore.stopCurrentRequest();
     stopTypewriter();
@@ -283,7 +284,7 @@ const runComplete = async (content, controller) => {
     const assistantMessage = chatStore.addAssistantMessage({ pending: true, content: '', think: '' });
     try {
         const response = await fetchComplete({
-            modelId: currentModel.value,
+            clientId: currentModel.value,
             userMessage: content,
             signal: controller.signal
         });
@@ -359,7 +360,7 @@ const runStream = async (content, controller) => {
 
     try {
         await fetchStream({
-            modelId: currentModel.value,
+            clientId: currentModel.value,
             userMessage: content,
             signal: controller.signal,
             onData: (payload) => {
@@ -423,6 +424,7 @@ const saveSettings = () => {
 const getContent = (message) => (message?.content ? message.content.toString().trimStart() : '');
 
 const toggleModelDropdown = () => {
+    if (models.value.length === 0) return;
     ragDropdownOpen.value = false;
     modelDropdownOpen.value = !modelDropdownOpen.value;
 };
@@ -619,6 +621,7 @@ const handleUpload = async () => {
                         <div
                             ref="modelSelectRef"
                             class="inline-flex min-h-[36px] min-w-[200px] cursor-pointer items-center justify-between gap-[10px] rounded-[12px] border border-[var(--border-color)] bg-white px-[12px] py-[8px] shadow-[0_12px_30px_rgba(27,36,55,0.08)]"
+                            :class="models.length === 0 ? 'cursor-not-allowed opacity-70' : ''"
                             @click="toggleModelDropdown"
                         >
                             <span class="font-bold text-[var(--text-primary)]">{{ currentModelLabel }}</span>
@@ -630,7 +633,7 @@ const handleUpload = async () => {
                             </span>
                         </div>
                         <div
-                            v-if="modelDropdownOpen"
+                            v-if="modelDropdownOpen && models.length > 0"
                             class="absolute left-0 top-[calc(100%+6px)] z-[15] w-full rounded-[12px] border border-[var(--border-color)] bg-white p-[6px] shadow-[0_18px_40px_rgba(15,23,42,0.12)] max-h-[240px] overflow-y-auto"
                         >
                             <div

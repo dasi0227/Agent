@@ -338,6 +338,7 @@ public class AgentRepository implements IAgentRepository {
         Set<String> aiClientIdSet = new HashSet<>();
 
         for (String clientId : clientIdList) {
+
             if (!aiClientIdSet.add(clientId)) {
                 continue;
             }
@@ -350,30 +351,29 @@ public class AgentRepository implements IAgentRepository {
 
             // 2. 查询客户端关联配置
             List<AiConfig> clientConfigList = configDao.queryBySource(CLIENT.getType(), clientId);
-            if (clientConfigList == null || clientConfigList.isEmpty()) {
-                continue;
-            }
 
             List<String> promptIdList = new ArrayList<>();
             List<String> mcpIdList = new ArrayList<>();
             List<String> advisorIdList = new ArrayList<>();
 
             // 3. 根据 Config 拿到各个 Id
-            for (AiConfig clientConfig : clientConfigList) {
-                if (clientConfig.getConfigStatus() == 0) {
-                    continue;
-                }
+            if (clientConfigList != null && !clientConfigList.isEmpty()) {
+                for (AiConfig clientConfig : clientConfigList) {
+                    if (clientConfig.getConfigStatus() == 0) {
+                        continue;
+                    }
 
-                switch (AiType.fromType(clientConfig.getTargetType())) {
-                    case PROMPT:
-                        promptIdList.add(clientConfig.getTargetId());
-                        break;
-                    case MCP:
-                        mcpIdList.add(clientConfig.getTargetId());
-                        break;
-                    case ADVISOR:
-                        advisorIdList.add(clientConfig.getTargetId());
-                        break;
+                    switch (AiType.fromType(clientConfig.getTargetType())) {
+                        case PROMPT:
+                            promptIdList.add(clientConfig.getTargetId());
+                            break;
+                        case MCP:
+                            mcpIdList.add(clientConfig.getTargetId());
+                            break;
+                        case ADVISOR:
+                            advisorIdList.add(clientConfig.getTargetId());
+                            break;
+                    }
                 }
             }
 
