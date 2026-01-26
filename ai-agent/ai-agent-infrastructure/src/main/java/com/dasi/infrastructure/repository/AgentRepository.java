@@ -159,19 +159,19 @@ public class AgentRepository implements IAgentRepository {
 
         for (String clientId : clientIdList) {
 
-            List<AiConfig> clientConfigList = configDao.queryBySource(CLIENT.getType(), clientId);
+            List<AiConfig> clientConfigList = configDao.queryByClientId(clientId);
             if (clientConfigList == null || clientConfigList.isEmpty()) {
                 continue;
             }
 
             for (AiConfig clientConfig : clientConfigList) {
                 // 1. 通过 Client 拿到 Config
-                if (!ADVISOR.getType().equals(clientConfig.getTargetType()) || clientConfig.getConfigStatus() == 0) {
+                if (!ADVISOR.getType().equals(clientConfig.getConfigType()) || clientConfig.getConfigStatus() == 0) {
                     continue;
                 }
 
                 // 2. 通过 Config 拿到 Advisor
-                String advisorId = clientConfig.getTargetId();
+                String advisorId = clientConfig.getConfigValue();
                 AiAdvisor aiAdvisor = advisorDao.queryByAdvisorId(advisorId);
                 if (aiAdvisor == null || aiAdvisor.getAdvisorStatus() == 0) {
                     continue;
@@ -227,16 +227,16 @@ public class AgentRepository implements IAgentRepository {
 
         for (String clientId : clientIdList) {
 
-            List<AiConfig> clientConfigList = configDao.queryBySource(CLIENT.getType(), clientId);
+            List<AiConfig> clientConfigList = configDao.queryByClientId(clientId);
 
             for (AiConfig clientConfig : clientConfigList) {
                 // 1. 通过 Client 拿到 Config
-                if (!PROMPT.getType().equals(clientConfig.getTargetType()) || clientConfig.getConfigStatus() == 0) {
+                if (!PROMPT.getType().equals(clientConfig.getConfigType()) || clientConfig.getConfigStatus() == 0) {
                     continue;
                 }
 
                 // 2. 通过 Config 拿到 Prompt
-                String promptId = clientConfig.getTargetId();
+                String promptId = clientConfig.getConfigValue();
                 if (!aiPromptIdSet.add(promptId)) {
                     continue;
                 }
@@ -271,19 +271,19 @@ public class AgentRepository implements IAgentRepository {
 
         for (String clientId : clientIdList) {
 
-            List<AiConfig> clientConfigList = configDao.queryBySource(CLIENT.getType(), clientId);
+            List<AiConfig> clientConfigList = configDao.queryByClientId(clientId);
             if (clientConfigList == null || clientConfigList.isEmpty()) {
                 continue;
             }
 
             for (AiConfig clientConfig : clientConfigList) {
                 // 1. 通过 Client 拿到 Config
-                if (!MCP.getType().equals(clientConfig.getTargetType()) || clientConfig.getConfigStatus() == 0) {
+                if (!MCP.getType().equals(clientConfig.getConfigType()) || clientConfig.getConfigStatus() == 0) {
                     continue;
                 }
 
                 // 2. 通过 Config 拿到 MCP
-                String mcpId = clientConfig.getTargetId();
+                String mcpId = clientConfig.getConfigValue();
                 if (!aiMcpIdSet.add(mcpId)) {
                     continue;
                 }
@@ -350,7 +350,7 @@ public class AgentRepository implements IAgentRepository {
             }
 
             // 2. 查询客户端关联配置
-            List<AiConfig> clientConfigList = configDao.queryBySource(CLIENT.getType(), clientId);
+            List<AiConfig> clientConfigList = configDao.queryByClientId(clientId);
 
             List<String> promptIdList = new ArrayList<>();
             List<String> mcpIdList = new ArrayList<>();
@@ -363,15 +363,15 @@ public class AgentRepository implements IAgentRepository {
                         continue;
                     }
 
-                    switch (AiType.fromType(clientConfig.getTargetType())) {
+                    switch (AiType.fromType(clientConfig.getConfigType())) {
                         case PROMPT:
-                            promptIdList.add(clientConfig.getTargetId());
+                            promptIdList.add(clientConfig.getConfigValue());
                             break;
                         case MCP:
-                            mcpIdList.add(clientConfig.getTargetId());
+                            mcpIdList.add(clientConfig.getConfigValue());
                             break;
                         case ADVISOR:
-                            advisorIdList.add(clientConfig.getTargetId());
+                            advisorIdList.add(clientConfig.getConfigValue());
                             break;
                     }
                 }

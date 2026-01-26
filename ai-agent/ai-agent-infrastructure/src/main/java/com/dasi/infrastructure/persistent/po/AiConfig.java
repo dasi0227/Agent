@@ -15,17 +15,14 @@ public class AiConfig {
     /** 自增 id */
     private Long id;
 
-    /** 源类型 */
-    private String sourceType;
+    /** 客户端 id */
+    private String clientId;
 
-    /** 源 id */
-    private String sourceId;
+    /** 配置类型 */
+    private String configType;
 
-    /** 目标类型 */
-    private String targetType;
-
-    /** 目标 id */
-    private String targetId;
+    /** 配置值 */
+    private String configValue;
 
     /** 关联参数配置 */
     private String configParam;

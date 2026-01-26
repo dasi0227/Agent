@@ -8,8 +8,8 @@ import java.util.List;
 @Mapper
 public interface IAiConfigDao {
 
-    List<AiConfig> queryBySource(String sourceType, String sourceId);
+    List<AiConfig> queryByClientId(String clientId);
 
-    List<String> queryIdListByTargetType(String targetType);
+    List<String> queryClientIdListByConfigType(String configType);
 
 }

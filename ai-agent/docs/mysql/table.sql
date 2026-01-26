@@ -110,10 +110,9 @@ DROP TABLE IF EXISTS `ai_config`;
 CREATE TABLE `ai_config`
 (
     `id`            BIGINT      NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT '自增 id',
-    `source_type`   VARCHAR(32) NOT NULL COMMENT '源类型',
-    `source_id`     VARCHAR(32) NOT NULL COMMENT '源 id',
-    `target_type`   VARCHAR(32) NOT NULL COMMENT '目标类型',
-    `target_id`     VARCHAR(32) NOT NULL COMMENT '目标 id',
+    `client_id`     VARCHAR(32) NOT NULL COMMENT '客户端 id',
+    `config_type`   VARCHAR(32) NOT NULL COMMENT '配置类型',
+    `config_value`  VARCHAR(32) NOT NULL COMMENT '配置值',
     `config_param`  TEXT        NULL     DEFAULT NULL COMMENT '关联参数配置',
     `config_status` TINYINT     NOT NULL DEFAULT '1' COMMENT '状态：0-禁用，1-启用',
     `create_time`   DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

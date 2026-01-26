@@ -53,7 +53,7 @@ public class AgentConfig implements ApplicationListener<ApplicationReadyEvent> {
     private void loadPrompt() {
 
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        List<String> clientIdList = configDao.queryIdListByTargetType(PROMPT.getType());
+        List<String> clientIdList = configDao.queryClientIdListByConfigType(PROMPT.getType());
 
         if (clientIdList == null || clientIdList.isEmpty()) {
             return;
