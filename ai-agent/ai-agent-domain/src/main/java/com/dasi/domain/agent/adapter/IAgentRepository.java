@@ -19,16 +19,10 @@ public interface IAgentRepository {
 
     List<AiApiVO> queryAiApiVOListByClientIdList(List<String> clientIdList);
 
-    List<AiModelVO> queryAiModelVOListByModelIdList(List<String> modelIdList);
-
-    List<AiApiVO> queryAiApiVOListByModelIdList(List<String> modelIdList);
-
     Map<String, AiFlowVO> queryAiFlowVOMapByAgentId(String aiAgentId);
 
     String queryExecuteTypeByAgentId(String aiAgentId);
 
     List<AiTaskVO> queryTaskVOList();
-
-    void updateTaskStatus(String taskId, Integer taskStatus);
 
 }

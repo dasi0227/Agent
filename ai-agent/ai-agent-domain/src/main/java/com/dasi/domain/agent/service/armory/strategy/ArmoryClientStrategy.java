@@ -44,7 +44,7 @@ public class ArmoryClientStrategy implements IArmoryStrategy {
         CompletableFuture<List<AiMcpVO>> aiMcpListFuture = CompletableFuture.supplyAsync(
                 () -> agentRepository.queryAiMcpVOListByClientIdList(clientIdList), threadPoolExecutor);
 
-        CompletableFuture<Map<String, AiPromptVO>> aiPromptListFuture = CompletableFuture.supplyAsync(
+        CompletableFuture<Map<String, AiPromptVO>> aiPromptMapFuture = CompletableFuture.supplyAsync(
                 () -> agentRepository.queryAiPromptVOMapByClientIdList(clientIdList), threadPoolExecutor);
 
         CompletableFuture<List<AiAdvisorVO>> aiAdvisorListFuture = CompletableFuture.supplyAsync(
@@ -57,7 +57,7 @@ public class ArmoryClientStrategy implements IArmoryStrategy {
                 aiApiListFuture,
                 aiModelListFuture,
                 aiMcpListFuture,
-                aiPromptListFuture,
+                aiPromptMapFuture,
                 aiAdvisorListFuture,
                 aiClientListFuture
         ).join();
@@ -65,7 +65,7 @@ public class ArmoryClientStrategy implements IArmoryStrategy {
         List<AiApiVO> aiApiList = aiApiListFuture.join();
         List<AiModelVO> aiModelList = aiModelListFuture.join();
         List<AiMcpVO> aiMcpList = aiMcpListFuture.join();
-        Map<String, AiPromptVO> aiPrompMap = aiPromptListFuture.join();
+        Map<String, AiPromptVO> aiPrompMap = aiPromptMapFuture.join();
         List<AiAdvisorVO> aiAdvisorList = aiAdvisorListFuture.join();
         List<AiClientVO> aiClientList = aiClientListFuture.join();
 

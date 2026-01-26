@@ -1,11 +1,11 @@
 package com.dasi.domain.chat.repository;
 
-import com.dasi.types.dto.response.ChatModelResponse;
+import com.dasi.types.dto.response.ChatClientResponse;
 
 import java.util.List;
 
 public interface IChatRepository {
 
-    List<ChatModelResponse> queryChatModelResponseList();
+    List<ChatClientResponse> queryChatClientResponseList();
 
 }

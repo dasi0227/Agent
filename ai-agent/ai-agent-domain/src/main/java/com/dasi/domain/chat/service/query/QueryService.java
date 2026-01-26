@@ -1,7 +1,7 @@
 package com.dasi.domain.chat.service.query;
 
 import com.dasi.domain.chat.repository.IChatRepository;
-import com.dasi.types.dto.response.ChatModelResponse;
+import com.dasi.types.dto.response.ChatClientResponse;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -14,8 +14,8 @@ public class QueryService implements IQueryService {
     private IChatRepository chatRepository;
 
     @Override
-    public List<ChatModelResponse> queryChatModelResponseList() {
-        return chatRepository.queryChatModelResponseList();
+    public List<ChatClientResponse> queryChatClientResponseList() {
+        return chatRepository.queryChatClientResponseList();
     }
 
 }

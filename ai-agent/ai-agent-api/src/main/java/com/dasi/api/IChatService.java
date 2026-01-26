@@ -1,7 +1,7 @@
 package com.dasi.api;
 
 import com.dasi.types.dto.request.ChatRequest;
-import com.dasi.types.dto.response.ChatModelResponse;
+import com.dasi.types.dto.response.ChatClientResponse;
 import com.dasi.types.dto.result.Result;
 import reactor.core.publisher.Flux;
 
@@ -13,6 +13,6 @@ public interface IChatService {
 
     Flux<String> stream(ChatRequest chatRequest);
 
-    Result<List<ChatModelResponse>> queryChatModelResponseList();
+    Result<List<ChatClientResponse>> queryChatClientResponseList();
 
 }

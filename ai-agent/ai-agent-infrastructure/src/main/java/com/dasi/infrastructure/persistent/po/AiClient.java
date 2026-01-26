@@ -18,6 +18,15 @@ public class AiClient {
     /** 客户端 id */
     private String clientId;
 
+    /** 客户端类型：chat/work */
+    private String clientType;
+
+    /** 模型 id */
+    private String modelId;
+
+    /** 模型名称 */
+    private String modelName;
+
     /** 客户端名称 */
     private String clientName;
 
