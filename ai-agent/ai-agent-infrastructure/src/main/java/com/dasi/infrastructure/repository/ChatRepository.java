@@ -6,14 +6,19 @@ import com.dasi.infrastructure.persistent.po.AiClient;
 import com.dasi.infrastructure.redis.IRedisService;
 import com.dasi.types.dto.response.ChatClientResponse;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.dasi.types.common.RedisConstant.CHAT_CLIENT_LIST_KEY;
+import static com.dasi.types.common.RedisConstant.RAG_TAG_LIST_KEY;
 
 @Repository
+@Slf4j
 public class ChatRepository implements IChatRepository {
 
     @Resource
@@ -21,6 +26,15 @@ public class ChatRepository implements IChatRepository {
 
     @Resource
     private IRedisService redisService;
+
+    @Resource(name = "postgresqlTemplate")
+    private JdbcTemplate jdbcTemplate;
+
+    @Value("${openai.embedding.schema-name}")
+    private String embeddingSchemaName;
+
+    @Value("${openai.embedding.table-name}")
+    private String embeddingTableName;
 
     @Override
     public List<ChatClientResponse> queryChatClientResponseList() {
@@ -47,6 +61,27 @@ public class ChatRepository implements IChatRepository {
 
         redisService.setValue(CHAT_CLIENT_LIST_KEY, chatClientResponseList);
         return chatClientResponseList;
+    }
+
+    @Override
+    public List<String> queryRagTagList() {
+
+        List<String> ragTagList = redisService.getValue(RAG_TAG_LIST_KEY);
+        if (ragTagList != null) {
+            return ragTagList;
+        }
+
+        String tableRef = embeddingSchemaName + "." + embeddingTableName;
+        String sql = """
+                SELECT DISTINCT metadata::jsonb->>'knowledge' AS knowledge
+                FROM %s
+                WHERE metadata::jsonb ? 'knowledge' AND metadata::jsonb->>'knowledge' <> ''
+                """
+                .formatted(tableRef);
+        ragTagList = jdbcTemplate.queryForList(sql, String.class);
+
+        redisService.setValue(RAG_TAG_LIST_KEY, ragTagList);
+        return ragTagList;
     }
 
 }

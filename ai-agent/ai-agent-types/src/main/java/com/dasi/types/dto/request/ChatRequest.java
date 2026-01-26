@@ -18,4 +18,6 @@ public class ChatRequest {
     @NotBlank
     private String userMessage;
 
+    private String ragTag;
+
 }

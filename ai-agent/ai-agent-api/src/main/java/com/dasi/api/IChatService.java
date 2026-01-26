@@ -15,4 +15,6 @@ public interface IChatService {
 
     Result<List<ChatClientResponse>> queryChatClientResponseList();
 
+    Result<List<String>> queryRagTagList();
+
 }
