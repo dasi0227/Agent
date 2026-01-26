@@ -2,14 +2,18 @@ package com.dasi.trigger.http;
 
 import com.dasi.api.IChatService;
 import com.dasi.domain.chat.service.query.IQueryService;
-import com.dasi.domain.chat.service.rag.IRagService;
+import com.dasi.domain.chat.service.rag.IAugmentService;
 import com.dasi.types.dto.request.ChatRequest;
 import com.dasi.types.dto.response.ChatClientResponse;
+import com.dasi.types.dto.response.ChatMcpResponse;
 import com.dasi.types.dto.result.Result;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.prompt.ChatOptions;
+import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
+import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -31,7 +35,7 @@ public class ChatController implements IChatService {
     private IQueryService queryService;
 
     @Resource
-    private IRagService ragService;
+    private IAugmentService augmentService;
 
     @PostMapping("/complete")
     @Override
@@ -40,14 +44,24 @@ public class ChatController implements IChatService {
         String clientId = chatRequest.getClientId();
         String userMessage = chatRequest.getUserMessage();
         String ragTag = chatRequest.getRagTag();
+        List<String> mcpIdList = chatRequest.getMcpIdList();
 
-        log.info("【模型对话】完整对话：userMessage={}", userMessage);
+        log.info("【模型对话】完整对话：chatRequest={}", chatRequest);
 
         try {
             ChatClient chatClient = applicationContext.getBean(CLIENT.getBeanName(clientId), ChatClient.class);
-            List<Message> messageList = ragService.addRagMessage(userMessage, ragTag);
+            List<Message> messageList = augmentService.augmentRagMessage(userMessage, ragTag);
+            SyncMcpToolCallbackProvider toolCallbackList = augmentService.augmentMcpTool(mcpIdList);
+            ChatOptions chatOptions = OpenAiChatOptions.builder()
+                    .temperature(0.3)
+                    .presencePenalty(0.5)
+                    .maxCompletionTokens(3000)
+                    .build();
+
             String response = chatClient.prompt()
                     .messages(messageList)
+                    .options(chatOptions)
+                    .toolCallbacks(toolCallbackList)
                     .call()
                     .content();
             if (response == null || response.isEmpty()) {
@@ -67,15 +81,24 @@ public class ChatController implements IChatService {
         String clientId = chatRequest.getClientId();
         String userMessage = chatRequest.getUserMessage();
         String ragTag = chatRequest.getRagTag();
+        List<String> mcpIdList = chatRequest.getMcpIdList();
 
-        log.info("【模型对话】流式对话：clientId={}, userMessage={}", clientId, userMessage);
+        log.info("【模型对话】流式对话：chatRequest={}", chatRequest);
 
         try {
             ChatClient chatClient = applicationContext.getBean(CLIENT.getBeanName(clientId), ChatClient.class);
-            List<Message> messageList = ragService.addRagMessage(userMessage, ragTag);
+            List<Message> messageList = augmentService.augmentRagMessage(userMessage, ragTag);
+            SyncMcpToolCallbackProvider toolCallbackList = augmentService.augmentMcpTool(mcpIdList);
+            ChatOptions chatOptions = OpenAiChatOptions.builder()
+                    .temperature(0.3)
+                    .presencePenalty(0.5)
+                    .maxCompletionTokens(3000)
+                    .build();
             return chatClient
                     .prompt()
+                    .options(chatOptions)
                     .messages(messageList)
+                    .toolCallbacks(toolCallbackList)
                     .stream()
                     .content()
                     .doFinally(signalType -> log.info("【模型对话】流式对话结束：clientId={}, signal={}", clientId, signalType))
@@ -93,6 +116,13 @@ public class ChatController implements IChatService {
     @Override
     public Result<List<ChatClientResponse>> queryChatClientResponseList() {
         List<ChatClientResponse> clientIdList = queryService.queryChatClientResponseList();
+        return Result.success(clientIdList);
+    }
+
+    @GetMapping("/chat-mcp-list")
+    @Override
+    public Result<List<ChatMcpResponse>> queryChatMcpResponseList() {
+        List<ChatMcpResponse> clientIdList = queryService.queryChatMcpResponseList();
         return Result.success(clientIdList);
     }
 

@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -17,6 +19,17 @@ public class ChatRequest {
 
     @NotBlank
     private String userMessage;
+
+    @Builder.Default
+    private Double temperature = 0.6;
+
+    @Builder.Default
+    private Double presencePenalty = 0.0;
+
+    @Builder.Default
+    private Integer maxCompletionTokens = 1024;
+
+    private List<String> mcpIdList;
 
     private String ragTag;
 
