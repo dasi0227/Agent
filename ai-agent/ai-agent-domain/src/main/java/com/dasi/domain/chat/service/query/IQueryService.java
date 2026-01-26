@@ -8,4 +8,6 @@ public interface IQueryService {
 
     List<ChatClientResponse> queryChatClientResponseList();
 
+    List<String> queryRagTagList();
+
 }

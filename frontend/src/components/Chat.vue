@@ -31,6 +31,8 @@ const isAtBottom = ref(true);
 const modelDropdownOpen = ref(false);
 const ragDropdownOpen = ref(false);
 const uploadRagDropdownOpen = ref(false);
+const copiedMessageId = ref(null);
+const copyTimer = ref(null);
 
 const typewriterState = reactive({
     lines: [],
@@ -221,6 +223,9 @@ onBeforeUnmount(() => {
     chatStore.stopCurrentRequest();
     detachListeners();
     stopTypewriter();
+    if (copyTimer.value) {
+        clearTimeout(copyTimer.value);
+    }
 });
 
 const handleKeydown = (event) => {
@@ -232,6 +237,40 @@ const handleKeydown = (event) => {
         modelDropdownOpen.value = false;
         ragDropdownOpen.value = false;
         uploadRagDropdownOpen.value = false;
+    }
+};
+
+const copyText = async (text) => {
+    if (!text) return;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        return;
+    }
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'absolute';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+};
+
+const handleCopy = async (message) => {
+    const text = getContent(message);
+    if (!text) return;
+    try {
+        await copyText(text);
+        copiedMessageId.value = message.id;
+        if (copyTimer.value) {
+            clearTimeout(copyTimer.value);
+        }
+        copyTimer.value = setTimeout(() => {
+            copiedMessageId.value = null;
+        }, 1200);
+    } catch (error) {
+        console.warn('复制失败', error);
     }
 };
 
@@ -286,6 +325,7 @@ const runComplete = async (content, controller) => {
         const response = await fetchComplete({
             clientId: currentModel.value,
             userMessage: content,
+            ragTag: currentRagTag.value,
             signal: controller.signal
         });
         const text = pickContentFromResult(response);
@@ -362,6 +402,7 @@ const runStream = async (content, controller) => {
         await fetchStream({
             clientId: currentModel.value,
             userMessage: content,
+            ragTag: currentRagTag.value,
             signal: controller.signal,
             onData: (payload) => {
                 const { token, answer, direct, finishReason } = extractStreamParts(payload);
@@ -729,34 +770,56 @@ const handleUpload = async () => {
                             class="flex w-full"
                             :class="message.role === 'user' ? 'justify-end' : 'justify-start'"
                         >
-                            <div
-                                class="relative max-w-full w-fit rounded-[14px] px-[14px] py-[12px] shadow-[0_12px_30px_rgba(27,36,55,0.08)] border"
-                                :class="[
-                                    message.role === 'user'
-                                        ? 'bg-[linear-gradient(135deg,#e5f4ff,#eaf4ff)] border-[#c5e2ff]'
-                                        : 'bg-white border-[var(--border-color)]',
-                                    message.pending ? 'border-dashed' : 'border-solid'
-                                ]"
-                            >
+                            <div class="flex max-w-full flex-col gap-[6px]" :class="message.role === 'user' ? 'items-end' : 'items-start'">
                                 <div
-                                    v-if="message.pending && message.role === 'assistant' && !message.content"
-                                    class="inline-flex items-center gap-[8px]"
+                                    class="relative max-w-full w-fit rounded-[14px] px-[14px] py-[12px] shadow-[0_12px_30px_rgba(27,36,55,0.08)] border"
+                                    :class="[
+                                        message.role === 'user'
+                                            ? 'bg-[linear-gradient(135deg,#e5f4ff,#eaf4ff)] border-[#c5e2ff]'
+                                            : 'bg-white border-[var(--border-color)]',
+                                        message.pending ? 'border-dashed' : 'border-solid'
+                                    ]"
                                 >
-                                    <div class="inline-flex items-center gap-[4px]">
-                                        <span class="h-[6px] w-[6px] rounded-full bg-[#7b8190] animate-blink"></span>
-                                        <span class="h-[6px] w-[6px] rounded-full bg-[#7b8190] animate-blink [animation-delay:0.2s]"></span>
-                                        <span class="h-[6px] w-[6px] rounded-full bg-[#7b8190] animate-blink [animation-delay:0.4s]"></span>
+                                    <div
+                                        v-if="message.pending && message.role === 'assistant' && !message.content"
+                                        class="inline-flex items-center gap-[8px]"
+                                    >
+                                        <div class="inline-flex items-center gap-[4px]">
+                                            <span class="h-[6px] w-[6px] rounded-full bg-[#7b8190] animate-blink"></span>
+                                            <span class="h-[6px] w-[6px] rounded-full bg-[#7b8190] animate-blink [animation-delay:0.2s]"></span>
+                                            <span class="h-[6px] w-[6px] rounded-full bg-[#7b8190] animate-blink [animation-delay:0.4s]"></span>
+                                        </div>
+                                        <div class="text-[13px] text-[var(--text-secondary)]">思考中</div>
                                     </div>
-                                    <div class="text-[13px] text-[var(--text-secondary)]">思考中</div>
+                                    <div v-else class="whitespace-pre-wrap leading-[1.6]" :class="message.error ? 'text-[#d14343]' : ''">
+                                        {{ getContent(message) }}
+                                    </div>
+                                    <div
+                                        v-if="message.error"
+                                        class="mt-[6px] rounded-[8px] bg-[#fff3f3] px-[10px] py-[8px] text-[13px] text-[#d14343]"
+                                    >
+                                        {{ message.error.message || '请求失败' }}
+                                    </div>
                                 </div>
-                                <div v-else class="whitespace-pre-wrap leading-[1.6]" :class="message.error ? 'text-[#d14343]' : ''">
-                                    {{ getContent(message) }}
-                                </div>
-                                <div
-                                    v-if="message.error"
-                                    class="mt-[6px] rounded-[8px] bg-[#fff3f3] px-[10px] py-[8px] text-[13px] text-[#d14343]"
-                                >
-                                    {{ message.error.message || '请求失败' }}
+                                <div class="flex items-center gap-[6px]" :class="message.role === 'user' ? 'justify-end' : 'justify-start'">
+                                    <button
+                                        type="button"
+                                        class="flex h-[22px] w-[22px] items-center justify-center rounded-[6px] border border-[rgba(15,23,42,0.1)] bg-white text-[var(--text-secondary)] shadow-[0_6px_16px_rgba(15,23,42,0.12)] transition-colors duration-150 hover:text-[var(--accent-color)] disabled:cursor-not-allowed disabled:opacity-60"
+                                        :disabled="!getContent(message)"
+                                        aria-label="复制"
+                                        @click.stop="handleCopy(message)"
+                                    >
+                                        <svg viewBox="0 0 24 24" class="h-[14px] w-[14px]" fill="none" stroke="currentColor" stroke-width="1.8">
+                                            <path d="M8 8h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2Z" />
+                                            <path d="M6 16H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                        </svg>
+                                    </button>
+                                    <div
+                                        v-if="copiedMessageId === message.id"
+                                        class="rounded-[6px] border border-[rgba(15,23,42,0.1)] bg-white px-[8px] py-[4px] text-[12px] text-[var(--text-secondary)] shadow-[0_8px_20px_rgba(15,23,42,0.12)]"
+                                    >
+                                        已复制
+                                    </div>
                                 </div>
                             </div>
                         </div>

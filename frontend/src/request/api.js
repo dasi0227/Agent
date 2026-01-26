@@ -2,29 +2,31 @@ import http, { streamFetch } from './request';
 
 const CHAT_COMPLETE_PATH = '/api/v1/chat/complete';
 const CHAT_STREAM_PATH = '/api/v1/chat/stream';
-const CHAT_MODELS_PATH = '/api/v1/chat/chat-client-list';
-const RAG_TAGS_PATH = '/api/v1/query/tags';
+const CHAT_CLIENTS_PATH = '/api/v1/chat/chat-client-list';
+const RAG_TAGS_PATH = '/api/v1/chat/rag-tag-list';
 const RAG_UPLOAD_PATH = '/api/v1/rag/file';
 const RAG_GIT_PATH = '/api/v1/rag/git';
 
-export const fetchComplete = async ({ clientId, userMessage, signal }) => {
+export const fetchComplete = async ({ clientId, userMessage, ragTag, signal }) => {
     return http.post(
         CHAT_COMPLETE_PATH,
         {
             clientId,
-            userMessage
+            userMessage,
+            ragTag
         },
         { signal }
     );
 };
 
-export const fetchStream = async ({ clientId, userMessage, onData, onError, onDone, signal }) => {
+export const fetchStream = async ({ clientId, userMessage, ragTag, onData, onError, onDone, signal }) => {
     const url = `${http.defaults.baseURL}${CHAT_STREAM_PATH}`;
     return streamFetch(
         url,
         {
             clientId,
-            userMessage
+            userMessage,
+            ragTag
         },
         onData,
         onError,
@@ -56,7 +58,7 @@ export const queryRagTags = async () => {
 };
 
 export const queryChatModels = async () => {
-    return http.get(CHAT_MODELS_PATH);
+    return http.get(CHAT_CLIENTS_PATH);
 };
 
 export const uploadRagFile = async ({ ragTag, file }) => {

@@ -7,7 +7,7 @@ const defaultSettings = () => ({
     type: 'complete',
     temperature: 0.7,
     topK: 40,
-    model: 'deepseek-r1:1.5b',
+    model: '',
     ragTag: '',
     token: ''
 });

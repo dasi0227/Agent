@@ -8,4 +8,6 @@ public interface IChatRepository {
 
     List<ChatClientResponse> queryChatClientResponseList();
 
+    List<String> queryRagTagList();
+
 }

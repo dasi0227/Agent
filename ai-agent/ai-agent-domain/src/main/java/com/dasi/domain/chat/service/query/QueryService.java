@@ -18,4 +18,9 @@ public class QueryService implements IQueryService {
         return chatRepository.queryChatClientResponseList();
     }
 
+    @Override
+    public List<String> queryRagTagList() {
+        return chatRepository.queryRagTagList();
+    }
+
 }
