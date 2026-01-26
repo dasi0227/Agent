@@ -11,7 +11,7 @@ export const parseThinkText = (text) => {
     const answer = text.replace(/<think>[\s\S]*?<\/think>/g, '');
     return {
         think: '',
-        answer: answer.trim()
+        answer
     };
 };
 

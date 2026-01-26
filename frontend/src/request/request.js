@@ -112,7 +112,7 @@ export async function streamFetch(url, body, onData, onError, onDone, signal) {
             buffer += decoder.decode(value, { stream: true });
             let boundary = buffer.indexOf('\n\n');
             while (boundary !== -1) {
-                const chunk = buffer.slice(0, boundary).trim();
+                const chunk = buffer.slice(0, boundary);
                 buffer = buffer.slice(boundary + 2);
                 if (chunk) {
                     processEventChunk(chunk, onData, onError);
@@ -120,8 +120,8 @@ export async function streamFetch(url, body, onData, onError, onDone, signal) {
                 boundary = buffer.indexOf('\n\n');
             }
         }
-        if (buffer.trim()) {
-            processEventChunk(buffer.trim(), onData, onError);
+        if (buffer) {
+            processEventChunk(buffer, onData, onError);
         }
         onDone && onDone();
     } catch (error) {
@@ -135,12 +135,12 @@ export async function streamFetch(url, body, onData, onError, onDone, signal) {
 }
 
 const processEventChunk = (chunk, onData, onError) => {
-    const lines = chunk.split('\n');
-    const dataLine = lines.find((line) => line.startsWith('data:'));
-    if (!dataLine) {
+    const lines = chunk.split('\n').map((line) => line.replace(/\r$/, ''));
+    const dataLines = lines.filter((line) => line.startsWith('data:'));
+    if (!dataLines.length) {
         return;
     }
-    const payload = dataLine.replace(/^data:\s*/, '');
+    const payload = dataLines.map((line) => line.replace(/^data:\s*/, '')).join('\n');
     if (!payload) {
         return;
     }

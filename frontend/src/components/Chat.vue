@@ -1,5 +1,8 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
+import { marked } from 'marked';
+import hljs from 'highlight.js';
+import DOMPurify from 'dompurify';
 import {
     fetchComplete,
     fetchStream,
@@ -71,6 +74,20 @@ const typewriterController = createTypewriter({
         typewriterState.playing = playing;
     }
 });
+
+const renderer = new marked.Renderer();
+renderer.code = (code, infostring) => {
+    const lang = (infostring || '').match(/\S*/)?.[0] || '';
+    if (lang && hljs.getLanguage(lang)) {
+        return `<pre><code class="hljs language-${lang}">${hljs.highlight(code, {
+            language: lang,
+            ignoreIllegals: true
+        }).value}</code></pre>`;
+    }
+    return `<pre><code class="hljs">${hljs.highlightAuto(code).value}</code></pre>`;
+};
+
+marked.setOptions({ breaks: true, gfm: true, renderer });
 
 const currentModel = computed({
     get: () => settingsStore.model,
@@ -229,15 +246,16 @@ onBeforeUnmount(() => {
 });
 
 const handleKeydown = (event) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-        event.preventDefault();
-        sendMessage();
-    }
     if (event.key === 'Escape') {
         modelDropdownOpen.value = false;
         ragDropdownOpen.value = false;
         uploadRagDropdownOpen.value = false;
     }
+};
+
+const renderMarkdown = (text) => {
+    if (!text) return '';
+    return DOMPurify.sanitize(marked.parse(text), { ADD_ATTR: ['class'] });
 };
 
 const copyText = async (text) => {
@@ -280,6 +298,9 @@ const extractStreamParts = (payload) => {
     if (typeof data === 'string') {
         return { token: data, finishReason };
     }
+    if (typeof data === 'number' || typeof data === 'boolean') {
+        return { token: String(data), finishReason };
+    }
     if (!data || typeof data !== 'object') {
         return { token: '', finishReason };
     }
@@ -298,6 +319,23 @@ const extractStreamParts = (payload) => {
         return { answer, finishReason, direct: true };
     }
     return { token: pickContentFromResult(data), finishReason };
+};
+
+const normalizeMarkdownSpacing = (text) => {
+    if (!text) return '';
+    return text
+        .split('```')
+        .map((segment, index) => {
+            if (index % 2 === 1) return segment;
+            return segment
+                .replace(/(^|\n)(\s*)(#{1,6})(\r?\n)(\S)/g, '$1$2$3 $5')
+                .replace(/(^|\n)(\s*)([-*+])(\r?\n)(\S)/g, '$1$2$3 $5')
+                .replace(/(^|\n)(\s*)(\d+\.)(\r?\n)(\S)/g, '$1$2$3 $5')
+                .replace(/(^|\n)(\s*)(#{1,6})(\S)/g, '$1$2$3 $4')
+                .replace(/(^|\n)(\s*)([-*+])(\S)/g, '$1$2$3 $4')
+                .replace(/(^|\n)(\s*)(\d+\.)(\S)/g, '$1$2$3 $4');
+        })
+        .join('```');
 };
 
 const sendMessage = async () => {
@@ -330,8 +368,9 @@ const runComplete = async (content, controller) => {
         });
         const text = pickContentFromResult(response);
         const { answer } = parseThinkText(text);
+        const normalized = normalizeMarkdownSpacing(answer);
         chatStore.updateAssistantMessage(assistantMessage.id, {
-            content: answer || '（无内容）',
+            content: normalized || '（无内容）',
             think: '',
             pending: false,
             error: null
@@ -368,9 +407,9 @@ const runStream = async (content, controller) => {
             }
             accumulator.carry = '';
         }
-        const answerText = accumulator.answer?.trim() || '';
+        const normalized = normalizeMarkdownSpacing(accumulator.answer);
         chatStore.updateAssistantMessage(assistantMessage.id, {
-            content: answerText || accumulator.answer,
+            content: normalized,
             think: '',
             pending: false
         });
@@ -462,7 +501,7 @@ const saveSettings = () => {
     showSettings.value = false;
 };
 
-const getContent = (message) => (message?.content ? message.content.toString().trimStart() : '');
+const getContent = (message) => (message?.content ? message.content.toString() : '');
 
 const toggleModelDropdown = () => {
     if (models.value.length === 0) return;
@@ -772,7 +811,7 @@ const handleUpload = async () => {
                         >
                             <div class="flex max-w-full flex-col gap-[6px]" :class="message.role === 'user' ? 'items-end' : 'items-start'">
                                 <div
-                                    class="relative max-w-full w-fit rounded-[14px] px-[14px] py-[12px] shadow-[0_12px_30px_rgba(27,36,55,0.08)] border"
+                                    class="relative w-fit max-w-[720px] rounded-[14px] px-[14px] py-[12px] shadow-[0_12px_30px_rgba(27,36,55,0.08)] border"
                                     :class="[
                                         message.role === 'user'
                                             ? 'bg-[linear-gradient(135deg,#e5f4ff,#eaf4ff)] border-[#c5e2ff]'
@@ -791,9 +830,19 @@ const handleUpload = async () => {
                                         </div>
                                         <div class="text-[13px] text-[var(--text-secondary)]">思考中</div>
                                     </div>
-                                    <div v-else class="whitespace-pre-wrap leading-[1.6]" :class="message.error ? 'text-[#d14343]' : ''">
+                                    <div
+                                        v-else-if="message.role === 'user' || message.pending"
+                                        class="whitespace-pre-wrap leading-[1.6]"
+                                        :class="message.error ? 'text-[#d14343]' : ''"
+                                    >
                                         {{ getContent(message) }}
                                     </div>
+                                    <div
+                                        v-else
+                                        class="markdown-body leading-[1.6] [&_pre]:overflow-auto [&_pre]:rounded-[10px] [&_pre]:bg-[#0f172a] [&_pre]:p-[12px] [&_pre]:text-[#e2e8f0] [&_code]:rounded-[6px] [&_code]:bg-[#f1f5f9] [&_code]:px-[6px] [&_code]:py-[2px] [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:rounded-none"
+                                        :class="message.error ? 'text-[#d14343]' : ''"
+                                        v-html="renderMarkdown(getContent(message))"
+                                    ></div>
                                     <div
                                         v-if="message.error"
                                         class="mt-[6px] rounded-[8px] bg-[#fff3f3] px-[10px] py-[8px] text-[13px] text-[#d14343]"
@@ -801,7 +850,10 @@ const handleUpload = async () => {
                                         {{ message.error.message || '请求失败' }}
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-[6px]" :class="message.role === 'user' ? 'justify-end' : 'justify-start'">
+                                <div
+                                    class="relative flex items-center gap-[6px]"
+                                    :class="message.role === 'user' ? 'justify-end' : 'justify-start'"
+                                >
                                     <button
                                         type="button"
                                         class="flex h-[22px] w-[22px] items-center justify-center rounded-[6px] border border-[rgba(15,23,42,0.1)] bg-white text-[var(--text-secondary)] shadow-[0_6px_16px_rgba(15,23,42,0.12)] transition-colors duration-150 hover:text-[var(--accent-color)] disabled:cursor-not-allowed disabled:opacity-60"
@@ -816,7 +868,8 @@ const handleUpload = async () => {
                                     </button>
                                     <div
                                         v-if="copiedMessageId === message.id"
-                                        class="rounded-[6px] border border-[rgba(15,23,42,0.1)] bg-white px-[8px] py-[4px] text-[12px] text-[var(--text-secondary)] shadow-[0_8px_20px_rgba(15,23,42,0.12)]"
+                                        class="pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap rounded-[6px] border border-[rgba(15,23,42,0.1)] bg-white px-[8px] py-[4px] text-[12px] text-[var(--text-secondary)] shadow-[0_8px_20px_rgba(15,23,42,0.12)]"
+                                        :class="message.role === 'user' ? 'right-[30px]' : 'left-[30px]'"
                                     >
                                         已复制
                                     </div>
