@@ -5,8 +5,9 @@ const CHATS_KEY = 'chat_sessions';
 
 const defaultSettings = () => ({
     type: 'complete',
-    temperature: 0.7,
-    topK: 40,
+    temperature: 0.6,
+    presencePenalty: 0.0,
+    maxCompletionTokens: 1024,
     model: '',
     ragTag: '',
     token: ''
@@ -38,7 +39,8 @@ export const useSettingsStore = defineStore('settings', {
             const payload = {
                 type: this.type,
                 temperature: this.temperature,
-                topK: this.topK,
+                presencePenalty: this.presencePenalty,
+                maxCompletionTokens: this.maxCompletionTokens,
                 model: this.model,
                 ragTag: this.ragTag,
                 token: this.token

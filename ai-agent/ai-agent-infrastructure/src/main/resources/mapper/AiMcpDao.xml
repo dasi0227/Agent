@@ -9,6 +9,7 @@
         <result column="mcp_config" property="mcpConfig"/>
         <result column="mcp_desc" property="mcpDesc"/>
         <result column="mcp_timeout" property="mcpTimeout"/>
+        <result column="mcp_chat" property="mcpChat"/>
         <result column="mcp_status" property="mcpStatus"/>
     </resultMap>
 
@@ -19,8 +20,39 @@
                mcp_config,
                mcp_desc,
                mcp_timeout,
+               mcp_chat,
                mcp_status
         FROM ai_mcp
         WHERE mcp_id = #{mcpId}
     </select>
+
+    <select id="queryByMcpIdList" parameterType="java.util.List" resultMap="dataMap">
+        SELECT mcp_id,
+        mcp_name,
+        mcp_type,
+        mcp_config,
+        mcp_desc,
+        mcp_timeout,
+        mcp_chat,
+        mcp_status
+        FROM ai_mcp
+        WHERE mcp_status = 1 AND mcp_chat = 1 AND mcp_id IN
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="queryChatMcpList" resultMap="dataMap">
+        SELECT mcp_id,
+               mcp_name,
+               mcp_type,
+               mcp_config,
+               mcp_desc,
+               mcp_timeout,
+               mcp_chat,
+               mcp_status
+        FROM ai_mcp
+        WHERE mcp_status = 1 AND mcp_chat = 1
+    </select>
+
 </mapper>

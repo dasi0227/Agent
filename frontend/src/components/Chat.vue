@@ -8,6 +8,7 @@ import {
     fetchStream,
     pickContentFromResult,
     queryChatModels,
+    queryChatMcps,
     queryRagTags,
     uploadRagFile,
     uploadRagGit
@@ -21,10 +22,13 @@ const chatStore = useChatStore();
 const settingsStore = useSettingsStore();
 
 const models = ref([]);
+const mcpTools = ref([]);
 const ragTags = ref([{ label: '不使用知识库', value: '' }]);
+const selectedMcpIds = ref([]);
 
 const messageScrollRef = ref(null);
 const modelSelectRef = ref(null);
+const mcpSelectRef = ref(null);
 const ragSelectRef = ref(null);
 const uploadRagSelectRef = ref(null);
 const inputValue = ref('');
@@ -32,6 +36,7 @@ const showSettings = ref(false);
 const showUploadModal = ref(false);
 const isAtBottom = ref(true);
 const modelDropdownOpen = ref(false);
+const mcpDropdownOpen = ref(false);
 const ragDropdownOpen = ref(false);
 const uploadRagDropdownOpen = ref(false);
 const copiedMessageId = ref(null);
@@ -57,10 +62,22 @@ const uploadForm = reactive({
     uploading: false
 });
 
+const normalizeSettingValue = (value) => {
+    if (value === null || value === undefined || value === '') return '';
+    return value;
+};
+
 const settingsForm = reactive({
     type: settingsStore.type,
-    temperature: settingsStore.temperature,
-    topK: settingsStore.topK
+    temperature: normalizeSettingValue(settingsStore.temperature),
+    presencePenalty: normalizeSettingValue(settingsStore.presencePenalty),
+    maxCompletionTokens: normalizeSettingValue(settingsStore.maxCompletionTokens)
+});
+
+const settingsErrors = reactive({
+    temperature: '',
+    presencePenalty: '',
+    maxCompletionTokens: ''
 });
 
 const typewriterController = createTypewriter({
@@ -98,6 +115,15 @@ const currentModelLabel = computed(() => {
     const match = models.value.find((item) => item.value === currentModel.value);
     if (match?.label) return match.label;
     return models.value.length === 0 ? '暂无模型' : currentModel.value;
+});
+
+const currentMcpLabel = computed(() => {
+    if (!selectedMcpIds.value.length) return '不使用工具';
+    if (selectedMcpIds.value.length === 1) {
+        const match = mcpTools.value.find((item) => item.value === selectedMcpIds.value[0]);
+        return match?.label || '不使用工具';
+    }
+    return '多个工具';
 });
 
 const currentRagTag = computed({
@@ -225,11 +251,48 @@ const fetchModels = async () => {
     }
 };
 
+const fetchMcpTools = async () => {
+    try {
+        const resp = await queryChatMcps();
+        const list = Array.isArray(resp?.result)
+            ? resp.result
+            : Array.isArray(resp)
+              ? resp
+              : Array.isArray(resp?.data)
+                ? resp.data
+                : [];
+        const normalized = list
+            .map((item) => {
+                if (!item || typeof item !== 'object') return null;
+                const mcpId = item.mcpId || item.id || '';
+                const mcpName = item.mcpName || item.name || mcpId;
+                const mcpDesc = item.mcpDesc || item.desc || '';
+                if (!mcpId) return null;
+                return { label: mcpName || mcpId, value: mcpId, desc: mcpDesc };
+            })
+            .filter(Boolean);
+        const seen = new Set();
+        const unique = normalized.filter((item) => {
+            if (seen.has(item.value)) return false;
+            seen.add(item.value);
+            return true;
+        });
+        mcpTools.value = unique;
+        if (selectedMcpIds.value.length) {
+            const valid = new Set(unique.map((item) => item.value));
+            selectedMcpIds.value = selectedMcpIds.value.filter((id) => valid.has(id));
+        }
+    } catch (error) {
+        console.warn('获取 MCP 工具失败', error);
+    }
+};
+
 onMounted(() => {
     scrollToBottom(false);
     attachListeners();
     fetchTags();
     fetchModels();
+    fetchMcpTools();
 });
 
 watch(currentModel, () => {
@@ -248,6 +311,7 @@ onBeforeUnmount(() => {
 const handleKeydown = (event) => {
     if (event.key === 'Escape') {
         modelDropdownOpen.value = false;
+        mcpDropdownOpen.value = false;
         ragDropdownOpen.value = false;
         uploadRagDropdownOpen.value = false;
     }
@@ -321,6 +385,22 @@ const extractStreamParts = (payload) => {
     return { token: pickContentFromResult(data), finishReason };
 };
 
+const syncSettingsFormWithStore = () => {
+    settingsForm.type = settingsStore.type;
+    settingsForm.temperature = normalizeSettingValue(settingsStore.temperature);
+    settingsForm.presencePenalty = normalizeSettingValue(settingsStore.presencePenalty);
+    settingsForm.maxCompletionTokens = normalizeSettingValue(settingsStore.maxCompletionTokens);
+};
+
+const validateSettingsBeforeSend = () => {
+    syncSettingsFormWithStore();
+    const valid = validateSettings(true);
+    if (!valid) {
+        showSettings.value = true;
+    }
+    return valid;
+};
+
 const normalizeMarkdownSpacing = (text) => {
     if (!text) return '';
     return text
@@ -341,6 +421,7 @@ const normalizeMarkdownSpacing = (text) => {
 const sendMessage = async () => {
     const content = inputValue.value.trim();
     if (!content || sending.value || !currentModel.value) return;
+    if (!validateSettingsBeforeSend()) return;
     const mode = settingsStore.type || 'complete';
     chatStore.stopCurrentRequest();
     stopTypewriter();
@@ -357,13 +438,21 @@ const sendMessage = async () => {
     }
 };
 
+const buildChatRequestPayload = (userMessage) => ({
+    clientId: currentModel.value,
+    userMessage,
+    temperature: settingsStore.temperature ?? undefined,
+    presencePenalty: settingsStore.presencePenalty ?? undefined,
+    maxCompletionTokens: settingsStore.maxCompletionTokens ?? undefined,
+    mcpIdList: selectedMcpIds.value.length ? [...selectedMcpIds.value] : [],
+    ragTag: currentRagTag.value
+});
+
 const runComplete = async (content, controller) => {
     const assistantMessage = chatStore.addAssistantMessage({ pending: true, content: '', think: '' });
     try {
         const response = await fetchComplete({
-            clientId: currentModel.value,
-            userMessage: content,
-            ragTag: currentRagTag.value,
+            ...buildChatRequestPayload(content),
             signal: controller.signal
         });
         const text = pickContentFromResult(response);
@@ -439,9 +528,7 @@ const runStream = async (content, controller) => {
 
     try {
         await fetchStream({
-            clientId: currentModel.value,
-            userMessage: content,
-            ragTag: currentRagTag.value,
+            ...buildChatRequestPayload(content),
             signal: controller.signal,
             onData: (payload) => {
                 const { token, answer, direct, finishReason } = extractStreamParts(payload);
@@ -483,20 +570,97 @@ const handleStop = () => {
     }
 };
 
+const parseOptionalNumber = (value, options) => {
+    if (value === '' || value === null || value === undefined) {
+        return { value: null, error: '' };
+    }
+    const num = Number(value);
+    if (Number.isNaN(num)) {
+        return { value: null, error: `${options.label} 请输入数字` };
+    }
+    if (options.integer && !Number.isInteger(num)) {
+        return { value: null, error: `${options.label} 必须是整数` };
+    }
+    if (num < options.min || num > options.max) {
+        return { value: null, error: `${options.label} 取值范围 ${options.min} ~ ${options.max}` };
+    }
+    return { value: num, error: '' };
+};
+
+const validateSettings = (showErrors = true) => {
+    const temperatureResult = parseOptionalNumber(settingsForm.temperature, {
+        label: 'temperature',
+        min: 0,
+        max: 1,
+        integer: false
+    });
+    const presenceResult = parseOptionalNumber(settingsForm.presencePenalty, {
+        label: 'presence penalty',
+        min: 0,
+        max: 1,
+        integer: false
+    });
+    const maxTokenResult = parseOptionalNumber(settingsForm.maxCompletionTokens, {
+        label: 'max token',
+        min: 1,
+        max: 8192,
+        integer: true
+    });
+
+    if (showErrors) {
+        settingsErrors.temperature = temperatureResult.error;
+        settingsErrors.presencePenalty = presenceResult.error;
+        settingsErrors.maxCompletionTokens = maxTokenResult.error;
+    }
+
+    return !temperatureResult.error && !presenceResult.error && !maxTokenResult.error;
+};
+
+const buildChatSettingsPayload = () => {
+    const temperatureResult = parseOptionalNumber(settingsForm.temperature, {
+        label: 'temperature',
+        min: 0,
+        max: 1,
+        integer: false
+    });
+    const presenceResult = parseOptionalNumber(settingsForm.presencePenalty, {
+        label: 'presence penalty',
+        min: 0,
+        max: 1,
+        integer: false
+    });
+    const maxTokenResult = parseOptionalNumber(settingsForm.maxCompletionTokens, {
+        label: 'max token',
+        min: 1,
+        max: 8192,
+        integer: true
+    });
+
+    return {
+        temperature: temperatureResult.value ?? undefined,
+        presencePenalty: presenceResult.value ?? undefined,
+        maxCompletionTokens: maxTokenResult.value ?? undefined
+    };
+};
+
 const openSettings = () => {
-    settingsForm.type = settingsStore.type;
-    settingsForm.temperature = settingsStore.temperature;
-    settingsForm.topK = settingsStore.topK;
+    syncSettingsFormWithStore();
+    settingsErrors.temperature = '';
+    settingsErrors.presencePenalty = '';
+    settingsErrors.maxCompletionTokens = '';
     showSettings.value = true;
 };
 
 const saveSettings = () => {
-    const safeTemperature = Math.min(2, Math.max(0, Number(settingsForm.temperature) || 0));
-    const safeTopK = Math.max(1, Math.floor(Number(settingsForm.topK) || 1));
+    if (!validateSettings(true)) {
+        return;
+    }
+    const payload = buildChatSettingsPayload();
     settingsStore.updateSettings({
         type: settingsForm.type,
-        temperature: safeTemperature,
-        topK: safeTopK
+        temperature: payload.temperature ?? null,
+        presencePenalty: payload.presencePenalty ?? null,
+        maxCompletionTokens: payload.maxCompletionTokens ?? null
     });
     showSettings.value = false;
 };
@@ -505,8 +669,24 @@ const getContent = (message) => (message?.content ? message.content.toString() :
 
 const toggleModelDropdown = () => {
     if (models.value.length === 0) return;
+    mcpDropdownOpen.value = false;
     ragDropdownOpen.value = false;
     modelDropdownOpen.value = !modelDropdownOpen.value;
+};
+
+const toggleMcpDropdown = () => {
+    modelDropdownOpen.value = false;
+    ragDropdownOpen.value = false;
+    mcpDropdownOpen.value = !mcpDropdownOpen.value;
+};
+
+const toggleMcpSelection = (value) => {
+    const idx = selectedMcpIds.value.indexOf(value);
+    if (idx >= 0) {
+        selectedMcpIds.value.splice(idx, 1);
+    } else {
+        selectedMcpIds.value.push(value);
+    }
 };
 
 const selectModel = (value) => {
@@ -516,6 +696,7 @@ const selectModel = (value) => {
 
 const toggleRagDropdown = () => {
     modelDropdownOpen.value = false;
+    mcpDropdownOpen.value = false;
     ragDropdownOpen.value = !ragDropdownOpen.value;
 };
 
@@ -539,9 +720,11 @@ const selectUploadRag = (value) => {
 const handleClickOutside = (event) => {
     const target = event.target;
     const inModel = modelSelectRef.value && modelSelectRef.value.contains(target);
+    const inMcp = mcpSelectRef.value && mcpSelectRef.value.contains(target);
     const inRag = ragSelectRef.value && ragSelectRef.value.contains(target);
     const inUploadRag = uploadRagSelectRef.value && uploadRagSelectRef.value.contains(target);
     if (!inModel) modelDropdownOpen.value = false;
+    if (!inMcp) mcpDropdownOpen.value = false;
     if (!inRag) ragDropdownOpen.value = false;
     if (!inUploadRag) uploadRagDropdownOpen.value = false;
 };
@@ -549,6 +732,7 @@ const handleClickOutside = (event) => {
 const handleEscClose = (event) => {
     if (event.key === 'Escape') {
         modelDropdownOpen.value = false;
+        mcpDropdownOpen.value = false;
         ragDropdownOpen.value = false;
         uploadRagDropdownOpen.value = false;
     }
@@ -693,9 +877,9 @@ const handleUpload = async () => {
             class="sticky top-0 z-10 h-[var(--header-height)] border-b border-[rgba(15,23,42,0.06)] bg-[#eef1f6] backdrop-blur-[6px]"
         >
             <div
-                class="mx-auto flex h-full w-full max-w-[900px] items-center justify-between gap-[12px] pl-[24px] pr-[calc(24px+var(--scrollbar-w))] max-[720px]:pl-[8px] max-[720px]:pr-[calc(8px+var(--scrollbar-w))]"
+                class="grid h-full w-full grid-cols-[auto_1fr_auto] items-center gap-[12px] pl-[128px] pr-[calc(64px+var(--scrollbar-w))] max-[720px]:pl-[8px] max-[720px]:pr-[calc(8px+var(--scrollbar-w))]"
             >
-                <div class="flex items-center gap-[10px] max-[720px]:flex-col max-[720px]:items-start">
+                <div class="flex items-center gap-[10px]">
                     <div class="relative flex items-center gap-[8px] font-semibold">
                         <label class="min-w-[48px] text-[12px] text-[var(--text-secondary)]">模型</label>
                         <div
@@ -762,9 +946,48 @@ const handleUpload = async () => {
                             </div>
                         </div>
                     </div>
+
+                    <div class="relative flex items-center gap-[8px] font-semibold">
+                        <label class="min-w-[48px] text-[12px] text-[var(--text-secondary)]">MCP工具</label>
+                        <div
+                            ref="mcpSelectRef"
+                            class="inline-flex min-h-[36px] min-w-[200px] cursor-pointer items-center justify-between gap-[10px] rounded-[12px] border border-[var(--border-color)] bg-white px-[12px] py-[8px] shadow-[0_12px_30px_rgba(27,36,55,0.08)]"
+                            @click="toggleMcpDropdown"
+                        >
+                            <span class="font-bold text-[var(--text-primary)]">{{ currentMcpLabel }}</span>
+                            <span
+                                class="text-[var(--text-secondary)] transition-transform duration-200"
+                                :class="{ 'rotate-180': mcpDropdownOpen }"
+                            >
+                                ⌄
+                            </span>
+                        </div>
+                        <div
+                            v-if="mcpDropdownOpen"
+                            class="absolute left-0 top-[calc(100%+6px)] z-[15] w-full rounded-[12px] border border-[var(--border-color)] bg-white p-[6px] shadow-[0_18px_40px_rgba(15,23,42,0.12)] max-h-[240px] overflow-y-auto"
+                            @click.stop
+                        >
+                            <div
+                                v-if="mcpTools.length === 0"
+                                class="flex items-center justify-between rounded-[10px] px-[12px] py-[10px] text-[var(--text-secondary)]"
+                            >
+                                <span>暂无工具</span>
+                            </div>
+                            <div
+                                v-for="item in mcpTools"
+                                :key="item.value"
+                                class="flex cursor-pointer items-center justify-between rounded-[10px] px-[12px] py-[10px] text-[var(--text-primary)] transition-colors duration-150 hover:bg-[#f5f7fb]"
+                                :class="selectedMcpIds.includes(item.value) ? 'bg-[#e8f1ff] text-[var(--accent-color)] font-bold' : ''"
+                                @click.stop="toggleMcpSelection(item.value)"
+                            >
+                                <span>{{ item.label }}</span>
+                                <span v-if="selectedMcpIds.includes(item.value)" class="text-[13px]">✓</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="flex gap-[10px] max-[720px]:flex-wrap">
+                <div class="flex justify-end gap-[10px] max-[720px]:flex-wrap">
                     <button
                         class="inline-flex h-[36px] items-center justify-center rounded-[12px] border border-[var(--border-color)] bg-white px-[14px] py-[9px] font-bold leading-[1.1] text-[var(--text-primary)] transition-all duration-200 hover:bg-[#f7f9fc]"
                         type="button"
@@ -944,26 +1167,55 @@ const handleUpload = async () => {
                         </div>
                     </div>
                     <div class="flex flex-col gap-[8px]">
-                        <label for="temperature" class="font-semibold text-[var(--text-primary)]">temperature</label>
+                        <label for="temperature" class="font-semibold text-[var(--text-primary)]">temperature（随机性）</label>
                         <input
                             id="temperature"
-                            v-model.number="settingsForm.temperature"
+                            v-model="settingsForm.temperature"
                             type="number"
                             min="0"
-                            max="2"
+                            max="1"
                             step="0.1"
                             class="rounded-[12px] border border-[var(--border-color)] px-[12px] py-[10px] text-[14px]"
+                            @input="settingsErrors.temperature = ''"
+                            @blur="validateSettings(true)"
                         />
+                        <div v-if="settingsErrors.temperature" class="text-[12px] text-[#d14343]">
+                            {{ settingsErrors.temperature }}
+                        </div>
                     </div>
                     <div class="flex flex-col gap-[8px]">
-                        <label for="topk" class="font-semibold text-[var(--text-primary)]">topK</label>
+                        <label for="presencePenalty" class="font-semibold text-[var(--text-primary)]">presence penalty（减少重复）</label>
                         <input
-                            id="topk"
-                            v-model.number="settingsForm.topK"
+                            id="presencePenalty"
+                            v-model="settingsForm.presencePenalty"
+                            type="number"
+                            min="0"
+                            max="1"
+                            step="0.1"
+                            class="rounded-[12px] border border-[var(--border-color)] px-[12px] py-[10px] text-[14px]"
+                            @input="settingsErrors.presencePenalty = ''"
+                            @blur="validateSettings(true)"
+                        />
+                        <div v-if="settingsErrors.presencePenalty" class="text-[12px] text-[#d14343]">
+                            {{ settingsErrors.presencePenalty }}
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-[8px]">
+                        <label for="maxTokens" class="font-semibold text-[var(--text-primary)]">max token（回复长度）</label>
+                        <input
+                            id="maxTokens"
+                            v-model="settingsForm.maxCompletionTokens"
                             type="number"
                             min="1"
+                            max="8192"
+                            step="1"
                             class="rounded-[12px] border border-[var(--border-color)] px-[12px] py-[10px] text-[14px]"
+                            @input="settingsErrors.maxCompletionTokens = ''"
+                            @blur="validateSettings(true)"
                         />
+                        <div v-if="settingsErrors.maxCompletionTokens" class="text-[12px] text-[#d14343]">
+                            {{ settingsErrors.maxCompletionTokens }}
+                        </div>
                     </div>
                 </div>
                 <div class="flex justify-end gap-[10px] border-t border-[var(--border-color)] px-[18px] pt-[12px] pb-[16px]">

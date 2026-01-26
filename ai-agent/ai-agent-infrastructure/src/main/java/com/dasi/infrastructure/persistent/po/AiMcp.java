@@ -32,6 +32,9 @@ public class AiMcp {
     /** 请求超时时间 */
     private Integer mcpTimeout;
 
+    /** 是否允许 chat 使用：0-允许，1-不允许 */
+    private Integer mcpChat;
+
     /** 工具描述 */
     private String mcpDesc;
 

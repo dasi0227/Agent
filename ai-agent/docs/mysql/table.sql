@@ -64,6 +64,7 @@ CREATE TABLE `ai_mcp`
     `mcp_config`  TEXT         NOT NULL COMMENT '工具配置',
     `mcp_desc`    VARCHAR(255) NOT NULL DEFAULT '暂无' COMMENT '工具描述',
     `mcp_timeout` INT          NOT NULL DEFAULT '180' COMMENT '请求超时时间',
+    `mcp_chat`    INT          NOT NULL DEFAULT '0' COMMENT '是否允许对话使用：0-不允许，1-允许',
     `mcp_status`  TINYINT      NOT NULL DEFAULT '1' COMMENT '状态：0-禁用，1-启用',
     `create_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
