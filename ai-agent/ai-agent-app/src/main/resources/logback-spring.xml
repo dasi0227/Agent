@@ -24,6 +24,7 @@
         <logger name="io.modelcontextprotocol.client" level="ERROR"/>
         <logger name="org.springframework.web.servlet" level="ERROR"/>
         <logger name="org.springframework.data.repository.config" level="ERROR"/>
+        <logger name="io.modelcontextprotocol.spec" level="ERROR"/>
     </springProfile>
 
     <!-- ========= 转换规则 ========= -->

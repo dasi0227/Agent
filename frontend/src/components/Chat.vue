@@ -877,11 +877,11 @@ const handleUpload = async () => {
             class="sticky top-0 z-10 h-[var(--header-height)] border-b border-[rgba(15,23,42,0.06)] bg-[#eef1f6] backdrop-blur-[6px]"
         >
             <div
-                class="grid h-full w-full grid-cols-[auto_1fr_auto] items-center gap-[12px] pl-[128px] pr-[calc(64px+var(--scrollbar-w))] max-[720px]:pl-[8px] max-[720px]:pr-[calc(8px+var(--scrollbar-w))]"
+                class="grid h-full w-full grid-cols-[auto_1fr_auto] items-center gap-[12px] pl-[128px] pr-[128px] max-[720px]:pl-[8px] max-[720px]:pr-[calc(8px+var(--scrollbar-w))]"
             >
                 <div class="flex items-center gap-[10px]">
-                    <div class="relative flex items-center gap-[8px] font-semibold">
-                        <label class="min-w-[48px] text-[12px] text-[var(--text-secondary)]">模型</label>
+                    <div class="relative flex items-center gap-[14px] font-semibold">
+                        <label class="w-[36px] text-[14px] text-[var(--text-secondary)] text-right">MODEL</label>
                         <div
                             ref="modelSelectRef"
                             class="inline-flex min-h-[36px] min-w-[200px] cursor-pointer items-center justify-between gap-[10px] rounded-[12px] border border-[var(--border-color)] bg-white px-[12px] py-[8px] shadow-[0_12px_30px_rgba(27,36,55,0.08)]"
@@ -913,8 +913,8 @@ const handleUpload = async () => {
                         </div>
                     </div>
 
-                    <div class="relative flex items-center gap-[8px] font-semibold">
-                        <label class="min-w-[48px] text-[12px] text-[var(--text-secondary)]">知识库</label>
+                    <div class="relative flex items-center gap-[6px] font-semibold">
+                        <label class="w-[36px] text-[14px] text-[var(--text-secondary)] text-right">RAG</label>
                         <div
                             ref="ragSelectRef"
                             class="inline-flex min-h-[36px] min-w-[200px] cursor-pointer items-center justify-between gap-[10px] rounded-[12px] border border-[var(--border-color)] bg-white px-[12px] py-[8px] shadow-[0_12px_30px_rgba(27,36,55,0.08)]"
@@ -947,8 +947,8 @@ const handleUpload = async () => {
                         </div>
                     </div>
 
-                    <div class="relative flex items-center gap-[8px] font-semibold">
-                        <label class="min-w-[48px] text-[12px] text-[var(--text-secondary)]">MCP工具</label>
+                    <div class="relative flex items-center gap-[6px] font-semibold">
+                        <label class="w-[36px] text-[14px] text-[var(--text-secondary)] text-right">MCP</label>
                         <div
                             ref="mcpSelectRef"
                             class="inline-flex min-h-[36px] min-w-[200px] cursor-pointer items-center justify-between gap-[10px] rounded-[12px] border border-[var(--border-color)] bg-white px-[12px] py-[8px] shadow-[0_12px_30px_rgba(27,36,55,0.08)]"
