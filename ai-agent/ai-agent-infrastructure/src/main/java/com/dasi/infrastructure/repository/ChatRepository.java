@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.dasi.types.common.RedisConstant.CLIENT_LIST_KEY;
+import static com.dasi.types.common.RedisConstant.CHAT_CLIENT_LIST_KEY;
 
 @Repository
 public class ChatRepository implements IChatRepository {
@@ -25,26 +25,27 @@ public class ChatRepository implements IChatRepository {
     @Override
     public List<ChatClientResponse> queryChatClientResponseList() {
 
-        List<ChatClientResponse> chatClientResponseList = redisService.getValue(CLIENT_LIST_KEY);
+        List<ChatClientResponse> chatClientResponseList = redisService.getValue(CHAT_CLIENT_LIST_KEY);
         if (chatClientResponseList != null) {
             return chatClientResponseList;
         }
 
-        List<AiClient> aiClientList = aiClientDao.queryClientList();
+        List<AiClient> aiClientList = aiClientDao.queryChatClientList();
         if (aiClientList == null || aiClientList.isEmpty()) {
             chatClientResponseList = new ArrayList<>();
-            redisService.setValue(CLIENT_LIST_KEY, chatClientResponseList);
+            redisService.setValue(CHAT_CLIENT_LIST_KEY, chatClientResponseList);
             return chatClientResponseList;
         }
 
         chatClientResponseList = aiClientList.stream()
                 .map(aiClient -> ChatClientResponse.builder()
                         .clientId(aiClient.getClientId())
-                        .clientName(aiClient.getClientName())
+                        .modelName(aiClient.getModelName())
+                        .clientDesc(aiClient.getClientDesc())
                         .build())
                 .toList();
 
-        redisService.setValue(CLIENT_LIST_KEY, chatClientResponseList);
+        redisService.setValue(CHAT_CLIENT_LIST_KEY, chatClientResponseList);
         return chatClientResponseList;
     }
 

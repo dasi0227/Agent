@@ -10,4 +10,6 @@ public interface IAiConfigDao {
 
     List<AiConfig> queryBySource(String sourceType, String sourceId);
 
+    List<String> queryIdListByTargetType(String targetType);
+
 }

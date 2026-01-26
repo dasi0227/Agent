@@ -1,7 +1,7 @@
 package com.dasi.config;
 
 import com.dasi.domain.agent.service.dispatch.IDispatchService;
-import com.dasi.infrastructure.persistent.dao.IAiClientDao;
+import com.dasi.infrastructure.persistent.dao.IAiConfigDao;
 import com.dasi.infrastructure.persistent.dao.IAiFlowDao;
 import com.dasi.infrastructure.persistent.dao.IAiPromptDao;
 import com.dasi.properties.AgentProperties;
@@ -77,13 +77,13 @@ public class AgentConfig implements ApplicationListener<ApplicationReadyEvent> {
     private IDispatchService dispatchService;
 
     @Autowired
-    private IAiClientDao aiClientDao;
+    private IAiConfigDao configDao;
 
     @Autowired
-    private IAiPromptDao aiPromptDao;
+    private IAiPromptDao promptDao;
 
     @Autowired
-    private IAiFlowDao aiFlowDao;
+    private IAiFlowDao flowDao;
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
@@ -91,14 +91,13 @@ public class AgentConfig implements ApplicationListener<ApplicationReadyEvent> {
         if (Boolean.TRUE.equals(agentProperties.getEnable())) {
             autoArmory(agentProperties.getAgentIdList(), AGENT.getType());
             autoArmory(agentProperties.getClientIdList(), CLIENT.getType());
-            autoArmory(agentProperties.getModelIdList(), MODEL.getType());
         }
     }
 
     private void loadPrompt() {
 
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        List<String> clientIdList = aiClientDao.queryClientIdList();
+        List<String> clientIdList = configDao.queryIdListByTargetType(PROMPT.getType());
 
         if (clientIdList == null || clientIdList.isEmpty()) {
             return;
@@ -126,10 +125,10 @@ public class AgentConfig implements ApplicationListener<ApplicationReadyEvent> {
 
                 // 更新 Prompt
                 String systemPromptContent = StreamUtils.copyToString(systemPromptFile.getInputStream(), StandardCharsets.UTF_8);
-                aiPromptDao.loadPromptContent(promptId, systemPromptContent);
+                promptDao.loadPromptContent(promptId, systemPromptContent);
 
                 String userPromptContent = StreamUtils.copyToString(userPromptFile.getInputStream(), StandardCharsets.UTF_8);
-                aiFlowDao.loadFlowPrompt(clientId, userPromptContent);
+                flowDao.loadFlowPrompt(clientId, userPromptContent);
 
                 log.info("【初始化配置】加载 Prompt：clientId={}", clientId);
 
@@ -149,6 +148,7 @@ public class AgentConfig implements ApplicationListener<ApplicationReadyEvent> {
             log.error("【初始化配置】自动装配客户端失败：error={}", e.getMessage(), e);
             throw new RuntimeException();
         }
+
     }
 
 }

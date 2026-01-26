@@ -62,9 +62,6 @@ public class ArmoryModelNode extends AbstractArmoryNode {
 
     @Override
     public StrategyHandler<ArmoryRequestEntity, ArmoryContext, String> get(ArmoryRequestEntity armoryRequestEntity, ArmoryContext armoryContext) {
-        if (armoryRequestEntity.getArmoryType().equals(MODEL.getType())) {
-            return defaultStrategyHandler;
-        }
         return armoryMcpNode;
     }
 

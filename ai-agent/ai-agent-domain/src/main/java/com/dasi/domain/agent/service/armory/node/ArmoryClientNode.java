@@ -23,6 +23,8 @@ import static com.dasi.domain.agent.model.enumeration.AiType.*;
 @Service
 public class ArmoryClientNode extends AbstractArmoryNode {
 
+    private static final String DEFAULT_SYSTEM = "You are a helpful assistant.";
+
     @Override
     protected String doApply(ArmoryRequestEntity armoryRequestEntity, ArmoryContext armoryContext) throws Exception {
 
@@ -39,9 +41,16 @@ public class ArmoryClientNode extends AbstractArmoryNode {
             // 1. 构建系统提示词
             StringBuilder system = new StringBuilder();
             List<String> promptIdList = aiClientVO.getPromptIdList();
-            for (String promptId : promptIdList) {
-                AiPromptVO aiPromptVO = aiPromptVOMap.get(promptId);
-                system.append(aiPromptVO.getPromptContent());
+            if (promptIdList != null && !promptIdList.isEmpty() && aiPromptVOMap != null) {
+                for (String promptId : promptIdList) {
+                    AiPromptVO aiPromptVO = aiPromptVOMap.get(promptId);
+                    if (aiPromptVO != null && aiPromptVO.getPromptContent() != null) {
+                        system.append(aiPromptVO.getPromptContent());
+                    }
+                }
+            }
+            if (system.isEmpty()) {
+                system.append(DEFAULT_SYSTEM);
             }
 
             // 2. 拿到 Model
@@ -52,20 +61,28 @@ public class ArmoryClientNode extends AbstractArmoryNode {
             // 3. 拿到 Mcp
             List<McpSyncClient> mcpSyncClientList = new ArrayList<>();
             List<String> mcpIdList = aiClientVO.getMcpIdList();
-            for (String mcpId : mcpIdList) {
-                String mcpBeanName = MCP.getBeanName(mcpId);
-                McpSyncClient mcpSyncClient = getBean(mcpBeanName);
-                mcpSyncClientList.add(mcpSyncClient);
+            if (mcpIdList != null && !mcpIdList.isEmpty()) {
+                for (String mcpId : mcpIdList) {
+                    String mcpBeanName = MCP.getBeanName(mcpId);
+                    McpSyncClient mcpSyncClient = getBean(mcpBeanName);
+                    if (mcpSyncClient != null) {
+                        mcpSyncClientList.add(mcpSyncClient);
+                    }
+                }
             }
             SyncMcpToolCallbackProvider toolCallbackList = new SyncMcpToolCallbackProvider(mcpSyncClientList.toArray(new McpSyncClient[0]));
 
             // 4. 拿到 Advisor
             List<Advisor> advisorList = new ArrayList<>();
             List<String> advisorIdList = aiClientVO.getAdvisorIdList();
-            for (String advisorId : advisorIdList) {
-                String advisorBeanName = ADVISOR.getBeanName(advisorId);
-                Advisor advisor = getBean(advisorBeanName);
-                advisorList.add(advisor);
+            if (advisorIdList != null && !advisorIdList.isEmpty()) {
+                for (String advisorId : advisorIdList) {
+                    String advisorBeanName = ADVISOR.getBeanName(advisorId);
+                    Advisor advisor = getBean(advisorBeanName);
+                    if (advisor != null) {
+                        advisorList.add(advisor);
+                    }
+                }
             }
 
             // 5. 构建 Client

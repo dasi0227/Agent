@@ -13,6 +13,8 @@ public class ChatClientResponse {
 
     private String clientId;
 
-    private String clientName;
+    private String modelName;
+
+    private String clientDesc;
 
 }
