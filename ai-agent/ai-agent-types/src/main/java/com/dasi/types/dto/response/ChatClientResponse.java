@@ -9,10 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatModelResponse {
+public class ChatClientResponse {
 
-    private String modelId;
+    private String clientId;
 
-    private String modelName;
+    private String clientName;
 
 }

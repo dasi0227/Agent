@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dasi.infrastructure.persistent.dao.IAiModelDao">
     <resultMap id="dataMap" type="com.dasi.infrastructure.persistent.po.AiModel">
         <result column="model_id" property="modelId"/>
@@ -19,16 +19,5 @@
         FROM ai_model
         WHERE model_id = #{modelId}
     </select>
-
-    <select id="queryChatModelList" resultMap="dataMap">
-        SELECT model_id,
-               api_id,
-               model_name,
-               model_type,
-               model_status
-        FROM ai_model
-        WHERE model_status = 1 AND model_type = 'chat'
-    </select>
-
 
 </mapper>

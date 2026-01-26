@@ -10,4 +10,6 @@ public interface IAiClientDao {
     AiClient queryByClientId(String clientId);
 
     List<String> queryClientIdList();
+
+    List<AiClient> queryClientList();
 }

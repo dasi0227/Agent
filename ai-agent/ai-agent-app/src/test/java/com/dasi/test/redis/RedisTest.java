@@ -3,7 +3,7 @@ package com.dasi.test.redis;
 import com.dasi.infrastructure.persistent.po.AiApi;
 import com.dasi.infrastructure.persistent.po.AiClient;
 import com.dasi.infrastructure.redis.IRedisService;
-import com.dasi.types.dto.response.ChatModelResponse;
+import com.dasi.types.dto.response.ChatClientResponse;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
@@ -35,7 +35,7 @@ public class RedisTest {
         String intKey = "test:redis:int";
         String longKey = "test:redis:long";
         String apiKey = "test:redis:aiApi";
-        String modelKey = "test:redis:modelResponse";
+        String modelKey = "test:redis:chatClientResponse";
         String clientListKey = "test:redis:clientList";
 
         List<String> listValue = Arrays.asList("a", "b", "c");
@@ -53,9 +53,9 @@ public class RedisTest {
                 .createTime(LocalDateTime.now())
                 .updateTime(LocalDateTime.now())
                 .build();
-        ChatModelResponse modelValue = ChatModelResponse.builder()
-                .modelId("model_test")
-                .modelName("Test Model")
+        ChatClientResponse modelValue = ChatClientResponse.builder()
+                .clientId("client_test")
+                .clientName("Test Client")
                 .build();
         List<AiClient> clientListValue = Arrays.asList(
                 AiClient.builder()
@@ -93,7 +93,7 @@ public class RedisTest {
         Integer intResult = redisService.getValue(intKey);
         Long longResult = redisService.getValue(longKey);
         AiApi apiResult = redisService.getValue(apiKey);
-        ChatModelResponse modelResult = redisService.getValue(modelKey);
+        ChatClientResponse modelResult = redisService.getValue(modelKey);
         List<AiClient> clientListResult = redisService.getValue(clientListKey);
 
         log.info("listResult={}", listResult);

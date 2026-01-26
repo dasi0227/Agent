@@ -4,6 +4,9 @@
 <mapper namespace="com.dasi.infrastructure.persistent.dao.IAiClientDao">
     <resultMap id="dataMap" type="com.dasi.infrastructure.persistent.po.AiClient">
         <result column="client_id" property="clientId"/>
+        <result column="client_type" property="clientType"/>
+        <result column="model_id" property="modelId"/>
+        <result column="model_name" property="modelName"/>
         <result column="client_name" property="clientName"/>
         <result column="client_desc" property="clientDesc"/>
         <result column="client_status" property="clientStatus"/>
@@ -12,11 +15,26 @@
     <select id="queryByClientId" parameterType="java.lang.String" resultMap="dataMap">
         SELECT
             client_id,
+            client_type,
+            model_id,
+            model_name,
             client_name,
             client_desc,
             client_status
         FROM ai_client
         WHERE client_id = #{clientId}
+    </select>
+
+    <select id="queryClientList" resultMap="dataMap">
+        SELECT
+            client_id,
+            client_type,
+            model_id,
+            model_name,
+            client_name,
+            client_desc,
+            client_status
+        FROM ai_client
     </select>
 
     <select id="queryClientIdList" resultType="java.lang.String">

@@ -41,6 +41,9 @@ CREATE TABLE `ai_client`
 (
     `id`            BIGINT       NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT '自增 ID',
     `client_id`     VARCHAR(32)  NOT NULL UNIQUE COMMENT '客户端 id',
+    `client_type`   VARCHAR(32)  NOT NULL COMMENT '客户端类型：chat/work',
+    `model_id`      VARCHAR(32)  NOT NULL COMMENT '模型 id',
+    `model_name`    VARCHAR(64)  NOT NULL COMMENT '模型名称',
     `client_name`   VARCHAR(32)  NOT NULL COMMENT '客户端名称',
     `client_desc`   VARCHAR(255) NOT NULL DEFAULT '暂无' COMMENT '客户端描述',
     `client_status` TINYINT      NOT NULL DEFAULT '1' COMMENT '状态：0-禁用，1-启用',

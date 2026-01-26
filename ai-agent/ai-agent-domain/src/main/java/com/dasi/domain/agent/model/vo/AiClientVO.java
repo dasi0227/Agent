@@ -24,6 +24,11 @@ public class AiClientVO {
     private String clientName;
 
     /**
+     * 客户端类型：chat/work
+     */
+    private String clientType;
+
+    /**
      * 客户端描述
      */
     private String clientDesc;
@@ -32,6 +37,11 @@ public class AiClientVO {
      * 模型 id
      */
     private String modelId;
+
+    /**
+     * 模型名称
+     */
+    private String modelName;
 
     /**
      * 提示词 ID List
