@@ -68,7 +68,7 @@ public class ChatController implements IChatService {
         String userMessage = chatRequest.getUserMessage();
         String ragTag = chatRequest.getRagTag();
 
-        log.info("【模型对话】流式对话：userMessage={}", userMessage);
+        log.info("【模型对话】流式对话：clientId={}, userMessage={}", clientId, userMessage);
 
         try {
             ChatClient chatClient = applicationContext.getBean(CLIENT.getBeanName(clientId), ChatClient.class);
@@ -78,6 +78,7 @@ public class ChatController implements IChatService {
                     .messages(messageList)
                     .stream()
                     .content()
+                    .doFinally(signalType -> log.info("【模型对话】流式对话结束：clientId={}, signal={}", clientId, signalType))
                     .onErrorResume(e -> {
                         log.error("【模型对话】流式对话失败：clientId={}", clientId, e);
                         return Flux.just(CHAT_ERROR_RESPONSE);
