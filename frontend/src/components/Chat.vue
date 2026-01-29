@@ -7,6 +7,7 @@ import {
     fetchComplete,
     fetchStream,
     pickContentFromResult,
+    dispatchArmory,
     queryChatModels,
     queryChatMcps,
     queryRagTags,
@@ -309,6 +310,11 @@ onBeforeUnmount(() => {
 });
 
 const handleKeydown = (event) => {
+    if (event.key === 'Enter' && event.metaKey) {
+        event.preventDefault();
+        sendMessage();
+        return;
+    }
     if (event.key === 'Escape') {
         modelDropdownOpen.value = false;
         mcpDropdownOpen.value = false;
@@ -689,9 +695,14 @@ const toggleMcpSelection = (value) => {
     }
 };
 
-const selectModel = (value) => {
+const selectModel = async (value) => {
     currentModel.value = value;
     modelDropdownOpen.value = false;
+    try {
+        await dispatchArmory({ armoryType: 'chat', armoryId: value });
+    } catch (error) {
+        console.warn('绑定 Chat armory 失败', error);
+    }
 };
 
 const toggleRagDropdown = () => {

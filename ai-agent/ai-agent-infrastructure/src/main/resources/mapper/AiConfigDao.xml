@@ -10,7 +10,7 @@
         <result column="config_status" property="configStatus"/>
     </resultMap>
 
-    <select id="queryByClientId" parameterType="java.lang.String" resultMap="dataMap">
+    <select id="queryByClientIdAndConfigType" resultMap="dataMap">
         SELECT client_id,
                config_type,
                config_value,
@@ -18,6 +18,8 @@
                config_status
         FROM ai_config
         WHERE client_id = #{clientId}
+          AND config_type = #{configType}
+          AND config_status = 1
     </select>
 
     <select id="queryClientIdListByConfigType" resultType="java.lang.String">

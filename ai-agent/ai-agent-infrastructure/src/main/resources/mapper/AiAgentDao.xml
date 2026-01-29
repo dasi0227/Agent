@@ -5,15 +5,21 @@
     <resultMap id="dataMap" type="com.dasi.infrastructure.persistent.po.AiAgent">
         <result column="agent_id" property="agentId"/>
         <result column="agent_name" property="agentName"/>
-        <result column="agent_channel" property="agentChannel"/>
         <result column="agent_type" property="agentType"/>
         <result column="agent_desc" property="agentDesc"/>
         <result column="agent_status" property="agentStatus"/>
     </resultMap>
 
-    <select id="queryTypeByAgentId" resultType="java.lang.String">
-        SELECT agent_type
+    <select id="queryAgentList" resultMap="dataMap">
+        SELECT agent_id, agent_name, agent_type, agent_desc, agent_status
         FROM ai_agent
-        WHERE agent_id = #{aiAgentId}
+        WHERE agent_status = 1
     </select>
+
+    <select id="queryAgentByAgentId" resultMap="dataMap">
+        SELECT agent_id, agent_name, agent_type, agent_desc, agent_status
+        FROM ai_agent
+        WHERE agent_id = #{agentId}
+    </select>
+
 </mapper>

@@ -1,0 +1,154 @@
+package com.dasi.trigger.http;
+
+import com.dasi.api.IAiApi;
+import com.dasi.domain.ai.model.entity.ExecuteRequestEntity;
+import com.dasi.domain.ai.service.augment.IAugmentService;
+import com.dasi.domain.ai.service.dispatch.IDispatchService;
+import com.dasi.types.dto.request.ArmoryRequest;
+import com.dasi.types.dto.request.ChatRequest;
+import com.dasi.types.dto.request.ExecuteRequest;
+import com.dasi.types.dto.result.Result;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.prompt.ChatOptions;
+import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
+import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.context.ApplicationContext;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import reactor.core.publisher.Flux;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static com.dasi.domain.ai.model.enumeration.AiType.CLIENT;
+import static com.dasi.types.constant.MessageConstant.CHAT_ERROR_RESPONSE;
+
+@Slf4j
+@RestController
+@RequestMapping("/api/v1/ai")
+public class AiController implements IAiApi {
+
+    @Resource
+    private IDispatchService dispatchService;
+
+    @Resource
+    private ApplicationContext applicationContext;
+
+    @Resource
+    private IAugmentService augmentService;
+
+    @Override
+    @PostMapping(value = "/agent/execute", produces = "text/event-stream")
+    public SseEmitter execute(@Valid @RequestBody ExecuteRequest executeRequest) {
+
+        SseEmitter sseEmitter = new SseEmitter(0L);
+
+        ExecuteRequestEntity executeRequestEntity = ExecuteRequestEntity.builder()
+                .aiAgentId(executeRequest.getAiAgentId())
+                .userMessage(executeRequest.getUserMessage())
+                .sessionId(executeRequest.getSessionId())
+                .maxRound(executeRequest.getMaxRound())
+                .maxRetry(executeRequest.getMaxRetry())
+                .build();
+
+        dispatchService.dispatchExecuteStrategy(executeRequestEntity, sseEmitter);
+
+        return sseEmitter;
+    }
+
+    @PostMapping("/chat/complete")
+    @Override
+    public String complete(@Valid @RequestBody ChatRequest chatRequest) {
+
+        String clientId = chatRequest.getClientId();
+        String userMessage = chatRequest.getUserMessage();
+        String ragTag = chatRequest.getRagTag();
+        List<String> mcpIdList = chatRequest.getMcpIdList();
+
+        log.info("【模型对话】完整对话：chatRequest={}", chatRequest);
+
+        try {
+            ChatClient chatClient = applicationContext.getBean(CLIENT.getBeanName(clientId), ChatClient.class);
+            List<Message> messageList = augmentService.augmentRagMessage(userMessage, ragTag);
+            SyncMcpToolCallbackProvider toolCallbackList = augmentService.augmentMcpTool(mcpIdList);
+            ChatOptions chatOptions = OpenAiChatOptions.builder()
+                    .temperature(0.3)
+                    .presencePenalty(0.5)
+                    .maxCompletionTokens(3000)
+                    .build();
+
+            String response = chatClient.prompt()
+                    .messages(messageList)
+                    .options(chatOptions)
+                    .toolCallbacks(toolCallbackList)
+                    .call()
+                    .content();
+            if (response == null || response.isEmpty()) {
+                return CHAT_ERROR_RESPONSE;
+            }
+            return response;
+        } catch (Exception e) {
+            log.error("【模型对话】完整对话失败：clientId={}", clientId, e);
+            return CHAT_ERROR_RESPONSE;
+        }
+    }
+
+    @PostMapping("/chat/stream")
+    @Override
+    public Flux<String> stream(@Valid @RequestBody ChatRequest chatRequest) {
+
+        String clientId = chatRequest.getClientId();
+        String userMessage = chatRequest.getUserMessage();
+        String ragTag = chatRequest.getRagTag();
+        List<String> mcpIdList = chatRequest.getMcpIdList();
+
+        log.info("【模型对话】流式对话：chatRequest={}", chatRequest);
+
+        try {
+            ChatClient chatClient = applicationContext.getBean(CLIENT.getBeanName(clientId), ChatClient.class);
+            List<Message> messageList = augmentService.augmentRagMessage(userMessage, ragTag);
+            SyncMcpToolCallbackProvider toolCallbackList = augmentService.augmentMcpTool(mcpIdList);
+            ChatOptions chatOptions = OpenAiChatOptions.builder()
+                    .temperature(0.3)
+                    .presencePenalty(0.5)
+                    .maxCompletionTokens(3000)
+                    .build();
+            return chatClient
+                    .prompt()
+                    .options(chatOptions)
+                    .messages(messageList)
+                    .toolCallbacks(toolCallbackList)
+                    .stream()
+                    .content()
+                    .doFinally(signalType -> log.info("【模型对话】流式对话结束：clientId={}, signal={}", clientId, signalType))
+                    .onErrorResume(e -> {
+                        log.error("【模型对话】流式对话失败：clientId={}", clientId, e);
+                        return Flux.just(CHAT_ERROR_RESPONSE);
+                    });
+        } catch (Exception e) {
+            log.error("【模型对话】流式对话失败：clientId={}", clientId, e);
+            return Flux.just(CHAT_ERROR_RESPONSE);
+        }
+    }
+
+
+    @Override
+    @PostMapping(value = "/armory")
+    public Result<Void> armory(@Valid @RequestBody ArmoryRequest armoryRequest) {
+
+        String armoryType = armoryRequest.getArmoryType();
+        String armoryId = armoryRequest.getArmoryId();
+
+        Set<String> armoryIdSet = new HashSet<>(Set.of(armoryId));
+        dispatchService.dispatchArmoryStrategy(armoryType, armoryIdSet);
+
+        return Result.success();
+    }
+
+
+}

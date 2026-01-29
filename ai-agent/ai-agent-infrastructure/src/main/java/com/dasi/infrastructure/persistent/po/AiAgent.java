@@ -1,10 +1,11 @@
 package com.dasi.infrastructure.persistent.po;
 
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 /** 智能体配置表 */
 @Data
@@ -20,9 +21,6 @@ public class AiAgent {
 
     /** 智能体名称 */
     private String agentName;
-
-    /** 智能体渠道 */
-    private String agentChannel;
 
     /** 智能体类型 */
     private String agentType;

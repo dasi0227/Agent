@@ -2,12 +2,14 @@ import { defineStore } from 'pinia';
 
 const SETTINGS_KEY = 'chat_settings';
 const CHATS_KEY = 'chat_sessions';
+const AGENT_SETTINGS_KEY = 'agent_settings';
+const AGENT_SESSIONS_KEY = 'agent_sessions';
 
 const defaultSettings = () => ({
     type: 'complete',
-    temperature: 0.6,
-    presencePenalty: 0.0,
-    maxCompletionTokens: 1024,
+    temperature: null,
+    presencePenalty: null,
+    maxCompletionTokens: null,
     model: '',
     ragTag: '',
     token: ''
@@ -49,6 +51,47 @@ export const useSettingsStore = defineStore('settings', {
         },
         reset() {
             Object.assign(this, defaultSettings());
+            this.persist();
+        }
+    }
+});
+
+const defaultAgentSettings = () => ({
+    maxRetry: 2,
+    maxRound: 2
+});
+
+const loadAgentSettings = () => {
+    try {
+        const raw = localStorage.getItem(AGENT_SETTINGS_KEY);
+        if (!raw) {
+            return defaultAgentSettings();
+        }
+        return { ...defaultAgentSettings(), ...JSON.parse(raw) };
+    } catch (error) {
+        console.warn('无法解析 Agent 设置，使用默认值', error);
+        return defaultAgentSettings();
+    }
+};
+
+export const useAgentSettingsStore = defineStore('agentSettings', {
+    state: () => ({
+        ...loadAgentSettings()
+    }),
+    actions: {
+        updateSettings(partial) {
+            Object.assign(this, partial);
+            this.persist();
+        },
+        persist() {
+            const payload = {
+                maxRetry: this.maxRetry,
+                maxRound: this.maxRound
+            };
+            localStorage.setItem(AGENT_SETTINGS_KEY, JSON.stringify(payload));
+        },
+        reset() {
+            Object.assign(this, defaultAgentSettings());
             this.persist();
         }
     }
@@ -204,6 +247,192 @@ export const useChatStore = defineStore('chat', {
                 persistChatState(this.chats, this.currentChatId);
             }
             return target;
+        },
+        setSending(flag) {
+            this.sending = flag;
+        },
+        setAbortController(controller) {
+            this.abortController = controller;
+        },
+        stopCurrentRequest() {
+            if (this.abortController) {
+                this.abortController.abort();
+                this.abortController = null;
+            }
+            this.sending = false;
+        }
+    }
+});
+
+const createAgentSessionId = () => `agent_session_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`;
+
+const createEmptyAgentSession = () => ({
+    id: `agent_${Date.now()}`,
+    title: '新会话',
+    createdAt: Date.now(),
+    sessionId: createAgentSessionId(),
+    messages: [],
+    cards: []
+});
+
+const loadAgentState = () => {
+    try {
+        const raw = localStorage.getItem(AGENT_SESSIONS_KEY);
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed.sessions)) {
+                return {
+                    sessions: parsed.sessions,
+                    currentSessionId: parsed.currentSessionId || parsed.sessions[0]?.id || null
+                };
+            }
+            if (Array.isArray(parsed)) {
+                return {
+                    sessions: parsed,
+                    currentSessionId: parsed[0]?.id || null
+                };
+            }
+        }
+    } catch (error) {
+        console.warn('无法解析 Agent 会话记录，使用新会话', error);
+    }
+    const session = createEmptyAgentSession();
+    return {
+        sessions: [session],
+        currentSessionId: session.id
+    };
+};
+
+const persistAgentState = (sessions, currentSessionId) => {
+    localStorage.setItem(
+        AGENT_SESSIONS_KEY,
+        JSON.stringify({
+            sessions,
+            currentSessionId
+        })
+    );
+};
+
+const initialAgentState = loadAgentState();
+
+export const useAgentStore = defineStore('agent', {
+    state: () => ({
+        sessions: initialAgentState.sessions,
+        currentSessionId: initialAgentState.currentSessionId,
+        sending: false,
+        abortController: null
+    }),
+    getters: {
+        currentSession(state) {
+            const session = state.sessions.find((item) => item.id === state.currentSessionId);
+            return session || state.sessions[0] || null;
+        },
+        currentMessages() {
+            return this.currentSession?.messages || [];
+        },
+        currentCards() {
+            return this.currentSession?.cards || [];
+        }
+    },
+    actions: {
+        ensureSession() {
+            if (!this.currentSessionId) {
+                const session = createEmptyAgentSession();
+                this.sessions.unshift(session);
+                this.currentSessionId = session.id;
+                persistAgentState(this.sessions, this.currentSessionId);
+            }
+            return this.currentSession;
+        },
+        createSession() {
+            const session = createEmptyAgentSession();
+            this.sessions.unshift(session);
+            this.currentSessionId = session.id;
+            persistAgentState(this.sessions, this.currentSessionId);
+            return session;
+        },
+        switchSession(sessionId) {
+            this.currentSessionId = sessionId;
+            persistAgentState(this.sessions, this.currentSessionId);
+        },
+        deleteSession(sessionId) {
+            const targetId = sessionId || this.currentSessionId;
+            const idx = this.sessions.findIndex((item) => item.id === targetId);
+            if (idx === -1) {
+                return;
+            }
+            this.sessions.splice(idx, 1);
+
+            if (this.sessions.length > 0) {
+                this.currentSessionId = this.sessions[0].id;
+            } else {
+                const newSession = createEmptyAgentSession();
+                this.sessions.unshift(newSession);
+                this.currentSessionId = newSession.id;
+            }
+            persistAgentState(this.sessions, this.currentSessionId);
+        },
+        renameSession(sessionId, newTitle) {
+            const session = this.sessions.find((item) => item.id === sessionId);
+            if (session) {
+                session.title = newTitle || '未命名会话';
+                persistAgentState(this.sessions, this.currentSessionId);
+            }
+        },
+        addUserMessage(content) {
+            const session = this.ensureSession();
+            const message = {
+                id: `msg_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`,
+                role: 'user',
+                content,
+                pending: false,
+                error: null,
+                createdAt: Date.now()
+            };
+            session.messages.push(message);
+            if (!session.title || session.title === '新会话') {
+                session.title = content.slice(0, 20) || '新会话';
+            }
+            persistAgentState(this.sessions, this.currentSessionId);
+            return message;
+        },
+        addAssistantMessage(payload) {
+            const session = this.ensureSession();
+            const message = {
+                id: payload.id || `msg_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`,
+                role: 'assistant',
+                content: payload.content || '',
+                pending: Boolean(payload.pending),
+                error: payload.error || null,
+                createdAt: Date.now()
+            };
+            session.messages.push(message);
+            persistAgentState(this.sessions, this.currentSessionId);
+            return message;
+        },
+        updateAssistantMessage(messageId, partial) {
+            const session = this.ensureSession();
+            const target = session.messages.find((item) => item.id === messageId);
+            if (target) {
+                Object.assign(target, partial);
+                persistAgentState(this.sessions, this.currentSessionId);
+            }
+            return target;
+        },
+        addCard(payload) {
+            const session = this.ensureSession();
+            const card = {
+                id: payload.id || `card_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`,
+                clientType: payload.clientType || '',
+                sectionType: payload.sectionType || '',
+                sectionContent: payload.sectionContent || '',
+                round: payload.round ?? null,
+                step: payload.step ?? null,
+                timestamp: payload.timestamp ?? null
+            };
+            session.cards.push(card);
+            persistAgentState(this.sessions, this.currentSessionId);
+            return card;
         },
         setSending(flag) {
             this.sending = flag;

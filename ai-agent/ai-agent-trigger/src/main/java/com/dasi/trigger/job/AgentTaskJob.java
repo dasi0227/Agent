@@ -1,6 +1,6 @@
 package com.dasi.trigger.job;
 
-import com.dasi.domain.agent.service.task.ITaskService;
+import com.dasi.domain.ai.service.task.ITaskService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.TaskScheduler;
