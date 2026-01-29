@@ -1,7 +1,7 @@
 package com.dasi.test.domain;
 
-import com.dasi.domain.agent.service.armory.ArmoryStrategyFactory;
-import com.dasi.domain.agent.service.execute.loop.ExecuteLoopStrategy;
+import com.dasi.domain.ai.service.armory.ArmoryStrategyFactory;
+import com.dasi.domain.ai.service.execute.loop.ExecuteLoopStrategy;
 import com.dasi.infrastructure.persistent.dao.IAiPromptDao;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;

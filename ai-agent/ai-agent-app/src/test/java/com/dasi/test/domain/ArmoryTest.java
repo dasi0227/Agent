@@ -1,9 +1,9 @@
 package com.dasi.test.domain;
 
 import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
-import com.dasi.domain.agent.model.entity.ArmoryRequestEntity;
-import com.dasi.domain.agent.service.armory.ArmoryContext;
-import com.dasi.domain.agent.service.armory.ArmoryStrategyFactory;
+import com.dasi.domain.ai.model.entity.ArmoryRequestEntity;
+import com.dasi.domain.ai.service.armory.ArmoryContext;
+import com.dasi.domain.ai.service.armory.ArmoryStrategyFactory;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -16,10 +16,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.List;
+import java.util.Set;
 
-import static com.dasi.domain.agent.model.enumeration.AiType.API;
-import static com.dasi.domain.agent.model.enumeration.AiType.CLIENT;
+import static com.dasi.domain.ai.model.enumeration.AiType.API;
+import static com.dasi.domain.ai.model.enumeration.AiType.CLIENT;
 
 @Slf4j
 @RunWith(SpringRunner.class)
@@ -39,7 +39,7 @@ public class ArmoryTest {
 
         ArmoryRequestEntity armoryRequestEntity = ArmoryRequestEntity.builder()
                 .armoryType(CLIENT.getType())
-                .idList(List.of("client_demo_1"))
+                .armoryIdSet(Set.of("client_demo_1"))
                 .build();
 
         ArmoryContext armoryContext = new ArmoryContext();
@@ -57,7 +57,7 @@ public class ArmoryTest {
 
         ArmoryRequestEntity armoryRequestEntity = ArmoryRequestEntity.builder()
                 .armoryType(CLIENT.getType())
-                .idList(List.of("client_demo_1"))
+                .armoryIdSet(Set.of("client_demo_1"))
                 .build();
 
         ArmoryContext armoryContext = new ArmoryContext();
@@ -76,7 +76,7 @@ public class ArmoryTest {
 
         ArmoryRequestEntity armoryRequestEntity = ArmoryRequestEntity.builder()
                 .armoryType(CLIENT.getType())
-                .idList(List.of("client_demo_1"))
+                .armoryIdSet(Set.of("client_demo_1"))
                 .build();
 
         ArmoryContext armoryContext = new ArmoryContext();
@@ -95,7 +95,7 @@ public class ArmoryTest {
 
         ArmoryRequestEntity armoryRequestEntity = ArmoryRequestEntity.builder()
                 .armoryType(CLIENT.getType())
-                .idList(List.of("client_demo_1"))
+                .armoryIdSet(Set.of("client_demo_1"))
                 .build();
 
         ArmoryContext armoryContext = new ArmoryContext();
@@ -117,7 +117,7 @@ public class ArmoryTest {
 
         ArmoryRequestEntity armoryRequestEntity = ArmoryRequestEntity.builder()
                 .armoryType(CLIENT.getType())
-                .idList(List.of("client_demo_1"))
+                .armoryIdSet(Set.of("client_demo_1"))
                 .build();
 
         ArmoryContext armoryContext = new ArmoryContext();
@@ -153,7 +153,7 @@ public class ArmoryTest {
 
         ArmoryRequestEntity armoryRequestEntity = ArmoryRequestEntity.builder()
                 .armoryType(CLIENT.getType())
-                .idList(List.of("client_demo_1"))
+                .armoryIdSet(Set.of("client_demo_1"))
                 .build();
 
         ArmoryContext armoryContext = new ArmoryContext();

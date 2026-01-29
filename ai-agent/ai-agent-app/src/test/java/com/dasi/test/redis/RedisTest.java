@@ -2,7 +2,7 @@ package com.dasi.test.redis;
 
 import com.dasi.infrastructure.persistent.po.AiApi;
 import com.dasi.infrastructure.persistent.po.AiClient;
-import com.dasi.infrastructure.redis.IRedisService;
+import com.dasi.domain.util.IRedisService;
 import com.dasi.types.dto.response.ChatClientResponse;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -78,23 +78,23 @@ public class RedisTest {
                         .build()
         );
 
-        redisService.setValue(listKey, listValue);
-        redisService.setValue(mapKey, mapValue);
-        redisService.setValue(stringKey, "hello");
-        redisService.setValue(intKey, 123);
-        redisService.setValue(longKey, 123456789L);
-        redisService.setValue(apiKey, apiValue);
-        redisService.setValue(modelKey, modelValue);
-        redisService.setValue(clientListKey, clientListValue);
+        redisService.setStringValue(listKey, listValue);
+        redisService.setStringValue(mapKey, mapValue);
+        redisService.setStringValue(stringKey, "hello");
+        redisService.setStringValue(intKey, 123);
+        redisService.setStringValue(longKey, 123456789L);
+        redisService.setStringValue(apiKey, apiValue);
+        redisService.setStringValue(modelKey, modelValue);
+        redisService.setStringValue(clientListKey, clientListValue);
 
-        List<String> listResult = redisService.getValue(listKey);
-        Map<String, Object> mapResult = redisService.getValue(mapKey);
-        String stringResult = redisService.getValue(stringKey);
-        Integer intResult = redisService.getValue(intKey);
-        Long longResult = redisService.getValue(longKey);
-        AiApi apiResult = redisService.getValue(apiKey);
-        ChatClientResponse modelResult = redisService.getValue(modelKey);
-        List<AiClient> clientListResult = redisService.getValue(clientListKey);
+        List<String> listResult = redisService.getStringValue(listKey);
+        Map<String, Object> mapResult = redisService.getStringValue(mapKey);
+        String stringResult = redisService.getStringValue(stringKey);
+        Integer intResult = redisService.getStringValue(intKey);
+        Long longResult = redisService.getStringValue(longKey);
+        AiApi apiResult = redisService.getStringValue(apiKey);
+        ChatClientResponse modelResult = redisService.getStringValue(modelKey);
+        List<AiClient> clientListResult = redisService.getStringValue(clientListKey);
 
         log.info("listResult={}", listResult);
         log.info("mapResult={}", mapResult);

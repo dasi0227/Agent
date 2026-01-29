@@ -1,10 +1,18 @@
 import http, { streamFetch } from './request';
 
-const CHAT_COMPLETE_PATH = '/api/v1/chat/complete';
-const CHAT_STREAM_PATH = '/api/v1/chat/stream';
-const CHAT_CLIENTS_PATH = '/api/v1/chat/chat-client-list';
-const CHAT_MCP_PATH = '/api/v1/chat/chat-mcp-list';
-const RAG_TAGS_PATH = '/api/v1/chat/rag-tag-list';
+
+const AI_BASE_PATH = '/api/v1/ai';
+const CHAT_COMPLETE_PATH = `${AI_BASE_PATH}/chat/complete`;
+const CHAT_STREAM_PATH = `${AI_BASE_PATH}/chat/stream`;
+const AGENT_EXECUTE_PATH = `${AI_BASE_PATH}/agent/execute`;
+const CLIENT_ARMORY_PATH = `${AI_BASE_PATH}/armory`;
+
+const QUERY_BASE_PATH = '/api/v1/query';
+const CHAT_CLIENTS_PATH = `${QUERY_BASE_PATH}/chat-client-list`;
+const CHAT_MCP_PATH = `${QUERY_BASE_PATH}/chat-mcp-list`;
+const AGENT_LIST_PATH = `${QUERY_BASE_PATH}/agent-list`;
+const RAG_TAGS_PATH = `${QUERY_BASE_PATH}/rag-tag-list`;
+
 const RAG_UPLOAD_PATH = '/api/v1/rag/file';
 const RAG_GIT_PATH = '/api/v1/rag/git';
 
@@ -93,6 +101,48 @@ export const queryChatModels = async () => {
 
 export const queryChatMcps = async () => {
     return http.get(CHAT_MCP_PATH);
+};
+
+export const queryAgentList = async () => {
+    return http.get(AGENT_LIST_PATH);
+};
+
+export const dispatchArmory = async ({ armoryType, armoryId }) => {
+    return http.post(
+        CLIENT_ARMORY_PATH,
+        {
+            armoryType,
+            armoryId
+        }
+    );
+};
+
+export const executeAgentStream = async ({
+    aiAgentId,
+    userMessage,
+    sessionId,
+    maxRound,
+    maxRetry,
+    onData,
+    onError,
+    onDone,
+    signal
+}) => {
+    const url = `${http.defaults.baseURL}${AGENT_EXECUTE_PATH}`;
+    return streamFetch(
+        url,
+        {
+            aiAgentId,
+            userMessage,
+            sessionId,
+            maxRound,
+            maxRetry
+        },
+        onData,
+        onError,
+        onDone,
+        signal
+    );
 };
 
 export const uploadRagFile = async ({ ragTag, file }) => {

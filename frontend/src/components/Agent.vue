@@ -1,0 +1,583 @@
+<script setup>
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
+import { marked } from 'marked';
+import hljs from 'highlight.js';
+import DOMPurify from 'dompurify';
+import { dispatchArmory, executeAgentStream, queryAgentList } from '../request/api';
+import { normalizeError } from '../request/request';
+import { useAgentSettingsStore, useAgentStore } from '../router/pinia';
+
+const agentStore = useAgentStore();
+const settingsStore = useAgentSettingsStore();
+
+const agentOptions = ref([]);
+const currentAgentId = ref('');
+const agentDropdownOpen = ref(false);
+const agentSelectRef = ref(null);
+
+const leftScrollRef = ref(null);
+const rightScrollRef = ref(null);
+const inputValue = ref('');
+const showSettings = ref(false);
+const isLeftAtBottom = ref(true);
+const isRightAtBottom = ref(true);
+
+const settingsForm = reactive({
+    maxRetry: settingsStore.maxRetry,
+    maxRound: settingsStore.maxRound
+});
+
+const renderer = new marked.Renderer();
+renderer.code = (code, infostring) => {
+    const lang = (infostring || '').match(/\S*/)?.[0] || '';
+    if (lang && hljs.getLanguage(lang)) {
+        return `<pre><code class="hljs language-${lang}">${hljs.highlight(code, {
+            language: lang,
+            ignoreIllegals: true
+        }).value}</code></pre>`;
+    }
+    return `<pre><code class="hljs">${hljs.highlightAuto(code).value}</code></pre>`;
+};
+
+marked.setOptions({ breaks: true, gfm: true, renderer });
+
+const renderMarkdown = (text) => {
+    if (!text) return '';
+    return DOMPurify.sanitize(marked.parse(text), { ADD_ATTR: ['class'] });
+};
+
+const currentAgentLabel = computed(() => {
+    if (!currentAgentId.value) {
+        return '选择AGENT';
+    }
+    const match = agentOptions.value.find((item) => item.value === currentAgentId.value);
+    return match?.label || currentAgentId.value;
+});
+
+const fetchAgents = async () => {
+    try {
+        const resp = await queryAgentList();
+        const list = Array.isArray(resp?.result)
+            ? resp.result
+            : Array.isArray(resp)
+              ? resp
+              : Array.isArray(resp?.data)
+                ? resp.data
+                : [];
+        const normalized = list
+            .map((item) => {
+                if (!item || typeof item !== 'object') return null;
+                const agentId = item.agentId || item.id || '';
+                const agentName = item.agentName || item.name || agentId;
+                const agentDesc = item.agentDesc || item.desc || '';
+                if (!agentId) return null;
+                return { label: agentName || agentId, value: agentId, desc: agentDesc };
+            })
+            .filter(Boolean);
+        const seen = new Set();
+        const unique = normalized.filter((item) => {
+            if (seen.has(item.value)) return false;
+            seen.add(item.value);
+            return true;
+        });
+        agentOptions.value = unique;
+        if (currentAgentId.value && !unique.some((item) => item.value === currentAgentId.value)) {
+            currentAgentId.value = '';
+        }
+    } catch (error) {
+        console.warn('获取 AGENT 列表失败', error);
+    }
+};
+
+const messages = computed(() => agentStore.currentMessages);
+const cards = computed(() => agentStore.currentCards);
+const sending = computed(() => agentStore.sending);
+
+const handleLeftScroll = () => {
+    const el = leftScrollRef.value;
+    if (!el) return;
+    const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
+    isLeftAtBottom.value = distance < 80;
+};
+
+const handleRightScroll = () => {
+    const el = rightScrollRef.value;
+    if (!el) return;
+    const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
+    isRightAtBottom.value = distance < 80;
+};
+
+const scrollLeftToBottom = (smooth = true) => {
+    nextTick(() => {
+        const el = leftScrollRef.value;
+        if (!el) return;
+        el.scrollTo({ top: el.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
+    });
+};
+
+const scrollRightToBottom = (smooth = true) => {
+    nextTick(() => {
+        const el = rightScrollRef.value;
+        if (!el) return;
+        el.scrollTo({ top: el.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
+    });
+};
+
+watch(
+    cards,
+    () => {
+        if (isLeftAtBottom.value) scrollLeftToBottom(true);
+    },
+    { deep: true }
+);
+
+watch(
+    messages,
+    () => {
+        if (isRightAtBottom.value) scrollRightToBottom(true);
+    },
+    { deep: true }
+);
+
+watch(
+    () => agentStore.currentSessionId,
+    () => {
+        nextTick(() => {
+            scrollLeftToBottom(false);
+            scrollRightToBottom(false);
+        });
+    }
+);
+
+const toggleAgentDropdown = () => {
+    agentDropdownOpen.value = !agentDropdownOpen.value;
+};
+
+const selectAgent = async (value) => {
+    currentAgentId.value = value;
+    agentDropdownOpen.value = false;
+    try {
+        await dispatchArmory({ armoryType: 'agent', armoryId: value });
+    } catch (error) {
+        console.warn('绑定 Agent armory 失败', error);
+    }
+};
+
+const handleClickOutside = (event) => {
+    const target = event.target;
+    const inAgent = agentSelectRef.value && agentSelectRef.value.contains(target);
+    if (!inAgent) agentDropdownOpen.value = false;
+};
+
+const handleEscClose = (event) => {
+    if (event.key === 'Escape') {
+        agentDropdownOpen.value = false;
+    }
+};
+
+const handleKeydown = (event) => {
+    if (event.key === 'Enter' && event.metaKey) {
+        event.preventDefault();
+        sendMessage();
+        return;
+    }
+    if (event.key === 'Escape') {
+        agentDropdownOpen.value = false;
+    }
+};
+
+const openSettings = () => {
+    settingsForm.maxRetry = settingsStore.maxRetry;
+    settingsForm.maxRound = settingsStore.maxRound;
+    showSettings.value = true;
+};
+
+const saveSettings = () => {
+    settingsStore.updateSettings({
+        maxRetry: Number(settingsForm.maxRetry) || 2,
+        maxRound: Number(settingsForm.maxRound) || 2
+    });
+    showSettings.value = false;
+};
+
+const buildExecutePayload = (userMessage) => {
+    const session = agentStore.ensureSession();
+    return {
+        aiAgentId: currentAgentId.value,
+        userMessage,
+        sessionId: session.sessionId,
+        maxRound: settingsStore.maxRound,
+        maxRetry: settingsStore.maxRetry
+    };
+};
+
+const sendMessage = async () => {
+    const content = inputValue.value.trim();
+    if (!content || sending.value || !currentAgentId.value) return;
+    agentStore.stopCurrentRequest();
+    agentStore.setSending(true);
+    const controller = new AbortController();
+    agentStore.setAbortController(controller);
+    agentStore.addUserMessage(content);
+    inputValue.value = '';
+    scrollRightToBottom(true);
+    await runExecute(content, controller);
+};
+
+const runExecute = async (content, controller) => {
+    const assistantMessage = agentStore.addAssistantMessage({ pending: true, content: '' });
+    const events = [];
+    let closed = false;
+
+    const finish = () => {
+        if (closed) return;
+        closed = true;
+        const answerEvent = [...events].reverse().find((item) => item?.sectionType === 'answer');
+        const answer = answerEvent?.sectionContent || '';
+        agentStore.updateAssistantMessage(assistantMessage.id, {
+            content: answer || '（无内容）',
+            pending: false,
+            error: null
+        });
+        agentStore.setSending(false);
+        agentStore.setAbortController(null);
+        scrollRightToBottom(true);
+    };
+
+    const handleError = (error) => {
+        if (closed) return;
+        const friendly = normalizeError(error);
+        closed = true;
+        agentStore.updateAssistantMessage(assistantMessage.id, {
+            content: friendly.message || '请求失败',
+            pending: false,
+            error: friendly
+        });
+        agentStore.setSending(false);
+        agentStore.setAbortController(null);
+        scrollRightToBottom(true);
+    };
+
+    try {
+        await executeAgentStream({
+            ...buildExecutePayload(content),
+            signal: controller.signal,
+            onData: (payload) => {
+                if (!payload || typeof payload !== 'object') return;
+                const event = {
+                    clientType: payload.clientType || '',
+                    sectionType: payload.sectionType || '',
+                    sectionContent: payload.sectionContent || '',
+                    round: payload.round ?? null,
+                    step: payload.step ?? null,
+                    timestamp: payload.timestamp ?? null
+                };
+                events.push(event);
+                agentStore.addCard(event);
+                if (isLeftAtBottom.value) scrollLeftToBottom(true);
+            },
+            onError: handleError,
+            onDone: finish
+        });
+    } catch (error) {
+        handleError(error);
+    }
+};
+
+const handleStop = () => {
+    if (!sending.value) return;
+    agentStore.stopCurrentRequest();
+    const lastAssistant = [...messages.value].filter((item) => item.role === 'assistant').pop();
+    if (lastAssistant && lastAssistant.pending) {
+        agentStore.updateAssistantMessage(lastAssistant.id, {
+            pending: false,
+            error: { message: '已停止生成' }
+        });
+    }
+};
+
+const getContent = (message) => (message?.content ? message.content.toString() : '');
+
+onMounted(() => {
+    document.addEventListener('click', handleClickOutside);
+    window.addEventListener('keydown', handleEscClose);
+    scrollLeftToBottom(false);
+    scrollRightToBottom(false);
+    fetchAgents();
+});
+
+onBeforeUnmount(() => {
+    agentStore.stopCurrentRequest();
+    document.removeEventListener('click', handleClickOutside);
+    window.removeEventListener('keydown', handleEscClose);
+});
+</script>
+
+<template>
+    <section class="grid h-screen grid-rows-[var(--header-height)_1fr_auto_var(--footer-height)] bg-[var(--bg-page)]">
+        <header
+            class="sticky top-0 z-10 h-[var(--header-height)] border-b border-[rgba(15,23,42,0.06)] bg-[#eef1f6] backdrop-blur-[6px]"
+        >
+            <div
+                class="grid h-full w-full grid-cols-[auto_1fr_auto] items-center gap-[12px] pl-[24px] pr-[calc(24px+var(--scrollbar-w))] max-[720px]:pl-[8px] max-[720px]:pr-[calc(8px+var(--scrollbar-w))]"
+            >
+                <div class="flex items-center gap-[10px]">
+                    <div class="relative flex items-center gap-[6px] font-semibold">
+                        <label class="w-[54px] text-[12px] text-[var(--text-secondary)] text-right">AGENT</label>
+                        <div
+                            ref="agentSelectRef"
+                            class="inline-flex min-h-[36px] min-w-[200px] cursor-pointer items-center justify-between gap-[10px] rounded-[12px] border border-[var(--border-color)] bg-white px-[12px] py-[8px] shadow-[0_12px_30px_rgba(27,36,55,0.08)]"
+                            @click="toggleAgentDropdown"
+                        >
+                            <span class="font-bold text-[var(--text-primary)]">{{ currentAgentLabel }}</span>
+                            <span
+                                class="text-[var(--text-secondary)] transition-transform duration-200"
+                                :class="{ 'rotate-180': agentDropdownOpen }"
+                            >
+                                ⌄
+                            </span>
+                        </div>
+                        <div
+                            v-if="agentDropdownOpen"
+                            class="absolute left-0 top-[calc(100%+6px)] z-[15] w-full rounded-[12px] border border-[var(--border-color)] bg-white p-[6px] shadow-[0_18px_40px_rgba(15,23,42,0.12)] max-h-[240px] overflow-y-auto"
+                        >
+                            <div
+                                v-if="agentOptions.length === 0"
+                                class="flex items-center justify-between rounded-[10px] px-[12px] py-[10px] text-[var(--text-secondary)]"
+                            >
+                                <span>暂无 AGENT</span>
+                            </div>
+                            <div
+                                v-for="item in agentOptions"
+                                :key="item.value"
+                                class="flex cursor-pointer items-center justify-between rounded-[10px] px-[12px] py-[10px] text-[var(--text-primary)] transition-colors duration-150 hover:bg-[#f5f7fb]"
+                                :class="item.value === currentAgentId ? 'bg-[#e8f1ff] text-[var(--accent-color)] font-bold' : ''"
+                                @click.stop="selectAgent(item.value)"
+                            >
+                                <span>{{ item.label }}</span>
+                                <span v-if="item.value === currentAgentId" class="text-[13px]">✓</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div></div>
+
+                <div class="flex justify-end gap-[10px] max-[720px]:flex-wrap">
+                    <button
+                        class="inline-flex h-[36px] items-center justify-center rounded-[12px] border border-[var(--accent-color)] bg-[var(--accent-color)] px-[14px] py-[9px] font-bold leading-[1.1] text-white transition-all duration-200 hover:brightness-95"
+                        type="button"
+                        @click="openSettings"
+                    >
+                        回答设置
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="overflow-hidden bg-[var(--bg-page)]">
+            <div class="grid h-full grid-cols-[1fr_auto_1fr] gap-0">
+                <div
+                    ref="leftScrollRef"
+                    class="h-full overflow-y-auto py-[16px] pl-[24px] pr-[12px] scroll-smooth [scrollbar-gutter:auto]"
+                    @scroll="handleLeftScroll"
+                >
+                    <div class="flex flex-col gap-[12px]">
+                        <div
+                            v-for="card in cards"
+                            :key="card.id"
+                            class="rounded-[14px] border border-[var(--border-color)] bg-white px-[14px] py-[12px] shadow-[0_12px_30px_rgba(27,36,55,0.08)]"
+                        >
+                            <div class="mb-[8px] flex flex-wrap gap-[6px]">
+                                <span class="rounded-full border border-[rgba(47,124,246,0.3)] bg-[rgba(47,124,246,0.08)] px-[10px] py-[2px] text-[12px] font-semibold text-[var(--accent-color)]">
+                                    {{ card.clientType || '-' }}
+                                </span>
+                                <span class="rounded-full border border-[rgba(15,23,42,0.12)] bg-[rgba(15,23,42,0.04)] px-[10px] py-[2px] text-[12px] text-[var(--text-secondary)]">
+                                    {{ card.sectionType || '-' }}
+                                </span>
+                                <span
+                                    v-if="card.round !== null && card.round !== undefined"
+                                    class="rounded-full border border-[rgba(15,23,42,0.12)] bg-[rgba(15,23,42,0.04)] px-[10px] py-[2px] text-[12px] text-[var(--text-secondary)]"
+                                >
+                                    round: {{ card.round }}
+                                </span>
+                                <span
+                                    v-if="card.step !== null && card.step !== undefined"
+                                    class="rounded-full border border-[rgba(15,23,42,0.12)] bg-[rgba(15,23,42,0.04)] px-[10px] py-[2px] text-[12px] text-[var(--text-secondary)]"
+                                >
+                                    step: {{ card.step }}
+                                </span>
+                            </div>
+                            <div class="whitespace-pre-wrap text-[14px] leading-[1.6] text-[var(--text-primary)]">
+                                {{ card.sectionContent }}
+                            </div>
+                        </div>
+                        <div v-if="cards.length === 0" class="text-[13px] text-[var(--text-secondary)]">
+                            暂无执行记录
+                        </div>
+                    </div>
+                </div>
+
+                <div class="h-full w-[1px] border-l border-dashed border-[rgba(15,23,42,0.16)]"></div>
+
+                <div
+                    ref="rightScrollRef"
+                    class="h-full overflow-y-auto py-[16px] pl-[12px] pr-[24px] scroll-smooth [scrollbar-gutter:auto]"
+                    @scroll="handleRightScroll"
+                >
+                    <div class="flex w-full flex-col gap-[14px]">
+                        <div
+                            v-for="message in messages"
+                            :key="message.id"
+                            class="flex w-full"
+                            :class="message.role === 'user' ? 'justify-end' : 'justify-start'"
+                        >
+                            <div class="flex max-w-full flex-col gap-[6px]" :class="message.role === 'user' ? 'items-end' : 'items-start'">
+                                <div
+                                    class="relative w-fit max-w-[720px] rounded-[14px] px-[14px] py-[12px] shadow-[0_12px_30px_rgba(27,36,55,0.08)] border"
+                                    :class="[
+                                        message.role === 'user'
+                                            ? 'bg-[linear-gradient(135deg,#e5f4ff,#eaf4ff)] border-[#c5e2ff]'
+                                            : 'bg-white border-[var(--border-color)]',
+                                        message.pending ? 'border-dashed' : 'border-solid'
+                                    ]"
+                                >
+                                    <div
+                                        v-if="message.pending && message.role === 'assistant' && !message.content"
+                                        class="inline-flex items-center gap-[8px]"
+                                    >
+                                        <div class="inline-flex items-center gap-[4px]">
+                                            <span class="h-[6px] w-[6px] rounded-full bg-[#7b8190] animate-blink"></span>
+                                            <span class="h-[6px] w-[6px] rounded-full bg-[#7b8190] animate-blink [animation-delay:0.2s]"></span>
+                                            <span class="h-[6px] w-[6px] rounded-full bg-[#7b8190] animate-blink [animation-delay:0.4s]"></span>
+                                        </div>
+                                        <div class="text-[13px] text-[var(--text-secondary)]">执行中...</div>
+                                    </div>
+                                    <div
+                                        v-else-if="message.role === 'user' || message.pending"
+                                        class="whitespace-pre-wrap leading-[1.6]"
+                                        :class="message.error ? 'text-[#d14343]' : ''"
+                                    >
+                                        {{ getContent(message) }}
+                                    </div>
+                                    <div
+                                        v-else
+                                        class="markdown-body leading-[1.6] [&_pre]:overflow-auto [&_pre]:rounded-[10px] [&_pre]:bg-[#0f172a] [&_pre]:p-[12px] [&_pre]:text-[#e2e8f0] [&_code]:rounded-[6px] [&_code]:bg-[#f1f5f9] [&_code]:px-[6px] [&_code]:py-[2px] [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:rounded-none"
+                                        :class="message.error ? 'text-[#d14343]' : ''"
+                                        v-html="renderMarkdown(getContent(message))"
+                                    ></div>
+                                    <div
+                                        v-if="message.error"
+                                        class="mt-[6px] rounded-[8px] bg-[#fff3f3] px-[10px] py-[8px] text-[13px] text-[#d14343]"
+                                    >
+                                        {{ message.error.message || '请求失败' }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="messages.length === 0" class="text-[13px] text-[var(--text-secondary)]">
+                            暂无对话记录
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-[var(--bg-page)]">
+            <div class="mx-auto flex w-full max-w-[900px] flex-col gap-0 py-[12px] pl-[24px] pr-[calc(24px+var(--scrollbar-w))]">
+                <div class="flex flex-col gap-[10px] rounded-[16px] border border-[var(--border-color)] bg-white p-[12px] shadow-[0_12px_30px_rgba(27,36,55,0.08)]">
+                    <textarea
+                        v-model="inputValue"
+                        class="w-full resize-none rounded-[12px] border border-[var(--border-color)] bg-white px-[14px] py-[12px] text-[14px] shadow-[inset_0_1px_2px_rgba(15,23,42,0.06)] disabled:bg-[#f4f6fb]"
+                        rows="3"
+                        placeholder="输入问题，Command+Enter 发送"
+                        :disabled="sending"
+                        @keydown="handleKeydown"
+                    ></textarea>
+                    <div class="flex justify-end gap-[10px]">
+                        <button
+                            class="inline-flex h-[36px] items-center justify-center rounded-[12px] border border-[var(--border-color)] bg-white px-[14px] py-[9px] font-bold leading-[1.1] text-[var(--text-primary)] transition-all duration-200 hover:bg-[#f7f9fc] disabled:cursor-not-allowed disabled:opacity-70"
+                            type="button"
+                            :disabled="!sending"
+                            @click="handleStop"
+                        >
+                            停止生成
+                        </button>
+                        <button
+                            class="inline-flex h-[36px] items-center justify-center rounded-[12px] border border-[var(--accent-color)] bg-[var(--accent-color)] px-[14px] py-[9px] font-bold leading-[1.1] text-white transition-all duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-70"
+                            type="button"
+                            :disabled="sending || !inputValue.trim() || !currentAgentId"
+                            @click="sendMessage"
+                        >
+                            {{ sending ? '执行中…' : '发送' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="h-[var(--footer-height)] border-t border-[rgba(15,23,42,0.06)] bg-[#eef1f6] backdrop-blur-[6px]">
+            <div
+                class="mx-auto flex h-full w-full max-w-[900px] items-center justify-between pl-[24px] pr-[calc(24px+var(--scrollbar-w))] text-[13px] text-[var(--text-secondary)] max-[720px]:pl-[8px] max-[720px]:pr-[calc(8px+var(--scrollbar-w))]"
+            >
+                <span>© 2025 Dasi</span>
+                <span>内容为 AI 生成，仅供参考，请注意甄别</span>
+            </div>
+        </footer>
+
+        <div v-if="showSettings" class="fixed inset-0 z-[20] grid place-items-center bg-[rgba(0,0,0,0.35)] p-[20px]" @click.self="showSettings = false">
+            <div class="w-full max-w-[520px] rounded-[16px] border border-[var(--border-color)] bg-white shadow-[0_20px_50px_rgba(15,23,42,0.2)]">
+                <div class="flex items-center justify-between border-b border-[var(--border-color)] px-[18px] pt-[14px] pb-[10px]">
+                    <div class="text-[18px] font-bold">回答设置</div>
+                    <button class="text-[22px] text-[var(--text-secondary)]" type="button" @click="showSettings = false">×</button>
+                </div>
+                <div class="flex flex-col gap-[14px] px-[18px] py-[14px]">
+                    <div class="flex flex-col gap-[8px]">
+                        <label class="font-semibold text-[var(--text-primary)]">maxRetry（最多重试）</label>
+                        <div class="flex items-center gap-[12px]">
+                            <input
+                                v-model.number="settingsForm.maxRetry"
+                                type="range"
+                                min="1"
+                                max="3"
+                                step="1"
+                                class="w-full accent-[var(--accent-color)]"
+                            />
+                            <span class="w-[18px] text-[14px] font-semibold text-[var(--text-primary)]">{{ settingsForm.maxRetry }}</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-[8px]">
+                        <label class="font-semibold text-[var(--text-primary)]">maxRound（最大轮次）</label>
+                        <div class="flex items-center gap-[12px]">
+                            <input
+                                v-model.number="settingsForm.maxRound"
+                                type="range"
+                                min="1"
+                                max="3"
+                                step="1"
+                                class="w-full accent-[var(--accent-color)]"
+                            />
+                            <span class="w-[18px] text-[14px] font-semibold text-[var(--text-primary)]">{{ settingsForm.maxRound }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-[10px] border-t border-[var(--border-color)] px-[18px] pt-[12px] pb-[16px]">
+                    <button
+                        class="inline-flex items-center justify-center rounded-[12px] border border-[var(--border-color)] bg-white px-[14px] py-[9px] font-bold leading-[1.1] text-[var(--text-primary)] transition-all duration-200 hover:bg-[#f7f9fc]"
+                        type="button"
+                        @click="showSettings = false"
+                    >
+                        取消
+                    </button>
+                    <button
+                        class="inline-flex items-center justify-center rounded-[12px] border border-[var(--accent-color)] bg-[var(--accent-color)] px-[14px] py-[9px] font-bold leading-[1.1] text-white transition-all duration-200 hover:brightness-95"
+                        type="button"
+                        @click="saveSettings"
+                    >
+                        保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+</template>
