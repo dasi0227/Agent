@@ -33,7 +33,7 @@ public class ArmoryMcpNode extends AbstractArmoryNode {
         Set<AiMcpVO> aiMcpVOList = armoryContext.getValue(MCP.getType());
 
         if (aiMcpVOList == null || aiMcpVOList.isEmpty()) {
-            log.warn("【装配节点】ArmoryMcpNode：没有数据");
+            log.warn("【装配节点】ArmoryMcpNode：null");
             return router(armoryRequestEntity, armoryContext);
         }
 

@@ -18,6 +18,9 @@ import java.util.List;
 import static com.dasi.domain.ai.model.enumeration.AiClientType.*;
 import static com.dasi.domain.ai.model.enumeration.AiSectionType.PLANNER_STEP;
 import static com.dasi.domain.ai.model.enumeration.AiType.CLIENT;
+import static com.dasi.types.constant.ChatConstant.CHAT_MEMORY_CONVERSATION_ID_KEY;
+import static com.dasi.types.constant.ChatConstant.CHAT_MEMORY_RETRIEVE_SIZE_KEY;
+import static com.dasi.types.constant.ChatConstant.CHAT_MEMORY_RETRIEVE_SIZE_WORK;
 
 @Slf4j
 @Service(value = "plannerNode")
@@ -52,7 +55,7 @@ public class ExecutePlannerNode extends AbstractExecuteNode {
                     .prompt(plannerPrompt)
                     .advisors(a -> a
                             .param(CHAT_MEMORY_CONVERSATION_ID_KEY, executeRequestEntity.getSessionId())
-                            .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 4096))
+                            .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, CHAT_MEMORY_RETRIEVE_SIZE_WORK))
                     .call()
                     .content();
 

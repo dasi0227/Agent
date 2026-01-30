@@ -26,7 +26,7 @@ public class ArmoryApiNode extends AbstractArmoryNode {
         Set<AiApiVO> aiApiVOList = armoryContext.getValue(API.getType());
 
         if (aiApiVOList == null || aiApiVOList.isEmpty()) {
-            log.warn("【装配节点】ArmoryApiNode：没有数据");
+            log.warn("【装配节点】ArmoryApiNode：null");
             return router(armoryRequestEntity, armoryContext);
         }
 

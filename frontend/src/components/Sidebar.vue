@@ -2,6 +2,8 @@
 import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import logoImg from '../assets/logo.jpg';
+import chatIcon from '../assets/chat.svg';
+import workIcon from '../assets/work.svg';
 import { useAgentStore, useChatStore } from '../router/pinia';
 
 const router = useRouter();
@@ -27,15 +29,10 @@ const editAgentTitle = ref('');
 
 const showDeleteConfirm = ref(false);
 const deleteTarget = ref({ type: 'chat', id: '' });
+const showNewSessionPicker = ref(false);
 
 const handleNewSession = () => {
-    if (isAgentRoute.value) {
-        agentStore.createSession();
-        router.push('/work');
-        return;
-    }
-    chatStore.createChat();
-    router.push('/chat');
+    showNewSessionPicker.value = true;
 };
 
 const handleSelectChat = (chatId) => {
@@ -135,6 +132,21 @@ const handleDelete = () => {
     deleteTarget.value = { type: 'chat', id: '' };
     cancelRenameChat();
     cancelRenameAgent();
+};
+
+const closeNewSessionPicker = () => {
+    showNewSessionPicker.value = false;
+};
+
+const confirmNewSession = (type) => {
+    if (type === 'work') {
+        agentStore.createSession();
+        router.push('/work');
+    } else if (type === 'chat') {
+        chatStore.createChat();
+        router.push('/chat');
+    }
+    closeNewSessionPicker();
 };
 </script>
 
@@ -345,6 +357,33 @@ const handleDelete = () => {
                         @click="handleDelete"
                     >
                         确认删除
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div
+            v-if="showNewSessionPicker"
+            class="fixed inset-0 z-[30] grid place-items-center bg-[rgba(0,0,0,0.35)] p-[20px]"
+            @click.self="closeNewSessionPicker"
+        >
+            <div class="flex flex-col items-center gap-[32px] -translate-y-[18px]">
+                <div class="flex items-center gap-[32px]">
+                    <button
+                        class="flex h-[440px] w-[440px] flex-col items-center justify-center gap-[26px] rounded-[28px] border border-[rgba(0,0,0,0.08)] bg-[#f8fafc] text-[#0f172a] shadow-[0_24px_50px_rgba(15,23,42,0.18)] transition-all duration-200 hover:border-[#94a3b8] hover:bg-[#e2e8f0] hover:shadow-[0_30px_60px_rgba(15,23,42,0.22)]"
+                        type="button"
+                        @click="confirmNewSession('chat')"
+                    >
+                        <img :src="chatIcon" alt="Chat" class="h-[200px] w-[200px]" />
+                        <div class="text-[40px] font-semibold">Chat Client</div>
+                    </button>
+                    <button
+                        class="flex h-[440px] w-[440px] flex-col items-center justify-center gap-[26px] rounded-[28px] border border-[rgba(0,0,0,0.08)] bg-[#f8fafc] text-[#0f172a] shadow-[0_24px_50px_rgba(15,23,42,0.18)] transition-all duration-200 hover:border-[#94a3b8] hover:bg-[#e2e8f0] hover:shadow-[0_30px_60px_rgba(15,23,42,0.22)]"
+                        type="button"
+                        @click="confirmNewSession('work')"
+                    >
+                        <img :src="workIcon" alt="Work" class="h-[200px] w-[200px]" />
+                        <div class="text-[40px] font-semibold">Work Agent</div>
                     </button>
                 </div>
             </div>

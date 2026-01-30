@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.dasi.domain.ai.model.enumeration.AiType.CLIENT;
-import static com.dasi.types.constant.MessageConstant.CHAT_ERROR_RESPONSE;
+import static com.dasi.types.constant.ChatConstant.*;
 
 @Slf4j
 @RestController
@@ -75,7 +75,11 @@ public class AiController implements IAiApi {
         String clientId = chatRequest.getClientId();
         String userMessage = chatRequest.getUserMessage();
         String ragTag = chatRequest.getRagTag();
+        String sessionId = chatRequest.getSessionId();
         List<String> mcpIdList = chatRequest.getMcpIdList();
+        Double temperature = chatRequest.getTemperature();
+        Double presencePenalty = chatRequest.getPresencePenalty();
+        Integer maxCompletionTokens = chatRequest.getMaxCompletionTokens();
 
         log.info("【模型对话】完整对话开始：chatRequest={}", chatRequest);
 
@@ -84,12 +88,16 @@ public class AiController implements IAiApi {
             List<Message> messageList = augmentService.augmentRagMessage(userMessage, ragTag);
             SyncMcpToolCallbackProvider toolCallbackList = augmentService.augmentMcpTool(mcpIdList);
             ChatOptions chatOptions = OpenAiChatOptions.builder()
-                    .temperature(0.3)
-                    .presencePenalty(0.5)
-                    .maxCompletionTokens(3000)
+                    .temperature(temperature)
+                    .presencePenalty(presencePenalty)
+                    .maxCompletionTokens(maxCompletionTokens)
                     .build();
 
             String response = chatClient.prompt()
+                    .advisors(a -> a
+                            .param(CHAT_MEMORY_CONVERSATION_ID_KEY, sessionId)
+                            .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, CHAT_MEMORY_RETRIEVE_SIZE_CHAT)
+                    )
                     .messages(messageList)
                     .options(chatOptions)
                     .toolCallbacks(toolCallbackList)
@@ -112,7 +120,11 @@ public class AiController implements IAiApi {
         String clientId = chatRequest.getClientId();
         String userMessage = chatRequest.getUserMessage();
         String ragTag = chatRequest.getRagTag();
+        String sessionId = chatRequest.getSessionId();
         List<String> mcpIdList = chatRequest.getMcpIdList();
+        Double temperature = chatRequest.getTemperature();
+        Double presencePenalty = chatRequest.getPresencePenalty();
+        Integer maxCompletionTokens = chatRequest.getMaxCompletionTokens();
 
         log.info("【模型对话】流式对话开始：chatRequest={}", chatRequest);
 
@@ -121,14 +133,18 @@ public class AiController implements IAiApi {
             List<Message> messageList = augmentService.augmentRagMessage(userMessage, ragTag);
             SyncMcpToolCallbackProvider toolCallbackList = augmentService.augmentMcpTool(mcpIdList);
             ChatOptions chatOptions = OpenAiChatOptions.builder()
-                    .temperature(0.3)
-                    .presencePenalty(0.5)
-                    .maxCompletionTokens(3000)
+                    .temperature(temperature)
+                    .presencePenalty(presencePenalty)
+                    .maxCompletionTokens(maxCompletionTokens)
                     .build();
             return chatClient
                     .prompt()
-                    .options(chatOptions)
+                    .advisors(a -> a
+                            .param(CHAT_MEMORY_CONVERSATION_ID_KEY, sessionId)
+                            .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, CHAT_MEMORY_RETRIEVE_SIZE_CHAT)
+                    )
                     .messages(messageList)
+                    .options(chatOptions)
                     .toolCallbacks(toolCallbackList)
                     .stream()
                     .content()

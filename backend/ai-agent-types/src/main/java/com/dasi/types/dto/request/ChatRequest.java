@@ -20,6 +20,13 @@ public class ChatRequest {
     @NotBlank
     private String userMessage;
 
+    @NotBlank
+    private String sessionId;
+
+    private List<String> mcpIdList;
+
+    private String ragTag;
+
     @Builder.Default
     private Double temperature = 0.6;
 
@@ -28,9 +35,5 @@ public class ChatRequest {
 
     @Builder.Default
     private Integer maxCompletionTokens = 1024;
-
-    private List<String> mcpIdList;
-
-    private String ragTag;
 
 }

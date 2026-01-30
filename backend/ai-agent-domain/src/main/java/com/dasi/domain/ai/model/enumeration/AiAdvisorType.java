@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public enum AiAdvisorType {
 
-    CHAT_MEMORY("对话记忆", "ChatMemory"),
-    RAG_ANSWER("知识库回答", "RagAnswer")
+    MEMORY("对话记忆", "Memory"),
+    RAG("知识库回答", "Rag")
     ;
 
     private String name;

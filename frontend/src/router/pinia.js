@@ -97,10 +97,13 @@ export const useAgentSettingsStore = defineStore('agentSettings', {
     }
 });
 
+const createChatSessionId = () => `chat_session_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`;
+
 const createEmptyChat = () => ({
     id: `chat_${Date.now()}`,
     title: '新会话',
     createdAt: Date.now(),
+    sessionId: createChatSessionId(),
     messages: []
 });
 
@@ -110,17 +113,29 @@ const loadChatState = () => {
         if (raw) {
             const parsed = JSON.parse(raw);
             if (Array.isArray(parsed.chats)) {
+                const chats = parsed.chats.map((chat) => ({
+                    ...chat,
+                    sessionId: chat.sessionId || createChatSessionId()
+                }));
                 return {
-                    chats: parsed.chats,
-                    currentChatId: parsed.currentChatId || parsed.chats[0]?.id || null
+                    chats,
+                    currentChatId: chats.length > 0 ? parsed.currentChatId || chats[0]?.id || null : null
                 };
             }
             if (Array.isArray(parsed)) {
+                const chats = parsed.map((chat) => ({
+                    ...chat,
+                    sessionId: chat.sessionId || createChatSessionId()
+                }));
                 return {
-                    chats: parsed,
-                    currentChatId: parsed[0]?.id || null
+                    chats,
+                    currentChatId: chats.length > 0 ? chats[0]?.id || null : null
                 };
             }
+            return {
+                chats: [],
+                currentChatId: null
+            };
         }
     } catch (error) {
         console.warn('无法解析本地会话记录，使用新会话', error);
@@ -168,6 +183,10 @@ export const useChatStore = defineStore('chat', {
                 this.currentChatId = chat.id;
                 persistChatState(this.chats, this.currentChatId);
             }
+            if (this.currentChat && !this.currentChat.sessionId) {
+                this.currentChat.sessionId = createChatSessionId();
+                persistChatState(this.chats, this.currentChatId);
+            }
             return this.currentChat;
         },
         createChat() {
@@ -193,9 +212,7 @@ export const useChatStore = defineStore('chat', {
                 // Switch to the most recently created (assumed first because we unshift on create)
                 this.currentChatId = this.chats[0].id;
             } else {
-                const newChat = createEmptyChat();
-                this.chats.unshift(newChat);
-                this.currentChatId = newChat.id;
+                this.currentChatId = null;
             }
             persistChatState(this.chats, this.currentChatId);
         },
@@ -281,17 +298,33 @@ const loadAgentState = () => {
         if (raw) {
             const parsed = JSON.parse(raw);
             if (Array.isArray(parsed.sessions)) {
+                if (parsed.sessions.length === 0) {
+                    return {
+                        sessions: [],
+                        currentSessionId: null
+                    };
+                }
                 return {
                     sessions: parsed.sessions,
                     currentSessionId: parsed.currentSessionId || parsed.sessions[0]?.id || null
                 };
             }
             if (Array.isArray(parsed)) {
+                if (parsed.length === 0) {
+                    return {
+                        sessions: [],
+                        currentSessionId: null
+                    };
+                }
                 return {
                     sessions: parsed,
                     currentSessionId: parsed[0]?.id || null
                 };
             }
+            return {
+                sessions: [],
+                currentSessionId: null
+            };
         }
     } catch (error) {
         console.warn('无法解析 Agent 会话记录，使用新会话', error);
@@ -366,9 +399,7 @@ export const useAgentStore = defineStore('agent', {
             if (this.sessions.length > 0) {
                 this.currentSessionId = this.sessions[0].id;
             } else {
-                const newSession = createEmptyAgentSession();
-                this.sessions.unshift(newSession);
-                this.currentSessionId = newSession.id;
+                this.currentSessionId = null;
             }
             persistAgentState(this.sessions, this.currentSessionId);
         },

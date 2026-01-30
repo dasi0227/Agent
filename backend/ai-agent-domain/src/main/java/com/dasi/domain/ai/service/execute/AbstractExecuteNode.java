@@ -21,10 +21,6 @@ public abstract class AbstractExecuteNode extends AbstractMultiThreadStrategyRou
     @Resource
     protected IAiRepository aiRepository;
 
-    public static final String CHAT_MEMORY_CONVERSATION_ID_KEY = "chat_memory_conversation_id";
-
-    public static final String CHAT_MEMORY_RETRIEVE_SIZE_KEY = "chat_memory_retrieve_size";
-
     @Override
     protected void multiThread(ExecuteRequestEntity executeRequestEntity, ExecuteContext executeContext) {
         // 缺省的，可以让继承类不一定非要实现该方法
