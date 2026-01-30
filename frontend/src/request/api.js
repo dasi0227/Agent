@@ -4,17 +4,16 @@ import http, { streamFetch } from './request';
 const AI_BASE_PATH = '/api/v1/ai';
 const CHAT_COMPLETE_PATH = `${AI_BASE_PATH}/chat/complete`;
 const CHAT_STREAM_PATH = `${AI_BASE_PATH}/chat/stream`;
-const AGENT_EXECUTE_PATH = `${AI_BASE_PATH}/agent/execute`;
+const AGENT_EXECUTE_PATH = `${AI_BASE_PATH}/work/execute`;
 const CLIENT_ARMORY_PATH = `${AI_BASE_PATH}/armory`;
+const RAG_UPLOAD_PATH = `${AI_BASE_PATH}/rag/file`;
+const RAG_GIT_PATH = `${AI_BASE_PATH}/rag/git`;
 
 const QUERY_BASE_PATH = '/api/v1/query';
 const CHAT_CLIENTS_PATH = `${QUERY_BASE_PATH}/chat-client-list`;
 const CHAT_MCP_PATH = `${QUERY_BASE_PATH}/chat-mcp-list`;
 const AGENT_LIST_PATH = `${QUERY_BASE_PATH}/agent-list`;
 const RAG_TAGS_PATH = `${QUERY_BASE_PATH}/rag-tag-list`;
-
-const RAG_UPLOAD_PATH = `${AI_BASE_PATH}/rag/file`;
-const RAG_GIT_PATH = `${AI_BASE_PATH}/rag/git`;
 
 export const fetchComplete = async ({
     clientId,

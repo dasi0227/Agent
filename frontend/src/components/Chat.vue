@@ -891,7 +891,7 @@ const handleUpload = async () => {
             class="sticky top-0 z-10 h-[var(--header-height)] border-b border-[rgba(15,23,42,0.06)] bg-[#eef1f6] backdrop-blur-[6px]"
         >
             <div
-                class="grid h-full w-full grid-cols-[auto_1fr_auto] items-center gap-[12px] pl-[128px] pr-[128px] max-[720px]:pl-[8px] max-[720px]:pr-[calc(8px+var(--scrollbar-w))]"
+                class="flex h-full w-full items-center justify-between gap-[12px] pl-[24px] pr-[calc(24px+var(--scrollbar-w))] max-[720px]:pl-[8px] max-[720px]:pr-[calc(8px+var(--scrollbar-w))]"
             >
                 <div class="flex items-center gap-[10px]">
                     <div class="relative flex items-center gap-[14px] font-semibold">

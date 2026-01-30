@@ -150,6 +150,7 @@ watch(
 );
 
 const toggleAgentDropdown = () => {
+    if (agentOptions.value.length === 0) return;
     agentDropdownOpen.value = !agentDropdownOpen.value;
 };
 
@@ -159,7 +160,7 @@ const selectAgent = async (value) => {
     try {
         await dispatchArmory({ armoryType: 'agent', armoryId: value });
     } catch (error) {
-        console.warn('绑定 Agent armory 失败', error);
+        console.warn('绑定 Work armory 失败', error);
     }
 };
 
@@ -198,6 +199,14 @@ const saveSettings = () => {
         maxRound: Number(settingsForm.maxRound) || 2
     });
     showSettings.value = false;
+};
+
+const rangeStyle = (value) => {
+    const clamped = Math.min(3, Math.max(1, Number(value) || 1));
+    const percent = ((clamped - 1) / 2) * 100;
+    return {
+        background: `linear-gradient(90deg, var(--accent-color) ${percent}%, #d7e3f6 ${percent}%)`
+    };
 };
 
 const buildExecutePayload = (userMessage) => {
@@ -319,14 +328,15 @@ onBeforeUnmount(() => {
             class="sticky top-0 z-10 h-[var(--header-height)] border-b border-[rgba(15,23,42,0.06)] bg-[#eef1f6] backdrop-blur-[6px]"
         >
             <div
-                class="grid h-full w-full grid-cols-[auto_1fr_auto] items-center gap-[12px] pl-[24px] pr-[calc(24px+var(--scrollbar-w))] max-[720px]:pl-[8px] max-[720px]:pr-[calc(8px+var(--scrollbar-w))]"
+                class="flex h-full w-full items-center justify-between gap-[12px] pl-[24px] pr-[calc(24px+var(--scrollbar-w))] max-[720px]:pl-[8px] max-[720px]:pr-[calc(8px+var(--scrollbar-w))]"
             >
                 <div class="flex items-center gap-[10px]">
-                    <div class="relative flex items-center gap-[6px] font-semibold">
-                        <label class="w-[54px] text-[12px] text-[var(--text-secondary)] text-right">AGENT</label>
+                    <div class="relative flex items-center gap-[14px] font-semibold">
+                        <label class="w-[36px] text-[14px] text-[var(--text-secondary)] text-right">AGENT</label>
                         <div
                             ref="agentSelectRef"
                             class="inline-flex min-h-[36px] min-w-[200px] cursor-pointer items-center justify-between gap-[10px] rounded-[12px] border border-[var(--border-color)] bg-white px-[12px] py-[8px] shadow-[0_12px_30px_rgba(27,36,55,0.08)]"
+                            :class="agentOptions.length === 0 ? 'cursor-not-allowed opacity-70' : ''"
                             @click="toggleAgentDropdown"
                         >
                             <span class="font-bold text-[var(--text-primary)]">{{ currentAgentLabel }}</span>
@@ -338,15 +348,9 @@ onBeforeUnmount(() => {
                             </span>
                         </div>
                         <div
-                            v-if="agentDropdownOpen"
+                            v-if="agentDropdownOpen && agentOptions.length > 0"
                             class="absolute left-0 top-[calc(100%+6px)] z-[15] w-full rounded-[12px] border border-[var(--border-color)] bg-white p-[6px] shadow-[0_18px_40px_rgba(15,23,42,0.12)] max-h-[240px] overflow-y-auto"
                         >
-                            <div
-                                v-if="agentOptions.length === 0"
-                                class="flex items-center justify-between rounded-[10px] px-[12px] py-[10px] text-[var(--text-secondary)]"
-                            >
-                                <span>暂无 AGENT</span>
-                            </div>
                             <div
                                 v-for="item in agentOptions"
                                 :key="item.value"
@@ -360,8 +364,6 @@ onBeforeUnmount(() => {
                         </div>
                     </div>
                 </div>
-
-                <div></div>
 
                 <div class="flex justify-end gap-[10px] max-[720px]:flex-wrap">
                     <button
@@ -379,7 +381,7 @@ onBeforeUnmount(() => {
             <div class="grid h-full grid-cols-[1fr_auto_1fr] gap-0">
                 <div
                     ref="leftScrollRef"
-                    class="h-full overflow-y-auto py-[16px] pl-[24px] pr-[12px] scroll-smooth [scrollbar-gutter:auto]"
+                    class="h-full overflow-y-auto py-[16px] pl-[24px] pr-[12px] scroll-smooth [scrollbar-gutter:auto] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
                     @scroll="handleLeftScroll"
                 >
                     <div class="flex flex-col gap-[12px]">
@@ -392,18 +394,18 @@ onBeforeUnmount(() => {
                                 <span class="rounded-full border border-[rgba(47,124,246,0.3)] bg-[rgba(47,124,246,0.08)] px-[10px] py-[2px] text-[12px] font-semibold text-[var(--accent-color)]">
                                     {{ card.clientType || '-' }}
                                 </span>
-                                <span class="rounded-full border border-[rgba(15,23,42,0.12)] bg-[rgba(15,23,42,0.04)] px-[10px] py-[2px] text-[12px] text-[var(--text-secondary)]">
+                                <span class="rounded-full border border-[rgba(16,185,129,0.3)] bg-[rgba(16,185,129,0.12)] px-[10px] py-[2px] text-[12px] font-semibold text-[#10b981]">
                                     {{ card.sectionType || '-' }}
                                 </span>
                                 <span
                                     v-if="card.round !== null && card.round !== undefined"
-                                    class="rounded-full border border-[rgba(15,23,42,0.12)] bg-[rgba(15,23,42,0.04)] px-[10px] py-[2px] text-[12px] text-[var(--text-secondary)]"
+                                    class="rounded-full border border-[rgba(139,92,246,0.3)] bg-[rgba(139,92,246,0.12)] px-[10px] py-[2px] text-[12px] font-semibold text-[#8b5cf6]"
                                 >
                                     round: {{ card.round }}
                                 </span>
                                 <span
                                     v-if="card.step !== null && card.step !== undefined"
-                                    class="rounded-full border border-[rgba(15,23,42,0.12)] bg-[rgba(15,23,42,0.04)] px-[10px] py-[2px] text-[12px] text-[var(--text-secondary)]"
+                                    class="rounded-full border border-[rgba(245,158,11,0.35)] bg-[rgba(245,158,11,0.12)] px-[10px] py-[2px] text-[12px] font-semibold text-[#f59e0b]"
                                 >
                                     step: {{ card.step }}
                                 </span>
@@ -418,11 +420,11 @@ onBeforeUnmount(() => {
                     </div>
                 </div>
 
-                <div class="h-full w-[1px] border-l border-dashed border-[rgba(15,23,42,0.16)]"></div>
+                <div class="h-full w-[1px] border-l border-dashed border-[rgba(15,23,42,0.30)]"></div>
 
                 <div
                     ref="rightScrollRef"
-                    class="h-full overflow-y-auto py-[16px] pl-[12px] pr-[24px] scroll-smooth [scrollbar-gutter:auto]"
+                    class="h-full overflow-y-auto py-[16px] pl-[12px] pr-[24px] scroll-smooth [scrollbar-gutter:auto] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
                     @scroll="handleRightScroll"
                 >
                     <div class="flex w-full flex-col gap-[14px]">
@@ -534,30 +536,58 @@ onBeforeUnmount(() => {
                 <div class="flex flex-col gap-[14px] px-[18px] py-[14px]">
                     <div class="flex flex-col gap-[8px]">
                         <label class="font-semibold text-[var(--text-primary)]">maxRetry（最多重试）</label>
-                        <div class="flex items-center gap-[12px]">
+                        <div class="flex flex-col gap-[10px]">
                             <input
                                 v-model.number="settingsForm.maxRetry"
                                 type="range"
                                 min="1"
                                 max="3"
                                 step="1"
-                                class="w-full accent-[var(--accent-color)]"
+                                class="h-[6px] w-full cursor-pointer appearance-none rounded-full bg-[#d7e3f6] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-[14px] [&::-webkit-slider-thumb]:w-[14px] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[var(--accent-color)] [&::-webkit-slider-thumb]:shadow-[0_6px_14px_rgba(47,124,246,0.35)] [&::-moz-range-thumb]:h-[14px] [&::-moz-range-thumb]:w-[14px] [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[var(--accent-color)]"
+                                :style="rangeStyle(settingsForm.maxRetry)"
                             />
-                            <span class="w-[18px] text-[14px] font-semibold text-[var(--text-primary)]">{{ settingsForm.maxRetry }}</span>
+                            <div class="flex items-center justify-between px-[2px]">
+                                <div v-for="value in [1, 2, 3]" :key="`retry-dot-${value}`" class="flex flex-col items-center gap-[6px]">
+                                    <span
+                                        class="h-[8px] w-[8px] rounded-full"
+                                        :class="value === settingsForm.maxRetry ? 'bg-[var(--accent-color)]' : 'bg-[#cbd5e1]'"
+                                    ></span>
+                                    <span
+                                        class="text-[12px]"
+                                        :class="settingsForm.maxRetry === value ? 'text-[var(--accent-color)] font-semibold' : 'text-[var(--text-secondary)]'"
+                                    >
+                                        {{ value }}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="flex flex-col gap-[8px]">
                         <label class="font-semibold text-[var(--text-primary)]">maxRound（最大轮次）</label>
-                        <div class="flex items-center gap-[12px]">
+                        <div class="flex flex-col gap-[10px]">
                             <input
                                 v-model.number="settingsForm.maxRound"
                                 type="range"
                                 min="1"
                                 max="3"
                                 step="1"
-                                class="w-full accent-[var(--accent-color)]"
+                                class="h-[6px] w-full cursor-pointer appearance-none rounded-full bg-[#d7e3f6] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-[14px] [&::-webkit-slider-thumb]:w-[14px] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[var(--accent-color)] [&::-webkit-slider-thumb]:shadow-[0_6px_14px_rgba(47,124,246,0.35)] [&::-moz-range-thumb]:h-[14px] [&::-moz-range-thumb]:w-[14px] [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[var(--accent-color)]"
+                                :style="rangeStyle(settingsForm.maxRound)"
                             />
-                            <span class="w-[18px] text-[14px] font-semibold text-[var(--text-primary)]">{{ settingsForm.maxRound }}</span>
+                            <div class="flex items-center justify-between px-[2px]">
+                                <div v-for="value in [1, 2, 3]" :key="`round-dot-${value}`" class="flex flex-col items-center gap-[6px]">
+                                    <span
+                                        class="h-[8px] w-[8px] rounded-full"
+                                        :class="value === settingsForm.maxRound ? 'bg-[var(--accent-color)]' : 'bg-[#cbd5e1]'"
+                                    ></span>
+                                    <span
+                                        class="text-[12px]"
+                                        :class="settingsForm.maxRound === value ? 'text-[var(--accent-color)] font-semibold' : 'text-[var(--text-secondary)]'"
+                                    >
+                                        {{ value }}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

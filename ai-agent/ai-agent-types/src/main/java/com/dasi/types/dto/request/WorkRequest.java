@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ExecuteRequest {
+public class WorkRequest {
 
     @NotBlank
     private String aiAgentId;

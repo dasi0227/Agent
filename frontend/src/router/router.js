@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Chat from '../components/Chat.vue';
-import Agent from '../components/Agent.vue';
+import Work from '../components/Work.vue';
 
 const routes = [
     {
@@ -14,8 +14,12 @@ const routes = [
     },
     {
         path: '/agent',
-        name: 'agent',
-        component: Agent
+        redirect: '/work'
+    },
+    {
+        path: '/work',
+        name: 'work',
+        component: Work
     }
 ];
 

@@ -1,24 +1,58 @@
 <script setup>
 import { computed, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import logoImg from '../assets/logo.jpg';
-import { useChatStore } from '../router/pinia';
+import { useAgentStore, useChatStore } from '../router/pinia';
+
+const router = useRouter();
+const route = useRoute();
 
 const chatStore = useChatStore();
+const agentStore = useAgentStore();
 
 const chats = computed(() => chatStore.chats);
 const currentChatId = computed(() => chatStore.currentChatId);
-const editingId = ref(null);
-const editTitle = ref('');
-const showDeleteConfirm = ref(false);
-const targetChatId = ref('');
+const agentSessions = computed(() => agentStore.sessions);
+const currentAgentSessionId = computed(() => agentStore.currentSessionId);
+const isAgentRoute = computed(() => route.path.startsWith('/work'));
+const isChatRoute = computed(() => route.path.startsWith('/chat'));
 
-const handleNewChat = () => {
+const showChatList = ref(true);
+const showAgentList = ref(true);
+
+const editingChatId = ref(null);
+const editChatTitle = ref('');
+const editingAgentId = ref(null);
+const editAgentTitle = ref('');
+
+const showDeleteConfirm = ref(false);
+const deleteTarget = ref({ type: 'chat', id: '' });
+
+const handleNewSession = () => {
+    if (isAgentRoute.value) {
+        agentStore.createSession();
+        router.push('/work');
+        return;
+    }
     chatStore.createChat();
+    router.push('/chat');
 };
 
 const handleSelectChat = (chatId) => {
+    if (route.path !== '/chat') {
+        router.push('/chat');
+    }
     if (chatId !== currentChatId.value) {
         chatStore.switchChat(chatId);
+    }
+};
+
+const handleSelectAgent = (sessionId) => {
+    if (route.path !== '/work') {
+        router.push('/work');
+    }
+    if (sessionId !== currentAgentSessionId.value) {
+        agentStore.switchSession(sessionId);
     }
 };
 
@@ -34,38 +68,73 @@ const formatDate = (timestamp) => {
     });
 };
 
-const startRename = (chat) => {
-    editingId.value = chat.id;
-    editTitle.value = chat.title || '';
+const formatTitle = (title) => {
+    const raw = title || '未命名会话';
+    if (raw.length > 7) {
+        return `${raw.slice(0, 7)}..`;
+    }
+    return raw;
 };
 
-const saveRename = (chat) => {
-    if (!chat || editingId.value !== chat.id) {
+const startRenameChat = (chat) => {
+    editingChatId.value = chat.id;
+    editChatTitle.value = chat.title || '';
+};
+
+const saveRenameChat = (chat) => {
+    if (!chat || editingChatId.value !== chat.id) {
         return;
     }
-    const title = editTitle.value.trim() || '未命名会话';
+    const title = editChatTitle.value.trim() || '未命名会话';
     chatStore.renameChat(chat.id, title);
-    editingId.value = null;
-    editTitle.value = '';
+    editingChatId.value = null;
+    editChatTitle.value = '';
 };
 
-const cancelRename = () => {
-    editingId.value = null;
-    editTitle.value = '';
+const cancelRenameChat = () => {
+    editingChatId.value = null;
+    editChatTitle.value = '';
 };
 
-const openDeleteConfirm = (chatId) => {
-    targetChatId.value = chatId;
+const startRenameAgent = (session) => {
+    editingAgentId.value = session.id;
+    editAgentTitle.value = session.title || '';
+};
+
+const saveRenameAgent = (session) => {
+    if (!session || editingAgentId.value !== session.id) {
+        return;
+    }
+    const title = editAgentTitle.value.trim() || '未命名会话';
+    agentStore.renameSession(session.id, title);
+    editingAgentId.value = null;
+    editAgentTitle.value = '';
+};
+
+const cancelRenameAgent = () => {
+    editingAgentId.value = null;
+    editAgentTitle.value = '';
+};
+
+const openDeleteConfirm = (type, id) => {
+    deleteTarget.value = { type, id };
     showDeleteConfirm.value = true;
 };
 
 const handleDelete = () => {
-    if (targetChatId.value) {
-        chatStore.deleteChat(targetChatId.value);
+    if (!deleteTarget.value?.id) {
+        showDeleteConfirm.value = false;
+        return;
+    }
+    if (deleteTarget.value.type === 'agent') {
+        agentStore.deleteSession(deleteTarget.value.id);
+    } else {
+        chatStore.deleteChat(deleteTarget.value.id);
     }
     showDeleteConfirm.value = false;
-    targetChatId.value = '';
-    cancelRename();
+    deleteTarget.value = { type: 'chat', id: '' };
+    cancelRenameChat();
+    cancelRenameAgent();
 };
 </script>
 
@@ -81,72 +150,153 @@ const handleDelete = () => {
                     <img :src="logoImg" alt="Logo" class="h-full w-full object-cover block" />
                 </div>
                 <div>
-                    <div class="text-[16px] font-bold">Dasi Chat</div>
-                    <div class="text-[12px] text-[rgba(231,236,244,0.7)]">RAG · MCP · AGENT</div>
+                    <div class="text-[16px] font-bold">Dasi AI</div>
+                    <div class="text-[12px] text-[rgba(231,236,244,0.7)]">RAG · MCP · OPENAI</div>
                 </div>
             </div>
         </div>
 
         <div
-            class="mb-[12px] mt-[8px] flex flex-1 flex-col gap-[8px] overflow-y-auto pr-[4px] [scrollbar-gutter:stable_both-edges] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            class="mb-[12px] mt-[8px] flex flex-1 flex-col gap-[12px] overflow-y-auto pr-[4px] [scrollbar-gutter:stable_both-edges] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
         >
             <button
                 class="mb-[6px] flex w-full justify-center rounded-[12px] border border-[rgba(255,255,255,0.15)] bg-[rgba(255,255,255,0.12)] px-[14px] py-[10px] font-semibold text-[#e7ecf4] transition-all duration-200 hover:bg-[rgba(255,255,255,0.16)]"
                 type="button"
-                @click="handleNewChat"
+                @click="handleNewSession"
             >
                 ＋ 新建会话
             </button>
-            <div
-                v-for="chat in chats"
-                :key="chat.id"
-                :class="[
-                    'w-full rounded-[12px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] px-[12px] py-[10px] transition-all duration-200 hover:border-[rgba(111,125,255,0.8)] hover:bg-[rgba(255,255,255,0.07)]',
-                    chat.id === currentChatId
-                        ? 'border-[#7bc8ff] bg-[linear-gradient(135deg,rgba(111,125,255,0.25),rgba(83,197,255,0.1))] shadow-[0_10px_20px_rgba(0,0,0,0.12)]'
-                        : ''
-                ]"
-            >
-                <div class="flex items-center justify-between gap-[10px]" @click="handleSelectChat(chat.id)">
-                    <div class="min-w-0 flex flex-col">
-                        <template v-if="editingId === chat.id">
-                            <input
-                                v-model="editTitle"
-                                class="w-full rounded-[8px] border border-[rgba(255,255,255,0.2)] bg-[rgba(255,255,255,0.08)] px-[8px] py-[6px] font-semibold text-[#e7ecf4]"
-                                :placeholder="chat.title || '未命名会话'"
-                                @keydown.enter.prevent="saveRename(chat)"
-                                @keydown.esc.prevent="cancelRename"
-                                @blur="saveRename(chat)"
-                                @click.stop
-                            />
-                        </template>
-                        <template v-else>
-                            <div class="mb-[4px] font-semibold">{{ chat.title || '未命名会话' }}</div>
-                        </template>
-                        <div class="text-[12px] text-[rgba(231,236,244,0.7)]">{{ formatDate(chat.createdAt) }}</div>
+
+            <div class="flex flex-col gap-[8px]">
+                <button
+                    class="flex w-full items-center px-[4px] py-[6px] text-[20px] font-bold text-[#f8fafc] transition-all duration-200 hover:text-[#7bc8ff]"
+                    :class="isChatRoute ? 'text-[#7bc8ff]' : ''"
+                    type="button"
+                    @click="showChatList = !showChatList"
+                >
+                    Chat 会话
+                </button>
+                <div v-if="showChatList" class="flex flex-col gap-[8px]">
+                    <div
+                        v-for="chat in chats"
+                        :key="chat.id"
+                        :class="[
+                            'w-full rounded-[12px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] px-[12px] py-[10px] transition-all duration-200 hover:border-[rgba(111,125,255,0.8)] hover:bg-[rgba(255,255,255,0.07)]',
+                            chat.id === currentChatId && route.path.startsWith('/chat')
+                                ? 'border-[#7bc8ff] bg-[linear-gradient(135deg,rgba(111,125,255,0.25),rgba(83,197,255,0.1))] shadow-[0_10px_20px_rgba(0,0,0,0.12)]'
+                                : ''
+                        ]"
+                    >
+                        <div class="flex items-center justify-between gap-[10px]" @click="handleSelectChat(chat.id)">
+                            <div class="min-w-0 flex flex-col">
+                                <template v-if="editingChatId === chat.id">
+                                    <input
+                                        v-model="editChatTitle"
+                                        class="w-full rounded-[8px] border border-[rgba(255,255,255,0.2)] bg-[rgba(255,255,255,0.08)] px-[8px] py-[6px] font-semibold text-[#e7ecf4]"
+                                        :placeholder="chat.title || '未命名会话'"
+                                        @keydown.enter.prevent="saveRenameChat(chat)"
+                                        @keydown.esc.prevent="cancelRenameChat"
+                                        @blur="saveRenameChat(chat)"
+                                        @click.stop
+                                    />
+                                </template>
+                                <template v-else>
+                                    <div class="mb-[4px] max-w-[140px] truncate font-semibold" :title="chat.title || '未命名会话'">
+                                        {{ formatTitle(chat.title) }}
+                                    </div>
+                                </template>
+                                <div class="text-[12px] text-[rgba(231,236,244,0.7)]">{{ formatDate(chat.createdAt) }}</div>
+                            </div>
+                            <div class="flex shrink-0 gap-[6px]" @click.stop>
+                                <button
+                                    class="grid h-[30px] w-[30px] place-items-center rounded-full border-[2px] border-[#f59e0b] text-[13px] text-[#f59e0b] transition-all duration-200 hover:bg-[rgba(245,158,11,0.1)]"
+                                    type="button"
+                                    title="重命名"
+                                    @click.stop="startRenameChat(chat)"
+                                >
+                                    ✎
+                                </button>
+                                <button
+                                    class="grid h-[30px] w-[30px] place-items-center rounded-full border-[2px] border-[#ef4444] text-[13px] text-[#ef4444] transition-all duration-200 hover:bg-[rgba(239,68,68,0.12)]"
+                                    type="button"
+                                    title="删除"
+                                    @click.stop="openDeleteConfirm('chat', chat.id)"
+                                >
+                                    🗑
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="flex shrink-0 gap-[6px]" @click.stop>
-                        <button
-                            class="grid h-[30px] w-[30px] place-items-center rounded-full border-[2px] border-[#f59e0b] text-[13px] text-[#f59e0b] transition-all duration-200 hover:bg-[rgba(245,158,11,0.1)]"
-                            type="button"
-                            title="重命名"
-                            @click.stop="startRename(chat)"
-                        >
-                            ✎
-                        </button>
-                        <button
-                            class="grid h-[30px] w-[30px] place-items-center rounded-full border-[2px] border-[#ef4444] text-[13px] text-[#ef4444] transition-all duration-200 hover:bg-[rgba(239,68,68,0.12)]"
-                            type="button"
-                            title="删除"
-                            @click.stop="openDeleteConfirm(chat.id)"
-                        >
-                            🗑
-                        </button>
+                    <div v-if="chats.length === 0" class="mt-[4px] text-[13px] text-[rgba(231,236,244,0.7)]">
+                        暂无会话
                     </div>
                 </div>
             </div>
-            <div v-if="chats.length === 0" class="mt-[12px] text-[13px] text-[rgba(231,236,244,0.7)]">
-                暂无会话，点击上方按钮开始
+
+            <div class="flex flex-col gap-[8px]">
+                <button
+                    class="flex w-full items-center px-[4px] py-[6px] text-[20px] font-bold text-[#f8fafc] transition-all duration-200 hover:text-[#7bc8ff]"
+                    :class="isAgentRoute ? 'text-[#7bc8ff]' : ''"
+                    type="button"
+                    @click="showAgentList = !showAgentList"
+                >
+                    Work 会话
+                </button>
+                <div v-if="showAgentList" class="flex flex-col gap-[8px]">
+                    <div
+                        v-for="session in agentSessions"
+                        :key="session.id"
+                        :class="[
+                            'w-full rounded-[12px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] px-[12px] py-[10px] transition-all duration-200 hover:border-[rgba(111,125,255,0.8)] hover:bg-[rgba(255,255,255,0.07)]',
+                            session.id === currentAgentSessionId && route.path.startsWith('/work')
+                                ? 'border-[#7bc8ff] bg-[linear-gradient(135deg,rgba(111,125,255,0.25),rgba(83,197,255,0.1))] shadow-[0_10px_20px_rgba(0,0,0,0.12)]'
+                                : ''
+                        ]"
+                    >
+                        <div class="flex items-center justify-between gap-[10px]" @click="handleSelectAgent(session.id)">
+                            <div class="min-w-0 flex flex-col">
+                                <template v-if="editingAgentId === session.id">
+                                    <input
+                                        v-model="editAgentTitle"
+                                        class="w-full rounded-[8px] border border-[rgba(255,255,255,0.2)] bg-[rgba(255,255,255,0.08)] px-[8px] py-[6px] font-semibold text-[#e7ecf4]"
+                                        :placeholder="session.title || '未命名会话'"
+                                        @keydown.enter.prevent="saveRenameAgent(session)"
+                                        @keydown.esc.prevent="cancelRenameAgent"
+                                        @blur="saveRenameAgent(session)"
+                                        @click.stop
+                                    />
+                                </template>
+                                <template v-else>
+                                    <div class="mb-[4px] max-w-[140px] truncate font-semibold" :title="session.title || '未命名会话'">
+                                        {{ formatTitle(session.title) }}
+                                    </div>
+                                </template>
+                                <div class="text-[12px] text-[rgba(231,236,244,0.7)]">{{ formatDate(session.createdAt) }}</div>
+                            </div>
+                            <div class="flex shrink-0 gap-[6px]" @click.stop>
+                                <button
+                                    class="grid h-[30px] w-[30px] place-items-center rounded-full border-[2px] border-[#f59e0b] text-[13px] text-[#f59e0b] transition-all duration-200 hover:bg-[rgba(245,158,11,0.1)]"
+                                    type="button"
+                                    title="重命名"
+                                    @click.stop="startRenameAgent(session)"
+                                >
+                                    ✎
+                                </button>
+                                <button
+                                    class="grid h-[30px] w-[30px] place-items-center rounded-full border-[2px] border-[#ef4444] text-[13px] text-[#ef4444] transition-all duration-200 hover:bg-[rgba(239,68,68,0.12)]"
+                                    type="button"
+                                    title="删除"
+                                    @click.stop="openDeleteConfirm('agent', session.id)"
+                                >
+                                    🗑
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-if="agentSessions.length === 0" class="mt-[4px] text-[13px] text-[rgba(231,236,244,0.7)]">
+                        暂无会话
+                    </div>
+                </div>
             </div>
         </div>
 
