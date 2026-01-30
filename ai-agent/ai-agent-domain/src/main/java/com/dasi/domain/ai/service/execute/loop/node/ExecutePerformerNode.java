@@ -67,8 +67,6 @@ public class ExecutePerformerNode extends AbstractExecuteNode {
             performerJson = performerObject.toJSONString();
         }
 
-        log.info("\n=========================================== Performer ===========================================\n{}", performerJson);
-
         // 发送客户端结果
         parsePerformerResponse(executeContext, performerObject, executeRequestEntity.getSessionId());
 

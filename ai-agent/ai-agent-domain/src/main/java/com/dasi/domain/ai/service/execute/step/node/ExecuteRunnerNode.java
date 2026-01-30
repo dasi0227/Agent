@@ -99,8 +99,6 @@ public class ExecuteRunnerNode extends AbstractExecuteNode {
                     }
                 }
 
-                log.info("\n=========================================== Runner ===========================================\n{}", runnerJson);
-
                 // 发送客户端结果
                 runnerList.add(runnerJson);
                 executeContext.setStep(++step);

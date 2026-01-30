@@ -63,8 +63,6 @@ public class ExecuteSummarizerNode extends AbstractExecuteNode {
             summarizerJson = summarizerObject.toJSONString();
         }
 
-        log.info("\n=========================================== Summarizer ===========================================\n{}", summarizerJson);
-
         // 发送客户端结果
         parseSummarizerResponse(executeContext, summarizerObject, executeRequestEntity.getSessionId());
 
