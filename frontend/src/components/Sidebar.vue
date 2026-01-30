@@ -221,7 +221,7 @@ const confirmNewSession = (type) => {
                             </div>
                             <div class="flex shrink-0 gap-[6px]" @click.stop>
                                 <button
-                                    class="grid h-[30px] w-[30px] place-items-center rounded-full border-[2px] border-[#f59e0b] text-[13px] text-[#f59e0b] transition-all duration-200 hover:bg-[rgba(245,158,11,0.1)]"
+                                    class="grid h-[30px] w-[30px] place-items-center rounded-full border border-[rgba(255,255,255,0.25)] text-[13px] text-[#e7ecf4] transition-all duration-200 hover:border-[#7bc8ff] hover:text-[#7bc8ff] hover:bg-[rgba(123,200,255,0.12)]"
                                     type="button"
                                     title="重命名"
                                     @click.stop="startRenameChat(chat)"
@@ -229,7 +229,7 @@ const confirmNewSession = (type) => {
                                     ✎
                                 </button>
                                 <button
-                                    class="grid h-[30px] w-[30px] place-items-center rounded-full border-[2px] border-[#ef4444] text-[13px] text-[#ef4444] transition-all duration-200 hover:bg-[rgba(239,68,68,0.12)]"
+                                    class="grid h-[30px] w-[30px] place-items-center rounded-full border border-[rgba(255,255,255,0.25)] text-[13px] text-[#e7ecf4] transition-all duration-200 hover:border-[#ef4444] hover:text-[#ef4444] hover:bg-[rgba(239,68,68,0.16)]"
                                     type="button"
                                     title="删除"
                                     @click.stop="openDeleteConfirm('chat', chat.id)"
@@ -287,7 +287,7 @@ const confirmNewSession = (type) => {
                             </div>
                             <div class="flex shrink-0 gap-[6px]" @click.stop>
                                 <button
-                                    class="grid h-[30px] w-[30px] place-items-center rounded-full border-[2px] border-[#f59e0b] text-[13px] text-[#f59e0b] transition-all duration-200 hover:bg-[rgba(245,158,11,0.1)]"
+                                    class="grid h-[30px] w-[30px] place-items-center rounded-full border border-[rgba(255,255,255,0.25)] text-[13px] text-[#e7ecf4] transition-all duration-200 hover:border-[#7bc8ff] hover:text-[#7bc8ff] hover:bg-[rgba(123,200,255,0.12)]"
                                     type="button"
                                     title="重命名"
                                     @click.stop="startRenameAgent(session)"
@@ -295,7 +295,7 @@ const confirmNewSession = (type) => {
                                     ✎
                                 </button>
                                 <button
-                                    class="grid h-[30px] w-[30px] place-items-center rounded-full border-[2px] border-[#ef4444] text-[13px] text-[#ef4444] transition-all duration-200 hover:bg-[rgba(239,68,68,0.12)]"
+                                    class="grid h-[30px] w-[30px] place-items-center rounded-full border border-[rgba(255,255,255,0.25)] text-[13px] text-[#e7ecf4] transition-all duration-200 hover:border-[#ef4444] hover:text-[#ef4444] hover:bg-[rgba(239,68,68,0.16)]"
                                     type="button"
                                     title="删除"
                                     @click.stop="openDeleteConfirm('agent', session.id)"

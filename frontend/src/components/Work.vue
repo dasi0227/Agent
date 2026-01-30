@@ -399,10 +399,10 @@ onBeforeUnmount(() => {
             <div class="grid h-full grid-cols-[1fr_auto_1fr] gap-0">
                 <div
                     ref="leftScrollRef"
-                    class="h-full overflow-y-auto py-[16px] pl-[24px] pr-[12px] scroll-smooth [scrollbar-gutter:auto] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                    class="flex h-full flex-col overflow-y-auto py-[16px] pl-[24px] pr-[12px] scroll-smooth [scrollbar-gutter:auto] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
                     @scroll="handleLeftScroll"
                 >
-                    <div class="flex flex-col gap-[12px]">
+                    <div class="flex flex-1 flex-col gap-[12px]">
                         <div
                             v-for="card in cards"
                             :key="card.id"
@@ -432,7 +432,7 @@ onBeforeUnmount(() => {
                                 {{ getCardContent(card) }}
                             </div>
                         </div>
-                        <div v-if="cards.length === 0" class="text-[13px] text-[var(--text-secondary)]">
+                        <div v-if="cards.length === 0" class="flex flex-1 items-center justify-center text-[13px] text-[var(--text-secondary)]">
                             暂无执行记录
                         </div>
                     </div>
@@ -442,10 +442,10 @@ onBeforeUnmount(() => {
 
                 <div
                     ref="rightScrollRef"
-                    class="h-full overflow-y-auto py-[16px] pl-[12px] pr-[24px] scroll-smooth [scrollbar-gutter:auto] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                    class="flex h-full flex-col overflow-y-auto py-[16px] pl-[12px] pr-[24px] scroll-smooth [scrollbar-gutter:auto] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
                     @scroll="handleRightScroll"
                 >
-                    <div class="flex w-full flex-col gap-[14px]">
+                    <div class="flex w-full flex-1 flex-col gap-[14px]">
                         <div
                             v-for="message in messages"
                             :key="message.id"
@@ -491,7 +491,7 @@ onBeforeUnmount(() => {
                                 </div>
                             </div>
                         </div>
-                        <div v-if="messages.length === 0" class="text-[13px] text-[var(--text-secondary)]">
+                        <div v-if="messages.length === 0" class="flex flex-1 items-center justify-center text-[13px] text-[var(--text-secondary)]">
                             暂无对话记录
                         </div>
                     </div>
