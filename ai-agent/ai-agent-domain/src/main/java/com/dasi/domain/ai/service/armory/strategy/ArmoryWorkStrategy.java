@@ -13,11 +13,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static com.dasi.domain.ai.model.enumeration.AiArmoryType.ARMORY_AGENT;
+import static com.dasi.domain.ai.model.enumeration.AiArmoryType.ARMORY_WORK;
 
 @Slf4j
-@Service("armoryAgentStrategy")
-public class ArmoryAgentStrategy implements IArmoryStrategy {
+@Service("armoryWorkStrategy")
+public class ArmoryWorkStrategy implements IArmoryStrategy {
 
     @Resource
     private IAiRepository aiRepository;
@@ -62,7 +62,7 @@ public class ArmoryAgentStrategy implements IArmoryStrategy {
 
     @Override
     public String getType() {
-        return ARMORY_AGENT.getType();
+        return ARMORY_WORK.getType();
     }
 
 }

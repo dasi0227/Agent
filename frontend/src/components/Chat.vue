@@ -1050,9 +1050,11 @@ const handleUpload = async () => {
                                 <div
                                     class="relative w-fit max-w-[720px] rounded-[14px] px-[14px] py-[12px] shadow-[0_12px_30px_rgba(27,36,55,0.08)] border"
                                     :class="[
-                                        message.role === 'user'
-                                            ? 'bg-[linear-gradient(135deg,#e5f4ff,#eaf4ff)] border-[#c5e2ff]'
-                                            : 'bg-white border-[var(--border-color)]',
+                                        message.error
+                                            ? 'bg-[linear-gradient(135deg,#ffe4e4,#ffd6d6)] border-[#f3b6b6] text-[#b91c1c]'
+                                            : message.role === 'user'
+                                                ? 'bg-[linear-gradient(135deg,#e5f4ff,#eaf4ff)] border-[#c5e2ff]'
+                                                : 'bg-white border-[var(--border-color)]',
                                         message.pending ? 'border-dashed' : 'border-solid'
                                     ]"
                                 >
@@ -1080,12 +1082,6 @@ const handleUpload = async () => {
                                         :class="message.error ? 'text-[#d14343]' : ''"
                                         v-html="renderMarkdown(getContent(message))"
                                     ></div>
-                                    <div
-                                        v-if="message.error"
-                                        class="mt-[6px] rounded-[8px] bg-[#fff3f3] px-[10px] py-[8px] text-[13px] text-[#d14343]"
-                                    >
-                                        {{ message.error.message || '请求失败' }}
-                                    </div>
                                 </div>
                                 <div
                                     class="relative flex items-center gap-[6px]"

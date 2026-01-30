@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public enum AiArmoryType {
 
-    ARMORY_AGENT("AI 智能体", "agent"),
+    ARMORY_WORK("AI 智能体", "work"),
     ARMORY_CHAT("AI 对话", "chat")
     ;
 

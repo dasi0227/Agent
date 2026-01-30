@@ -74,8 +74,6 @@ public class ExecuteSupervisorNode extends AbstractExecuteNode {
             supervisorJson = supervisorObject.toJSONString();
         }
 
-        log.info("\n=========================================== Supervisor ===========================================\n{}", supervisorJson);
-
         // 发送客户端结果
         parseSupervisorResponse(executeContext, supervisorObject, executeRequestEntity.getSessionId());
 

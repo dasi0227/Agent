@@ -2,7 +2,7 @@ package com.dasi.trigger.http;
 
 import com.dasi.api.IQueryApi;
 import com.dasi.domain.query.service.IQueryService;
-import com.dasi.types.dto.response.AgentResponse;
+import com.dasi.types.dto.response.WorkAgentResponse;
 import com.dasi.types.dto.response.ChatClientResponse;
 import com.dasi.types.dto.response.ChatMcpResponse;
 import com.dasi.types.dto.result.Result;
@@ -45,9 +45,9 @@ public class QueryController implements IQueryApi {
 
     @GetMapping("/agent-list")
     @Override
-    public Result<List<AgentResponse>> queryAgentResponseList() {
-        List<AgentResponse> agentResponseList = queryService.queryAgentResponseList();
-        return Result.success(agentResponseList);
+    public Result<List<WorkAgentResponse>> queryAgentResponseList() {
+        List<WorkAgentResponse> workAgentResponseList = queryService.queryAgentResponseList();
+        return Result.success(workAgentResponseList);
     }
 
 }

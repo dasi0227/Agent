@@ -71,8 +71,6 @@ public class ExecuteAnalyzerNode extends AbstractExecuteNode {
             analyzerJson = analyzerObject.toJSONString();
         }
 
-        log.info("\n=========================================== Analyzer ===========================================\n{}", analyzerJson);
-
         // 发送客户端结果
         parseAnalyzerResponse(executeContext, analyzerObject, executeRequestEntity.getSessionId());
 

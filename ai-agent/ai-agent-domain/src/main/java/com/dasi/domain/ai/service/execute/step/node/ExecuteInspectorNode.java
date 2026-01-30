@@ -62,8 +62,6 @@ public class ExecuteInspectorNode extends AbstractExecuteNode {
             inspectorJson = inspectorArray.toJSONString();
         }
 
-        log.info("\n=========================================== Inspector ===========================================\n{}", inspectorJson);
-
         // 发送客户端结果
         parseInspectorResponse(executeContext, inspectorArray, executeRequestEntity.getSessionId());
 

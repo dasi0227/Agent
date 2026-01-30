@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Set;
 
-import static com.dasi.domain.ai.model.enumeration.AiArmoryType.ARMORY_AGENT;
+import static com.dasi.domain.ai.model.enumeration.AiArmoryType.ARMORY_WORK;
 import static com.dasi.domain.ai.model.enumeration.AiArmoryType.ARMORY_CHAT;
 import static com.dasi.domain.ai.model.enumeration.AiType.PROMPT;
 
@@ -48,7 +48,7 @@ public class ArmoryConfig implements ApplicationListener<ApplicationReadyEvent> 
     public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
         loadPrompt();
         if (Boolean.TRUE.equals(armoryProperties.getEnable())) {
-            autoArmory(armoryProperties.getAgentIdList(), ARMORY_AGENT.getType());
+            autoArmory(armoryProperties.getAgentIdList(), ARMORY_WORK.getType());
             autoArmory(armoryProperties.getClientIdList(), ARMORY_CHAT.getType());
         }
     }
