@@ -1,8 +1,8 @@
 package com.dasi.config;
 
 import com.dasi.properties.HikariDataSourceProperties;
-import com.dasi.properties.MySQLDataSourceProperties;
-import com.dasi.properties.PostgreSQLDataSourceProperties;
+import com.dasi.properties.MySQLProperties;
+import com.dasi.properties.PostgreSQLProperties;
 import com.dasi.properties.SQLDataSourceProperties;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -23,7 +23,7 @@ import javax.sql.DataSource;
 
 @Slf4j
 @Configuration
-@EnableConfigurationProperties({MySQLDataSourceProperties.class, PostgreSQLDataSourceProperties.class, HikariDataSourceProperties.class})
+@EnableConfigurationProperties({MySQLProperties.class, PostgreSQLProperties.class, HikariDataSourceProperties.class})
 public class DataSourceConfig {
 
     /**
@@ -31,7 +31,7 @@ public class DataSourceConfig {
      */
     @Bean(name = "mysqlDataSource")
     @Primary
-    public DataSource mysqlDataSource(MySQLDataSourceProperties mysqlProps, HikariDataSourceProperties hikariProps) {
+    public DataSource mysqlDataSource(MySQLProperties mysqlProps, HikariDataSourceProperties hikariProps) {
         HikariConfig hikariConfig = buildHikariConfig(mysqlProps, hikariProps);
         return new HikariDataSource(hikariConfig);
     }
@@ -40,7 +40,7 @@ public class DataSourceConfig {
      * PostgreSQL DataSource
      */
     @Bean(name = "postgresqlDataSource")
-    public DataSource postgresqlDataSource(PostgreSQLDataSourceProperties postgresqlProps, HikariDataSourceProperties hikariProps) {
+    public DataSource postgresqlDataSource(PostgreSQLProperties postgresqlProps, HikariDataSourceProperties hikariProps) {
         HikariConfig hikariConfig = buildHikariConfig(postgresqlProps, hikariProps);
         return new HikariDataSource(hikariConfig);
     }

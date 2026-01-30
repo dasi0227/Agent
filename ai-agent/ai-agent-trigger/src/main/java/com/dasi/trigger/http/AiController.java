@@ -4,9 +4,11 @@ import com.dasi.api.IAiApi;
 import com.dasi.domain.ai.model.entity.ExecuteRequestEntity;
 import com.dasi.domain.ai.service.augment.IAugmentService;
 import com.dasi.domain.ai.service.dispatch.IDispatchService;
+import com.dasi.domain.ai.service.rag.IRagService;
 import com.dasi.types.dto.request.ArmoryRequest;
 import com.dasi.types.dto.request.ChatRequest;
 import com.dasi.types.dto.request.ExecuteRequest;
+import com.dasi.types.dto.request.UploadGitRepoRequest;
 import com.dasi.types.dto.result.Result;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -17,7 +19,9 @@ import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import reactor.core.publisher.Flux;
 
@@ -34,13 +38,16 @@ import static com.dasi.types.constant.MessageConstant.CHAT_ERROR_RESPONSE;
 public class AiController implements IAiApi {
 
     @Resource
-    private IDispatchService dispatchService;
-
-    @Resource
     private ApplicationContext applicationContext;
 
     @Resource
+    private IDispatchService dispatchService;
+
+    @Resource
     private IAugmentService augmentService;
+
+    @Resource
+    private IRagService ragService;
 
     @Override
     @PostMapping(value = "/agent/execute", produces = "text/event-stream")
@@ -150,5 +157,19 @@ public class AiController implements IAiApi {
         return Result.success();
     }
 
+
+    @PostMapping(value = "/rag/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Override
+    public Result<Void> uploadFile(@RequestPart("ragTag") String ragTag, @RequestPart("fileList") List<MultipartFile> fileList) {
+        ragService.uploadTextFile(ragTag, fileList);
+        return Result.success();
+    }
+
+    @PostMapping("/rag/git")
+    @Override
+    public Result<Void> uploadGitRepo(@RequestBody UploadGitRepoRequest uploadGitRepoRequest) {
+        ragService.uploadGitRepo(uploadGitRepoRequest);
+        return Result.success();
+    }
 
 }

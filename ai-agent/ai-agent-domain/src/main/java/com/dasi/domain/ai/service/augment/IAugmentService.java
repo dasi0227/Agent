@@ -9,8 +9,6 @@ public interface IAugmentService {
 
     List<Message> augmentRagMessage(String userMessage, String ragTag);
 
-    void uploadRagFile();
-
     SyncMcpToolCallbackProvider augmentMcpTool(List<String> mcpIdList);
 
 }
