@@ -15,10 +15,8 @@ import org.springframework.ai.reader.tika.TikaDocumentReader;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.ai.vectorstore.pgvector.PgVectorStore;
 import org.springframework.core.io.PathResource;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -43,9 +41,12 @@ public class RagController implements IRagService {
     @Resource
     private PgVectorStore pgVectorStore;
 
-    @PostMapping("/file")
+    @PostMapping(value = "/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Override
-    public Result<Void> uploadFile(@RequestParam String ragTag, @RequestParam List<MultipartFile> fileList) {
+    public Result<Void> uploadFile(
+            @RequestPart("ragTag") String ragTag,
+            @RequestPart("fileList") List<MultipartFile> fileList) {
+
         for (MultipartFile file : fileList) {
             TikaDocumentReader documentReader = new TikaDocumentReader(file.getResource());
             List<Document> documentList = documentReader.get();

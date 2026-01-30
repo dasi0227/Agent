@@ -151,10 +151,4 @@ public class AugmentService implements IAugmentService {
         return new SyncMcpToolCallbackProvider(mcpSyncClientList.toArray(new McpSyncClient[0]));
     }
 
-
-    @Override
-    public void uploadRagFile() {
-
-    }
-
 }

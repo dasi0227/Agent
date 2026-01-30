@@ -13,8 +13,8 @@ const CHAT_MCP_PATH = `${QUERY_BASE_PATH}/chat-mcp-list`;
 const AGENT_LIST_PATH = `${QUERY_BASE_PATH}/agent-list`;
 const RAG_TAGS_PATH = `${QUERY_BASE_PATH}/rag-tag-list`;
 
-const RAG_UPLOAD_PATH = '/api/v1/rag/file';
-const RAG_GIT_PATH = '/api/v1/rag/git';
+const RAG_UPLOAD_PATH = `${AI_BASE_PATH}/rag/file`;
+const RAG_GIT_PATH = `${AI_BASE_PATH}/rag/git`;
 
 export const fetchComplete = async ({
     clientId,
@@ -153,9 +153,9 @@ export const uploadRagFile = async ({ ragTag, file }) => {
 };
 
 export const uploadRagGit = async ({ repo, username, password }) => {
-    const formData = new FormData();
-    formData.append('repo', repo);
-    formData.append('username', username);
-    formData.append('password', password);
-    return http.post(RAG_GIT_PATH, formData);
+    return http.post(RAG_GIT_PATH, {
+        repo,
+        username,
+        password
+    });
 };

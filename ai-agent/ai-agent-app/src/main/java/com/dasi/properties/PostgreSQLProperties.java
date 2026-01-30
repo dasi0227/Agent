@@ -3,4 +3,4 @@ package com.dasi.properties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "datasource.postgresql", ignoreInvalidFields = true)
-public class PostgreSQLDataSourceProperties extends SQLDataSourceProperties {}
+public class PostgreSQLProperties extends SQLDataSourceProperties {}

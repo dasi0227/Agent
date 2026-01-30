@@ -800,8 +800,11 @@ const formatSize = (size) => {
 const handleFileChange = (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    if (!file.name.toLowerCase().endsWith('.txt')) {
-        uploadForm.error = '仅支持 .txt 文件';
+    const lowerName = file.name.toLowerCase();
+    const isTxt = lowerName.endsWith('.txt');
+    const isMd = lowerName.endsWith('.md');
+    if (!isTxt && !isMd) {
+        uploadForm.error = '仅支持 .txt 或 .md 文件';
         uploadForm.file = null;
         uploadForm.fileName = '';
         uploadForm.fileSize = '';
@@ -829,7 +832,7 @@ const handleUpload = async () => {
             return;
         }
         if (!uploadForm.file) {
-            uploadForm.error = '请选择 txt 文件';
+            uploadForm.error = '请选择 txt 或 md 文件';
             return;
         }
         uploadForm.uploading = true;
@@ -1258,7 +1261,7 @@ const handleUpload = async () => {
                     <div class="flex gap-[10px]">
                         <button
                             class="rounded-[10px] border border-[var(--border-color)] bg-[#f7f9fc] px-[12px] py-[8px] font-semibold text-[var(--text-secondary)]"
-                            :class="uploadForm.mode === 'file' ? 'border-[#c7dcff] bg-[#e8f1ff] text-[var(--accent-color)]' : ''"
+                            :class="uploadForm.mode === 'file' ? 'border-[#4f8cff] bg-[#e8f1ff] text-[var(--accent-color)] shadow-[0_10px_24px_rgba(47,124,246,0.2)]' : ''"
                             type="button"
                             @click="uploadForm.mode = 'file'"
                         >
@@ -1266,7 +1269,7 @@ const handleUpload = async () => {
                         </button>
                         <button
                             class="rounded-[10px] border border-[var(--border-color)] bg-[#f7f9fc] px-[12px] py-[8px] font-semibold text-[var(--text-secondary)]"
-                            :class="uploadForm.mode === 'git' ? 'border-[#c7dcff] bg-[#e8f1ff] text-[var(--accent-color)]' : ''"
+                            :class="uploadForm.mode === 'git' ? 'border-[#4f8cff] bg-[#e8f1ff] text-[var(--accent-color)] shadow-[0_10px_24px_rgba(47,124,246,0.2)]' : ''"
                             type="button"
                             @click="uploadForm.mode = 'git'"
                         >
@@ -1319,11 +1322,11 @@ const handleUpload = async () => {
                     </div>
 
                     <div v-if="uploadForm.mode === 'file'" class="flex flex-col gap-[8px]">
-                        <label class="font-semibold text-[var(--text-primary)]">上传文件（仅 .txt）</label>
+                        <label class="font-semibold text-[var(--text-primary)]">上传文件（仅 .txt / .md）</label>
                         <label class="block cursor-pointer rounded-[12px] border border-dashed border-[var(--border-color)] bg-[#f8fafc] px-[12px] py-[14px]">
                             <input
                                 type="file"
-                                accept=".txt,text/plain"
+                                accept=".txt,.md,text/plain,text/markdown"
                                 class="hidden"
                                 @change="handleFileChange"
                             />
@@ -1331,7 +1334,7 @@ const handleUpload = async () => {
                                 <span class="name">{{ uploadForm.fileName }}</span>
                                 <span class="text-[13px] text-[var(--text-secondary)]">{{ uploadForm.fileSize }}</span>
                             </div>
-                            <div v-else class="text-[14px] text-[var(--text-secondary)]">点击选择或拖拽 TXT 文件</div>
+                            <div v-else class="text-[14px] text-[var(--text-secondary)]">点击选择或拖拽 TXT / MD 文件</div>
                         </label>
                     </div>
 
