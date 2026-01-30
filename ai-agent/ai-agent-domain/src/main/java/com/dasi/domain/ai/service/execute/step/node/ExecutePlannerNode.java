@@ -69,8 +69,6 @@ public class ExecutePlannerNode extends AbstractExecuteNode {
             plannerJson = plannerArray.toJSONString();
         }
 
-        log.info("\n=========================================== Planner ===========================================\n{}", plannerJson);
-
         // 发送客户端结果
         parsePlannerResponse(executeContext, plannerArray, executeRequestEntity.getSessionId());
 
