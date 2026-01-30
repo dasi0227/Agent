@@ -33,7 +33,7 @@ public class ArmoryClientNode extends AbstractArmoryNode {
         Set<AiClientVO> aiClientVOList = armoryContext.getValue(CLIENT.getType());
 
         if (aiClientVOList == null || aiClientVOList.isEmpty()) {
-            log.warn("【装配节点】ArmoryClientNode：没有数据");
+            log.warn("【装配节点】ArmoryClientNode：null");
             return router(armoryRequestEntity, armoryContext);
         }
 

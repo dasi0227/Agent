@@ -35,7 +35,7 @@ public class ArmoryAdvisorNode extends AbstractArmoryNode {
         Set<AiAdvisorVO> aiAdvisorVOList = armoryContext.getValue(ADVISOR.getType());
 
         if (aiAdvisorVOList == null || aiAdvisorVOList.isEmpty()) {
-            log.warn("【装配节点】ArmoryAdvisorNode：没有数据");
+            log.warn("【装配节点】ArmoryAdvisorNode：null");
             return router(armoryRequestEntity, armoryContext);
         }
 
@@ -43,7 +43,7 @@ public class ArmoryAdvisorNode extends AbstractArmoryNode {
             Advisor advisor = null;
 
             switch (AiAdvisorType.fromCode(aiAdvisorVO.getAdvisorType())) {
-                case RAG_ANSWER -> {
+                case RAG -> {
                     AiAdvisorVO.RagAnswer ragAnswer = aiAdvisorVO.getRagAnswer();
                     SearchRequest searchRequest = SearchRequest.builder()
                             .topK(ragAnswer.getTopK())
@@ -51,7 +51,7 @@ public class ArmoryAdvisorNode extends AbstractArmoryNode {
                             .build();
                     advisor = new RagAnswerAdvisor(vectorStore, searchRequest);
                 }
-                case CHAT_MEMORY -> {
+                case MEMORY -> {
                     AiAdvisorVO.ChatMemory chatMemory = aiAdvisorVO.getChatMemory();
                     MessageWindowChatMemory messageWindowChatMemory = MessageWindowChatMemory.builder()
                             .maxMessages(chatMemory.getMaxMessages())

@@ -193,8 +193,8 @@ public class AiRepository implements IAiRepository {
                 if (advisorParam != null && !advisorParam.trim().isEmpty()) {
                     try {
                         switch (AiAdvisorType.fromCode(aiAdvisor.getAdvisorType())) {
-                            case CHAT_MEMORY -> chatMemory = JSON.parseObject(advisorParam, AiAdvisorVO.ChatMemory.class);
-                            case RAG_ANSWER -> ragAnswer = JSON.parseObject(advisorParam, AiAdvisorVO.RagAnswer.class);
+                            case MEMORY -> chatMemory = JSON.parseObject(advisorParam, AiAdvisorVO.ChatMemory.class);
+                            case RAG -> ragAnswer = JSON.parseObject(advisorParam, AiAdvisorVO.RagAnswer.class);
                         }
                     } catch (Exception e) {
                         log.error("【查询数据】失败：{}", e.getMessage());

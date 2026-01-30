@@ -29,7 +29,7 @@ public class ArmoryModelNode extends AbstractArmoryNode {
         Set<AiModelVO> aiModelVOList = armoryContext.getValue(MODEL.getType());
 
         if (aiModelVOList == null || aiModelVOList.isEmpty()) {
-            log.warn("【装配节点】ArmoryModelNode：没有数据");
+            log.warn("【装配节点】ArmoryModelNode：null");
             return router(armoryRequestEntity, armoryContext);
         }
 

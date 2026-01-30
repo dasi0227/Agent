@@ -23,6 +23,7 @@ export const fetchComplete = async ({
     temperature,
     presencePenalty,
     maxCompletionTokens,
+    sessionId,
     signal
 }) => {
     return http.post(
@@ -34,6 +35,7 @@ export const fetchComplete = async ({
             presencePenalty,
             maxCompletionTokens,
             mcpIdList,
+            sessionId,
             ragTag
         },
         { signal }
@@ -48,6 +50,7 @@ export const fetchStream = async ({
     temperature,
     presencePenalty,
     maxCompletionTokens,
+    sessionId,
     onData,
     onError,
     onDone,
@@ -63,6 +66,7 @@ export const fetchStream = async ({
             presencePenalty,
             maxCompletionTokens,
             mcpIdList,
+            sessionId,
             ragTag
         },
         onData,

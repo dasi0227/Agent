@@ -16,6 +16,9 @@ import static com.dasi.domain.ai.model.enumeration.AiClientType.INSPECTOR;
 import static com.dasi.domain.ai.model.enumeration.AiClientType.PLANNER;
 import static com.dasi.domain.ai.model.enumeration.AiSectionType.INSPECTOR_MCP;
 import static com.dasi.domain.ai.model.enumeration.AiType.CLIENT;
+import static com.dasi.types.constant.ChatConstant.CHAT_MEMORY_CONVERSATION_ID_KEY;
+import static com.dasi.types.constant.ChatConstant.CHAT_MEMORY_RETRIEVE_SIZE_KEY;
+import static com.dasi.types.constant.ChatConstant.CHAT_MEMORY_RETRIEVE_SIZE_NONE;
 
 @Slf4j
 @Service(value = "inspectorNode")
@@ -45,7 +48,7 @@ public class ExecuteInspectorNode extends AbstractExecuteNode {
                     .prompt(inspectorPrompt)
                     .advisors(a -> a
                             .param(CHAT_MEMORY_CONVERSATION_ID_KEY, executeRequestEntity.getSessionId())
-                            .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 0))
+                            .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, CHAT_MEMORY_RETRIEVE_SIZE_NONE))
                     .call()
                     .content();
 

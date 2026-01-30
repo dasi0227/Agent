@@ -133,6 +133,7 @@ const currentRagTag = computed({
 });
 
 const messages = computed(() => chatStore.currentMessages);
+const currentChatSessionId = computed(() => chatStore.currentChat?.sessionId || '');
 const sending = computed(() => chatStore.sending);
 const hasMessages = computed(() => messages.value.length > 0);
 
@@ -451,6 +452,7 @@ const buildChatRequestPayload = (userMessage) => ({
     presencePenalty: settingsStore.presencePenalty ?? undefined,
     maxCompletionTokens: settingsStore.maxCompletionTokens ?? undefined,
     mcpIdList: selectedMcpIds.value.length ? [...selectedMcpIds.value] : [],
+    sessionId: currentChatSessionId.value,
     ragTag: currentRagTag.value
 });
 
@@ -895,7 +897,7 @@ const handleUpload = async () => {
             >
                 <div class="flex items-center gap-[10px]">
                     <div class="relative flex items-center gap-[14px] font-semibold">
-                        <label class="w-[36px] text-[14px] text-[var(--text-secondary)] text-right">MODEL</label>
+                        <label class="w-[36px] text-[14px] text-[var(--text-secondary)] text-right">CLIENT</label>
                         <div
                             ref="modelSelectRef"
                             class="inline-flex min-h-[36px] min-w-[200px] cursor-pointer items-center justify-between gap-[10px] rounded-[12px] border border-[var(--border-color)] bg-white px-[12px] py-[8px] shadow-[0_12px_30px_rgba(27,36,55,0.08)]"
