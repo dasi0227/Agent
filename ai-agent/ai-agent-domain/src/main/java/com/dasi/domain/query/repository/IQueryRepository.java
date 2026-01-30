@@ -1,7 +1,7 @@
 package com.dasi.domain.query.repository;
 
 import com.dasi.domain.query.model.vo.AiMcpVO;
-import com.dasi.types.dto.response.AgentResponse;
+import com.dasi.types.dto.response.WorkAgentResponse;
 import com.dasi.types.dto.response.ChatClientResponse;
 import com.dasi.types.dto.response.ChatMcpResponse;
 
@@ -17,5 +17,5 @@ public interface IQueryRepository {
 
     List<AiMcpVO> queryAiMcpVOListByMcpIdList(List<String> mcpIdList);
 
-    List<AgentResponse> queryAgentResponseList();
+    List<WorkAgentResponse> queryAgentResponseList();
 }

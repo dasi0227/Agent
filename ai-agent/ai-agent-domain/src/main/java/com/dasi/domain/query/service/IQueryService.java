@@ -1,6 +1,6 @@
 package com.dasi.domain.query.service;
 
-import com.dasi.types.dto.response.AgentResponse;
+import com.dasi.types.dto.response.WorkAgentResponse;
 import com.dasi.types.dto.response.ChatClientResponse;
 import com.dasi.types.dto.response.ChatMcpResponse;
 
@@ -14,6 +14,6 @@ public interface IQueryService {
 
     List<String> queryRagTagList();
 
-    List<AgentResponse> queryAgentResponseList();
+    List<WorkAgentResponse> queryAgentResponseList();
 
 }

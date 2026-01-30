@@ -77,7 +77,7 @@ public class AiController implements IAiApi {
         String ragTag = chatRequest.getRagTag();
         List<String> mcpIdList = chatRequest.getMcpIdList();
 
-        log.info("【模型对话】完整对话：chatRequest={}", chatRequest);
+        log.info("【模型对话】完整对话开始：chatRequest={}", chatRequest);
 
         try {
             ChatClient chatClient = applicationContext.getBean(CLIENT.getBeanName(clientId), ChatClient.class);
@@ -114,7 +114,7 @@ public class AiController implements IAiApi {
         String ragTag = chatRequest.getRagTag();
         List<String> mcpIdList = chatRequest.getMcpIdList();
 
-        log.info("【模型对话】流式对话：chatRequest={}", chatRequest);
+        log.info("【模型对话】流式对话开始：chatRequest={}", chatRequest);
 
         try {
             ChatClient chatClient = applicationContext.getBean(CLIENT.getBeanName(clientId), ChatClient.class);

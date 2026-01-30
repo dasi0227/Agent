@@ -49,7 +49,7 @@ public class DispatchService implements IDispatchService {
         }
 
         String armoryKey = ARMORY_CACHE_PREFIX + armoryType;
-        Set<String> cacheSet = redisService.getSetValue(armoryKey);
+        Set<String> cacheSet = redisService.getSetMembers(armoryKey, String.class);
 
         if (cacheSet != null && !cacheSet.isEmpty()) {
             armoryIdSet.removeAll(cacheSet);
@@ -66,6 +66,7 @@ public class DispatchService implements IDispatchService {
         ArmoryContext armoryContext = new ArmoryContext();
 
         try {
+            log.info("========================================================================================");
             armoryStrategy.armory(armoryRequestEntity, armoryContext);
             armoryRootNode.apply(armoryRequestEntity, armoryContext);
         } catch (Exception e) {
@@ -73,7 +74,7 @@ public class DispatchService implements IDispatchService {
             throw new RuntimeException("装配数据失败：" + armoryType);
         }
 
-        redisService.addSetValue(armoryKey, armoryIdSet);
+        redisService.addSetMembers(armoryKey, armoryIdSet);
     }
 
     @Override
@@ -87,7 +88,7 @@ public class DispatchService implements IDispatchService {
 
         threadPoolExecutor.execute(() -> {
             try {
-                log.info("【Agent 执行】开始");
+                log.info("========================================================================================");
                 executeStrategy.execute(executeRequestEntity, sseEmitter);
             } catch (Exception e) {
                 try {
@@ -99,7 +100,6 @@ public class DispatchService implements IDispatchService {
                     log.error("【Agent 执行】error={}", e.getMessage(), e);
                 }
             } finally {
-                log.info("【Agent 执行】结束");
                 sseEmitter.complete();
             }
         });

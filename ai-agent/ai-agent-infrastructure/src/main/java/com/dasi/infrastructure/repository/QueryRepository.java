@@ -12,7 +12,7 @@ import com.dasi.infrastructure.persistent.po.AiAgent;
 import com.dasi.infrastructure.persistent.po.AiClient;
 import com.dasi.infrastructure.persistent.po.AiMcp;
 import com.dasi.domain.util.IRedisService;
-import com.dasi.types.dto.response.AgentResponse;
+import com.dasi.types.dto.response.WorkAgentResponse;
 import com.dasi.types.dto.response.ChatClientResponse;
 import com.dasi.types.dto.response.ChatMcpResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -56,7 +56,7 @@ public class QueryRepository implements IQueryRepository {
     @Override
     public List<ChatClientResponse> queryChatClientResponseList() {
 
-        List<ChatClientResponse> chatClientResponseList = redisService.getStringValue(CHAT_CLIENT_LIST_KEY);
+        List<ChatClientResponse> chatClientResponseList = redisService.getList(LIST_CHAT_CLIENT_KEY, ChatClientResponse.class);
         if (chatClientResponseList != null) {
             return chatClientResponseList;
         }
@@ -64,7 +64,7 @@ public class QueryRepository implements IQueryRepository {
         List<AiClient> aiClientList = aiClientDao.queryChatClientList();
         if (aiClientList == null || aiClientList.isEmpty()) {
             chatClientResponseList = new ArrayList<>();
-            redisService.setStringValue(CHAT_CLIENT_LIST_KEY, chatClientResponseList);
+            redisService.setList(LIST_CHAT_CLIENT_KEY, chatClientResponseList);
             return chatClientResponseList;
         }
 
@@ -76,7 +76,7 @@ public class QueryRepository implements IQueryRepository {
                         .build())
                 .toList();
 
-        redisService.setStringValue(CHAT_CLIENT_LIST_KEY, chatClientResponseList);
+        redisService.setList(LIST_CHAT_CLIENT_KEY, chatClientResponseList);
         return chatClientResponseList;
     }
 
@@ -84,7 +84,7 @@ public class QueryRepository implements IQueryRepository {
     @Override
     public List<ChatMcpResponse> queryChatMcpResponseList() {
 
-        List<ChatMcpResponse> chatMcpResponseList = redisService.getStringValue(CHAT_MCP_LIST_KEY);
+        List<ChatMcpResponse> chatMcpResponseList = redisService.getList(LIST_CHAT_MCP_KEY, ChatMcpResponse.class);
         if (chatMcpResponseList != null) {
             return chatMcpResponseList;
         }
@@ -92,7 +92,7 @@ public class QueryRepository implements IQueryRepository {
         List<AiMcp> aiMcpList = aiMcpDao.queryChatMcpList();
         if (aiMcpList == null || aiMcpList.isEmpty()) {
             chatMcpResponseList = new ArrayList<>();
-            redisService.setStringValue(CHAT_MCP_LIST_KEY, chatMcpResponseList);
+            redisService.setList(LIST_CHAT_MCP_KEY, chatMcpResponseList);
             return chatMcpResponseList;
         }
 
@@ -104,7 +104,7 @@ public class QueryRepository implements IQueryRepository {
                         .build())
                 .toList();
 
-        redisService.setStringValue(CHAT_MCP_LIST_KEY, chatMcpResponseList);
+        redisService.setList(LIST_CHAT_MCP_KEY, chatMcpResponseList);
         return chatMcpResponseList;
     }
 
@@ -152,36 +152,36 @@ public class QueryRepository implements IQueryRepository {
     }
 
     @Override
-    public List<AgentResponse> queryAgentResponseList() {
+    public List<WorkAgentResponse> queryAgentResponseList() {
 
-        List<AgentResponse> agentResponseList = redisService.getStringValue(AGENT_LIST_KEY);
-        if (agentResponseList != null) {
-            return agentResponseList;
+        List<WorkAgentResponse> workAgentResponseList = redisService.getList(LIST_WORK_AGENT_KEY, WorkAgentResponse.class);
+        if (workAgentResponseList != null) {
+            return workAgentResponseList;
         }
 
         List<AiAgent> aiAgentList = aiAgentDao.queryAgentList();
         if (aiAgentList == null || aiAgentList.isEmpty()) {
-            agentResponseList = new ArrayList<>();
-            redisService.setStringValue(AGENT_LIST_KEY, agentResponseList);
-            return agentResponseList;
+            workAgentResponseList = new ArrayList<>();
+            redisService.setList(LIST_WORK_AGENT_KEY, workAgentResponseList);
+            return workAgentResponseList;
         }
 
-        agentResponseList = aiAgentList.stream()
-                .map(aiAgent -> AgentResponse.builder()
+        workAgentResponseList = aiAgentList.stream()
+                .map(aiAgent -> WorkAgentResponse.builder()
                         .agentId(aiAgent.getAgentId())
                         .agentName(aiAgent.getAgentName())
                         .agentDesc(aiAgent.getAgentDesc())
                         .build())
                 .toList();
 
-        redisService.setStringValue(AGENT_LIST_KEY, agentResponseList);
-        return agentResponseList;
+        redisService.setList(LIST_WORK_AGENT_KEY, workAgentResponseList);
+        return workAgentResponseList;
     }
 
     @Override
     public List<String> queryRagTagList() {
 
-        List<String> ragTagList = redisService.getStringValue(CHAT_RAG_TAG_LIST_KEY);
+        List<String> ragTagList = redisService.getList(LIST_CHAT_RAG_KEY, String.class);
         if (ragTagList != null) {
             return ragTagList;
         }
@@ -195,7 +195,7 @@ public class QueryRepository implements IQueryRepository {
                 .formatted(tableRef);
         ragTagList = jdbcTemplate.queryForList(sql, String.class);
 
-        redisService.setStringValue(CHAT_RAG_TAG_LIST_KEY, ragTagList);
+        redisService.setList(LIST_CHAT_RAG_KEY, ragTagList);
         return ragTagList;
     }
 

@@ -1,7 +1,7 @@
 package com.dasi.domain.query.service;
 
 import com.dasi.domain.query.repository.IQueryRepository;
-import com.dasi.types.dto.response.AgentResponse;
+import com.dasi.types.dto.response.WorkAgentResponse;
 import com.dasi.types.dto.response.ChatClientResponse;
 import com.dasi.types.dto.response.ChatMcpResponse;
 import jakarta.annotation.Resource;
@@ -31,7 +31,7 @@ public class QueryService implements IQueryService {
     }
 
     @Override
-    public List<AgentResponse> queryAgentResponseList() {
+    public List<WorkAgentResponse> queryAgentResponseList() {
         return queryRepository.queryAgentResponseList();
     }
 

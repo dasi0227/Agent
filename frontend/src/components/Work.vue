@@ -5,6 +5,7 @@ import hljs from 'highlight.js';
 import DOMPurify from 'dompurify';
 import { dispatchArmory, executeAgentStream, queryAgentList } from '../request/api';
 import { normalizeError } from '../request/request';
+import { formatMcpJson } from '../utils/formatMcpJson';
 import { useAgentSettingsStore, useAgentStore } from '../router/pinia';
 
 const agentStore = useAgentStore();
@@ -158,7 +159,7 @@ const selectAgent = async (value) => {
     currentAgentId.value = value;
     agentDropdownOpen.value = false;
     try {
-        await dispatchArmory({ armoryType: 'agent', armoryId: value });
+        await dispatchArmory({ armoryType: 'work', armoryId: value });
     } catch (error) {
         console.warn('绑定 Work armory 失败', error);
     }
@@ -241,8 +242,10 @@ const runExecute = async (content, controller) => {
     const finish = () => {
         if (closed) return;
         closed = true;
-        const answerEvent = [...events].reverse().find((item) => item?.sectionType === 'answer');
-        const answer = answerEvent?.sectionContent || '';
+        const reversed = [...events].reverse();
+        const summarizerEvent = reversed.find((item) => item?.sectionType === 'summarizer_overview');
+        const replierEvent = reversed.find((item) => item?.sectionType === 'replier_overview');
+        const answer = summarizerEvent?.sectionContent || replierEvent?.sectionContent || '';
         agentStore.updateAssistantMessage(assistantMessage.id, {
             content: answer || '（无内容）',
             pending: false,
@@ -282,7 +285,14 @@ const runExecute = async (content, controller) => {
                     timestamp: payload.timestamp ?? null
                 };
                 events.push(event);
-                agentStore.addCard(event);
+                if (
+                    !(
+                        event.sectionType === 'summarizer_overview' ||
+                        event.sectionType === 'replier_overview'
+                    )
+                ) {
+                    agentStore.addCard(event);
+                }
                 if (isLeftAtBottom.value) scrollLeftToBottom(true);
             },
             onError: handleError,
@@ -305,7 +315,16 @@ const handleStop = () => {
     }
 };
 
-const getContent = (message) => (message?.content ? message.content.toString() : '');
+const getContent = (message) => {
+    if (!message?.content) return '';
+    const raw = message.content.toString();
+    return formatMcpJson(raw);
+};
+
+const getCardContent = (card) => {
+    if (!card?.sectionContent) return '';
+    return formatMcpJson(card.sectionContent);
+};
 
 onMounted(() => {
     document.addEventListener('click', handleClickOutside);
@@ -316,7 +335,6 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-    agentStore.stopCurrentRequest();
     document.removeEventListener('click', handleClickOutside);
     window.removeEventListener('keydown', handleEscClose);
 });
@@ -411,7 +429,7 @@ onBeforeUnmount(() => {
                                 </span>
                             </div>
                             <div class="whitespace-pre-wrap text-[14px] leading-[1.6] text-[var(--text-primary)]">
-                                {{ card.sectionContent }}
+                                {{ getCardContent(card) }}
                             </div>
                         </div>
                         <div v-if="cards.length === 0" class="text-[13px] text-[var(--text-secondary)]">
@@ -438,9 +456,11 @@ onBeforeUnmount(() => {
                                 <div
                                     class="relative w-fit max-w-[720px] rounded-[14px] px-[14px] py-[12px] shadow-[0_12px_30px_rgba(27,36,55,0.08)] border"
                                     :class="[
-                                        message.role === 'user'
-                                            ? 'bg-[linear-gradient(135deg,#e5f4ff,#eaf4ff)] border-[#c5e2ff]'
-                                            : 'bg-white border-[var(--border-color)]',
+                                        message.error
+                                            ? 'bg-[linear-gradient(135deg,#ffe4e4,#ffd6d6)] border-[#f3b6b6] text-[#b91c1c]'
+                                            : message.role === 'user'
+                                                ? 'bg-[linear-gradient(135deg,#e5f4ff,#eaf4ff)] border-[#c5e2ff]'
+                                                : 'bg-white border-[var(--border-color)]',
                                         message.pending ? 'border-dashed' : 'border-solid'
                                     ]"
                                 >
@@ -468,12 +488,6 @@ onBeforeUnmount(() => {
                                         :class="message.error ? 'text-[#d14343]' : ''"
                                         v-html="renderMarkdown(getContent(message))"
                                     ></div>
-                                    <div
-                                        v-if="message.error"
-                                        class="mt-[6px] rounded-[8px] bg-[#fff3f3] px-[10px] py-[8px] text-[13px] text-[#d14343]"
-                                    >
-                                        {{ message.error.message || '请求失败' }}
-                                    </div>
                                 </div>
                             </div>
                         </div>

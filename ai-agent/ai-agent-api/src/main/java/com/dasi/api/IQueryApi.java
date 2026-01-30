@@ -1,6 +1,6 @@
 package com.dasi.api;
 
-import com.dasi.types.dto.response.AgentResponse;
+import com.dasi.types.dto.response.WorkAgentResponse;
 import com.dasi.types.dto.response.ChatClientResponse;
 import com.dasi.types.dto.response.ChatMcpResponse;
 import com.dasi.types.dto.result.Result;
@@ -15,6 +15,6 @@ public interface IQueryApi {
 
     Result<List<String>> queryRagTagList();
 
-    Result<List<AgentResponse>> queryAgentResponseList();
+    Result<List<WorkAgentResponse>> queryAgentResponseList();
 
 }

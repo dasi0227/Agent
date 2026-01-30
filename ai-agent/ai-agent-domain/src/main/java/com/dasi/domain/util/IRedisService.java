@@ -1,17 +1,24 @@
 package com.dasi.domain.util;
 
+import java.util.List;
 import java.util.Set;
 
 public interface IRedisService {
 
-    <T> void setStringValue(String key, T value);
+    void setValue(String key, Object value);
 
-    <T> T getStringValue(String key);
+    <T> T getValue(String key, Class<T> type);
 
-    <T> Set<T> getSetValue(String key);
+    void setList(String key, List<?> values);
 
-    <T> void addSetValue(String key, Set<T> value);
+    <T> List<T> getList(String key, Class<T> elementType);
 
-    <T> void resetSetValue(String key, Set<T> value);
+    void addSetMembers(String key, Set<?> values);
+
+    <T> Set<T> getSetMembers(String key, Class<T> elementType);
+
+    void delete(String key);
+
+    void clear();
 
 }
