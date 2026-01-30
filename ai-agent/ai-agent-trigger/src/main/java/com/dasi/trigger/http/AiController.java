@@ -7,7 +7,7 @@ import com.dasi.domain.ai.service.dispatch.IDispatchService;
 import com.dasi.domain.ai.service.rag.IRagService;
 import com.dasi.types.dto.request.ArmoryRequest;
 import com.dasi.types.dto.request.ChatRequest;
-import com.dasi.types.dto.request.ExecuteRequest;
+import com.dasi.types.dto.request.WorkRequest;
 import com.dasi.types.dto.request.UploadGitRepoRequest;
 import com.dasi.types.dto.result.Result;
 import jakarta.annotation.Resource;
@@ -50,17 +50,17 @@ public class AiController implements IAiApi {
     private IRagService ragService;
 
     @Override
-    @PostMapping(value = "/agent/execute", produces = "text/event-stream")
-    public SseEmitter execute(@Valid @RequestBody ExecuteRequest executeRequest) {
+    @PostMapping(value = "/work/execute", produces = "text/event-stream")
+    public SseEmitter execute(@Valid @RequestBody WorkRequest workRequest) {
 
         SseEmitter sseEmitter = new SseEmitter(0L);
 
         ExecuteRequestEntity executeRequestEntity = ExecuteRequestEntity.builder()
-                .aiAgentId(executeRequest.getAiAgentId())
-                .userMessage(executeRequest.getUserMessage())
-                .sessionId(executeRequest.getSessionId())
-                .maxRound(executeRequest.getMaxRound())
-                .maxRetry(executeRequest.getMaxRetry())
+                .aiAgentId(workRequest.getAiAgentId())
+                .userMessage(workRequest.getUserMessage())
+                .sessionId(workRequest.getSessionId())
+                .maxRound(workRequest.getMaxRound())
+                .maxRetry(workRequest.getMaxRetry())
                 .build();
 
         dispatchService.dispatchExecuteStrategy(executeRequestEntity, sseEmitter);
