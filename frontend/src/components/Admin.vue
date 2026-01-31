@@ -14,8 +14,8 @@ const moduleDefs = [
         group: 'model',
         title: 'AGENT 管理',
         statusField: 'agentStatus',
-        search: ['keyword', 'status', 'type'],
-        query: { keyword: '', status: '', type: '', page: 1, size: 10 },
+        search: ['idKeyword', 'nameKeyword', 'type'],
+        query: { idKeyword: '', nameKeyword: '', type: '', page: 1, size: 10 },
         formDefaults: () => ({
             id: null,
             agentId: '',
@@ -25,9 +25,18 @@ const moduleDefs = [
             agentStatus: 1
         }),
         fields: [
-            { prop: 'agentId', label: 'Agent ID', placeholder: '可不填自动生成' },
+            { prop: 'agentId', label: 'Agent ID *', required: true },
             { prop: 'agentName', label: '名称', required: true },
-            { prop: 'agentType', label: '类型', required: true },
+            {
+                prop: 'agentType',
+                label: '类型',
+                type: 'select',
+                required: true,
+                options: [
+                    { label: 'loop', value: 'loop' },
+                    { label: 'step', value: 'step' }
+                ]
+            },
             { prop: 'agentDesc', label: '描述', type: 'textarea' },
             { prop: 'agentStatus', label: '状态', type: 'switch' }
         ],
@@ -44,24 +53,31 @@ const moduleDefs = [
         group: 'model',
         title: 'CLIENT 管理',
         statusField: 'clientStatus',
-        search: ['keyword', 'modelId', 'type', 'status'],
-        query: { keyword: '', modelId: '', type: '', status: '', page: 1, size: 10 },
+        search: ['idKeyword', 'nameKeyword', 'modelId', 'type'],
+        query: { idKeyword: '', nameKeyword: '', modelId: '', type: '', page: 1, size: 10 },
         formDefaults: () => ({
             id: null,
             clientId: '',
             clientType: '',
             modelId: '',
-            modelName: '',
             clientName: '',
             clientDesc: '',
             clientStatus: 1
         }),
         fields: [
-            { prop: 'clientId', label: 'Client ID', placeholder: '可不填自动生成' },
+            { prop: 'clientId', label: 'Client ID *', required: true },
             { prop: 'clientName', label: '名称', required: true },
-            { prop: 'clientType', label: '类型', required: true },
-            { prop: 'modelId', label: '模型', type: 'select', optionsKey: 'models', required: true },
-            { prop: 'modelName', label: '模型名称', placeholder: '可选' },
+            {
+                prop: 'clientType',
+                label: '类型',
+                type: 'select',
+                required: true,
+                options: [
+                    { label: 'work', value: 'work' },
+                    { label: 'chat', value: 'chat' }
+                ]
+            },
+            { prop: 'modelId', label: '模型 ID *', type: 'select', optionsKey: 'models', required: true },
             { prop: 'clientDesc', label: '描述', type: 'textarea' },
             { prop: 'clientStatus', label: '状态', type: 'switch' }
         ],
@@ -110,8 +126,8 @@ const moduleDefs = [
         group: 'base',
         title: 'API 管理',
         statusField: 'apiStatus',
-        search: ['keyword', 'status'],
-        query: { keyword: '', status: '', page: 1, size: 10 },
+        search: ['idKeyword'],
+        query: { idKeyword: '', page: 1, size: 10 },
         formDefaults: () => ({
             id: null,
             apiId: '',
@@ -122,7 +138,7 @@ const moduleDefs = [
             apiStatus: 1
         }),
         fields: [
-            { prop: 'apiId', label: 'API ID', placeholder: '可不填自动生成' },
+            { prop: 'apiId', label: 'API ID *', required: true },
             { prop: 'apiBaseUrl', label: 'Base URL', required: true },
             { prop: 'apiKey', label: 'Key', required: true },
             { prop: 'apiCompletionsPath', label: '对话路径', required: true },
@@ -141,8 +157,8 @@ const moduleDefs = [
         group: 'base',
         title: 'MODEL 管理',
         statusField: 'modelStatus',
-        search: ['keyword', 'apiId', 'status'],
-        query: { keyword: '', apiId: '', status: '', page: 1, size: 10 },
+        search: ['idKeyword', 'nameKeyword', 'apiId'],
+        query: { idKeyword: '', nameKeyword: '', apiId: '', page: 1, size: 10 },
         formDefaults: () => ({
             id: null,
             modelId: '',
@@ -152,7 +168,7 @@ const moduleDefs = [
             modelStatus: 1
         }),
         fields: [
-            { prop: 'modelId', label: 'Model ID', placeholder: '可不填自动生成' },
+            { prop: 'modelId', label: 'Model ID *', required: true },
             { prop: 'modelName', label: '名称', required: true },
             { prop: 'modelType', label: '类型', placeholder: '如 GPT' },
             { prop: 'apiId', label: 'API', type: 'select', optionsKey: 'apis', required: true },
@@ -170,8 +186,8 @@ const moduleDefs = [
         group: 'base',
         title: 'MCP 管理',
         statusField: 'mcpStatus',
-        search: ['keyword', 'type', 'status'],
-        query: { keyword: '', type: '', status: '', page: 1, size: 10 },
+        search: ['idKeyword', 'nameKeyword'],
+        query: { idKeyword: '', nameKeyword: '', page: 1, size: 10 },
         formDefaults: () => ({
             id: null,
             mcpId: '',
@@ -184,7 +200,7 @@ const moduleDefs = [
             mcpStatus: 1
         }),
         fields: [
-            { prop: 'mcpId', label: 'MCP ID', placeholder: '可不填自动生成' },
+            { prop: 'mcpId', label: 'MCP ID *', required: true },
             { prop: 'mcpName', label: '名称', required: true },
             { prop: 'mcpType', label: '类型', required: true },
             { prop: 'mcpConfig', label: '配置', type: 'textarea', required: true },
@@ -205,8 +221,8 @@ const moduleDefs = [
         group: 'base',
         title: 'ADVISOR 管理',
         statusField: 'advisorStatus',
-        search: ['keyword', 'type', 'status'],
-        query: { keyword: '', type: '', status: '', page: 1, size: 10 },
+        search: ['idKeyword', 'nameKeyword'],
+        query: { idKeyword: '', nameKeyword: '', page: 1, size: 10 },
         formDefaults: () => ({
             id: null,
             advisorId: '',
@@ -218,7 +234,7 @@ const moduleDefs = [
             advisorStatus: 1
         }),
         fields: [
-            { prop: 'advisorId', label: 'Advisor ID', placeholder: '可不填自动生成' },
+            { prop: 'advisorId', label: 'Advisor ID *', required: true },
             { prop: 'advisorName', label: '名称', required: true },
             { prop: 'advisorType', label: '类型', required: true },
             { prop: 'advisorOrder', label: '顺序', type: 'number' },
@@ -238,8 +254,8 @@ const moduleDefs = [
         group: 'base',
         title: 'PROMPT 管理',
         statusField: 'promptStatus',
-        search: ['keyword', 'status'],
-        query: { keyword: '', status: '', page: 1, size: 10 },
+        search: ['idKeyword', 'nameKeyword'],
+        query: { idKeyword: '', nameKeyword: '', page: 1, size: 10 },
         formDefaults: () => ({
             id: null,
             promptId: '',
@@ -249,7 +265,7 @@ const moduleDefs = [
             promptStatus: 1
         }),
         fields: [
-            { prop: 'promptId', label: 'Prompt ID', placeholder: '可不填自动生成' },
+            { prop: 'promptId', label: 'Prompt ID *', required: true },
             { prop: 'promptName', label: '名称', required: true },
             { prop: 'promptContent', label: '内容', type: 'textarea', required: true },
             { prop: 'promptDesc', label: '描述', type: 'textarea' },
@@ -403,6 +419,10 @@ const fetchList = async (key = currentKey.value) => {
     state.error = '';
     try {
         const params = { ...state.query };
+        // 兼容后端当前的 keyword 过滤：优先使用 id 或名称关键字
+        if (params.idKeyword || params.nameKeyword) {
+            params.keyword = params.idKeyword || params.nameKeyword;
+        }
         Object.keys(params).forEach((k) => {
             if (params[k] === '' || params[k] === null || params[k] === undefined) {
                 delete params[k];
@@ -550,10 +570,29 @@ const logout = () => {
                                 </select>
                             </template>
                             <template v-else-if="field === 'type'">
-                                <input
+                                <select
                                     v-model="stateMap[currentKey].query.type"
-                                    class="w-[140px] rounded-[10px] border border-[#e2e8f0] px-3 py-2 text-[13px] outline-none focus:border-[#1d4ed8]"
-                                    placeholder="类型"
+                                    class="rounded-[10px] border border-[#e2e8f0] px-3 py-2 text-[13px] outline-none focus:border-[#1d4ed8]"
+                                >
+                                    <option value="">选择类型</option>
+                                    <option value="loop">loop</option>
+                                    <option value="step">step</option>
+                                    <option value="work">work</option>
+                                    <option value="chat">chat</option>
+                                </select>
+                            </template>
+                            <template v-else-if="field === 'idKeyword'">
+                                <input
+                                    v-model="stateMap[currentKey].query.idKeyword"
+                                    class="w-[160px] rounded-[10px] border border-[#e2e8f0] px-3 py-2 text-[13px] outline-none focus:border-[#1d4ed8]"
+                                    placeholder="ID 关键字"
+                                />
+                            </template>
+                            <template v-else-if="field === 'nameKeyword'">
+                                <input
+                                    v-model="stateMap[currentKey].query.nameKeyword"
+                                    class="w-[160px] rounded-[10px] border border-[#e2e8f0] px-3 py-2 text-[13px] outline-none focus:border-[#1d4ed8]"
+                                    placeholder="名称关键字"
                                 />
                             </template>
                             <template v-else-if="field === 'apiId'">

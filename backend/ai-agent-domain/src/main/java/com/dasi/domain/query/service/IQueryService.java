@@ -1,19 +1,20 @@
 package com.dasi.domain.query.service;
 
-import com.dasi.types.dto.response.WorkAgentResponse;
-import com.dasi.types.dto.response.ChatClientResponse;
-import com.dasi.types.dto.response.ChatMcpResponse;
+import com.dasi.types.dto.response.QueryChatRagResponse;
+import com.dasi.types.dto.response.QueryWorkAgentResponse;
+import com.dasi.types.dto.response.QueryChatClientResponse;
+import com.dasi.types.dto.response.QueryChatMcpResponse;
 
 import java.util.List;
 
 public interface IQueryService {
 
-    List<ChatClientResponse> queryChatClientResponseList();
+    List<QueryChatClientResponse> queryChatClientResponseList();
 
-    List<ChatMcpResponse> queryChatMcpResponseList();
+    List<QueryChatMcpResponse> queryChatMcpResponseList();
 
-    List<String> queryRagTagList();
+    List<QueryChatRagResponse> queryChatRagList();
 
-    List<WorkAgentResponse> queryAgentResponseList();
+    List<QueryWorkAgentResponse> queryWorkAgentResponseList();
 
 }

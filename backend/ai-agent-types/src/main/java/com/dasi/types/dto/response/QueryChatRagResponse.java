@@ -9,12 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatClientResponse {
+public class QueryChatRagResponse {
 
-    private String clientId;
-
-    private String modelName;
-
-    private String clientDesc;
+    private String ragTag;
 
 }

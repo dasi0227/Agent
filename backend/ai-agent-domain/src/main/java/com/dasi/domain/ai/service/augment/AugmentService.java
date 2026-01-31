@@ -1,8 +1,8 @@
 package com.dasi.domain.ai.service.augment;
 
-import com.dasi.domain.query.model.enumeration.AiMcpType;
-import com.dasi.domain.query.model.vo.AiMcpVO;
-import com.dasi.domain.query.repository.IQueryRepository;
+import com.dasi.domain.ai.repository.IAiRepository;
+import com.dasi.domain.ai.model.enumeration.AiMcpType;
+import com.dasi.domain.ai.model.vo.AiMcpVO;
 import io.modelcontextprotocol.client.McpClient;
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.client.transport.HttpClientSseClientTransport;
@@ -51,7 +51,7 @@ public class AugmentService implements IAugmentService {
     private PgVectorStore pgVectorStore;
 
     @Resource
-    private IQueryRepository chatRepository;
+    private IAiRepository aiRepository;
 
     @Override
     public List<Message> augmentRagMessage(String userMessage, String ragTag) {
@@ -94,7 +94,7 @@ public class AugmentService implements IAugmentService {
             return new SyncMcpToolCallbackProvider();
         }
 
-        List<AiMcpVO> aiMcpVOList = chatRepository.queryAiMcpVOListByMcpIdList(mcpIdList);
+        List<AiMcpVO> aiMcpVOList = aiRepository.queryAiMcpVOListByMcpIdList(mcpIdList);
         if (aiMcpVOList == null || aiMcpVOList.isEmpty()) {
             return new SyncMcpToolCallbackProvider();
         }

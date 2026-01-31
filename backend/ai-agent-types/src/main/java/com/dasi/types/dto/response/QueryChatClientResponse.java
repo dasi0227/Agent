@@ -9,12 +9,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatMcpResponse {
+public class QueryChatClientResponse {
 
-    private String mcpId;
+    private String clientId;
 
-    private String mcpName;
+    private String modelName;
 
-    private String mcpDesc;
+    private String clientDesc;
 
 }

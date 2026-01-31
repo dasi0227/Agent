@@ -21,15 +21,15 @@ public class AdminController {
     // -------------------- API --------------------
     @GetMapping("/apis")
     public Result<PageResult<ApiVO>> listApis(@RequestParam(value = "keyword", required = false) String keyword,
-                                              @RequestParam(value = "status", required = false) Integer status,
+                                              @RequestParam(value = "idKeyword", required = false) String idKeyword,
                                               @RequestParam(value = "page", required = false) Integer page,
                                               @RequestParam(value = "size", required = false) Integer size) {
         ApiQuery query = ApiQuery.builder()
-                .keyword(keyword)
-                .status(status)
+                .keyword(keyword != null ? keyword : (idKeyword))
                 .page(page)
                 .size(size)
                 .build();
+
         return Result.success(adminService.pageApi(query));
     }
 
@@ -74,14 +74,14 @@ public class AdminController {
     // -------------------- Model --------------------
     @GetMapping("/models")
     public Result<PageResult<ModelVO>> listModels(@RequestParam(value = "keyword", required = false) String keyword,
+                                                  @RequestParam(value = "idKeyword", required = false) String idKeyword,
+                                                  @RequestParam(value = "nameKeyword", required = false) String nameKeyword,
                                                   @RequestParam(value = "apiId", required = false) String apiId,
-                                                  @RequestParam(value = "status", required = false) Integer status,
                                                   @RequestParam(value = "page", required = false) Integer page,
                                                   @RequestParam(value = "size", required = false) Integer size) {
         ModelQuery query = ModelQuery.builder()
-                .keyword(keyword)
+                .keyword(keyword != null ? keyword : firstNonNull(idKeyword, nameKeyword))
                 .apiId(apiId)
-                .status(status)
                 .page(page)
                 .size(size)
                 .build();
@@ -127,14 +127,12 @@ public class AdminController {
     // -------------------- MCP --------------------
     @GetMapping("/mcps")
     public Result<PageResult<McpVO>> listMcps(@RequestParam(value = "keyword", required = false) String keyword,
-                                              @RequestParam(value = "type", required = false) String type,
-                                              @RequestParam(value = "status", required = false) Integer status,
+                                              @RequestParam(value = "idKeyword", required = false) String idKeyword,
+                                              @RequestParam(value = "nameKeyword", required = false) String nameKeyword,
                                               @RequestParam(value = "page", required = false) Integer page,
                                               @RequestParam(value = "size", required = false) Integer size) {
         McpQuery query = McpQuery.builder()
-                .keyword(keyword)
-                .mcpType(type)
-                .status(status)
+                .keyword(keyword != null ? keyword : firstNonNull(idKeyword, nameKeyword))
                 .page(page)
                 .size(size)
                 .build();
@@ -186,14 +184,12 @@ public class AdminController {
     // -------------------- Advisor --------------------
     @GetMapping("/advisors")
     public Result<PageResult<AdvisorVO>> listAdvisors(@RequestParam(value = "keyword", required = false) String keyword,
-                                                      @RequestParam(value = "type", required = false) String type,
-                                                      @RequestParam(value = "status", required = false) Integer status,
+                                                      @RequestParam(value = "idKeyword", required = false) String idKeyword,
+                                                      @RequestParam(value = "nameKeyword", required = false) String nameKeyword,
                                                       @RequestParam(value = "page", required = false) Integer page,
                                                       @RequestParam(value = "size", required = false) Integer size) {
         AdvisorQuery query = AdvisorQuery.builder()
-                .keyword(keyword)
-                .advisorType(type)
-                .status(status)
+                .keyword(keyword != null ? keyword : firstNonNull(idKeyword, nameKeyword))
                 .page(page)
                 .size(size)
                 .build();
@@ -243,12 +239,12 @@ public class AdminController {
     // -------------------- Prompt --------------------
     @GetMapping("/prompts")
     public Result<PageResult<PromptVO>> listPrompts(@RequestParam(value = "keyword", required = false) String keyword,
-                                                    @RequestParam(value = "status", required = false) Integer status,
+                                                    @RequestParam(value = "idKeyword", required = false) String idKeyword,
+                                                    @RequestParam(value = "nameKeyword", required = false) String nameKeyword,
                                                     @RequestParam(value = "page", required = false) Integer page,
                                                     @RequestParam(value = "size", required = false) Integer size) {
         PromptQuery query = PromptQuery.builder()
-                .keyword(keyword)
-                .status(status)
+                .keyword(keyword != null ? keyword : firstNonNull(idKeyword, nameKeyword))
                 .page(page)
                 .size(size)
                 .build();
@@ -294,16 +290,16 @@ public class AdminController {
     // -------------------- Client --------------------
     @GetMapping("/clients")
     public Result<PageResult<ClientVO>> listClients(@RequestParam(value = "keyword", required = false) String keyword,
+                                                    @RequestParam(value = "idKeyword", required = false) String idKeyword,
+                                                    @RequestParam(value = "nameKeyword", required = false) String nameKeyword,
                                                     @RequestParam(value = "modelId", required = false) String modelId,
                                                     @RequestParam(value = "type", required = false) String type,
-                                                    @RequestParam(value = "status", required = false) Integer status,
                                                     @RequestParam(value = "page", required = false) Integer page,
                                                     @RequestParam(value = "size", required = false) Integer size) {
         ClientQuery query = ClientQuery.builder()
-                .keyword(keyword)
+                .keyword(keyword != null ? keyword : firstNonNull(idKeyword, nameKeyword))
                 .modelId(modelId)
                 .clientType(type)
-                .status(status)
                 .page(page)
                 .size(size)
                 .build();
@@ -408,13 +404,13 @@ public class AdminController {
     // -------------------- Agent --------------------
     @GetMapping("/agents")
     public Result<PageResult<AdminAgentVO>> listAgents(@RequestParam(value = "keyword", required = false) String keyword,
-                                                       @RequestParam(value = "status", required = false) Integer status,
+                                                       @RequestParam(value = "idKeyword", required = false) String idKeyword,
+                                                       @RequestParam(value = "nameKeyword", required = false) String nameKeyword,
                                                        @RequestParam(value = "type", required = false) String type,
                                                        @RequestParam(value = "page", required = false) Integer page,
                                                        @RequestParam(value = "size", required = false) Integer size) {
         AgentQuery query = AgentQuery.builder()
-                .keyword(keyword)
-                .agentStatus(status)
+                .keyword(keyword != null ? keyword : firstNonNull(idKeyword, nameKeyword))
                 .agentType(type)
                 .page(page)
                 .size(size)
@@ -592,5 +588,9 @@ public class AdminController {
     @Data
     private static class StatusRequest {
         private Integer status;
+    }
+
+    private String firstNonNull(String a, String b) {
+        return a != null && !a.isEmpty() ? a : b;
     }
 }

@@ -26,4 +26,5 @@ public interface IAiRepository {
 
     List<AiTaskVO> queryTaskVOList();
 
+    List<AiMcpVO> queryAiMcpVOListByMcpIdList(List<String> mcpIdList);
 }

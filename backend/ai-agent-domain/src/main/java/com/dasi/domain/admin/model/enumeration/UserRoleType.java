@@ -1,0 +1,20 @@
+package com.dasi.domain.admin.model.enumeration;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+public enum UserRoleType {
+
+    ADMIN("管理员", "admin"),
+    ACCOUNT("用户", "account")
+    ;
+
+    private String name;
+
+    private String type;
+
+}
