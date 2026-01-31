@@ -1,16 +1,23 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import logoImg from '../assets/logo.jpg';
 import chatIcon from '../assets/chat.svg';
 import workIcon from '../assets/work.svg';
-import { useAgentStore, useChatStore } from '../router/pinia';
+import { useAgentStore, useAuthStore, useChatStore, useSettingsStore } from '../router/pinia';
+import { updateProfile } from '../request/api';
 
 const router = useRouter();
 const route = useRoute();
 
 const chatStore = useChatStore();
 const agentStore = useAgentStore();
+const authStore = useAuthStore();
+const settingsStore = useSettingsStore();
+
+const isLogin = computed(() => authStore.isLogin);
+const currentUser = computed(() => authStore.user || { username: '访客', role: 'guest' });
+const avatarChar = computed(() => (currentUser.value.username || '访客').slice(0, 1).toUpperCase());
 
 const chats = computed(() => chatStore.chats);
 const currentChatId = computed(() => chatStore.currentChatId);
@@ -30,6 +37,14 @@ const editAgentTitle = ref('');
 const showDeleteConfirm = ref(false);
 const deleteTarget = ref({ type: 'chat', id: '' });
 const showNewSessionPicker = ref(false);
+const showProfile = ref(false);
+const profileSaving = ref(false);
+const profileError = ref('');
+const profileForm = reactive({
+    username: currentUser.value.username || '',
+    oldPassword: '',
+    newPassword: ''
+});
 
 const handleNewSession = () => {
     showNewSessionPicker.value = true;
@@ -147,6 +162,62 @@ const confirmNewSession = (type) => {
         router.push('/chat');
     }
     closeNewSessionPicker();
+};
+
+const openProfile = () => {
+    if (!authStore.isLogin) {
+        router.push('/login');
+        return;
+    }
+    profileForm.username = currentUser.value.username || '';
+    profileForm.oldPassword = '';
+    profileForm.newPassword = '';
+    profileError.value = '';
+    showProfile.value = true;
+};
+
+const closeProfile = () => {
+    showProfile.value = false;
+    profileSaving.value = false;
+    profileError.value = '';
+};
+
+const saveProfile = async () => {
+    profileError.value = '';
+    profileSaving.value = true;
+    if (profileForm.newPassword && !profileForm.oldPassword) {
+        profileError.value = '请先输入旧密码';
+        profileSaving.value = false;
+        return;
+    }
+    try {
+        const resp = await updateProfile({
+            username: profileForm.username,
+            oldPassword: profileForm.oldPassword,
+            newPassword: profileForm.newPassword
+        });
+        const payload = resp?.data || resp?.result || resp;
+        const token = payload?.token || payload?.data?.token;
+        const user = payload?.user || payload?.data?.user;
+        if (token || user) {
+            authStore.setAuth({
+                token: token || authStore.token,
+                user: user || authStore.user
+            });
+        }
+        showProfile.value = false;
+    } catch (error) {
+        profileError.value = error?.message || '更新失败，请稍后重试';
+    } finally {
+        profileSaving.value = false;
+    }
+};
+
+const handleLogout = () => {
+    authStore.clear();
+    settingsStore.updateSettings({ token: '' });
+    closeProfile();
+    router.push('/login');
 };
 </script>
 
@@ -312,19 +383,23 @@ const confirmNewSession = (type) => {
             </div>
         </div>
 
-        <div
-            class="flex items-center gap-[10px] rounded-[14px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] p-[12px]"
+        <button
+            class="flex items-center gap-[10px] rounded-[14px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] p-[12px] text-left transition hover:border-[rgba(123,200,255,0.5)]"
+            type="button"
+            @click="openProfile"
         >
             <div
-                class="grid h-[40px] w-[40px] place-items-center rounded-[12px] bg-[linear-gradient(135deg,#fef08a,#f59e0b)] font-bold text-[#0b1220]"
+                class="grid h-[40px] w-[40px] place-items-center rounded-[12px] bg-[linear-gradient(135deg,#e0f3ff,#c7e1ff)] font-bold text-[#0b1220]"
             >
-                U
+                {{ avatarChar }}
             </div>
             <div>
-                <div class="font-bold text-white">访客</div>
-                <div class="text-[12px] text-[rgba(231,236,244,0.72)]">在线</div>
+                <div class="font-bold text-white">{{ currentUser.username || '访客' }}</div>
+                <div class="text-[12px] text-[rgba(231,236,244,0.72)]">
+                    {{ isLogin ? (currentUser.role || 'account') : '未登录，点击登录/注册' }}
+                </div>
             </div>
-        </div>
+        </button>
 
         <div v-if="showDeleteConfirm" class="fixed inset-0 z-[20] grid place-items-center bg-[rgba(0,0,0,0.35)] p-[20px]" @click.self="showDeleteConfirm = false">
             <div
@@ -385,6 +460,78 @@ const confirmNewSession = (type) => {
                         <img :src="workIcon" alt="Work" class="h-[200px] w-[200px]" />
                         <div class="text-[40px] font-semibold">Work Agent</div>
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <div
+            v-if="showProfile"
+            class="fixed inset-0 z-[25] grid place-items-center bg-[rgba(0,0,0,0.35)] p-[20px]"
+            @click.self="closeProfile"
+        >
+            <div
+                class="w-full max-w-[520px] rounded-[14px] border border-[rgba(255,255,255,0.08)] bg-[#0f172a] text-[#e7ecf4] shadow-[0_20px_50px_rgba(0,0,0,0.25)]"
+            >
+                <div class="flex items-center justify-between border-b border-[rgba(255,255,255,0.08)] px-[18px] py-[14px]">
+                    <div class="text-[16px] font-bold">个人资料</div>
+                    <button class="text-[20px]" type="button" @click="closeProfile">×</button>
+                </div>
+                <div class="space-y-[14px] px-[18px] py-[16px]">
+                    <div>
+                        <div class="mb-[6px] text-[13px] text-[rgba(231,236,244,0.72)]">用户名</div>
+                        <input
+                            v-model="profileForm.username"
+                            class="w-full rounded-[10px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] px-[10px] py-[10px] text-[14px] text-white outline-none focus:border-[#7bc8ff]"
+                            placeholder="请输入用户名"
+                        />
+                    </div>
+                    <div class="grid grid-cols-2 gap-[12px] max-[520px]:grid-cols-1">
+                        <div>
+                            <div class="mb-[6px] text-[13px] text-[rgba(231,236,244,0.72)]">旧密码</div>
+                            <input
+                                v-model="profileForm.oldPassword"
+                                type="password"
+                                class="w-full rounded-[10px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] px-[10px] py-[10px] text-[14px] text-white outline-none focus:border-[#7bc8ff]"
+                                placeholder="修改密码时必填"
+                            />
+                        </div>
+                        <div>
+                            <div class="mb-[6px] text-[13px] text-[rgba(231,236,244,0.72)]">新密码</div>
+                            <input
+                                v-model="profileForm.newPassword"
+                                type="password"
+                                class="w-full rounded-[10px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] px-[10px] py-[10px] text-[14px] text-white outline-none focus:border-[#7bc8ff]"
+                                placeholder="不修改则留空"
+                            />
+                        </div>
+                    </div>
+                    <div class="text-[12px] text-[#f87171]" v-if="profileError">{{ profileError }}</div>
+                    <div class="flex items-center justify-between gap-[10px] border-t border-[rgba(255,255,255,0.08)] pt-[14px]">
+                        <button
+                            class="rounded-[10px] border border-[rgba(255,255,255,0.15)] px-[14px] py-[10px] text-[14px] font-semibold text-[#e7ecf4] transition hover:bg-[rgba(255,255,255,0.08)]"
+                            type="button"
+                            @click="handleLogout"
+                        >
+                            退出登录
+                        </button>
+                        <div class="flex gap-[10px]">
+                            <button
+                                class="rounded-[10px] border border-[rgba(255,255,255,0.15)] px-[14px] py-[10px] text-[14px] font-semibold text-[#e7ecf4] transition hover:bg-[rgba(255,255,255,0.08)]"
+                                type="button"
+                                @click="closeProfile"
+                            >
+                                取消
+                            </button>
+                            <button
+                                class="rounded-[10px] border border-[rgba(123,200,255,0.6)] bg-[rgba(123,200,255,0.14)] px-[14px] py-[10px] text-[14px] font-semibold text-[#7bc8ff] transition hover:bg-[rgba(123,200,255,0.22)]"
+                                type="button"
+                                :disabled="profileSaving"
+                                @click="saveProfile"
+                            >
+                                {{ profileSaving ? '保存中...' : '保存' }}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

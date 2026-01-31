@@ -3,6 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dasi.infrastructure.persistent.dao.IAiMcpDao">
     <resultMap id="dataMap" type="com.dasi.infrastructure.persistent.po.AiMcp">
+        <id column="id" property="id"/>
         <result column="mcp_id" property="mcpId"/>
         <result column="mcp_name" property="mcpName"/>
         <result column="mcp_type" property="mcpType"/>
@@ -11,30 +12,38 @@
         <result column="mcp_timeout" property="mcpTimeout"/>
         <result column="mcp_chat" property="mcpChat"/>
         <result column="mcp_status" property="mcpStatus"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <select id="queryByMcpId" parameterType="java.lang.String" resultMap="dataMap">
-        SELECT mcp_id,
+        SELECT id,
+               mcp_id,
                mcp_name,
                mcp_type,
                mcp_config,
                mcp_desc,
                mcp_timeout,
                mcp_chat,
-               mcp_status
+               mcp_status,
+               create_time,
+               update_time
         FROM ai_mcp
         WHERE mcp_id = #{mcpId}
     </select>
 
     <select id="queryByMcpIdList" parameterType="java.util.List" resultMap="dataMap">
-        SELECT mcp_id,
+        SELECT id,
+        mcp_id,
         mcp_name,
         mcp_type,
         mcp_config,
         mcp_desc,
         mcp_timeout,
         mcp_chat,
-        mcp_status
+        mcp_status,
+        create_time,
+        update_time
         FROM ai_mcp
         WHERE mcp_status = 1 AND mcp_chat = 1 AND mcp_id IN
         <foreach collection="list" item="id" open="(" separator="," close=")">
@@ -43,16 +52,121 @@
     </select>
 
     <select id="queryChatMcpList" resultMap="dataMap">
-        SELECT mcp_id,
+        SELECT id,
+               mcp_id,
                mcp_name,
                mcp_type,
                mcp_config,
                mcp_desc,
                mcp_timeout,
                mcp_chat,
-               mcp_status
+               mcp_status,
+               create_time,
+               update_time
         FROM ai_mcp
         WHERE mcp_status = 1 AND mcp_chat = 1
     </select>
+
+    <select id="queryById" parameterType="long" resultMap="dataMap">
+        SELECT id,
+               mcp_id,
+               mcp_name,
+               mcp_type,
+               mcp_config,
+               mcp_desc,
+               mcp_timeout,
+               mcp_chat,
+               mcp_status,
+               create_time,
+               update_time
+        FROM ai_mcp
+        WHERE id = #{id}
+    </select>
+
+    <select id="queryPage" resultMap="dataMap">
+        SELECT id,
+               mcp_id,
+               mcp_name,
+               mcp_type,
+               mcp_config,
+               mcp_desc,
+               mcp_timeout,
+               mcp_chat,
+               mcp_status,
+               create_time,
+               update_time
+        FROM ai_mcp
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (mcp_id LIKE CONCAT('%', #{keyword}, '%')
+                  OR mcp_name LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="mcpType != null and mcpType != ''">
+                AND mcp_type = #{mcpType}
+            </if>
+            <if test="status != null">
+                AND mcp_status = #{status}
+            </if>
+        </where>
+        ORDER BY id DESC
+        <if test="offset != null and size != null">
+            LIMIT #{offset}, #{size}
+        </if>
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(1)
+        FROM ai_mcp
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (mcp_id LIKE CONCAT('%', #{keyword}, '%')
+                  OR mcp_name LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="mcpType != null and mcpType != ''">
+                AND mcp_type = #{mcpType}
+            </if>
+            <if test="status != null">
+                AND mcp_status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ai_mcp (mcp_id,
+                            mcp_name,
+                            mcp_type,
+                            mcp_config,
+                            mcp_desc,
+                            mcp_timeout,
+                            mcp_chat,
+                            mcp_status)
+        VALUES (#{mcpId},
+                #{mcpName},
+                #{mcpType},
+                #{mcpConfig},
+                #{mcpDesc},
+                #{mcpTimeout},
+                #{mcpChat},
+                #{mcpStatus})
+    </insert>
+
+    <update id="update">
+        UPDATE ai_mcp
+        <set>
+            <if test="mcpId != null">mcp_id = #{mcpId},</if>
+            <if test="mcpName != null">mcp_name = #{mcpName},</if>
+            <if test="mcpType != null">mcp_type = #{mcpType},</if>
+            <if test="mcpConfig != null">mcp_config = #{mcpConfig},</if>
+            <if test="mcpDesc != null">mcp_desc = #{mcpDesc},</if>
+            <if test="mcpTimeout != null">mcp_timeout = #{mcpTimeout},</if>
+            <if test="mcpChat != null">mcp_chat = #{mcpChat},</if>
+            <if test="mcpStatus != null">mcp_status = #{mcpStatus},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="long">
+        DELETE FROM ai_mcp WHERE id = #{id}
+    </delete>
 
 </mapper>

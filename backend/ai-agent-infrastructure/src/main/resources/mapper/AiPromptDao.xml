@@ -3,23 +3,115 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dasi.infrastructure.persistent.dao.IAiPromptDao">
     <resultMap id="dataMap" type="com.dasi.infrastructure.persistent.po.AiPrompt">
+        <id column="id" property="id"/>
         <result column="prompt_id" property="promptId"/>
         <result column="prompt_name" property="promptName"/>
         <result column="prompt_content" property="promptContent"/>
         <result column="prompt_desc" property="promptDesc"/>
         <result column="prompt_status" property="promptStatus"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <select id="queryByPromptId" parameterType="java.lang.String" resultMap="dataMap">
-        SELECT
-            prompt_id,
-            prompt_name,
-            prompt_content,
-            prompt_desc,
-            prompt_status
+        SELECT id,
+               prompt_id,
+               prompt_name,
+               prompt_content,
+               prompt_desc,
+               prompt_status,
+               create_time,
+               update_time
         FROM ai_prompt
         WHERE prompt_id = #{promptId}
     </select>
+
+    <select id="queryById" parameterType="long" resultMap="dataMap">
+        SELECT id,
+               prompt_id,
+               prompt_name,
+               prompt_content,
+               prompt_desc,
+               prompt_status,
+               create_time,
+               update_time
+        FROM ai_prompt
+        WHERE id = #{id}
+    </select>
+
+    <select id="queryClientIdListByPromptId" resultType="java.lang.String">
+        SELECT client_id
+        FROM ai_config
+        WHERE config_type = 'prompt' AND config_value = #{promptId}
+    </select>
+
+    <select id="queryPage" resultMap="dataMap">
+        SELECT id,
+               prompt_id,
+               prompt_name,
+               prompt_content,
+               prompt_desc,
+               prompt_status,
+               create_time,
+               update_time
+        FROM ai_prompt
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (prompt_id LIKE CONCAT('%', #{keyword}, '%')
+                 OR prompt_name LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="status != null">
+                AND prompt_status = #{status}
+            </if>
+        </where>
+        ORDER BY id DESC
+        <if test="offset != null and size != null">
+            LIMIT #{offset}, #{size}
+        </if>
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(1)
+        FROM ai_prompt
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (prompt_id LIKE CONCAT('%', #{keyword}, '%')
+                 OR prompt_name LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="status != null">
+                AND prompt_status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ai_prompt (prompt_id,
+                               prompt_name,
+                               prompt_content,
+                               prompt_desc,
+                               prompt_status)
+        VALUES (#{promptId},
+                #{promptName},
+                #{promptContent},
+                #{promptDesc},
+                #{promptStatus})
+    </insert>
+
+    <update id="update">
+        UPDATE ai_prompt
+        <set>
+            <if test="promptId != null">prompt_id = #{promptId},</if>
+            <if test="promptName != null">prompt_name = #{promptName},</if>
+            <if test="promptContent != null">prompt_content = #{promptContent},</if>
+            <if test="promptDesc != null">prompt_desc = #{promptDesc},</if>
+            <if test="promptStatus != null">prompt_status = #{promptStatus},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="long">
+        DELETE FROM ai_prompt WHERE id = #{id}
+    </delete>
 
     <update id="loadPromptContent">
         UPDATE ai_prompt

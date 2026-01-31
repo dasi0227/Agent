@@ -27,4 +27,11 @@
         FROM ai_config
         WHERE config_type = #{configType}
     </select>
+
+    <select id="queryClientIdListByConfig" resultType="java.lang.String">
+        SELECT client_id
+        FROM ai_config
+        WHERE config_type = #{configType}
+          AND config_value = #{configValue}
+    </select>
 </mapper>
