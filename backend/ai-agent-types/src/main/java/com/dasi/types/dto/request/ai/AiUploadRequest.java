@@ -1,4 +1,4 @@
-package com.dasi.types.dto.request;
+package com.dasi.types.dto.request.ai;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UploadGitRepoRequest {
+public class AiUploadRequest {
 
     private String repoUrl;
 

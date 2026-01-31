@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dasi.infrastructure.persistent.dao.IAiApiDao">
     <resultMap id="dataMap" type="com.dasi.infrastructure.persistent.po.AiApi">
         <id column="id" property="id"/>
@@ -28,61 +28,53 @@
         WHERE api_id = #{apiId}
     </select>
 
-    <select id="queryById" parameterType="long" resultMap="dataMap">
+    <select id="page" resultMap="dataMap">
         SELECT id,
-               api_id,
-               api_base_url,
-               api_key,
-               api_completions_path,
-               api_embeddings_path,
-               api_status,
-               create_time,
-               update_time
-        FROM ai_api
-        WHERE id = #{id}
-    </select>
-
-    <select id="queryPage" resultMap="dataMap">
-        SELECT id,
-               api_id,
-               api_base_url,
-               api_key,
-               api_completions_path,
-               api_embeddings_path,
-               api_status,
-               create_time,
-               update_time
+        api_id,
+        api_base_url,
+        api_key,
+        api_completions_path,
+        api_embeddings_path,
+        api_status,
+        create_time,
+        update_time
         FROM ai_api
         <where>
             <if test="keyword != null and keyword != ''">
-                AND (api_id LIKE CONCAT('%', #{keyword}, '%')
-                 OR api_base_url LIKE CONCAT('%', #{keyword}, '%'))
-            </if>
-            <if test="status != null">
-                AND api_status = #{status}
+                AND api_id LIKE CONCAT('%', #{idKeyword}, '%')
             </if>
         </where>
         ORDER BY id DESC
         <if test="offset != null and size != null">
-            LIMIT #{offset}, #{size}
+            `LIMIT` #{offset}, #{size}
         </if>
     </select>
 
-    <select id="count" resultType="long">
+    <select id="count" parameterType="java.lang.String" resultType="java.lang.Integer">
         SELECT COUNT(1)
         FROM ai_api
         <where>
-            <if test="keyword != null and keyword != ''">
-                AND (api_id LIKE CONCAT('%', #{keyword}, '%')
-                 OR api_base_url LIKE CONCAT('%', #{keyword}, '%'))
-            </if>
-            <if test="status != null">
-                AND api_status = #{status}
+            <if test="idKeyword != null and idKeyword != ''">
+                AND api_id LIKE CONCAT('%', #{idKeyword}, '%')
             </if>
         </where>
     </select>
 
-    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+    <select id="query" resultMap="dataMap">
+        SELECT id,
+               api_id,
+               api_base_url,
+               api_key,
+               api_completions_path,
+               api_embeddings_path,
+               api_status,
+               create_time,
+               update_time
+        FROM ai_api
+        WHERE api_id = #{apiId}
+    </select>
+
+    <insert id="insert" parameterType="com.dasi.infrastructure.persistent.po.AiApi">
         INSERT INTO ai_api (api_id,
                             api_base_url,
                             api_key,
@@ -97,7 +89,7 @@
                 #{apiStatus})
     </insert>
 
-    <update id="update">
+    <update id="update" parameterType="com.dasi.infrastructure.persistent.po.AiApi">
         UPDATE ai_api
         <set>
             <if test="apiId != null">api_id = #{apiId},</if>
@@ -107,10 +99,20 @@
             <if test="apiEmbeddingsPath != null">api_embeddings_path = #{apiEmbeddingsPath},</if>
             <if test="apiStatus != null">api_status = #{apiStatus},</if>
         </set>
-        WHERE id = #{id}
+        WHERE api_id = #{apiId}
     </update>
 
-    <delete id="delete" parameterType="long">
-        DELETE FROM ai_api WHERE id = #{id}
+    <update id="toggle" parameterType="com.dasi.infrastructure.persistent.po.AiApi">
+        UPDATE ai_api
+        <set>
+            <if test="apiStatus != null">api_status = #{apiStatus},</if>
+        </set>
+        WHERE api_id = #{apiId}
+    </update>
+
+    <delete id="delete" parameterType="java.lang.String">
+        DELETE
+        FROM ai_api
+        WHERE api_id = #{apiId}
     </delete>
 </mapper>

@@ -4,11 +4,17 @@ import com.dasi.domain.admin.model.command.*;
 import com.dasi.domain.admin.model.query.*;
 import com.dasi.domain.admin.model.vo.*;
 import com.dasi.domain.admin.service.IAdminService;
+import com.dasi.types.dto.request.admin.ApiManageRequest;
+import com.dasi.types.dto.request.admin.ApiPageRequest;
+import com.dasi.types.dto.result.PageResult;
 import com.dasi.types.dto.result.Result;
 import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+import javax.websocket.server.PathParam;
 
 @Slf4j
 @RestController
@@ -19,56 +25,33 @@ public class AdminController {
     private IAdminService adminService;
 
     // -------------------- API --------------------
-    @GetMapping("/apis")
-    public Result<PageResult<ApiVO>> listApis(@RequestParam(value = "keyword", required = false) String keyword,
-                                              @RequestParam(value = "idKeyword", required = false) String idKeyword,
-                                              @RequestParam(value = "page", required = false) Integer page,
-                                              @RequestParam(value = "size", required = false) Integer size) {
-        ApiQuery query = ApiQuery.builder()
-                .keyword(keyword != null ? keyword : (idKeyword))
-                .page(page)
-                .size(size)
-                .build();
-
-        return Result.success(adminService.pageApi(query));
+    @GetMapping("/api/page")
+    public Result<PageResult<ApiVO>> apiPage(@Valid @RequestBody ApiPageRequest apiPageRequest) {
+        return Result.success(adminService.apiPage(apiPageRequest));
     }
 
-    @PostMapping("/apis")
-    public Result<ApiVO> createApi(@RequestBody ApiRequest request) {
-        ApiCommand command = ApiCommand.builder()
-                .apiId(request.getApiId())
-                .apiBaseUrl(request.getApiBaseUrl())
-                .apiKey(request.getApiKey())
-                .apiCompletionsPath(request.getApiCompletionsPath())
-                .apiEmbeddingsPath(request.getApiEmbeddingsPath())
-                .apiStatus(request.getApiStatus())
-                .build();
-        return Result.success(adminService.createApi(command));
-    }
-
-    @PutMapping("/apis/{id}")
-    public Result<ApiVO> updateApi(@PathVariable("id") Long id, @RequestBody ApiRequest request) {
-        ApiCommand command = ApiCommand.builder()
-                .id(id)
-                .apiId(request.getApiId())
-                .apiBaseUrl(request.getApiBaseUrl())
-                .apiKey(request.getApiKey())
-                .apiCompletionsPath(request.getApiCompletionsPath())
-                .apiEmbeddingsPath(request.getApiEmbeddingsPath())
-                .apiStatus(request.getApiStatus())
-                .build();
-        return Result.success(adminService.updateApi(command));
-    }
-
-    @DeleteMapping("/apis/{id}")
-    public Result<Void> deleteApi(@PathVariable("id") Long id) {
-        adminService.deleteApi(id);
+    @PostMapping("/api/insert")
+    public Result<Void> apiInsert(@Valid @RequestBody ApiManageRequest apiManageRequest) {
+        adminService.apiInsert(apiManageRequest);
         return Result.success();
     }
 
-    @PutMapping("/apis/{id}/status")
-    public Result<ApiVO> switchApiStatus(@PathVariable("id") Long id, @RequestBody StatusRequest request) {
-        return Result.success(adminService.switchApiStatus(id, request.getStatus()));
+    @PostMapping("/api/update")
+    public Result<Void> apiUpdate(@Valid @RequestBody ApiManageRequest apiManageRequest) {
+        adminService.apiUpdate(apiManageRequest);
+        return Result.success();
+    }
+
+    @PostMapping("/api/delete")
+    public Result<Void> apiDelete(@PathParam("apiId") String apiId) {
+        adminService.apiDelete(apiId);
+        return Result.success();
+    }
+
+    @PutMapping("/api/toggle")
+    public Result<Void> apiToggle(@PathParam("apiId") String apiId, @PathParam("apiStatus") Integer apiStatus) {
+        adminService.apiToggle(apiId, apiStatus);
+        return Result.success();
     }
 
     // -------------------- Model --------------------

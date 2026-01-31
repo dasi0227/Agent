@@ -1,4 +1,4 @@
-package com.dasi.domain.admin.model.vo;
+package com.dasi.types.dto.result;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +13,11 @@ import java.util.List;
 @AllArgsConstructor
 public class PageResult<T> {
 
-    private Long total;
+    private Integer pageNum;
+
+    private Integer pageSum;
+
+    private Integer pageSize;
 
     private List<T> list;
 

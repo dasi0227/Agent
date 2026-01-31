@@ -2,10 +2,10 @@ package com.dasi.trigger.http;
 
 import com.dasi.api.IQueryApi;
 import com.dasi.domain.query.service.IQueryService;
-import com.dasi.types.dto.response.QueryChatClientResponse;
-import com.dasi.types.dto.response.QueryChatMcpResponse;
-import com.dasi.types.dto.response.QueryChatRagResponse;
-import com.dasi.types.dto.response.QueryWorkAgentResponse;
+import com.dasi.types.dto.response.query.QueryChatClientResponse;
+import com.dasi.types.dto.response.query.QueryChatMcpResponse;
+import com.dasi.types.dto.response.query.QueryChatRagResponse;
+import com.dasi.types.dto.response.query.QueryWorkAgentResponse;
 import com.dasi.types.dto.result.Result;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -26,29 +26,25 @@ public class QueryController implements IQueryApi {
     @GetMapping("/chat-client-list")
     @Override
     public Result<List<QueryChatClientResponse>> queryChatClientResponseList() {
-        List<QueryChatClientResponse> clientIdList = queryService.queryChatClientResponseList();
-        return Result.success(clientIdList);
+        return Result.success(queryService.queryChatClientResponseList());
     }
 
     @GetMapping("/chat-mcp-list")
     @Override
     public Result<List<QueryChatMcpResponse>> queryChatMcpResponseList() {
-        List<QueryChatMcpResponse> clientIdList = queryService.queryChatMcpResponseList();
-        return Result.success(clientIdList);
+        return Result.success(queryService.queryChatMcpResponseList());
     }
 
     @GetMapping("/chat-rag-list")
     @Override
     public Result<List<QueryChatRagResponse>> queryRagTagList() {
-        List<QueryChatRagResponse> ragTagList = queryService.queryChatRagList();
-        return Result.success(ragTagList);
+        return Result.success(queryService.queryChatRagList());
     }
 
     @GetMapping("/agent-list")
     @Override
     public Result<List<QueryWorkAgentResponse>> queryWorkAgentResponseList() {
-        List<QueryWorkAgentResponse> queryWorkAgentResponseList = queryService.queryWorkAgentResponseList();
-        return Result.success(queryWorkAgentResponseList);
+        return Result.success(queryService.queryWorkAgentResponseList());
     }
 
 }

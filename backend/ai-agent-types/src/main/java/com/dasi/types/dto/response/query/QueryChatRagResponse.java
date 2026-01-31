@@ -1,4 +1,4 @@
-package com.dasi.types.dto.response;
+package com.dasi.types.dto.response.query;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

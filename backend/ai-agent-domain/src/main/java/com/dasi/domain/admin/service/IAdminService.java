@@ -3,19 +3,22 @@ package com.dasi.domain.admin.service;
 import com.dasi.domain.admin.model.command.*;
 import com.dasi.domain.admin.model.query.*;
 import com.dasi.domain.admin.model.vo.*;
+import com.dasi.types.dto.request.admin.ApiManageRequest;
+import com.dasi.types.dto.request.admin.ApiPageRequest;
+import com.dasi.types.dto.result.PageResult;
 
 public interface IAdminService {
 
     // Api
-    PageResult<ApiVO> pageApi(ApiQuery query);
+    PageResult<ApiVO> apiPage(ApiPageRequest apiPageRequest);
 
-    ApiVO createApi(ApiCommand command);
+    void apiInsert(ApiManageRequest apiManageRequest);
 
-    ApiVO updateApi(ApiCommand command);
+    void apiUpdate(ApiManageRequest apiManageRequest);
 
-    void deleteApi(Long id);
+    void apiDelete(String apiId);
 
-    ApiVO switchApiStatus(Long id, Integer status);
+    void apiToggle(String apiId, Integer status);
 
     // Model
     PageResult<ModelVO> pageModel(ModelQuery query);
@@ -100,4 +103,5 @@ public interface IAdminService {
     UserAdminVO updateUser(UserCommand command);
 
     void deleteUser(Long id);
+
 }

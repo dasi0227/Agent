@@ -1,4 +1,4 @@
-package com.dasi.types.dto.request;
+package com.dasi.types.dto.request.ai;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -12,7 +12,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatRequest {
+public class AiChatRequest {
 
     @NotBlank
     private String clientId;
