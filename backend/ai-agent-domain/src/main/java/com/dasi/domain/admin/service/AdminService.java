@@ -6,6 +6,10 @@ import com.dasi.domain.admin.model.query.*;
 import com.dasi.domain.admin.model.vo.*;
 import com.dasi.domain.admin.repository.IAdminRepository;
 import com.dasi.domain.login.model.User;
+import com.dasi.types.dto.request.admin.ApiManageRequest;
+import com.dasi.types.dto.request.admin.ApiPageRequest;
+import com.dasi.types.dto.result.PageResult;
+import com.dasi.types.exception.AdminException;
 import com.dasi.types.exception.DependencyConflictException;
 import jakarta.annotation.Resource;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,86 +32,53 @@ public class AdminService implements IAdminService {
 
     // -------------------- API --------------------
     @Override
-    public PageResult<ApiVO> pageApi(ApiQuery query) {
-        PageConfig page = resolvePage(query.getPage(), query.getSize());
-        List<AdminApi> list = adminRepository.queryApiList(query.getKeyword(), query.getStatus(), page.offset, page.size);
-        Long total = adminRepository.countApi(query.getKeyword(), query.getStatus());
+    public PageResult<ApiVO> apiPage(ApiPageRequest apiPageRequest) {
+        List<ApiVO> apiVOList = adminRepository.apiPage(apiPageRequest);
+        Integer pageSum = adminRepository.apiCount(apiPageRequest);
         return PageResult.<ApiVO>builder()
-                .list(list.stream().map(this::toApiVO).toList())
-                .total(total == null ? 0L : total)
+                .list(apiVOList)
+                .pageSum(pageSum)
+                .pageNum(apiPageRequest.getPageNum())
+                .pageSize(apiPageRequest.getPageSize())
                 .build();
     }
 
     @Override
-    public ApiVO createApi(ApiCommand command) {
-        validateRequired(command.getApiBaseUrl(), "基础路径不能为空");
-        validateRequired(command.getApiKey(), "密钥不能为空");
-        validateRequired(command.getApiCompletionsPath(), "对话路径不能为空");
-        validateRequired(command.getApiEmbeddingsPath(), "嵌入路径不能为空");
-        validateRequired(command.getApiId(), "API ID 不能为空");
-        String apiId = command.getApiId().trim();
-        if (adminRepository.queryApiByApiId(apiId) != null) {
-            throw new IllegalArgumentException("接口 ID 已存在");
+    public void apiInsert(ApiManageRequest apiManageRequest) {
+        ApiVO apiVO = adminRepository.apiQuery(apiManageRequest.getApiId());
+        if (apiVO != null) {
+            throw new AdminException("API 的 ID 已存在，请修改后重新添加");
         }
-        AdminApi api = AdminApi.builder()
-                .apiId(apiId)
-                .apiBaseUrl(command.getApiBaseUrl().trim())
-                .apiKey(command.getApiKey().trim())
-                .apiCompletionsPath(command.getApiCompletionsPath().trim())
-                .apiEmbeddingsPath(command.getApiEmbeddingsPath().trim())
-                .apiStatus(command.getApiStatus() == null ? 1 : command.getApiStatus())
-                .build();
-        adminRepository.insertApi(api);
-        return toApiVO(api);
+        adminRepository.apiInsert(apiManageRequest);
     }
 
     @Override
-    public ApiVO updateApi(ApiCommand command) {
-        if (command.getId() == null) {
-            throw new IllegalArgumentException("缺少接口 ID");
+    public void apiUpdate(ApiManageRequest apiManageRequest) {
+        ApiVO apiVO = adminRepository.apiQuery(apiManageRequest.getApiId());
+        if (apiVO == null) {
+            throw new AdminException("API 的 ID 不存在，请确认后重新提交");
         }
-        AdminApi db = adminRepository.queryApiById(command.getId());
-        if (db == null) {
-            throw new IllegalArgumentException("接口不存在");
-        }
-        if (StringUtils.hasText(command.getApiId()) && !command.getApiId().equals(db.getApiId())) {
-            if (adminRepository.queryApiByApiId(command.getApiId()) != null) {
-                throw new IllegalArgumentException("接口 ID 已存在");
-            }
-            assertNoDependency("模型", adminRepository.queryModelIdListByApiId(db.getApiId()));
-            db.setApiId(command.getApiId().trim());
-        }
-        if (StringUtils.hasText(command.getApiBaseUrl())) db.setApiBaseUrl(command.getApiBaseUrl().trim());
-        if (StringUtils.hasText(command.getApiKey())) db.setApiKey(command.getApiKey().trim());
-        if (StringUtils.hasText(command.getApiCompletionsPath())) db.setApiCompletionsPath(command.getApiCompletionsPath().trim());
-        if (StringUtils.hasText(command.getApiEmbeddingsPath())) db.setApiEmbeddingsPath(command.getApiEmbeddingsPath().trim());
-        if (command.getApiStatus() != null) db.setApiStatus(command.getApiStatus());
-        adminRepository.updateApi(db);
-        return toApiVO(db);
+        adminRepository.apiUpdate(apiManageRequest);
     }
 
     @Override
-    public void deleteApi(Long id) {
-        AdminApi db = adminRepository.queryApiById(id);
-        if (db == null) {
-            return;
+    public void apiDelete(String apiId) {
+        ApiVO apiVO = adminRepository.apiQuery(apiId);
+        if (apiVO == null) {
+            throw new AdminException("API 的 ID 不存在，请确认后重新删除");
         }
-        assertNoDependency("模型", adminRepository.queryModelIdListByApiId(db.getApiId()));
-        adminRepository.deleteApi(id);
+        assertNoDependency("模型", adminRepository.queryModelIdListByApiId(apiId));
+        adminRepository.apiDelete(apiId);
     }
 
     @Override
-    public ApiVO switchApiStatus(Long id, Integer status) {
-        AdminApi db = adminRepository.queryApiById(id);
-        if (db == null) {
-            throw new IllegalArgumentException("接口不存在");
+    public void apiToggle(String apiId, Integer apiStatus) {
+        ApiVO apiVO = adminRepository.apiQuery(apiId);
+        if (apiVO == null) {
+            throw new AdminException("API 的 ID 不存在，请确认后重新切换");
         }
-        if (status != null && status == 0) {
-            assertNoDependency("模型", adminRepository.queryModelIdListByApiId(db.getApiId()));
-        }
-        db.setApiStatus(status);
-        adminRepository.updateApi(db);
-        return toApiVO(db);
+        assertNoDependency("模型", adminRepository.queryModelIdListByApiId(apiId));
+        adminRepository.apiToggle(apiId, apiStatus);
     }
 
     // -------------------- Model --------------------
@@ -597,7 +568,7 @@ public class AdminService implements IAdminService {
         if (command.getId() == null) {
             throw new IllegalArgumentException("缺少智能体 ID");
         }
-        AdminAgent dbAgent = adminRepository.queryAgentById(command.getId());
+        AdminAgent dbAgent = adminRepository.apiQuery(command.getId());
         if (dbAgent == null) {
             throw new IllegalArgumentException("智能体不存在");
         }
@@ -629,7 +600,7 @@ public class AdminService implements IAdminService {
 
     @Override
     public void deleteAgent(Long id) {
-        AdminAgent db = adminRepository.queryAgentById(id);
+        AdminAgent db = adminRepository.apiQuery(id);
         if (db == null) return;
         assertNoDependency("工作流", extractFlowDependents(adminRepository.queryFlowListByAgentId(db.getAgentId())));
         adminRepository.deleteAgent(id);
@@ -637,7 +608,7 @@ public class AdminService implements IAdminService {
 
     @Override
     public AdminAgentVO switchAgentStatus(Long id, Integer status) {
-        AdminAgent db = adminRepository.queryAgentById(id);
+        AdminAgent db = adminRepository.apiQuery(id);
         if (db == null) throw new IllegalArgumentException("智能体不存在");
         if (status != null && status == 0) {
             assertNoDependency("工作流", extractFlowDependents(adminRepository.queryFlowListByAgentId(db.getAgentId())));
@@ -866,6 +837,4 @@ public class AdminService implements IAdminService {
                 .collect(Collectors.toList());
     }
 
-    private record PageConfig(int offset, int size) {
-    }
 }

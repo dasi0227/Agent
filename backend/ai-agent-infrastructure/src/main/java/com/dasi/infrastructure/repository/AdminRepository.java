@@ -1,11 +1,14 @@
 package com.dasi.infrastructure.repository;
 
 import com.dasi.domain.admin.model.*;
+import com.dasi.domain.admin.model.vo.ApiVO;
 import com.dasi.domain.admin.repository.IAdminRepository;
 import com.dasi.domain.login.model.User;
 import com.dasi.domain.util.IRedisService;
 import com.dasi.infrastructure.persistent.dao.*;
 import com.dasi.infrastructure.persistent.po.*;
+import com.dasi.types.dto.request.admin.ApiManageRequest;
+import com.dasi.types.dto.request.admin.ApiPageRequest;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
@@ -63,55 +66,81 @@ public class AdminRepository implements IAdminRepository {
 
     // -------------------- API --------------------
     @Override
-    public List<AdminApi> queryApiList(String keyword, Integer status, int offset, int size) {
-        List<AiApi> poList = aiApiDao.queryPage(keyword, status, offset, size);
+    public List<ApiVO> apiPage(ApiPageRequest apiPageRequest) {
+
+        String idKeyword = apiPageRequest.getIdKeyword();
+        Integer pageNum = apiPageRequest.getPageNum();
+        Integer pageSize = apiPageRequest.getPageSize();
+
+        Integer offset = (pageNum - 1) * pageSize;
+        List<AiApi> poList = aiApiDao.page(idKeyword, offset, pageSize);
         if (CollectionUtils.isEmpty(poList)) {
             return List.of();
         }
-        return poList.stream().map(this::toAdminApi).toList();
+
+        return poList.stream().map(this::toApiVO).toList();
     }
 
     @Override
-    public Long countApi(String keyword, Integer status) {
-        return aiApiDao.count(keyword, status);
+    public Integer apiCount(ApiPageRequest apiPageRequest) {
+        return aiApiDao.count(apiPageRequest.getIdKeyword());
     }
 
     @Override
-    public AdminApi queryApiById(Long id) {
-        return toAdminApi(aiApiDao.queryById(id));
+    public ApiVO apiQuery(String apiId) {
+        AiApi aiApi = aiApiDao.query(apiId);
+        return toApiVO(aiApi);
     }
 
     @Override
-    public AdminApi queryApiByApiId(String apiId) {
-        return toAdminApi(aiApiDao.queryByApiId(apiId));
+    public void apiInsert(ApiManageRequest apiManageRequest) {
+        AiApi aiApi = toApiPO(apiManageRequest);
+        aiApiDao.insert(aiApi);
     }
 
     @Override
-    public void insertApi(AdminApi api) {
-        AiApi po = toPo(api);
-        aiApiDao.insert(po);
-        api.setId(po.getId());
-        clearApiCache(api.getApiId());
+    public void apiUpdate(ApiManageRequest apiManageRequest) {
+        AiApi aiApi = toApiPO(apiManageRequest);
+        aiApiDao.update(aiApi);
     }
 
     @Override
-    public void updateApi(AdminApi api) {
-        aiApiDao.update(toPo(api));
-        clearApiCache(api.getApiId());
+    public void apiDelete(String apiId) {
+        aiApiDao.delete(apiId);
     }
 
     @Override
-    public void deleteApi(Long id) {
-        AdminApi exist = queryApiById(id);
-        aiApiDao.delete(id);
-        if (exist != null) {
-            clearApiCache(exist.getApiId());
-        }
+    public void apiToggle(String apiId, Integer apiStatus) {
+        AiApi aiApi = AiApi.builder().apiId(apiId).apiStatus(apiStatus).build();
+        aiApiDao.toggle(aiApi);
     }
 
     @Override
     public List<String> queryModelIdListByApiId(String apiId) {
         return aiModelDao.queryModelIdListByApiId(apiId);
+    }
+
+    private ApiVO toApiVO(AiApi aiApi) {
+        return ApiVO.builder()
+                .apiId(aiApi.getApiId())
+                .apiBaseUrl(aiApi.getApiBaseUrl())
+                .apiKey(aiApi.getApiKey())
+                .apiCompletionsPath(aiApi.getApiCompletionsPath())
+                .apiEmbeddingsPath(aiApi.getApiEmbeddingsPath())
+                .apiStatus(aiApi.getApiStatus())
+                .updateTime(aiApi.getUpdateTime())
+                .build();
+    }
+
+    private AiApi toApiPO(ApiManageRequest apiManageRequest) {
+        return AiApi.builder()
+                .apiId(apiManageRequest.getApiId())
+                .apiBaseUrl(apiManageRequest.getApiBaseUrl())
+                .apiKey(apiManageRequest.getApiKey())
+                .apiCompletionsPath(apiManageRequest.getApiCompletionsPath())
+                .apiEmbeddingsPath(apiManageRequest.getApiEmbeddingsPath())
+                .apiStatus(apiManageRequest.getApiStatus())
+                .build();
     }
 
     // -------------------- Model --------------------
@@ -456,7 +485,7 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
-    public AdminAgent queryAgentById(Long id) {
+    public AdminAgent apiQuery(Long id) {
         AiAgent po = aiAgentDao.queryAgentById(id);
         return toAdminAgent(po);
     }
@@ -483,7 +512,7 @@ public class AdminRepository implements IAdminRepository {
 
     @Override
     public void deleteAgent(Long id) {
-        AdminAgent exist = queryAgentById(id);
+        AdminAgent exist = apiQuery(id);
         aiAgentDao.deleteAgent(id);
         if (exist != null) {
             clearAgentCache(exist.getAgentId());
@@ -544,22 +573,6 @@ public class AdminRepository implements IAdminRepository {
     }
 
     // -------------------- convert helpers --------------------
-    private AdminApi toAdminApi(AiApi po) {
-        if (po == null) {
-            return null;
-        }
-        return AdminApi.builder()
-                .id(po.getId())
-                .apiId(po.getApiId())
-                .apiBaseUrl(po.getApiBaseUrl())
-                .apiKey(po.getApiKey())
-                .apiCompletionsPath(po.getApiCompletionsPath())
-                .apiEmbeddingsPath(po.getApiEmbeddingsPath())
-                .apiStatus(po.getApiStatus())
-                .createTime(po.getCreateTime())
-                .updateTime(po.getUpdateTime())
-                .build();
-    }
 
     private AiApi toPo(AdminApi api) {
         if (api == null) {

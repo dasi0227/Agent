@@ -1,10 +1,11 @@
 package com.dasi.infrastructure.persistent.po;
 
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 /** 接口配置表 */
 @Data
@@ -38,4 +39,5 @@ public class AiApi {
 
     /** 更新时间 */
     private LocalDateTime updateTime;
+
 }

@@ -11,18 +11,18 @@ public interface IAiApiDao {
 
     AiApi queryByApiId(String apiId);
 
-    AiApi queryById(Long id);
+    List<AiApi> page(@Param("idKeyword") String idKeyword, @Param("offset") Integer offset, @Param("size") Integer size);
 
-    List<AiApi> queryPage(@Param("keyword") String keyword,
-                          @Param("status") Integer status,
-                          @Param("offset") Integer offset,
-                          @Param("size") Integer size);
+    Integer count(String idKeyword);
 
-    Long count(@Param("keyword") String keyword, @Param("status") Integer status);
+    AiApi query(String apiId);
 
     void insert(AiApi aiApi);
 
     void update(AiApi aiApi);
 
-    void delete(Long id);
+    void delete(String apiId);
+
+    void toggle(AiApi aiApi);
+
 }

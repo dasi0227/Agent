@@ -1,4 +1,4 @@
-package com.dasi.types.dto.response;
+package com.dasi.types.dto.response.query;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,12 +9,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class QueryChatMcpResponse {
+public class QueryChatClientResponse {
 
-    private String mcpId;
+    private String clientId;
 
-    private String mcpName;
+    private String modelName;
 
-    private String mcpDesc;
+    private String clientDesc;
 
 }

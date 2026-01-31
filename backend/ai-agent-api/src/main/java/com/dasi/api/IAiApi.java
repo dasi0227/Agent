@@ -1,9 +1,9 @@
 package com.dasi.api;
 
-import com.dasi.types.dto.request.ArmoryRequest;
-import com.dasi.types.dto.request.ChatRequest;
-import com.dasi.types.dto.request.WorkRequest;
-import com.dasi.types.dto.request.UploadGitRepoRequest;
+import com.dasi.types.dto.request.ai.AiArmoryRequest;
+import com.dasi.types.dto.request.ai.AiChatRequest;
+import com.dasi.types.dto.request.ai.AiWorkRequest;
+import com.dasi.types.dto.request.ai.AiUploadRequest;
 import com.dasi.types.dto.result.Result;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -13,16 +13,16 @@ import java.util.List;
 
 public interface IAiApi {
 
-    SseEmitter execute(WorkRequest workRequest);
+    SseEmitter execute(AiWorkRequest aiWorkRequest);
 
-    String complete(ChatRequest chatRequest);
+    String complete(AiChatRequest aiChatRequest);
 
-    Flux<String> stream(ChatRequest chatRequest);
+    Flux<String> stream(AiChatRequest aiChatRequest);
 
-    Result<Void> armory(ArmoryRequest armoryRequest);
+    Result<Void> armory(AiArmoryRequest aiArmoryRequest);
 
     Result<Void> uploadFile(String ragTag, List<MultipartFile> fileList);
 
-    Result<Void> uploadGitRepo(UploadGitRepoRequest uploadGitRepoRequest);
+    Result<Void> uploadGitRepo(AiUploadRequest aiUploadRequest);
 
 }

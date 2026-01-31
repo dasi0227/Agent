@@ -1,6 +1,6 @@
 package com.dasi.domain.ai.service.rag;
 
-import com.dasi.types.dto.request.UploadGitRepoRequest;
+import com.dasi.types.dto.request.ai.AiUploadRequest;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -53,11 +53,11 @@ public class RagService implements IRagService {
     }
 
     @Override
-    public void uploadGitRepo(UploadGitRepoRequest uploadGitRepoRequest) {
+    public void uploadGitRepo(AiUploadRequest aiUploadRequest) {
 
-        String repoUrl = uploadGitRepoRequest.getRepoUrl();
-        String username = uploadGitRepoRequest.getUsername();
-        String password = uploadGitRepoRequest.getPassword();
+        String repoUrl = aiUploadRequest.getRepoUrl();
+        String username = aiUploadRequest.getUsername();
+        String password = aiUploadRequest.getPassword();
 
         try {
             String[] parts = repoUrl.split("/");

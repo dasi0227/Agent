@@ -1,4 +1,4 @@
-package com.dasi.types.dto.request;
+package com.dasi.types.dto.request.ai;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ArmoryRequest {
+public class AiArmoryRequest {
     
     @NotBlank
     private String armoryType;

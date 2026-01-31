@@ -1,30 +1,31 @@
-package com.dasi.domain.admin.model.vo;
+package com.dasi.types.dto.request.admin;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class ApiVO {
+@NoArgsConstructor
+public class ApiManageRequest {
 
+    @NotBlank
     private String apiId;
 
+    @NotBlank
     private String apiBaseUrl;
 
+    @NotBlank
     private String apiKey;
 
     private String apiCompletionsPath;
 
     private String apiEmbeddingsPath;
 
-    private Integer apiStatus;
-
-    private LocalDateTime updateTime;
+    @Builder.Default
+    private Integer apiStatus = 1;
 
 }

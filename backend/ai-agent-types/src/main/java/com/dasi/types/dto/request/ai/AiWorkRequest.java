@@ -1,4 +1,4 @@
-package com.dasi.types.dto.request;
+package com.dasi.types.dto.request.ai;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class WorkRequest {
+public class AiWorkRequest {
 
     @NotBlank
     private String aiAgentId;

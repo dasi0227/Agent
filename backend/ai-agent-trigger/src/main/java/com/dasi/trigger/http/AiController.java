@@ -5,10 +5,10 @@ import com.dasi.domain.ai.model.entity.ExecuteRequestEntity;
 import com.dasi.domain.ai.service.augment.IAugmentService;
 import com.dasi.domain.ai.service.dispatch.IDispatchService;
 import com.dasi.domain.ai.service.rag.IRagService;
-import com.dasi.types.dto.request.ArmoryRequest;
-import com.dasi.types.dto.request.ChatRequest;
-import com.dasi.types.dto.request.WorkRequest;
-import com.dasi.types.dto.request.UploadGitRepoRequest;
+import com.dasi.types.dto.request.ai.AiChatRequest;
+import com.dasi.types.dto.request.ai.AiArmoryRequest;
+import com.dasi.types.dto.request.ai.AiWorkRequest;
+import com.dasi.types.dto.request.ai.AiUploadRequest;
 import com.dasi.types.dto.result.Result;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -51,16 +51,16 @@ public class AiController implements IAiApi {
 
     @Override
     @PostMapping(value = "/work/execute", produces = "text/event-stream")
-    public SseEmitter execute(@Valid @RequestBody WorkRequest workRequest) {
+    public SseEmitter execute(@Valid @RequestBody AiWorkRequest aiWorkRequest) {
 
         SseEmitter sseEmitter = new SseEmitter(0L);
 
         ExecuteRequestEntity executeRequestEntity = ExecuteRequestEntity.builder()
-                .aiAgentId(workRequest.getAiAgentId())
-                .userMessage(workRequest.getUserMessage())
-                .sessionId(workRequest.getSessionId())
-                .maxRound(workRequest.getMaxRound())
-                .maxRetry(workRequest.getMaxRetry())
+                .aiAgentId(aiWorkRequest.getAiAgentId())
+                .userMessage(aiWorkRequest.getUserMessage())
+                .sessionId(aiWorkRequest.getSessionId())
+                .maxRound(aiWorkRequest.getMaxRound())
+                .maxRetry(aiWorkRequest.getMaxRetry())
                 .build();
 
         dispatchService.dispatchExecuteStrategy(executeRequestEntity, sseEmitter);
@@ -70,18 +70,18 @@ public class AiController implements IAiApi {
 
     @PostMapping("/chat/complete")
     @Override
-    public String complete(@Valid @RequestBody ChatRequest chatRequest) {
+    public String complete(@Valid @RequestBody AiChatRequest aiChatRequest) {
 
-        String clientId = chatRequest.getClientId();
-        String userMessage = chatRequest.getUserMessage();
-        String ragTag = chatRequest.getRagTag();
-        String sessionId = chatRequest.getSessionId();
-        List<String> mcpIdList = chatRequest.getMcpIdList();
-        Double temperature = chatRequest.getTemperature();
-        Double presencePenalty = chatRequest.getPresencePenalty();
-        Integer maxCompletionTokens = chatRequest.getMaxCompletionTokens();
+        String clientId = aiChatRequest.getClientId();
+        String userMessage = aiChatRequest.getUserMessage();
+        String ragTag = aiChatRequest.getRagTag();
+        String sessionId = aiChatRequest.getSessionId();
+        List<String> mcpIdList = aiChatRequest.getMcpIdList();
+        Double temperature = aiChatRequest.getTemperature();
+        Double presencePenalty = aiChatRequest.getPresencePenalty();
+        Integer maxCompletionTokens = aiChatRequest.getMaxCompletionTokens();
 
-        log.info("【模型对话】完整对话开始：chatRequest={}", chatRequest);
+        log.info("【模型对话】完整对话开始：aiChatRequest={}", aiChatRequest);
 
         try {
             ChatClient chatClient = applicationContext.getBean(CLIENT.getBeanName(clientId), ChatClient.class);
@@ -115,18 +115,18 @@ public class AiController implements IAiApi {
 
     @PostMapping("/chat/stream")
     @Override
-    public Flux<String> stream(@Valid @RequestBody ChatRequest chatRequest) {
+    public Flux<String> stream(@Valid @RequestBody AiChatRequest aiChatRequest) {
 
-        String clientId = chatRequest.getClientId();
-        String userMessage = chatRequest.getUserMessage();
-        String ragTag = chatRequest.getRagTag();
-        String sessionId = chatRequest.getSessionId();
-        List<String> mcpIdList = chatRequest.getMcpIdList();
-        Double temperature = chatRequest.getTemperature();
-        Double presencePenalty = chatRequest.getPresencePenalty();
-        Integer maxCompletionTokens = chatRequest.getMaxCompletionTokens();
+        String clientId = aiChatRequest.getClientId();
+        String userMessage = aiChatRequest.getUserMessage();
+        String ragTag = aiChatRequest.getRagTag();
+        String sessionId = aiChatRequest.getSessionId();
+        List<String> mcpIdList = aiChatRequest.getMcpIdList();
+        Double temperature = aiChatRequest.getTemperature();
+        Double presencePenalty = aiChatRequest.getPresencePenalty();
+        Integer maxCompletionTokens = aiChatRequest.getMaxCompletionTokens();
 
-        log.info("【模型对话】流式对话开始：chatRequest={}", chatRequest);
+        log.info("【模型对话】流式对话开始：aiChatRequest={}", aiChatRequest);
 
         try {
             ChatClient chatClient = applicationContext.getBean(CLIENT.getBeanName(clientId), ChatClient.class);
@@ -162,10 +162,10 @@ public class AiController implements IAiApi {
 
     @Override
     @PostMapping(value = "/armory")
-    public Result<Void> armory(@Valid @RequestBody ArmoryRequest armoryRequest) {
+    public Result<Void> armory(@Valid @RequestBody AiArmoryRequest aiArmoryRequest) {
 
-        String armoryType = armoryRequest.getArmoryType();
-        String armoryId = armoryRequest.getArmoryId();
+        String armoryType = aiArmoryRequest.getArmoryType();
+        String armoryId = aiArmoryRequest.getArmoryId();
 
         Set<String> armoryIdSet = new HashSet<>(Set.of(armoryId));
         dispatchService.dispatchArmoryStrategy(armoryType, armoryIdSet);
@@ -183,8 +183,8 @@ public class AiController implements IAiApi {
 
     @PostMapping("/rag/git")
     @Override
-    public Result<Void> uploadGitRepo(@RequestBody UploadGitRepoRequest uploadGitRepoRequest) {
-        ragService.uploadGitRepo(uploadGitRepoRequest);
+    public Result<Void> uploadGitRepo(@RequestBody AiUploadRequest aiUploadRequest) {
+        ragService.uploadGitRepo(aiUploadRequest);
         return Result.success();
     }
 

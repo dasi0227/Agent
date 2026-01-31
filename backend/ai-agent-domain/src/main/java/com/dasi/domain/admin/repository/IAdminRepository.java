@@ -1,26 +1,29 @@
 package com.dasi.domain.admin.repository;
 
 import com.dasi.domain.admin.model.*;
+import com.dasi.domain.admin.model.vo.ApiVO;
 import com.dasi.domain.login.model.User;
+import com.dasi.types.dto.request.admin.ApiManageRequest;
+import com.dasi.types.dto.request.admin.ApiPageRequest;
 
 import java.util.List;
 
 public interface IAdminRepository {
 
     // Api
-    List<AdminApi> queryApiList(String keyword, Integer status, int offset, int size);
+    List<ApiVO> apiPage(ApiPageRequest apiPageRequest);
 
-    Long countApi(String keyword, Integer status);
+    Integer apiCount(ApiPageRequest apiPageRequest);
 
-    AdminApi queryApiById(Long id);
+    ApiVO apiQuery(String apiId);
 
-    AdminApi queryApiByApiId(String apiId);
+    void apiInsert(ApiManageRequest apiManageRequest);
 
-    void insertApi(AdminApi api);
+    void apiUpdate(ApiManageRequest apiManageRequest);
 
-    void updateApi(AdminApi api);
+    void apiDelete(String apiId);
 
-    void deleteApi(Long id);
+    void apiToggle(String apiId, Integer status);
 
     List<String> queryModelIdListByApiId(String apiId);
 
@@ -131,7 +134,7 @@ public interface IAdminRepository {
 
     Long countAgent(String keyword, Integer status, String agentType);
 
-    AdminAgent queryAgentById(Long id);
+    AdminAgent apiQuery(Long id);
 
     AdminAgent queryAgentByAgentId(String agentId);
 
@@ -157,4 +160,5 @@ public interface IAdminRepository {
     void updateUser(User user);
 
     void deleteUser(Long id);
+
 }
