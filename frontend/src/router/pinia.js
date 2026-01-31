@@ -4,6 +4,7 @@ const SETTINGS_KEY = 'chat_settings';
 const CHATS_KEY = 'chat_sessions';
 const AGENT_SETTINGS_KEY = 'agent_settings';
 const AGENT_SESSIONS_KEY = 'agent_sessions';
+const AUTH_KEY = 'auth_info';
 
 const defaultSettings = () => ({
     type: 'complete',
@@ -27,6 +28,61 @@ const loadSettings = () => {
         return defaultSettings();
     }
 };
+
+const loadAuth = () => {
+    try {
+        const raw = localStorage.getItem(AUTH_KEY);
+        if (!raw) {
+            return { token: '', user: null };
+        }
+        const parsed = JSON.parse(raw);
+        return {
+            token: parsed.token || '',
+            user: parsed.user || null
+        };
+    } catch (error) {
+        console.warn('无法解析登录信息，已清空', error);
+        return { token: '', user: null };
+    }
+};
+
+export const getStoredAuth = () => loadAuth();
+
+export const useAuthStore = defineStore('auth', {
+    state: () => ({
+        token: loadAuth().token,
+        user: loadAuth().user
+    }),
+    getters: {
+        isLogin(state) {
+            return Boolean(state.token);
+        },
+        isAdmin(state) {
+            return state.user?.role === 'admin';
+        }
+    },
+    actions: {
+        setAuth({ token, user }) {
+            this.token = token || '';
+            this.user = user || null;
+            this.persist();
+        },
+        clear() {
+            this.token = '';
+            this.user = null;
+            localStorage.removeItem(AUTH_KEY);
+        },
+        persist() {
+            localStorage.setItem(
+                AUTH_KEY,
+                JSON.stringify({
+                    token: this.token,
+                    user: this.user
+                })
+            );
+        }
+    }
+});
 
 export const useSettingsStore = defineStore('settings', {
     state: () => ({

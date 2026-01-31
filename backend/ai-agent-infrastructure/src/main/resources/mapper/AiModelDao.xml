@@ -3,21 +3,120 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dasi.infrastructure.persistent.dao.IAiModelDao">
     <resultMap id="dataMap" type="com.dasi.infrastructure.persistent.po.AiModel">
+        <id column="id" property="id"/>
         <result column="model_id" property="modelId"/>
         <result column="api_id" property="apiId"/>
         <result column="model_name" property="modelName"/>
         <result column="model_type" property="modelType"/>
         <result column="model_status" property="modelStatus"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <select id="queryByModelId" parameterType="java.lang.String" resultMap="dataMap">
-        SELECT model_id,
+        SELECT id,
+               model_id,
                api_id,
                model_name,
                model_type,
-               model_status
+               model_status,
+               create_time,
+               update_time
         FROM ai_model
         WHERE model_id = #{modelId}
     </select>
+
+    <select id="queryById" parameterType="long" resultMap="dataMap">
+        SELECT id,
+               model_id,
+               api_id,
+               model_name,
+               model_type,
+               model_status,
+               create_time,
+               update_time
+        FROM ai_model
+        WHERE id = #{id}
+    </select>
+
+    <select id="queryPage" resultMap="dataMap">
+        SELECT id,
+               model_id,
+               api_id,
+               model_name,
+               model_type,
+               model_status,
+               create_time,
+               update_time
+        FROM ai_model
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (model_id LIKE CONCAT('%', #{keyword}, '%')
+                 OR model_name LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="apiId != null and apiId != ''">
+                AND api_id = #{apiId}
+            </if>
+            <if test="status != null">
+                AND model_status = #{status}
+            </if>
+        </where>
+        ORDER BY id DESC
+        <if test="offset != null and size != null">
+            LIMIT #{offset}, #{size}
+        </if>
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(1)
+        FROM ai_model
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (model_id LIKE CONCAT('%', #{keyword}, '%')
+                 OR model_name LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="apiId != null and apiId != ''">
+                AND api_id = #{apiId}
+            </if>
+            <if test="status != null">
+                AND model_status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <select id="queryModelIdListByApiId" resultType="java.lang.String">
+        SELECT model_id
+        FROM ai_model
+        WHERE api_id = #{apiId}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ai_model (model_id,
+                              api_id,
+                              model_name,
+                              model_type,
+                              model_status)
+        VALUES (#{modelId},
+                #{apiId},
+                #{modelName},
+                #{modelType},
+                #{modelStatus})
+    </insert>
+
+    <update id="update">
+        UPDATE ai_model
+        <set>
+            <if test="modelId != null">model_id = #{modelId},</if>
+            <if test="apiId != null">api_id = #{apiId},</if>
+            <if test="modelName != null">model_name = #{modelName},</if>
+            <if test="modelType != null">model_type = #{modelType},</if>
+            <if test="modelStatus != null">model_status = #{modelStatus},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="long">
+        DELETE FROM ai_model WHERE id = #{id}
+    </delete>
 
 </mapper>

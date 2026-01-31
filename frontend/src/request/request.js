@@ -3,6 +3,7 @@ import axios from 'axios';
 const BASE_URL = 'http://localhost:8066';
 const REQUEST_TIMEOUT = 600000;
 const SETTINGS_KEY = 'chat_settings';
+const AUTH_KEY = 'auth_info';
 
 const http = axios.create({
     baseURL: BASE_URL,
@@ -37,7 +38,7 @@ export const normalizeError = (error) => {
     const isNetworkError = !error.response;
     const status = error.response?.status ?? null;
     const data = error.response?.data ?? {};
-    const message = data.message || data.error || error.message || '请求失败，请稍后再试';
+    const message = data.message || data.error || data.info || error.message || '请求失败，请稍后再试';
     return {
         message,
         status,
@@ -50,14 +51,17 @@ http.interceptors.request.use(
     (config) => {
         const storedSettings = localStorage.getItem(SETTINGS_KEY);
         const settings = storedSettings ? JSON.parse(storedSettings) : {};
+        const storedAuth = localStorage.getItem(AUTH_KEY);
+        const auth = storedAuth ? JSON.parse(storedAuth) : {};
         const isFormData = config.data instanceof FormData;
         config.headers = {
             ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
             Accept: 'application/json',
             ...(config.headers || {})
         };
-        if (settings.token) {
-            config.headers.Authorization = `Bearer ${settings.token}`;
+        const token = auth.token || settings.token;
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
         }
         config.metadata = { startTime: Date.now() };
         console.log(
@@ -81,6 +85,23 @@ http.interceptors.response.use(
         if (duration) {
             console.warn(`[response error] ${error.config?.url || ''} failed in ${duration}`);
         }
+        const status = error?.response?.status;
+        if (status === 401) {
+            localStorage.removeItem(AUTH_KEY);
+            try {
+                const settingsRaw = localStorage.getItem(SETTINGS_KEY);
+                if (settingsRaw) {
+                    const parsed = JSON.parse(settingsRaw);
+                    delete parsed.token;
+                    localStorage.setItem(SETTINGS_KEY, JSON.stringify(parsed));
+                }
+            } catch (_) {
+                // ignore
+            }
+            if (window.location.pathname !== '/login') {
+                window.location.href = '/login';
+            }
+        }
         return Promise.reject(normalizeError(error));
     }
 );
@@ -90,6 +111,18 @@ export async function streamFetch(url, body, onData, onError, onDone, signal) {
     const activeSignal = signal || controller.signal;
     const headers = { Accept: 'text/event-stream', 'Content-Type': 'application/json' };
     try {
+        const storedAuth = localStorage.getItem(AUTH_KEY);
+        const auth = storedAuth ? JSON.parse(storedAuth) : {};
+        const storedSettings = localStorage.getItem(SETTINGS_KEY);
+        const settings = storedSettings ? JSON.parse(storedSettings) : {};
+        const token = auth.token || settings.token;
+        if (token) {
+            headers.Authorization = `Bearer ${token}`;
+        }
+    } catch (_) {
+        // ignore
+    }
+    try {
         console.log(`[stream] POST ${url}`);
         const response = await fetch(url, {
             method: 'POST',
@@ -97,6 +130,13 @@ export async function streamFetch(url, body, onData, onError, onDone, signal) {
             body: JSON.stringify(body || {}),
             signal: activeSignal
         });
+        if (response.status === 401) {
+            localStorage.removeItem(AUTH_KEY);
+            if (window.location.pathname !== '/login') {
+                window.location.href = '/login';
+            }
+            throw new Error('未登录或登录已过期');
+        }
         if (!response.ok || !response.body) {
             throw new Error(`流式请求失败: ${response.status}`);
         }

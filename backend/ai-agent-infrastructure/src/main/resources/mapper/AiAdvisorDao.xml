@@ -3,6 +3,7 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dasi.infrastructure.persistent.dao.IAiAdvisorDao">
     <resultMap id="dataMap" type="com.dasi.infrastructure.persistent.po.AiAdvisor">
+        <id column="id" property="id"/>
         <result column="advisor_id" property="advisorId"/>
         <result column="advisor_name" property="advisorName"/>
         <result column="advisor_type" property="advisorType"/>
@@ -10,18 +11,122 @@
         <result column="advisor_order" property="advisorOrder"/>
         <result column="advisor_param" property="advisorParam"/>
         <result column="advisor_status" property="advisorStatus"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <select id="queryByAdvisorId" parameterType="java.lang.String" resultMap="dataMap">
         SELECT
+            id,
             advisor_id,
             advisor_name,
             advisor_type,
             advisor_desc,
             advisor_order,
             advisor_param,
-            advisor_status
+            advisor_status,
+            create_time,
+            update_time
         FROM ai_advisor
         WHERE advisor_id = #{advisorId}
     </select>
+
+    <select id="queryById" parameterType="long" resultMap="dataMap">
+        SELECT
+            id,
+            advisor_id,
+            advisor_name,
+            advisor_type,
+            advisor_desc,
+            advisor_order,
+            advisor_param,
+            advisor_status,
+            create_time,
+            update_time
+        FROM ai_advisor
+        WHERE id = #{id}
+    </select>
+
+    <select id="queryPage" resultMap="dataMap">
+        SELECT
+            id,
+            advisor_id,
+            advisor_name,
+            advisor_type,
+            advisor_desc,
+            advisor_order,
+            advisor_param,
+            advisor_status,
+            create_time,
+            update_time
+        FROM ai_advisor
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (advisor_id LIKE CONCAT('%', #{keyword}, '%')
+                 OR advisor_name LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="advisorType != null and advisorType != ''">
+                AND advisor_type = #{advisorType}
+            </if>
+            <if test="status != null">
+                AND advisor_status = #{status}
+            </if>
+        </where>
+        ORDER BY id DESC
+        <if test="offset != null and size != null">
+            LIMIT #{offset}, #{size}
+        </if>
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(1)
+        FROM ai_advisor
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (advisor_id LIKE CONCAT('%', #{keyword}, '%')
+                 OR advisor_name LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="advisorType != null and advisorType != ''">
+                AND advisor_type = #{advisorType}
+            </if>
+            <if test="status != null">
+                AND advisor_status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ai_advisor (advisor_id,
+                                advisor_name,
+                                advisor_type,
+                                advisor_desc,
+                                advisor_order,
+                                advisor_param,
+                                advisor_status)
+        VALUES (#{advisorId},
+                #{advisorName},
+                #{advisorType},
+                #{advisorDesc},
+                #{advisorOrder},
+                #{advisorParam},
+                #{advisorStatus})
+    </insert>
+
+    <update id="update">
+        UPDATE ai_advisor
+        <set>
+            <if test="advisorId != null">advisor_id = #{advisorId},</if>
+            <if test="advisorName != null">advisor_name = #{advisorName},</if>
+            <if test="advisorType != null">advisor_type = #{advisorType},</if>
+            <if test="advisorDesc != null">advisor_desc = #{advisorDesc},</if>
+            <if test="advisorOrder != null">advisor_order = #{advisorOrder},</if>
+            <if test="advisorParam != null">advisor_param = #{advisorParam},</if>
+            <if test="advisorStatus != null">advisor_status = #{advisorStatus},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="long">
+        DELETE FROM ai_advisor WHERE id = #{id}
+    </delete>
 </mapper>

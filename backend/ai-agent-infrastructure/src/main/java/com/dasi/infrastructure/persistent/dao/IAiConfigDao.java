@@ -13,4 +13,6 @@ public interface IAiConfigDao {
 
     List<String> queryClientIdListByConfigType(String configType);
 
+    List<String> queryClientIdListByConfig(@Param("configType") String configType, @Param("configValue") String configValue);
+
 }

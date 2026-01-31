@@ -126,14 +126,14 @@ CREATE TABLE `ai_config`
 DROP TABLE IF EXISTS `ai_agent`;
 CREATE TABLE `ai_agent`
 (
-    `id`            BIGINT       NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT '自增 id',
-    `agent_id`      VARCHAR(32)  NOT NULL UNIQUE COMMENT '全局 id',
-    `agent_name`    VARCHAR(32)  NOT NULL COMMENT '智能体名称',
-    `agent_type`    VARCHAR(32)  NOT NULL DEFAULT 'loop' COMMENT '智能体类型',
-    `agent_desc`    VARCHAR(255) NOT NULL DEFAULT '暂无' COMMENT '智能体描述',
-    `agent_status`  TINYINT      NOT NULL DEFAULT '1' COMMENT '状态：0-禁用，1-启用',
-    `create_time`   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time`   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+    `id`           BIGINT       NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT '自增 id',
+    `agent_id`     VARCHAR(32)  NOT NULL UNIQUE COMMENT '全局 id',
+    `agent_name`   VARCHAR(32)  NOT NULL COMMENT '智能体名称',
+    `agent_type`   VARCHAR(32)  NOT NULL DEFAULT 'loop' COMMENT '智能体类型',
+    `agent_desc`   VARCHAR(255) NOT NULL DEFAULT '暂无' COMMENT '智能体描述',
+    `agent_status` TINYINT      NOT NULL DEFAULT '1' COMMENT '状态：0-禁用，1-启用',
+    `create_time`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='智能体配置表';
@@ -165,9 +165,24 @@ CREATE TABLE `ai_flow`
     `client_type` VARCHAR(32) NOT NULL COMMENT '客户端类型',
     `flow_prompt` TEXT        NOT NULL COMMENT '工作流提示词',
     `flow_seq`    TINYINT     NOT NULL COMMENT '工作流顺序',
+    `flow_status` TINYINT     NOT NULL DEFAULT '1' COMMENT '状态：0-禁用，1-启用',
     `create_time` DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     UNIQUE KEY `uk_agent_client_seq` (`agent_id`, `client_id`, `flow_seq`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='智能体-客户端关联表';
+
+# user：系统用户表
+DROP TABLE IF EXISTS `user`;
+CREATE TABLE `user`
+(
+    `id`          BIGINT       NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT '自增 id',
+    `username`    VARCHAR(64)  NOT NULL UNIQUE COMMENT '用户名',
+    `password`    VARCHAR(255) NOT NULL COMMENT '加密后的密码',
+    `role`        VARCHAR(32)  NOT NULL DEFAULT 'account' COMMENT '角色：account / admin',
+    `create_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='系统用户表';

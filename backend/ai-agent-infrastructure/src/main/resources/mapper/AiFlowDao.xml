@@ -3,21 +3,44 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dasi.infrastructure.persistent.dao.IAiFlowDao">
     <resultMap id="dataMap" type="com.dasi.infrastructure.persistent.po.AiFlow">
+        <id column="id" property="id"/>
         <result column="agent_id" property="agentId"/>
         <result column="client_id" property="clientId"/>
         <result column="client_type" property="clientType"/>
         <result column="flow_prompt" property="flowPrompt"/>
         <result column="flow_seq" property="flowSeq"/>
+        <result column="flow_status" property="flowStatus"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <select id="queryByAgentId" parameterType="java.lang.String" resultMap="dataMap">
-        select agent_id,
+        SELECT id,
+               agent_id,
                client_id,
                client_type,
                flow_prompt,
-               flow_seq
-        from ai_flow
+               flow_seq,
+               flow_status,
+               create_time,
+               update_time
+        FROM ai_flow
         WHERE agent_id = #{agentId}
+        ORDER BY flow_seq
+    </select>
+
+    <select id="queryByClientId" parameterType="java.lang.String" resultMap="dataMap">
+        SELECT id,
+               agent_id,
+               client_id,
+               client_type,
+               flow_prompt,
+               flow_seq,
+               flow_status,
+               create_time,
+               update_time
+        FROM ai_flow
+        WHERE client_id = #{clientId}
         ORDER BY flow_seq
     </select>
 
@@ -25,5 +48,101 @@
         UPDATE ai_flow
         SET flow_prompt = #{flowPrompt}
         WHERE client_id = #{clientId}
+    </update>
+
+    <select id="queryById" parameterType="long" resultMap="dataMap">
+        SELECT id,
+               agent_id,
+               client_id,
+               client_type,
+               flow_prompt,
+               flow_seq,
+               flow_status,
+               create_time,
+               update_time
+        FROM ai_flow
+        WHERE id = #{id}
+    </select>
+
+    <select id="queryPage" resultMap="dataMap">
+        SELECT id,
+               agent_id,
+               client_id,
+               client_type,
+               flow_prompt,
+               flow_seq,
+               flow_status,
+               create_time,
+               update_time
+        FROM ai_flow
+        <where>
+            <if test="agentId != null and agentId != ''">
+                AND agent_id = #{agentId}
+            </if>
+            <if test="clientId != null and clientId != ''">
+                AND client_id = #{clientId}
+            </if>
+            <if test="status != null">
+                AND flow_status = #{status}
+            </if>
+        </where>
+        ORDER BY id DESC
+        <if test="offset != null and size != null">
+            LIMIT #{offset}, #{size}
+        </if>
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(1)
+        FROM ai_flow
+        <where>
+            <if test="agentId != null and agentId != ''">
+                AND agent_id = #{agentId}
+            </if>
+            <if test="clientId != null and clientId != ''">
+                AND client_id = #{clientId}
+            </if>
+            <if test="status != null">
+                AND flow_status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ai_flow (agent_id,
+                             client_id,
+                             client_type,
+                             flow_prompt,
+                             flow_seq,
+                             flow_status)
+        VALUES (#{agentId},
+                #{clientId},
+                #{clientType},
+                #{flowPrompt},
+                #{flowSeq},
+                #{flowStatus})
+    </insert>
+
+    <update id="update">
+        UPDATE ai_flow
+        <set>
+            <if test="agentId != null">agent_id = #{agentId},</if>
+            <if test="clientId != null">client_id = #{clientId},</if>
+            <if test="clientType != null">client_type = #{clientType},</if>
+            <if test="flowPrompt != null">flow_prompt = #{flowPrompt},</if>
+            <if test="flowSeq != null">flow_seq = #{flowSeq},</if>
+            <if test="flowStatus != null">flow_status = #{flowStatus},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="long">
+        DELETE FROM ai_flow WHERE id = #{id}
+    </delete>
+
+    <update id="updateStatus">
+        UPDATE ai_flow
+        SET flow_status = #{status}
+        WHERE id = #{id}
     </update>
 </mapper>
