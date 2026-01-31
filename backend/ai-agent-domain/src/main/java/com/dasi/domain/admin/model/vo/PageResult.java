@@ -13,7 +13,8 @@ import java.util.List;
 @AllArgsConstructor
 public class PageResult<T> {
 
+    private Long total;
+
     private List<T> list;
 
-    private Long total;
 }

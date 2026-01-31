@@ -1,21 +1,20 @@
 package com.dasi.domain.query.repository;
 
-import com.dasi.domain.query.model.vo.AiMcpVO;
-import com.dasi.types.dto.response.WorkAgentResponse;
-import com.dasi.types.dto.response.ChatClientResponse;
-import com.dasi.types.dto.response.ChatMcpResponse;
+import com.dasi.types.dto.response.QueryChatClientResponse;
+import com.dasi.types.dto.response.QueryChatMcpResponse;
+import com.dasi.types.dto.response.QueryChatRagResponse;
+import com.dasi.types.dto.response.QueryWorkAgentResponse;
 
 import java.util.List;
 
 public interface IQueryRepository {
 
-    List<ChatClientResponse> queryChatClientResponseList();
+    List<QueryChatClientResponse> queryChatClientResponseList();
 
-    List<String> queryRagTagList();
+    List<QueryChatRagResponse> queryChatRagList();
 
-    List<ChatMcpResponse> queryChatMcpResponseList();
+    List<QueryChatMcpResponse> queryChatMcpResponseList();
 
-    List<AiMcpVO> queryAiMcpVOListByMcpIdList(List<String> mcpIdList);
+    List<QueryWorkAgentResponse> queryWorkAgentResponseList();
 
-    List<WorkAgentResponse> queryAgentResponseList();
 }

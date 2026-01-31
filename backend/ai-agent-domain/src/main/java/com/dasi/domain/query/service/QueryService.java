@@ -1,9 +1,10 @@
 package com.dasi.domain.query.service;
 
 import com.dasi.domain.query.repository.IQueryRepository;
-import com.dasi.types.dto.response.WorkAgentResponse;
-import com.dasi.types.dto.response.ChatClientResponse;
-import com.dasi.types.dto.response.ChatMcpResponse;
+import com.dasi.types.dto.response.QueryChatRagResponse;
+import com.dasi.types.dto.response.QueryWorkAgentResponse;
+import com.dasi.types.dto.response.QueryChatClientResponse;
+import com.dasi.types.dto.response.QueryChatMcpResponse;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -16,23 +17,23 @@ public class QueryService implements IQueryService {
     private IQueryRepository queryRepository;
 
     @Override
-    public List<ChatClientResponse> queryChatClientResponseList() {
+    public List<QueryChatClientResponse> queryChatClientResponseList() {
         return queryRepository.queryChatClientResponseList();
     }
 
     @Override
-    public List<ChatMcpResponse> queryChatMcpResponseList() {
+    public List<QueryChatMcpResponse> queryChatMcpResponseList() {
         return queryRepository.queryChatMcpResponseList();
     }
 
     @Override
-    public List<String> queryRagTagList() {
-        return queryRepository.queryRagTagList();
+    public List<QueryChatRagResponse> queryChatRagList() {
+        return queryRepository.queryChatRagList();
     }
 
     @Override
-    public List<WorkAgentResponse> queryAgentResponseList() {
-        return queryRepository.queryAgentResponseList();
+    public List<QueryWorkAgentResponse> queryWorkAgentResponseList() {
+        return queryRepository.queryWorkAgentResponseList();
     }
 
 }

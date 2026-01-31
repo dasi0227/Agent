@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class WorkAgentResponse {
+public class QueryWorkAgentResponse {
 
     private String agentId;
 

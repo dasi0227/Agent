@@ -1,11 +1,17 @@
 package com.dasi.config;
 
+import com.dasi.trigger.interceptor.AuthInterceptor;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+@Slf4j
 @Configuration
-public class CorsConfig implements WebMvcConfigurer {
+public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
@@ -19,6 +25,20 @@ public class CorsConfig implements WebMvcConfigurer {
                 .exposedHeaders("*")
                 .allowCredentials(true)
                 .maxAge(3600);
+    }
+
+    @Resource
+    private AuthInterceptor authInterceptor;
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(authInterceptor)
+                .addPathPatterns("/api/**");
+    }
+
+    @PostConstruct
+    public void init() {
+        log.info("【初始化配置】WebMvc");
     }
 
 }

@@ -2,9 +2,10 @@ package com.dasi.trigger.http;
 
 import com.dasi.api.IQueryApi;
 import com.dasi.domain.query.service.IQueryService;
-import com.dasi.types.dto.response.WorkAgentResponse;
-import com.dasi.types.dto.response.ChatClientResponse;
-import com.dasi.types.dto.response.ChatMcpResponse;
+import com.dasi.types.dto.response.QueryChatClientResponse;
+import com.dasi.types.dto.response.QueryChatMcpResponse;
+import com.dasi.types.dto.response.QueryChatRagResponse;
+import com.dasi.types.dto.response.QueryWorkAgentResponse;
 import com.dasi.types.dto.result.Result;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -24,30 +25,30 @@ public class QueryController implements IQueryApi {
 
     @GetMapping("/chat-client-list")
     @Override
-    public Result<List<ChatClientResponse>> queryChatClientResponseList() {
-        List<ChatClientResponse> clientIdList = queryService.queryChatClientResponseList();
+    public Result<List<QueryChatClientResponse>> queryChatClientResponseList() {
+        List<QueryChatClientResponse> clientIdList = queryService.queryChatClientResponseList();
         return Result.success(clientIdList);
     }
 
     @GetMapping("/chat-mcp-list")
     @Override
-    public Result<List<ChatMcpResponse>> queryChatMcpResponseList() {
-        List<ChatMcpResponse> clientIdList = queryService.queryChatMcpResponseList();
+    public Result<List<QueryChatMcpResponse>> queryChatMcpResponseList() {
+        List<QueryChatMcpResponse> clientIdList = queryService.queryChatMcpResponseList();
         return Result.success(clientIdList);
     }
 
-    @GetMapping("/rag-tag-list")
+    @GetMapping("/chat-rag-list")
     @Override
-    public Result<List<String>> queryRagTagList() {
-        List<String> ragTagList = queryService.queryRagTagList();
+    public Result<List<QueryChatRagResponse>> queryRagTagList() {
+        List<QueryChatRagResponse> ragTagList = queryService.queryChatRagList();
         return Result.success(ragTagList);
     }
 
     @GetMapping("/agent-list")
     @Override
-    public Result<List<WorkAgentResponse>> queryAgentResponseList() {
-        List<WorkAgentResponse> workAgentResponseList = queryService.queryAgentResponseList();
-        return Result.success(workAgentResponseList);
+    public Result<List<QueryWorkAgentResponse>> queryWorkAgentResponseList() {
+        List<QueryWorkAgentResponse> queryWorkAgentResponseList = queryService.queryWorkAgentResponseList();
+        return Result.success(queryWorkAgentResponseList);
     }
 
 }

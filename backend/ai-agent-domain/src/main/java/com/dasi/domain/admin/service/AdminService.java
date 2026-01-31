@@ -44,7 +44,8 @@ public class AdminService implements IAdminService {
         validateRequired(command.getApiKey(), "密钥不能为空");
         validateRequired(command.getApiCompletionsPath(), "对话路径不能为空");
         validateRequired(command.getApiEmbeddingsPath(), "嵌入路径不能为空");
-        String apiId = StringUtils.hasText(command.getApiId()) ? command.getApiId().trim() : buildId("api");
+        validateRequired(command.getApiId(), "API ID 不能为空");
+        String apiId = command.getApiId().trim();
         if (adminRepository.queryApiByApiId(apiId) != null) {
             throw new IllegalArgumentException("接口 ID 已存在");
         }
@@ -125,7 +126,8 @@ public class AdminService implements IAdminService {
     public ModelVO createModel(ModelCommand command) {
         validateRequired(command.getModelName(), "模型名称不能为空");
         validateRequired(command.getApiId(), "请选择接口");
-        String modelId = StringUtils.hasText(command.getModelId()) ? command.getModelId().trim() : buildId("model");
+        validateRequired(command.getModelId(), "模型 ID 不能为空");
+        String modelId = command.getModelId().trim();
         if (adminRepository.queryModelByModelId(modelId) != null) {
             throw new IllegalArgumentException("模型 ID 已存在");
         }
@@ -201,7 +203,8 @@ public class AdminService implements IAdminService {
         validateRequired(command.getMcpName(), "工具名称不能为空");
         validateRequired(command.getMcpType(), "工具类型不能为空");
         validateRequired(command.getMcpConfig(), "工具配置不能为空");
-        String mcpId = StringUtils.hasText(command.getMcpId()) ? command.getMcpId().trim() : buildId("mcp");
+        validateRequired(command.getMcpId(), "MCP ID 不能为空");
+        String mcpId = command.getMcpId().trim();
         if (adminRepository.queryMcpByMcpId(mcpId) != null) {
             throw new IllegalArgumentException("工具 ID 已存在");
         }
@@ -280,7 +283,8 @@ public class AdminService implements IAdminService {
     public AdvisorVO createAdvisor(AdvisorCommand command) {
         validateRequired(command.getAdvisorName(), "顾问名称不能为空");
         validateRequired(command.getAdvisorType(), "顾问类型不能为空");
-        String advisorId = StringUtils.hasText(command.getAdvisorId()) ? command.getAdvisorId().trim() : buildId("advisor");
+        validateRequired(command.getAdvisorId(), "顾问 ID 不能为空");
+        String advisorId = command.getAdvisorId().trim();
         if (adminRepository.queryAdvisorByAdvisorId(advisorId) != null) {
             throw new IllegalArgumentException("顾问 ID 已存在");
         }
@@ -357,7 +361,8 @@ public class AdminService implements IAdminService {
     public PromptVO createPrompt(PromptCommand command) {
         validateRequired(command.getPromptName(), "提示词名称不能为空");
         validateRequired(command.getPromptContent(), "提示词内容不能为空");
-        String promptId = StringUtils.hasText(command.getPromptId()) ? command.getPromptId().trim() : buildId("prompt");
+        validateRequired(command.getPromptId(), "提示词 ID 不能为空");
+        String promptId = command.getPromptId().trim();
         if (adminRepository.queryPromptByPromptId(promptId) != null) {
             throw new IllegalArgumentException("提示词 ID 已存在");
         }
@@ -431,7 +436,8 @@ public class AdminService implements IAdminService {
         validateRequired(command.getClientName(), "客户端名称不能为空");
         validateRequired(command.getModelId(), "请选择模型");
         validateRequired(command.getClientType(), "客户端类型不能为空");
-        String clientId = StringUtils.hasText(command.getClientId()) ? command.getClientId().trim() : buildId("client");
+        validateRequired(command.getClientId(), "客户端 ID 不能为空");
+        String clientId = command.getClientId().trim();
         if (adminRepository.queryClientByClientId(clientId) != null) {
             throw new IllegalArgumentException("客户端 ID 已存在");
         }
@@ -570,7 +576,8 @@ public class AdminService implements IAdminService {
     @Override
     public AdminAgentVO createAgent(AgentCommand command) {
         validateRequired(command.getAgentName(), "智能体名称不能为空");
-        String agentId = StringUtils.hasText(command.getAgentId()) ? command.getAgentId().trim() : buildId("agent");
+        validateRequired(command.getAgentId(), "智能体 ID 不能为空");
+        String agentId = command.getAgentId().trim();
         if (adminRepository.queryAgentByAgentId(agentId) != null) {
             throw new IllegalArgumentException("智能体 ID 已存在");
         }

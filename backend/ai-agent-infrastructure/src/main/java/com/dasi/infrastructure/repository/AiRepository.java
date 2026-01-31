@@ -462,6 +462,49 @@ public class AiRepository implements IAiRepository {
                 .toList();
     }
 
+    @Override
+    public List<AiMcpVO> queryAiMcpVOListByMcpIdList(List<String> mcpIdList) {
+
+        List<AiMcpVO> aiMcpVOList = new ArrayList<>();
+
+        List<AiMcp> aiMcpList = aiMcpDao.queryByMcpIdList(mcpIdList);
+        if (aiMcpList == null || aiMcpList.isEmpty()) {
+            return aiMcpVOList;
+        }
+
+        for (AiMcp aiMcp : aiMcpList) {
+            AiMcpVO aiMcpVO = AiMcpVO.builder()
+                    .mcpId(aiMcp.getMcpId())
+                    .mcpName(aiMcp.getMcpName())
+                    .mcpType(aiMcp.getMcpType())
+                    .mcpConfig(aiMcp.getMcpConfig())
+                    .mcpTimeout(aiMcp.getMcpTimeout())
+                    .build();
+
+            try {
+                switch (com.dasi.domain.query.model.enumeration.AiMcpType.fromCode(aiMcp.getMcpType())) {
+                    case SSE -> {
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        AiMcpVO.SseConfig sseConfig = objectMapper.readValue(aiMcp.getMcpConfig(), AiMcpVO.SseConfig.class);
+                        aiMcpVO.setSseConfig(sseConfig);
+                    }
+                    case STDIO -> {
+                        Map<String, AiMcpVO.StdioConfig.Stdio> stdio = JSON.parseObject(aiMcp.getMcpConfig(), new TypeReference<>() {});
+                        AiMcpVO.StdioConfig stdioConfig = new AiMcpVO.StdioConfig();
+                        stdioConfig.setStdio(stdio);
+                        aiMcpVO.setStdioConfig(stdioConfig);
+                    }
+                }
+                aiMcpVOList.add(aiMcpVO);
+            } catch (Exception e) {
+                log.error("【查询数据】失败：{}", e.getMessage());
+                throw new IllegalStateException(e);
+            }
+        }
+
+        return aiMcpVOList;
+    }
+
     private AiTaskVO.TaskParam parseTaskParam(String taskParam, String taskId) {
         try {
             if (taskParam == null || taskParam.isBlank()) throw new IllegalStateException("taskParam 为空，taskId=" + taskId);
