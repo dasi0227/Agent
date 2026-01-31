@@ -1,6 +1,7 @@
 package com.dasi.trigger.handler;
 
 import com.dasi.types.dto.result.Result;
+import com.dasi.types.exception.DependencyConflictException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -19,6 +20,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Result<Void> handleValid(MethodArgumentNotValidException e) {
         log.error(e.getMessage(), e);
+        return Result.error(e.getMessage());
+    }
+
+    @ExceptionHandler(DependencyConflictException.class)
+    public Result<Void> handleConflict(DependencyConflictException e) {
+        log.warn("依赖冲突: {}", e.getMessage());
         return Result.error(e.getMessage());
     }
 

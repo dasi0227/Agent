@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Chat from '../components/Chat.vue';
 import Work from '../components/Work.vue';
 import Login from '../components/Login.vue';
-import Admin from '../views/admin/Admin.vue';
+import Admin from '../components/Admin.vue';
 import NotFound from '../components/NotFound.vue';
 import { getStoredAuth } from './pinia';
 
@@ -60,12 +60,16 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
     const auth = getStoredAuth();
+    if (!auth.token && to.path !== '/login') {
+        next({ path: '/login', replace: true });
+        return;
+    }
     if (to.meta?.requiresAuth && !auth.token) {
         next({ path: '/login', replace: true });
         return;
     }
     if (to.meta?.requiresAdmin && auth?.user?.role !== 'admin') {
-        next({ path: '/chat', replace: true });
+        next({ path: '/login', replace: true });
         return;
     }
     if (to.path === '/login' && auth.token) {

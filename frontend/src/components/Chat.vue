@@ -906,11 +906,9 @@ const handleUpload = async () => {
                         >
                             <span class="font-bold text-[var(--text-primary)]">{{ currentModelLabel }}</span>
                             <span
-                                class="text-[var(--text-secondary)] transition-transform duration-200"
-                                :class="{ 'rotate-180': modelDropdownOpen }"
-                            >
-                                ⌄
-                            </span>
+                                class="caret transition-transform duration-150"
+                                :class="modelDropdownOpen ? 'caret-open' : 'caret-closed'"
+                            />
                         </div>
                         <div
                             v-if="modelDropdownOpen && models.length > 0"
@@ -940,11 +938,9 @@ const handleUpload = async () => {
                                 {{ ragTags.find((t) => t.value === currentRagTag)?.label || '不使用知识库' }}
                             </span>
                             <span
-                                class="text-[var(--text-secondary)] transition-transform duration-200"
-                                :class="{ 'rotate-180': ragDropdownOpen }"
-                            >
-                                ⌄
-                            </span>
+                                class="caret transition-transform duration-150"
+                                :class="ragDropdownOpen ? 'caret-open' : 'caret-closed'"
+                            />
                         </div>
                         <div
                             v-if="ragDropdownOpen"
@@ -972,11 +968,9 @@ const handleUpload = async () => {
                         >
                             <span class="font-bold text-[var(--text-primary)]">{{ currentMcpLabel }}</span>
                             <span
-                                class="text-[var(--text-secondary)] transition-transform duration-200"
-                                :class="{ 'rotate-180': mcpDropdownOpen }"
-                            >
-                                ⌄
-                            </span>
+                                class="caret transition-transform duration-150"
+                                :class="mcpDropdownOpen ? 'caret-open' : 'caret-closed'"
+                            />
                         </div>
                         <div
                             v-if="mcpDropdownOpen"
@@ -1391,3 +1385,24 @@ const handleUpload = async () => {
         </div>
     </section>
 </template>
+
+<style scoped>
+.caret {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 7px solid #94a3b8;
+    transform-origin: center;
+    transition: transform 0.15s ease;
+}
+
+.caret-open {
+    transform: rotate(0deg);
+}
+
+.caret-closed {
+    transform: rotate(-90deg);
+}
+</style>
