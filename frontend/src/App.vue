@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { RouterView, useRoute } from 'vue-router';
-import Sidebar from './components/Sidebar.vue';
+import SideBar from './components/SideBar.vue';
 
 const route = useRoute();
 const hideSidebar = computed(() => route.meta?.hideSidebar);
@@ -16,7 +16,7 @@ const hideSidebar = computed(() => route.meta?.hideSidebar);
                 : 'grid-cols-[280px_1fr] max-[960px]:grid-cols-[240px_1fr] max-[720px]:grid-cols-[1fr]'
         ]"
     >
-        <Sidebar v-if="!hideSidebar" />
+        <SideBar v-if="!hideSidebar" />
         <RouterView />
     </div>
 </template>

@@ -6,6 +6,7 @@ import com.dasi.domain.admin.model.query.*;
 import com.dasi.domain.admin.model.vo.*;
 import com.dasi.domain.admin.repository.IAdminRepository;
 import com.dasi.domain.login.model.User;
+import com.dasi.types.exception.DependencyConflictException;
 import jakarta.annotation.Resource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -72,6 +73,7 @@ public class AdminService implements IAdminService {
             if (adminRepository.queryApiByApiId(command.getApiId()) != null) {
                 throw new IllegalArgumentException("接口 ID 已存在");
             }
+            assertNoDependency("模型", adminRepository.queryModelIdListByApiId(db.getApiId()));
             db.setApiId(command.getApiId().trim());
         }
         if (StringUtils.hasText(command.getApiBaseUrl())) db.setApiBaseUrl(command.getApiBaseUrl().trim());
@@ -151,6 +153,7 @@ public class AdminService implements IAdminService {
             if (adminRepository.queryModelByModelId(command.getModelId()) != null) {
                 throw new IllegalArgumentException("模型 ID 已存在");
             }
+            assertNoDependency("客户端", adminRepository.queryClientIdListByModelId(db.getModelId()));
             db.setModelId(command.getModelId().trim());
         }
         if (StringUtils.hasText(command.getApiId())) db.setApiId(command.getApiId().trim());
@@ -227,6 +230,7 @@ public class AdminService implements IAdminService {
             if (adminRepository.queryMcpByMcpId(command.getMcpId()) != null) {
                 throw new IllegalArgumentException("工具 ID 已存在");
             }
+            assertNoDependency("客户端", adminRepository.queryClientIdListByMcpId(db.getMcpId()));
             db.setMcpId(command.getMcpId().trim());
         }
         if (StringUtils.hasText(command.getMcpName())) db.setMcpName(command.getMcpName().trim());
@@ -304,6 +308,7 @@ public class AdminService implements IAdminService {
             if (adminRepository.queryAdvisorByAdvisorId(command.getAdvisorId()) != null) {
                 throw new IllegalArgumentException("顾问 ID 已存在");
             }
+            assertNoDependency("客户端", adminRepository.queryClientIdListByAdvisorId(db.getAdvisorId()));
             db.setAdvisorId(command.getAdvisorId().trim());
         }
         if (StringUtils.hasText(command.getAdvisorName())) db.setAdvisorName(command.getAdvisorName().trim());
@@ -378,6 +383,7 @@ public class AdminService implements IAdminService {
             if (adminRepository.queryPromptByPromptId(command.getPromptId()) != null) {
                 throw new IllegalArgumentException("提示词 ID 已存在");
             }
+            assertNoDependency("客户端", adminRepository.queryClientIdListByPromptId(db.getPromptId()));
             db.setPromptId(command.getPromptId().trim());
         }
         if (StringUtils.hasText(command.getPromptName())) db.setPromptName(command.getPromptName().trim());
@@ -453,6 +459,7 @@ public class AdminService implements IAdminService {
             if (adminRepository.queryClientByClientId(command.getClientId()) != null) {
                 throw new IllegalArgumentException("客户端 ID 已存在");
             }
+            assertNoDependency("工作流", extractFlowDependents(adminRepository.queryFlowListByClientId(db.getClientId())));
             db.setClientId(command.getClientId().trim());
         }
         if (StringUtils.hasText(command.getClientType())) db.setClientType(command.getClientType().trim());
@@ -593,6 +600,7 @@ public class AdminService implements IAdminService {
             if (exists != null && !exists.getId().equals(dbAgent.getId())) {
                 throw new IllegalArgumentException("智能体 ID 已存在");
             }
+            assertNoDependency("工作流", extractFlowDependents(adminRepository.queryFlowListByAgentId(dbAgent.getAgentId())));
             dbAgent.setAgentId(command.getAgentId().trim());
         }
         if (StringUtils.hasText(command.getAgentName())) {
@@ -706,7 +714,7 @@ public class AdminService implements IAdminService {
 
     private void assertNoDependency(String dependentName, List<String> dependents) {
         if (!CollectionUtils.isEmpty(dependents)) {
-            throw new IllegalStateException("存在依赖，无法执行操作，相关" + dependentName + "：" + String.join(",", dependents));
+            throw new DependencyConflictException("存在依赖，无法执行操作，相关" + dependentName + "：" + String.join(",", dependents), dependents);
         }
     }
 

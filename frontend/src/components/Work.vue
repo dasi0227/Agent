@@ -359,11 +359,9 @@ onBeforeUnmount(() => {
                         >
                             <span class="font-bold text-[var(--text-primary)]">{{ currentAgentLabel }}</span>
                             <span
-                                class="text-[var(--text-secondary)] transition-transform duration-200"
-                                :class="{ 'rotate-180': agentDropdownOpen }"
-                            >
-                                ⌄
-                            </span>
+                                class="caret transition-transform duration-150"
+                                :class="agentDropdownOpen ? 'caret-open' : 'caret-closed'"
+                            />
                         </div>
                         <div
                             v-if="agentDropdownOpen && agentOptions.length > 0"
@@ -625,3 +623,24 @@ onBeforeUnmount(() => {
         </div>
     </section>
 </template>
+
+<style scoped>
+.caret {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 7px solid #94a3b8;
+    transform-origin: center;
+    transition: transform 0.15s ease;
+}
+
+.caret-open {
+    transform: rotate(0deg);
+}
+
+.caret-closed {
+    transform: rotate(-90deg);
+}
+</style>
