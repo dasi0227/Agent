@@ -1,7 +1,5 @@
 package com.dasi.domain.login.repository;
 
-import com.dasi.domain.login.model.User;
-
 public interface ILoginRepository {
 
     User queryByUsername(String username);

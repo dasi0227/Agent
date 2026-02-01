@@ -26,7 +26,47 @@
         WHERE model_id = #{modelId}
     </select>
 
-    <select id="queryById" parameterType="long" resultMap="dataMap">
+    <select id="page" resultMap="dataMap">
+        SELECT id,
+               model_id,
+               api_id,
+               model_name,
+               model_type,
+               model_status,
+               create_time,
+               update_time
+        FROM ai_model
+        <where>
+            <if test="idKeyword != null and idKeyword != ''">
+                AND model_id LIKE CONCAT('%', #{idKeyword}, '%')
+            </if>
+            <if test="nameKeyword != null and nameKeyword != ''">
+                AND model_name LIKE CONCAT('%', #{nameKeyword}, '%')
+            </if>
+            <if test="apiId != null and apiId != ''">
+                AND model_name LIKE CONCAT('%', #{apiId}, '%')
+            </if>
+        </where>
+        ORDER BY update_time DESC, id DESC
+        <if test="offset != null and size != null">
+            LIMIT #{offset}, #{size}
+        </if>
+    </select>
+
+    <select id="count" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM ai_model
+        <where>
+            <if test="idKeyword != null and idKeyword != ''">
+                AND model_id LIKE CONCAT('%', #{idKeyword}, '%')
+            </if>
+            <if test="nameKeyword != null and nameKeyword != ''">
+                AND model_name LIKE CONCAT('%', #{nameKeyword}, '%')
+            </if>
+        </where>
+    </select>
+
+    <select id="query" resultMap="dataMap">
         SELECT id,
                model_id,
                api_id,
@@ -39,58 +79,13 @@
         WHERE id = #{id}
     </select>
 
-    <select id="queryPage" resultMap="dataMap">
-        SELECT id,
-               model_id,
-               api_id,
-               model_name,
-               model_type,
-               model_status,
-               create_time,
-               update_time
-        FROM ai_model
-        <where>
-            <if test="keyword != null and keyword != ''">
-                AND (model_id LIKE CONCAT('%', #{keyword}, '%')
-                 OR model_name LIKE CONCAT('%', #{keyword}, '%'))
-            </if>
-            <if test="apiId != null and apiId != ''">
-                AND api_id = #{apiId}
-            </if>
-            <if test="status != null">
-                AND model_status = #{status}
-            </if>
-        </where>
-        ORDER BY id DESC
-        <if test="offset != null and size != null">
-            LIMIT #{offset}, #{size}
-        </if>
-    </select>
-
-    <select id="count" resultType="long">
-        SELECT COUNT(1)
-        FROM ai_model
-        <where>
-            <if test="keyword != null and keyword != ''">
-                AND (model_id LIKE CONCAT('%', #{keyword}, '%')
-                 OR model_name LIKE CONCAT('%', #{keyword}, '%'))
-            </if>
-            <if test="apiId != null and apiId != ''">
-                AND api_id = #{apiId}
-            </if>
-            <if test="status != null">
-                AND model_status = #{status}
-            </if>
-        </where>
-    </select>
-
-    <select id="queryModelIdListByApiId" resultType="java.lang.String">
+    <select id="queryModelIdByApiId" resultType="java.lang.String">
         SELECT model_id
         FROM ai_model
         WHERE api_id = #{apiId}
     </select>
 
-    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="com.dasi.infrastructure.persistent.po.AiModel">
         INSERT INTO ai_model (model_id,
                               api_id,
                               model_name,
@@ -103,7 +98,7 @@
                 #{modelStatus})
     </insert>
 
-    <update id="update">
+    <update id="update" parameterType="com.dasi.infrastructure.persistent.po.AiModel">
         UPDATE ai_model
         <set>
             <if test="modelId != null">model_id = #{modelId},</if>
@@ -115,8 +110,15 @@
         WHERE id = #{id}
     </update>
 
-    <delete id="delete" parameterType="long">
-        DELETE FROM ai_model WHERE id = #{id}
-    </delete>
+    <update id="toggle" parameterType="com.dasi.infrastructure.persistent.po.AiModel">
+        UPDATE ai_model
+        SET model_status = #{modelStatus}
+        WHERE id = #{id}
+    </update>
 
+    <delete id="delete">
+        DELETE
+        FROM ai_model
+        WHERE id = #{id}
+    </delete>
 </mapper>

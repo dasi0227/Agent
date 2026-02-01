@@ -1,6 +1,5 @@
 package com.dasi.infrastructure.repository;
 
-import com.dasi.domain.login.model.User;
 import com.dasi.domain.login.repository.ILoginRepository;
 import com.dasi.infrastructure.persistent.dao.IUserDao;
 import jakarta.annotation.Resource;

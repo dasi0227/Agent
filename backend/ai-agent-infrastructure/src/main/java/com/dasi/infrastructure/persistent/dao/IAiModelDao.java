@@ -11,23 +11,25 @@ public interface IAiModelDao {
 
     AiModel queryByModelId(String modelId);
 
-    AiModel queryById(Long id);
+    List<AiModel> page(@Param("idKeyword") String idKeyword,
+                       @Param("nameKeyword") String nameKeyword,
+                       @Param("apiId") String apiId,
+                       @Param("offset") Integer offset,
+                       @Param("size") Integer size);
 
-    List<AiModel> queryPage(@Param("keyword") String keyword,
-                            @Param("apiId") String apiId,
-                            @Param("status") Integer status,
-                            @Param("offset") Integer offset,
-                            @Param("size") Integer size);
+    Integer count(@Param("idKeyword") String idKeyword,
+                  @Param("nameKeyword") String nameKeyword);
 
-    Long count(@Param("keyword") String keyword,
-               @Param("apiId") String apiId,
-               @Param("status") Integer status);
-
-    List<String> queryModelIdListByApiId(String apiId);
+    AiModel query(@Param("id") Long id);
 
     void insert(AiModel aiModel);
 
     void update(AiModel aiModel);
 
-    void delete(Long id);
+    void delete(@Param("id") Long id);
+
+    void toggle(AiModel aiModel);
+
+    List<String> queryModelIdByApiId(@Param("apiId") String apiId);
+
 }

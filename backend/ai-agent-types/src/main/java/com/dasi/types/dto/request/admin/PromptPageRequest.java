@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PromptPageRequest {
 
-    private String keyword;
     private String idKeyword;
+
     private String nameKeyword;
 
     @NotNull

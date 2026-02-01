@@ -20,6 +20,5 @@ public class ClientVO {
     private String clientName;
     private String clientDesc;
     private Integer clientStatus;
-    private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

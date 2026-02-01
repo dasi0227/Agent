@@ -7,7 +7,6 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.dasi.domain.login.model.JwtProperties;
 import com.dasi.domain.login.model.LoginUser;
-import com.dasi.domain.login.model.User;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;

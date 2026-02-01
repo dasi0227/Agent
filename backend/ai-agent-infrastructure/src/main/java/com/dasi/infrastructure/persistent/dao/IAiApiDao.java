@@ -9,19 +9,21 @@ import java.util.List;
 @Mapper
 public interface IAiApiDao {
 
-    AiApi queryByApiId(String apiId);
+    AiApi queryByApiId(@Param("apiId") String apiId);
 
-    List<AiApi> page(@Param("idKeyword") String idKeyword, @Param("offset") Integer offset, @Param("size") Integer size);
+    List<AiApi> page(@Param("idKeyword") String idKeyword,
+                     @Param("offset") Integer offset,
+                     @Param("size") Integer size);
 
-    Integer count(String idKeyword);
+    Integer count(@Param("idKeyword") String idKeyword);
 
-    AiApi query(String apiId);
+    AiApi query(@Param("id") Long id);
 
     void insert(AiApi aiApi);
 
     void update(AiApi aiApi);
 
-    void delete(String apiId);
+    void delete(@Param("id") Long id);
 
     void toggle(AiApi aiApi);
 

@@ -22,19 +22,19 @@ public class AdminController {
 
     // -------------------- API --------------------
     @PostMapping("/api/page")
-    public Result<PageResult<ApiVO>> apiPage(@Valid @RequestBody ApiPageRequest apiPageRequest) {
-        return Result.success(adminService.apiPage(apiPageRequest));
+    public Result<PageResult<ApiVO>> apiPage(@Valid @RequestBody ApiPageRequest request) {
+        return Result.success(adminService.apiPage(request));
     }
 
     @PostMapping("/api/insert")
-    public Result<Void> apiInsert(@Valid @RequestBody ApiManageRequest apiManageRequest) {
-        adminService.apiInsert(apiManageRequest);
+    public Result<Void> apiInsert(@Valid @RequestBody ApiManageRequest request) {
+        adminService.apiInsert(request);
         return Result.success();
     }
 
     @PostMapping("/api/update")
-    public Result<Void> apiUpdate(@Valid @RequestBody ApiManageRequest apiManageRequest) {
-        adminService.apiUpdate(apiManageRequest);
+    public Result<Void> apiUpdate(@Valid @RequestBody ApiManageRequest request) {
+        adminService.apiUpdate(request);
         return Result.success();
     }
 
@@ -52,211 +52,204 @@ public class AdminController {
 
     // -------------------- Model --------------------
     @PostMapping("/model/page")
-    public Result<PageResult<ModelVO>> modelPage(@Valid @RequestBody ModelPageRequest modelPageRequest) {
-        return Result.success(adminService.modelPage(modelPageRequest));
+    public Result<PageResult<ModelVO>> modelPage(@Valid @RequestBody ModelPageRequest request) {
+        return Result.success(adminService.modelPage(request));
     }
 
     @PostMapping("/model/insert")
-    public Result<ModelVO> createModel(@Valid @RequestBody ModelManageRequest request) {
-        return Result.success(adminService.modelCreate(request));
+    public Result<Void> modelInsert(@Valid @RequestBody ModelManageRequest request) {
+        adminService.modelInsert(request);
+        return Result.success();
     }
 
     @PostMapping("/model/update")
-    public Result<ModelVO> updateModel(@Valid @RequestBody ModelManageRequest request) {
-        return Result.success(adminService.modelUpdate(request));
+    public Result<Void> modelUpdate(@Valid @RequestBody ModelManageRequest request) {
+        adminService.modelUpdate(request);
+        return Result.success();
     }
 
     @PostMapping("/model/delete")
-    public Result<Void> deleteModel(@PathParam("modelId") String modelId) {
+    public Result<Void> modelDelete(@PathParam("modelId") String modelId) {
         adminService.modelDelete(modelId);
         return Result.success();
     }
 
     @PostMapping("/model/toggle")
-    public Result<ModelVO> modelToggle(@PathParam("modelId") String modelId, @PathParam("modelStatus") Integer modelStatus) {
-        return Result.success(adminService.modelToggle(modelId, modelStatus));
+    public Result<Void> modelToggle(@PathParam("modelId") String modelId, @PathParam("modelStatus") Integer modelStatus) {
+        adminService.modelToggle(modelId, modelStatus);
+        return Result.success();
     }
 
     // -------------------- MCP --------------------
     @PostMapping("/mcp/page")
-    public Result<PageResult<McpVO>> listMcps(@Valid @RequestBody McpPageRequest request) {
+    public Result<PageResult<McpVO>> mcpPage(@Valid @RequestBody McpPageRequest request) {
         return Result.success(adminService.mcpPage(request));
     }
 
     @PostMapping("/mcp/insert")
-    public Result<McpVO> createMcp(@Valid @RequestBody McpManageRequest request) {
-        return Result.success(adminService.mcpCreate(request));
+    public Result<Void> mcpInsert(@Valid @RequestBody McpManageRequest request) {
+        adminService.mcpInsert(request);
+        return Result.success();
     }
 
     @PostMapping("/mcp/update")
-    public Result<McpVO> updateMcp(@Valid @RequestBody McpManageRequest request) {
-        return Result.success(adminService.mcpUpdate(request));
+    public Result<Void> mcpUpdate(@Valid @RequestBody McpManageRequest request) {
+        adminService.mcpUpdate(request);
+        return Result.success();
     }
 
     @PostMapping("/mcp/delete")
-    public Result<Void> deleteMcp(@PathParam("mcpId") String mcpId) {
+    public Result<Void> mcpDelete(@PathParam("mcpId") String mcpId) {
         adminService.mcpDelete(mcpId);
         return Result.success();
     }
 
     @PostMapping("/mcp/toggle")
-    public Result<McpVO> mcpToggle(@PathParam("mcpId") String mcpId, @PathParam("mcpStatus") Integer mcpStatus) {
-        return Result.success(adminService.mcpToggle(mcpId, mcpStatus));
+    public Result<Void> mcpToggle(@PathParam("mcpId") String mcpId, @PathParam("mcpStatus") Integer mcpStatus) {
+        adminService.mcpToggle(mcpId, mcpStatus);
+        return Result.success();
     }
 
     // -------------------- Advisor --------------------
     @PostMapping("/advisor/page")
-    public Result<PageResult<AdvisorVO>> listAdvisors(@Valid @RequestBody AdvisorPageRequest request) {
+    public Result<PageResult<AdvisorVO>> advisorPage(@Valid @RequestBody AdvisorPageRequest request) {
         return Result.success(adminService.advisorPage(request));
     }
 
     @PostMapping("/advisor/insert")
-    public Result<AdvisorVO> createAdvisor(@Valid @RequestBody AdvisorManageRequest request) {
-        return Result.success(adminService.advisorCreate(request));
+    public Result<Void> advisorInsert(@Valid @RequestBody AdvisorManageRequest request) {
+        adminService.advisorInsert(request);
+        return Result.success();
     }
 
     @PostMapping("/advisor/update")
-    public Result<AdvisorVO> updateAdvisor(@Valid @RequestBody AdvisorManageRequest request) {
-        return Result.success(adminService.advisorUpdate(request));
+    public Result<Void> advisorUpdate(@Valid @RequestBody AdvisorManageRequest request) {
+        adminService.advisorUpdate(request);
+        return Result.success();
     }
 
     @PostMapping("/advisor/delete")
-    public Result<Void> deleteAdvisor(@PathParam("advisorId") String advisorId) {
+    public Result<Void> advisorDelete(@PathParam("advisorId") String advisorId) {
         adminService.advisorDelete(advisorId);
         return Result.success();
     }
 
     @PostMapping("/advisor/toggle")
-    public Result<AdvisorVO> advisorToggle(@PathParam("advisorId") String advisorId, @PathParam("advisorStatus") Integer advisorStatus) {
-        return Result.success(adminService.advisorToggle(advisorId, advisorStatus));
+    public Result<Void> advisorToggle(@PathParam("advisorId") String advisorId, @PathParam("advisorStatus") Integer advisorStatus) {
+        adminService.advisorToggle(advisorId, advisorStatus);
+        return Result.success();
     }
 
     // -------------------- Prompt --------------------
     @PostMapping("/prompt/page")
-    public Result<PageResult<PromptVO>> listPrompts(@Valid @RequestBody PromptPageRequest request) {
+    public Result<PageResult<PromptVO>> promptPage(@Valid @RequestBody PromptPageRequest request) {
         return Result.success(adminService.promptPage(request));
     }
 
     @PostMapping("/prompt/insert")
-    public Result<PromptVO> createPrompt(@Valid @RequestBody PromptManageRequest request) {
-        return Result.success(adminService.promptCreate(request));
+    public Result<Void> promptInsert(@Valid @RequestBody PromptManageRequest request) {
+        adminService.promptInsert(request);
+        return Result.success();
     }
 
     @PostMapping("/prompt/update")
-    public Result<PromptVO> updatePrompt(@Valid @RequestBody PromptManageRequest request) {
-        return Result.success(adminService.promptUpdate(request));
+    public Result<Void> promptUpdate(@Valid @RequestBody PromptManageRequest request) {
+        adminService.promptUpdate(request);
+        return Result.success();
     }
 
     @PostMapping("/prompt/delete")
-    public Result<Void> deletePrompt(@PathParam("promptId") String promptId) {
+    public Result<Void> promptDelete(@PathParam("promptId") String promptId) {
         adminService.promptDelete(promptId);
         return Result.success();
     }
 
     @PostMapping("/prompt/toggle")
-    public Result<PromptVO> promptToggle(@PathParam("promptId") String promptId, @PathParam("promptStatus") Integer promptStatus) {
-        return Result.success(adminService.promptToggle(promptId, promptStatus));
+    public Result<Void> promptToggle(@PathParam("promptId") String promptId, @PathParam("promptStatus") Integer promptStatus) {
+        adminService.promptToggle(promptId, promptStatus);
+        return Result.success();
     }
 
     // -------------------- Client --------------------
     @PostMapping("/client/page")
-    public Result<PageResult<ClientVO>> listClients(@Valid @RequestBody ClientPageRequest request) {
+    public Result<PageResult<ClientVO>> clientPage(@Valid @RequestBody ClientPageRequest request) {
         return Result.success(adminService.clientPage(request));
     }
 
     @PostMapping("/client/insert")
-    public Result<ClientVO> createClient(@Valid @RequestBody ClientManageRequest request) {
-        return Result.success(adminService.clientCreate(request));
+    public Result<Void> clientInsert(@Valid @RequestBody ClientManageRequest request) {
+        adminService.clientInsert(request);
+        return Result.success();
     }
 
     @PostMapping("/client/update")
-    public Result<ClientVO> updateClient(@Valid @RequestBody ClientManageRequest request) {
-        return Result.success(adminService.clientUpdate(request));
+    public Result<Void> clientUpdate(@Valid @RequestBody ClientManageRequest request) {
+        adminService.clientUpdate(request);
+        return Result.success();
     }
 
     @PostMapping("/client/delete")
-    public Result<Void> deleteClient(@PathParam("clientId") String clientId) {
+    public Result<Void> clientDelete(@PathParam("clientId") String clientId) {
         adminService.clientDelete(clientId);
         return Result.success();
     }
 
     @PostMapping("/client/toggle")
-    public Result<ClientVO> clientToggle(@PathParam("clientId") String clientId, @PathParam("clientStatus") Integer clientStatus) {
-        return Result.success(adminService.clientToggle(clientId, clientStatus));
-    }
-
-    // -------------------- Flow --------------------
-    @PostMapping("/flow/page")
-    public Result<PageResult<FlowVO>> listFlows(@Valid @RequestBody FlowPageRequest request) {
-        return Result.success(adminService.flowPage(request));
-    }
-
-    @PostMapping("/flow/insert")
-    public Result<FlowVO> createFlow(@Valid @RequestBody FlowManageRequest request) {
-        return Result.success(adminService.flowCreate(request));
-    }
-
-    @PostMapping("/flow/update")
-    public Result<FlowVO> updateFlow(@Valid @RequestBody FlowManageRequest request) {
-        return Result.success(adminService.flowUpdate(request));
-    }
-
-    @PostMapping("/flow/delete")
-    public Result<Void> deleteFlow(@PathParam("flowId") String flowId) {
-        adminService.flowDelete(flowId);
+    public Result<Void> clientToggle(@PathParam("clientId") String clientId, @PathParam("clientStatus") Integer clientStatus) {
+        adminService.clientToggle(clientId, clientStatus);
         return Result.success();
-    }
-
-    @PostMapping("/flow/toggle")
-    public Result<FlowVO> flowToggle(@PathParam("flowId") String flowId, @PathParam("flowStatus") Integer flowStatus) {
-        return Result.success(adminService.flowToggle(flowId, flowStatus));
     }
 
     // -------------------- Agent --------------------
     @PostMapping("/agent/page")
-    public Result<PageResult<AdminAgentVO>> listAgents(@Valid @RequestBody AgentPageRequest request) {
+    public Result<PageResult<AdminAgentVO>> agentPage(@Valid @RequestBody AgentPageRequest request) {
         return Result.success(adminService.agentPage(request));
     }
 
     @PostMapping("/agent/insert")
-    public Result<AdminAgentVO> createAgent(@Valid @RequestBody AgentManageRequest request) {
-        return Result.success(adminService.agentCreate(request));
+    public Result<Void> agentInsert(@Valid @RequestBody AgentManageRequest request) {
+        adminService.agentInsert(request);
+        return Result.success();
     }
 
     @PostMapping("/agent/update")
-    public Result<AdminAgentVO> updateAgent(@Valid @RequestBody AgentManageRequest request) {
-        return Result.success(adminService.agentUpdate(request));
+    public Result<Void> agentUpdate(@Valid @RequestBody AgentManageRequest request) {
+        adminService.agentUpdate(request);
+        return Result.success();
     }
 
     @PostMapping("/agent/delete")
-    public Result<Void> deleteAgent(@PathParam("agentId") String agentId) {
+    public Result<Void> agentDelete(@PathParam("agentId") String agentId) {
         adminService.agentDelete(agentId);
         return Result.success();
     }
 
     @PostMapping("/agent/toggle")
-    public Result<AdminAgentVO> agentToggle(@PathParam("agentId") String agentId, @PathParam("agentStatus") Integer agentStatus) {
-        return Result.success(adminService.agentToggle(agentId, agentStatus));
+    public Result<Void> agentToggle(@PathParam("agentId") String agentId, @PathParam("agentStatus") Integer agentStatus) {
+        adminService.agentToggle(agentId, agentStatus);
+        return Result.success();
     }
 
     // -------------------- User --------------------
     @PostMapping("/user/page")
-    public Result<PageResult<UserAdminVO>> listUsers(@Valid @RequestBody UserPageRequest request) {
+    public Result<PageResult<UserVO>> userPage(@Valid @RequestBody UserPageRequest request) {
         return Result.success(adminService.userPage(request));
     }
 
     @PostMapping("/user/insert")
-    public Result<UserAdminVO> createUser(@Valid @RequestBody UserManageRequest request) {
-        return Result.success(adminService.userCreate(request));
+    public Result<Void> userInsert(@Valid @RequestBody UserManageRequest request) {
+        adminService.userInsert(request);
+        return Result.success();
     }
 
     @PostMapping("/user/update")
-    public Result<UserAdminVO> updateUser(@Valid @RequestBody UserManageRequest request) {
-        return Result.success(adminService.userUpdate(request));
+    public Result<Void> userUpdate(@Valid @RequestBody UserManageRequest request) {
+        adminService.userUpdate(request);
+        return Result.success();
     }
 
     @PostMapping("/user/delete")
-    public Result<Void> deleteUser(@PathParam("userId") String userId) {
+    public Result<Void> userDelete(@PathParam("userId") String userId) {
         adminService.userDelete(userId);
         return Result.success();
     }

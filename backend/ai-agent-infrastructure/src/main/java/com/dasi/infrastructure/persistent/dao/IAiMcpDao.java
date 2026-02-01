@@ -15,22 +15,22 @@ public interface IAiMcpDao {
 
     List<AiMcp> queryByMcpIdList(List<String> mcpIdList);
 
-    AiMcp queryById(Long id);
+    List<AiMcp> page(@Param("idKeyword") String idKeyword,
+                     @Param("nameKeyword") String nameKeyword,
+                     @Param("offset") Integer offset,
+                     @Param("size") Integer size);
 
-    List<AiMcp> queryPage(@Param("keyword") String keyword,
-                          @Param("mcpType") String mcpType,
-                          @Param("status") Integer status,
-                          @Param("offset") Integer offset,
-                          @Param("size") Integer size);
+    Integer count(@Param("idKeyword") String idKeyword,
+                  @Param("nameKeyword") String nameKeyword);
 
-    Long count(@Param("keyword") String keyword,
-               @Param("mcpType") String mcpType,
-               @Param("status") Integer status);
+    AiMcp query(@Param("id") Long id);
 
     void insert(AiMcp aiMcp);
 
     void update(AiMcp aiMcp);
 
-    void delete(Long id);
+    void delete(@Param("id") Long id);
+
+    void toggle(AiMcp aiMcp);
 
 }

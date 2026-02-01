@@ -12,20 +12,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdminAgentVO {
-
     private Long id;
-
     private String agentId;
-
     private String agentName;
-
     private String agentType;
-
     private String agentDesc;
-
     private Integer agentStatus;
-
-    private LocalDateTime createTime;
-
     private LocalDateTime updateTime;
 }

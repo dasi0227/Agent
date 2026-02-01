@@ -12,26 +12,28 @@ public interface IAiClientDao {
 
     List<AiClient> queryChatClientList();
 
-    AiClient queryById(Long id);
+    List<AiClient> page(@Param("idKeyword") String idKeyword,
+                        @Param("nameKeyword") String nameKeyword,
+                        @Param("modelId") String modelId,
+                        @Param("clientType") String clientType,
+                        @Param("offset") Integer offset,
+                        @Param("size") Integer size);
 
-    List<AiClient> queryPage(@Param("keyword") String keyword,
-                             @Param("modelId") String modelId,
-                             @Param("clientType") String clientType,
-                             @Param("status") Integer status,
-                             @Param("offset") Integer offset,
-                             @Param("size") Integer size);
+    Integer count(@Param("idKeyword") String idKeyword,
+                  @Param("nameKeyword") String nameKeyword,
+                  @Param("modelId") String modelId,
+                  @Param("clientType") String clientType);
 
-    Long count(@Param("keyword") String keyword,
-               @Param("modelId") String modelId,
-               @Param("clientType") String clientType,
-               @Param("status") Integer status);
+    AiClient query(@Param("id") Long id);
 
     void insert(AiClient aiClient);
 
     void update(AiClient aiClient);
 
-    void delete(Long id);
+    void delete(@Param("id") Long id);
 
-    List<String> queryClientIdListByModelId(String modelId);
+    void toggle(AiClient aiClient);
+
+    List<String> queryClientIdByModelId(@Param("modelId") String modelId);
 
 }

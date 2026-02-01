@@ -14,7 +14,14 @@
     </resultMap>
 
     <select id="queryAgentList" resultMap="dataMap">
-        SELECT id, agent_id, agent_name, agent_type, agent_desc, agent_status, create_time, update_time
+        SELECT id,
+               agent_id,
+               agent_name,
+               agent_type,
+               agent_desc,
+               agent_status,
+               create_time,
+               update_time
         FROM ai_agent
         WHERE agent_status = 1
     </select>
@@ -25,43 +32,42 @@
         WHERE agent_id = #{agentId}
     </select>
 
-    <select id="queryAgentById" resultMap="dataMap">
-        SELECT id, agent_id, agent_name, agent_type, agent_desc, agent_status, create_time, update_time
-        FROM ai_agent
-        WHERE id = #{id}
-    </select>
-
-    <select id="queryAgentPage" resultMap="dataMap">
-        SELECT id, agent_id, agent_name, agent_type, agent_desc, agent_status, create_time, update_time
+    <select id="page" resultMap="dataMap">
+        SELECT id,
+               agent_id,
+               agent_name,
+               agent_type,
+               agent_desc,
+               agent_status,
+               create_time,
+               update_time
         FROM ai_agent
         <where>
-            <if test="keyword != null and keyword != ''">
-                AND (agent_id LIKE CONCAT('%', #{keyword}, '%')
-                    OR agent_name LIKE CONCAT('%', #{keyword}, '%'))
+            <if test="idKeyword != null and idKeyword != ''">
+                AND agent_id LIKE CONCAT('%', #{idKeyword}, '%')
             </if>
-            <if test="agentStatus != null">
-                AND agent_status = #{agentStatus}
+            <if test="nameKeyword != null and nameKeyword != ''">
+                AND agent_name LIKE CONCAT('%', #{nameKeyword}, '%')
             </if>
             <if test="agentType != null and agentType != ''">
                 AND agent_type = #{agentType}
             </if>
         </where>
-        ORDER BY id DESC
+        ORDER BY update_time DESC, id DESC
         <if test="offset != null and size != null">
             LIMIT #{offset}, #{size}
         </if>
     </select>
 
-    <select id="countAgent" resultType="long">
+    <select id="count" resultType="java.lang.Integer">
         SELECT COUNT(1)
         FROM ai_agent
         <where>
-            <if test="keyword != null and keyword != ''">
-                AND (agent_id LIKE CONCAT('%', #{keyword}, '%')
-                    OR agent_name LIKE CONCAT('%', #{keyword}, '%'))
+            <if test="idKeyword != null and idKeyword != ''">
+                AND agent_id LIKE CONCAT('%', #{idKeyword}, '%')
             </if>
-            <if test="agentStatus != null">
-                AND agent_status = #{agentStatus}
+            <if test="nameKeyword != null and nameKeyword != ''">
+                AND agent_name LIKE CONCAT('%', #{nameKeyword}, '%')
             </if>
             <if test="agentType != null and agentType != ''">
                 AND agent_type = #{agentType}
@@ -69,12 +75,33 @@
         </where>
     </select>
 
-    <insert id="insertAgent" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO ai_agent (agent_id, agent_name, agent_type, agent_desc, agent_status)
-        VALUES (#{agentId}, #{agentName}, #{agentType}, #{agentDesc}, #{agentStatus})
+    <select id="query" resultMap="dataMap">
+        SELECT id,
+               agent_id,
+               agent_name,
+               agent_type,
+               agent_desc,
+               agent_status,
+               create_time,
+               update_time
+        FROM ai_agent
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.dasi.infrastructure.persistent.po.AiAgent">
+        INSERT INTO ai_agent (agent_id,
+                              agent_name,
+                              agent_type,
+                              agent_desc,
+                              agent_status)
+        VALUES (#{agentId},
+                #{agentName},
+                #{agentType},
+                #{agentDesc},
+                #{agentStatus})
     </insert>
 
-    <update id="updateAgent">
+    <update id="update" parameterType="com.dasi.infrastructure.persistent.po.AiAgent">
         UPDATE ai_agent
         <set>
             <if test="agentId != null">agent_id = #{agentId},</if>
@@ -86,8 +113,15 @@
         WHERE id = #{id}
     </update>
 
-    <delete id="deleteAgent" parameterType="long">
-        DELETE FROM ai_agent WHERE id = #{id}
-    </delete>
+    <update id="toggle" parameterType="com.dasi.infrastructure.persistent.po.AiAgent">
+        UPDATE ai_agent
+        SET agent_status = #{agentStatus}
+        WHERE id = #{id}
+    </update>
 
+    <delete id="delete">
+        DELETE
+        FROM ai_agent
+        WHERE id = #{id}
+    </delete>
 </mapper>

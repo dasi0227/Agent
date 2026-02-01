@@ -20,6 +20,5 @@ public class AdvisorVO {
     private Integer advisorOrder;
     private String advisorParam;
     private Integer advisorStatus;
-    private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

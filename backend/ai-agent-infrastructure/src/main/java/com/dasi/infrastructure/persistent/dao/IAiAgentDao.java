@@ -11,24 +11,26 @@ public interface IAiAgentDao {
 
     AiAgent queryAgentByAgentId(String agentId);
 
-    AiAgent queryAgentById(Long id);
-
     List<AiAgent> queryAgentList();
 
-    List<AiAgent> queryAgentPage(@Param("keyword") String keyword,
-                                 @Param("agentStatus") Integer agentStatus,
-                                 @Param("agentType") String agentType,
-                                 @Param("offset") Integer offset,
-                                 @Param("size") Integer size);
+    List<AiAgent> page(@Param("idKeyword") String idKeyword,
+                       @Param("nameKeyword") String nameKeyword,
+                       @Param("agentType") String agentType,
+                       @Param("offset") Integer offset,
+                       @Param("size") Integer size);
 
-    Long countAgent(@Param("keyword") String keyword,
-                    @Param("agentStatus") Integer agentStatus,
-                    @Param("agentType") String agentType);
+    Integer count(@Param("idKeyword") String idKeyword,
+                  @Param("nameKeyword") String nameKeyword,
+                  @Param("agentType") String agentType);
 
-    void insertAgent(AiAgent aiAgent);
+    AiAgent query(@Param("id") Long id);
 
-    void updateAgent(AiAgent aiAgent);
+    void insert(AiAgent aiAgent);
 
-    void deleteAgent(Long id);
+    void update(AiAgent aiAgent);
+
+    void delete(@Param("id") Long id);
+
+    void toggle(AiAgent aiAgent);
 
 }

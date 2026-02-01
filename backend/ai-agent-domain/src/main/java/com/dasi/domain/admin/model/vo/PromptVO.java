@@ -18,6 +18,5 @@ public class PromptVO {
     private String promptContent;
     private String promptDesc;
     private Integer promptStatus;
-    private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }
