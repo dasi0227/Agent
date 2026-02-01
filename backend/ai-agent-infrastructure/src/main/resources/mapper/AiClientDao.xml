@@ -30,21 +30,6 @@
         WHERE client_id = #{clientId}
     </select>
 
-    <select id="queryById" parameterType="long" resultMap="dataMap">
-        SELECT id,
-               client_id,
-               client_type,
-               model_id,
-               model_name,
-               client_name,
-               client_desc,
-               client_status,
-               create_time,
-               update_time
-        FROM ai_client
-        WHERE id = #{id}
-    </select>
-
     <select id="queryChatClientList" resultMap="dataMap">
         SELECT id,
                client_id,

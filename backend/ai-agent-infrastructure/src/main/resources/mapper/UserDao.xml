@@ -12,12 +12,6 @@
         <result column="update_time" property="updateTime"/>
     </resultMap>
 
-    <select id="queryById" parameterType="long" resultMap="dataMap">
-        SELECT id, username, password, role, create_time, update_time
-        FROM `user`
-        WHERE id = #{id}
-    </select>
-
     <select id="queryByUsername" parameterType="string" resultMap="dataMap">
         SELECT id, username, password, role, create_time, update_time
         FROM `user`
