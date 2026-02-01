@@ -4,7 +4,8 @@ import com.dasi.domain.admin.model.vo.*;
 import com.dasi.domain.admin.repository.IAdminRepository;
 import com.dasi.infrastructure.persistent.dao.*;
 import com.dasi.infrastructure.persistent.po.*;
-import com.dasi.types.dto.request.admin.*;
+import com.dasi.types.dto.request.admin.manage.*;
+import com.dasi.types.dto.request.admin.page.*;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
@@ -43,6 +44,9 @@ public class AdminRepository implements IAdminRepository {
     @Resource
     private IUserDao userDao;
 
+    @Resource
+    private IAiFlowDao aiFlowDao;
+
     // -------------------- API --------------------
     @Override
     public List<ApiVO> apiPage(ApiPageRequest apiPageRequest) {
@@ -67,8 +71,13 @@ public class AdminRepository implements IAdminRepository {
 
     @Override
     public ApiVO apiQuery(Long id) {
-        AiApi aiApi = aiApiDao.query(id);
+        AiApi aiApi = aiApiDao.queryById(id);
         return toApiVO(aiApi);
+    }
+
+    @Override
+    public ApiVO apiQuery(String apiId) {
+        return toApiVO(aiApiDao.queryByApiId(apiId));
     }
 
     @Override
@@ -148,8 +157,13 @@ public class AdminRepository implements IAdminRepository {
 
     @Override
     public ModelVO modelQuery(Long id) {
-        AiModel po = aiModelDao.query(id);
+        AiModel po = aiModelDao.queryById(id);
         return toModelVO(po);
+    }
+
+    @Override
+    public ModelVO modelQuery(String modelId) {
+        return toModelVO(aiModelDao.queryByModelId(modelId));
     }
 
     @Override
@@ -220,7 +234,12 @@ public class AdminRepository implements IAdminRepository {
 
     @Override
     public McpVO mcpQuery(Long id) {
-        return toMcpVO(aiMcpDao.query(id));
+        return toMcpVO(aiMcpDao.queryById(id));
+    }
+
+    @Override
+    public McpVO mcpQuery(String mcpId) {
+        return toMcpVO(aiMcpDao.queryByMcpId(mcpId));
     }
 
     @Override
@@ -298,7 +317,12 @@ public class AdminRepository implements IAdminRepository {
 
     @Override
     public AdvisorVO advisorQuery(Long id) {
-        return toAdvisorVO(aiAdvisorDao.query(id));
+        return toAdvisorVO(aiAdvisorDao.queryById(id));
+    }
+
+    @Override
+    public AdvisorVO advisorQuery(String advisorId) {
+        return toAdvisorVO(aiAdvisorDao.queryByAdvisorId(advisorId));
     }
 
     @Override
@@ -373,7 +397,12 @@ public class AdminRepository implements IAdminRepository {
 
     @Override
     public PromptVO promptQuery(Long id) {
-        return toPromptVO(aiPromptDao.query(id));
+        return toPromptVO(aiPromptDao.queryById(id));
+    }
+
+    @Override
+    public PromptVO promptQuery(String promptId) {
+        return toPromptVO(aiPromptDao.queryByPromptId(promptId));
     }
 
     @Override
@@ -444,7 +473,12 @@ public class AdminRepository implements IAdminRepository {
 
     @Override
     public ClientVO clientQuery(Long id) {
-        return toClientVO(aiClientDao.query(id));
+        return toClientVO(aiClientDao.queryById(id));
+    }
+
+    @Override
+    public ClientVO clientQuery(String clientId) {
+        return toClientVO(aiClientDao.queryByClientId(clientId));
     }
 
     @Override
@@ -520,7 +554,12 @@ public class AdminRepository implements IAdminRepository {
 
     @Override
     public AdminAgentVO agentQuery(Long id) {
-        return toAgentVO(aiAgentDao.query(id));
+        return toAgentVO(aiAgentDao.queryById(id));
+    }
+
+    @Override
+    public AdminAgentVO agentQuery(String agentId) {
+        return toAgentVO(aiAgentDao.queryAgentByAgentId(agentId));
     }
 
     @Override
@@ -592,7 +631,12 @@ public class AdminRepository implements IAdminRepository {
 
     @Override
     public UserVO userQuery(Long id) {
-        return toUserVO(userDao.query(id));
+        return toUserVO(userDao.queryById(id));
+    }
+
+    @Override
+    public UserVO userQuery(String username) {
+        return toUserVO(userDao.queryByUsername(username));
     }
 
     @Override
@@ -655,6 +699,11 @@ public class AdminRepository implements IAdminRepository {
     @Override
     public List<String> queryClientDependOnModel(String modelId) {
         return aiClientDao.queryClientIdByModelId(modelId);
+    }
+
+    @Override
+    public List<String> queryAgentDependOnClient(String clientId) {
+        return aiFlowDao.queryAgentIdByClientId(clientId);
     }
 
 }

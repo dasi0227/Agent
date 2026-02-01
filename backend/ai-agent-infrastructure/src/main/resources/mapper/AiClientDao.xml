@@ -111,7 +111,7 @@
         </where>
     </select>
 
-    <select id="query" resultMap="dataMap">
+    <select id="queryById" resultMap="dataMap">
         SELECT id,
                client_id,
                client_type,

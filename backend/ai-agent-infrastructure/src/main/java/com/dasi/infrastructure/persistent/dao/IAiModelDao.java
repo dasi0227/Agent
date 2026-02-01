@@ -9,7 +9,7 @@ import java.util.List;
 @Mapper
 public interface IAiModelDao {
 
-    AiModel queryByModelId(String modelId);
+    AiModel queryByModelId(@Param("modelId") String modelId);
 
     List<AiModel> page(@Param("idKeyword") String idKeyword,
                        @Param("nameKeyword") String nameKeyword,
@@ -20,7 +20,7 @@ public interface IAiModelDao {
     Integer count(@Param("idKeyword") String idKeyword,
                   @Param("nameKeyword") String nameKeyword);
 
-    AiModel query(@Param("id") Long id);
+    AiModel queryById(@Param("id") Long id);
 
     void insert(AiModel aiModel);
 

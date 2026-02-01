@@ -20,9 +20,9 @@ public interface IAiRepository {
 
     Set<AiApiVO> queryAiApiVOSetByClientIdSet(Set<String> clientIdSet);
 
-    Map<String, AiFlowVO> queryAiFlowVOMapByAgentId(String aiAgentId);
+    Map<String, AiFlowVO> queryAiFlowVOMapByAgentId(String agentId);
 
-    String queryExecuteTypeByAgentId(String aiAgentId);
+    String queryExecuteTypeByAgentId(String agentId);
 
     List<AiTaskVO> queryTaskVOList();
 

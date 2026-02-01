@@ -9,11 +9,11 @@ import java.util.List;
 @Mapper
 public interface IAiMcpDao {
 
-    AiMcp queryByMcpId(String mcpId);
+    AiMcp queryByMcpId(@Param("mcpId") String mcpId);
 
     List<AiMcp> queryChatMcpList();
 
-    List<AiMcp> queryByMcpIdList(List<String> mcpIdList);
+    List<AiMcp> queryByMcpIdList(@Param("mcpIdList") List<String> mcpIdList);
 
     List<AiMcp> page(@Param("idKeyword") String idKeyword,
                      @Param("nameKeyword") String nameKeyword,
@@ -23,7 +23,7 @@ public interface IAiMcpDao {
     Integer count(@Param("idKeyword") String idKeyword,
                   @Param("nameKeyword") String nameKeyword);
 
-    AiMcp query(@Param("id") Long id);
+    AiMcp queryById(@Param("id") Long id);
 
     void insert(AiMcp aiMcp);
 

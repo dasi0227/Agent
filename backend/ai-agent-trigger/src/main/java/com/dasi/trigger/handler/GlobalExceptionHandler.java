@@ -14,7 +14,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AsyncRequestNotUsableException.class)
     public void handleAsyncRequestNotUsable(AsyncRequestNotUsableException e) {
-        // ignore
+        // ignore，暂不处理 SSE 的莫名错误
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

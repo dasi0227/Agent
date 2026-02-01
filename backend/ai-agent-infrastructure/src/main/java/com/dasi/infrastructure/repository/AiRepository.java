@@ -398,17 +398,17 @@ public class AiRepository implements IAiRepository {
     }
 
     @Override
-    public Map<String, AiFlowVO> queryAiFlowVOMapByAgentId(String aiAgentId) {
+    public Map<String, AiFlowVO> queryAiFlowVOMapByAgentId(String agentId) {
 
-        if (aiAgentId == null || aiAgentId.isEmpty()) {
+        if (agentId == null || agentId.isEmpty()) {
             return Map.of();
         }
 
         // 获取 Flow
-        String flowKey = PO_LIST_FLOW_PREFIX + aiAgentId;
+        String flowKey = PO_LIST_FLOW_PREFIX + agentId;
         List<AiFlow> aiFlowList = redisService.getList(flowKey, AiFlow.class);
         if (aiFlowList == null) {
-            aiFlowList = aiFlowDao.queryByAgentId(aiAgentId);
+            aiFlowList = aiFlowDao.queryByAgentId(agentId);
             if (aiFlowList != null) redisService.setList(flowKey, aiFlowList);
         }
         if (aiFlowList == null || aiFlowList.isEmpty()) return Map.of();
@@ -430,12 +430,12 @@ public class AiRepository implements IAiRepository {
     }
 
     @Override
-    public String queryExecuteTypeByAgentId(String aiAgentId) {
+    public String queryExecuteTypeByAgentId(String agentId) {
 
-        String agentKey = PO_AGENT_PREFIX + aiAgentId;
+        String agentKey = PO_AGENT_PREFIX + agentId;
         AiAgent aiAgent = redisService.getValue(agentKey, AiAgent.class);
         if (aiAgent == null) {
-            aiAgent = aiAgentDao.queryAgentByAgentId(aiAgentId);
+            aiAgent = aiAgentDao.queryAgentByAgentId(agentId);
             if (aiAgent != null) redisService.setValue(agentKey, aiAgent);
         }
         if (aiAgent == null) return null;

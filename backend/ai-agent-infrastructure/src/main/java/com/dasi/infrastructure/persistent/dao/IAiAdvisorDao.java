@@ -9,7 +9,7 @@ import java.util.List;
 @Mapper
 public interface IAiAdvisorDao {
 
-    AiAdvisor queryByAdvisorId(String advisorId);
+    AiAdvisor queryByAdvisorId(@Param("advisorId") String advisorId);
 
     List<AiAdvisor> page(@Param("idKeyword") String idKeyword,
                          @Param("nameKeyword") String nameKeyword,
@@ -19,7 +19,7 @@ public interface IAiAdvisorDao {
     Integer count(@Param("idKeyword") String idKeyword,
                   @Param("nameKeyword") String nameKeyword);
 
-    AiAdvisor query(@Param("id") Long id);
+    AiAdvisor queryById(@Param("id") Long id);
 
     void insert(AiAdvisor aiAdvisor);
 

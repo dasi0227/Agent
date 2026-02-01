@@ -80,7 +80,7 @@ public class DispatchService implements IDispatchService {
     @Override
     public void dispatchExecuteStrategy(ExecuteRequestEntity executeRequestEntity, SseEmitter sseEmitter) {
 
-        IExecuteStrategy executeStrategy = executeStrategyFactory.getStrategyByAgentId(executeRequestEntity.getAiAgentId());
+        IExecuteStrategy executeStrategy = executeStrategyFactory.getStrategyByAgentId(executeRequestEntity.getAgentId());
 
         if (executeStrategy == null) {
             throw new IllegalStateException("执行策略不存在");

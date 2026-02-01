@@ -1,9 +1,9 @@
 package com.dasi.trigger.interceptor;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.dasi.domain.login.model.AuthContext;
-import com.dasi.domain.login.model.LoginUser;
-import com.dasi.domain.login.service.JwtService;
+import com.dasi.domain.auth.model.jwt.AuthContext;
+import com.dasi.domain.auth.model.vo.UserVO;
+import com.dasi.domain.util.IJwtService;
 import com.dasi.types.dto.result.Result;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
@@ -25,12 +25,15 @@ import static com.dasi.domain.admin.model.enumeration.UserRoleType.ADMIN;
 public class AuthInterceptor implements HandlerInterceptor {
 
     private static final Set<String> WHITE_LIST = Set.of(
-            "/api/v1/login",
-            "/api/v1/register"
+            "/api/v1/auth/login",
+            "/api/v1/auth/register"
     );
 
     @Resource
-    private JwtService jwtService;
+    private IJwtService jwtService;
+
+    @Resource
+    private AuthContext authContext;
 
     @Resource
     private ObjectMapper objectMapper;
@@ -53,10 +56,10 @@ public class AuthInterceptor implements HandlerInterceptor {
         }
 
         String token = authHeader.substring(7);
-        LoginUser loginUser;
+        UserVO userVO;
 
         try {
-            loginUser = jwtService.parseLoginUser(token);
+            userVO = jwtService.parseToken(token);
         } catch (JWTVerificationException e) {
             log.warn("Token 校验失败：{}", e.getMessage());
             return unauthorized(response, "登录状态无效，请重新登录");
@@ -65,9 +68,9 @@ public class AuthInterceptor implements HandlerInterceptor {
             return unauthorized(response, "登录状态无效，请重新登录");
         }
 
-        AuthContext.set(loginUser);
+        authContext.set(userVO);
 
-        if (uri.startsWith("/api/v1/admin") && (loginUser.getRole() == null || !ADMIN.getType().equalsIgnoreCase(loginUser.getRole()))) {
+        if (uri.startsWith("/api/v1/admin") && (userVO.getRole() == null || !ADMIN.getType().equalsIgnoreCase(userVO.getRole()))) {
             return forbidden(response, "无权限访问该资源");
         }
 
@@ -76,7 +79,7 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
-        AuthContext.clear();
+        authContext.clear();
     }
 
     private boolean unauthorized(HttpServletResponse response, String message) throws IOException {

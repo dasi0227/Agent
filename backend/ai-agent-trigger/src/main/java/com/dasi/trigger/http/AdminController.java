@@ -2,15 +2,14 @@ package com.dasi.trigger.http;
 
 import com.dasi.domain.admin.model.vo.*;
 import com.dasi.domain.admin.service.IAdminService;
-import com.dasi.types.dto.request.admin.*;
+import com.dasi.types.dto.request.admin.manage.*;
+import com.dasi.types.dto.request.admin.page.*;
 import com.dasi.types.dto.result.PageResult;
 import com.dasi.types.dto.result.Result;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-
-import javax.websocket.server.PathParam;
 
 @Slf4j
 @RestController
@@ -39,14 +38,14 @@ public class AdminController {
     }
 
     @PostMapping("/api/delete")
-    public Result<Void> apiDelete(@PathParam("apiId") String apiId) {
-        adminService.apiDelete(apiId);
+    public Result<Void> apiDelete(@RequestParam("id") Long id) {
+        adminService.apiDelete(id);
         return Result.success();
     }
 
     @PostMapping("/api/toggle")
-    public Result<Void> apiToggle(@PathParam("apiId") String apiId, @PathParam("apiStatus") Integer apiStatus) {
-        adminService.apiToggle(apiId, apiStatus);
+    public Result<Void> apiToggle(@RequestParam("id") Long id, @RequestParam("apiStatus") Integer apiStatus) {
+        adminService.apiToggle(id, apiStatus);
         return Result.success();
     }
 
@@ -69,14 +68,14 @@ public class AdminController {
     }
 
     @PostMapping("/model/delete")
-    public Result<Void> modelDelete(@PathParam("modelId") String modelId) {
-        adminService.modelDelete(modelId);
+    public Result<Void> modelDelete(@RequestParam("id") Long id) {
+        adminService.modelDelete(id);
         return Result.success();
     }
 
     @PostMapping("/model/toggle")
-    public Result<Void> modelToggle(@PathParam("modelId") String modelId, @PathParam("modelStatus") Integer modelStatus) {
-        adminService.modelToggle(modelId, modelStatus);
+    public Result<Void> modelToggle(@RequestParam("id") Long id, @RequestParam("modelStatus") Integer modelStatus) {
+        adminService.modelToggle(id, modelStatus);
         return Result.success();
     }
 
@@ -99,14 +98,14 @@ public class AdminController {
     }
 
     @PostMapping("/mcp/delete")
-    public Result<Void> mcpDelete(@PathParam("mcpId") String mcpId) {
-        adminService.mcpDelete(mcpId);
+    public Result<Void> mcpDelete(@RequestParam("id") Long id) {
+        adminService.mcpDelete(id);
         return Result.success();
     }
 
     @PostMapping("/mcp/toggle")
-    public Result<Void> mcpToggle(@PathParam("mcpId") String mcpId, @PathParam("mcpStatus") Integer mcpStatus) {
-        adminService.mcpToggle(mcpId, mcpStatus);
+    public Result<Void> mcpToggle(@RequestParam("id") Long id, @RequestParam("mcpStatus") Integer mcpStatus) {
+        adminService.mcpToggle(id, mcpStatus);
         return Result.success();
     }
 
@@ -129,14 +128,14 @@ public class AdminController {
     }
 
     @PostMapping("/advisor/delete")
-    public Result<Void> advisorDelete(@PathParam("advisorId") String advisorId) {
-        adminService.advisorDelete(advisorId);
+    public Result<Void> advisorDelete(@RequestParam("id") Long id) {
+        adminService.advisorDelete(id);
         return Result.success();
     }
 
     @PostMapping("/advisor/toggle")
-    public Result<Void> advisorToggle(@PathParam("advisorId") String advisorId, @PathParam("advisorStatus") Integer advisorStatus) {
-        adminService.advisorToggle(advisorId, advisorStatus);
+    public Result<Void> advisorToggle(@RequestParam("id") Long id, @RequestParam("advisorStatus") Integer advisorStatus) {
+        adminService.advisorToggle(id, advisorStatus);
         return Result.success();
     }
 
@@ -159,14 +158,14 @@ public class AdminController {
     }
 
     @PostMapping("/prompt/delete")
-    public Result<Void> promptDelete(@PathParam("promptId") String promptId) {
-        adminService.promptDelete(promptId);
+    public Result<Void> promptDelete(@RequestParam("id") Long id) {
+        adminService.promptDelete(id);
         return Result.success();
     }
 
     @PostMapping("/prompt/toggle")
-    public Result<Void> promptToggle(@PathParam("promptId") String promptId, @PathParam("promptStatus") Integer promptStatus) {
-        adminService.promptToggle(promptId, promptStatus);
+    public Result<Void> promptToggle(@RequestParam("id") Long id, @RequestParam("promptStatus") Integer promptStatus) {
+        adminService.promptToggle(id, promptStatus);
         return Result.success();
     }
 
@@ -189,14 +188,14 @@ public class AdminController {
     }
 
     @PostMapping("/client/delete")
-    public Result<Void> clientDelete(@PathParam("clientId") String clientId) {
-        adminService.clientDelete(clientId);
+    public Result<Void> clientDelete(@RequestParam("id") Long id) {
+        adminService.clientDelete(id);
         return Result.success();
     }
 
     @PostMapping("/client/toggle")
-    public Result<Void> clientToggle(@PathParam("clientId") String clientId, @PathParam("clientStatus") Integer clientStatus) {
-        adminService.clientToggle(clientId, clientStatus);
+    public Result<Void> clientToggle(@RequestParam("id") Long id, @RequestParam("clientStatus") Integer clientStatus) {
+        adminService.clientToggle(id, clientStatus);
         return Result.success();
     }
 
@@ -219,14 +218,14 @@ public class AdminController {
     }
 
     @PostMapping("/agent/delete")
-    public Result<Void> agentDelete(@PathParam("agentId") String agentId) {
-        adminService.agentDelete(agentId);
+    public Result<Void> agentDelete(@RequestParam("id") Long id) {
+        adminService.agentDelete(id);
         return Result.success();
     }
 
     @PostMapping("/agent/toggle")
-    public Result<Void> agentToggle(@PathParam("agentId") String agentId, @PathParam("agentStatus") Integer agentStatus) {
-        adminService.agentToggle(agentId, agentStatus);
+    public Result<Void> agentToggle(@RequestParam("id") Long id, @RequestParam("agentStatus") Integer agentStatus) {
+        adminService.agentToggle(id, agentStatus);
         return Result.success();
     }
 
@@ -249,8 +248,8 @@ public class AdminController {
     }
 
     @PostMapping("/user/delete")
-    public Result<Void> userDelete(@PathParam("userId") String userId) {
-        adminService.userDelete(userId);
+    public Result<Void> userDelete(@RequestParam("id") Long id) {
+        adminService.userDelete(id);
         return Result.success();
     }
 

@@ -69,7 +69,7 @@
         </where>
     </select>
 
-    <select id="query" resultMap="dataMap">
+    <select id="queryById" resultMap="dataMap">
         SELECT id,
                prompt_id,
                prompt_name,

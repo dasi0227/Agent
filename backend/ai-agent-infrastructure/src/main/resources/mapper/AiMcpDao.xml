@@ -107,7 +107,7 @@
         </where>
     </select>
 
-    <select id="query" resultMap="dataMap">
+    <select id="queryById" resultMap="dataMap">
         SELECT id,
                mcp_id,
                mcp_name,

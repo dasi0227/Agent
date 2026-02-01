@@ -60,7 +60,7 @@
         </where>
     </select>
 
-    <select id="query" resultMap="dataMap">
+    <select id="queryById" resultMap="dataMap">
         SELECT id,
                username,
                password,
@@ -71,7 +71,7 @@
         WHERE id = #{id}
     </select>
 
-    <insert id="insert" parameterType="com.dasi.infrastructure.persistent.po.User">
+    <insert id="insert" parameterType="com.dasi.infrastructure.persistent.po.User" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO `user` (username,
                             password,
                             role)

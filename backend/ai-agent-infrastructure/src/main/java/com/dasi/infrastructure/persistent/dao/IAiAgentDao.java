@@ -9,7 +9,7 @@ import java.util.List;
 @Mapper
 public interface IAiAgentDao {
 
-    AiAgent queryAgentByAgentId(String agentId);
+    AiAgent queryAgentByAgentId(@Param("agentId") String agentId);
 
     List<AiAgent> queryAgentList();
 
@@ -23,7 +23,7 @@ public interface IAiAgentDao {
                   @Param("nameKeyword") String nameKeyword,
                   @Param("agentType") String agentType);
 
-    AiAgent query(@Param("id") Long id);
+    AiAgent queryById(@Param("id") Long id);
 
     void insert(AiAgent aiAgent);
 
