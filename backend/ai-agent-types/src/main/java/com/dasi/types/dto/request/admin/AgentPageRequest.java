@@ -14,11 +14,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AgentPageRequest {
 
-    private String keyword;
     private String idKeyword;
+
     private String nameKeyword;
+
     private String agentType;
-    private Integer agentStatus;
 
     @NotNull
     @Min(1)

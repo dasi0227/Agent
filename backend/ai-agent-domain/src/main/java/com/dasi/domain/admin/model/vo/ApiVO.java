@@ -12,19 +12,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ApiVO {
-
+    private Long id;
     private String apiId;
-
     private String apiBaseUrl;
-
     private String apiKey;
-
     private String apiCompletionsPath;
-
     private String apiEmbeddingsPath;
-
     private Integer apiStatus;
-
     private LocalDateTime updateTime;
-
 }

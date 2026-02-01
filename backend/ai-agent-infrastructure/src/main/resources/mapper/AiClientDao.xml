@@ -60,7 +60,7 @@
         WHERE client_type = 'chat'
     </select>
 
-    <select id="queryPage" resultMap="dataMap">
+    <select id="page" resultMap="dataMap">
         SELECT id,
                client_id,
                client_type,
@@ -73,9 +73,11 @@
                update_time
         FROM ai_client
         <where>
-            <if test="keyword != null and keyword != ''">
-                AND (client_id LIKE CONCAT('%', #{keyword}, '%')
-                 OR client_name LIKE CONCAT('%', #{keyword}, '%'))
+            <if test="idKeyword != null and idKeyword != ''">
+                AND client_id LIKE CONCAT('%', #{idKeyword}, '%')
+            </if>
+            <if test="nameKeyword != null and nameKeyword != ''">
+                AND client_name LIKE CONCAT('%', #{nameKeyword}, '%')
             </if>
             <if test="modelId != null and modelId != ''">
                 AND model_id = #{modelId}
@@ -83,23 +85,22 @@
             <if test="clientType != null and clientType != ''">
                 AND client_type = #{clientType}
             </if>
-            <if test="status != null">
-                AND client_status = #{status}
-            </if>
         </where>
-        ORDER BY id DESC
+        ORDER BY update_time DESC, id DESC
         <if test="offset != null and size != null">
             LIMIT #{offset}, #{size}
         </if>
     </select>
 
-    <select id="count" resultType="long">
+    <select id="count" resultType="java.lang.Integer">
         SELECT COUNT(1)
         FROM ai_client
         <where>
-            <if test="keyword != null and keyword != ''">
-                AND (client_id LIKE CONCAT('%', #{keyword}, '%')
-                 OR client_name LIKE CONCAT('%', #{keyword}, '%'))
+            <if test="idKeyword != null and idKeyword != ''">
+                AND client_id LIKE CONCAT('%', #{idKeyword}, '%')
+            </if>
+            <if test="nameKeyword != null and nameKeyword != ''">
+                AND client_name LIKE CONCAT('%', #{nameKeyword}, '%')
             </if>
             <if test="modelId != null and modelId != ''">
                 AND model_id = #{modelId}
@@ -107,13 +108,31 @@
             <if test="clientType != null and clientType != ''">
                 AND client_type = #{clientType}
             </if>
-            <if test="status != null">
-                AND client_status = #{status}
-            </if>
         </where>
     </select>
 
-    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+    <select id="query" resultMap="dataMap">
+        SELECT id,
+               client_id,
+               client_type,
+               model_id,
+               model_name,
+               client_name,
+               client_desc,
+               client_status,
+               create_time,
+               update_time
+        FROM ai_client
+        WHERE id = #{id}
+    </select>
+
+    <select id="queryClientIdByModelId" resultType="java.lang.String">
+        SELECT client_id
+        FROM ai_client
+        WHERE model_id = #{modelId}
+    </select>
+
+    <insert id="insert" parameterType="com.dasi.infrastructure.persistent.po.AiClient">
         INSERT INTO ai_client (client_id,
                                client_type,
                                model_id,
@@ -130,7 +149,7 @@
                 #{clientStatus})
     </insert>
 
-    <update id="update">
+    <update id="update" parameterType="com.dasi.infrastructure.persistent.po.AiClient">
         UPDATE ai_client
         <set>
             <if test="clientId != null">client_id = #{clientId},</if>
@@ -144,14 +163,15 @@
         WHERE id = #{id}
     </update>
 
-    <delete id="delete" parameterType="long">
-        DELETE FROM ai_client WHERE id = #{id}
-    </delete>
+    <update id="toggle" parameterType="com.dasi.infrastructure.persistent.po.AiClient">
+        UPDATE ai_client
+        SET client_status = #{clientStatus}
+        WHERE id = #{id}
+    </update>
 
-    <select id="queryClientIdListByModelId" resultType="java.lang.String">
-        SELECT client_id
+    <delete id="delete">
+        DELETE
         FROM ai_client
-        WHERE model_id = #{modelId}
-    </select>
-
+        WHERE id = #{id}
+    </delete>
 </mapper>

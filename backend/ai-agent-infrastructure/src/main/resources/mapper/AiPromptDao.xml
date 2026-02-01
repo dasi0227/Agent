@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dasi.infrastructure.persistent.dao.IAiPromptDao">
     <resultMap id="dataMap" type="com.dasi.infrastructure.persistent.po.AiPrompt">
         <id column="id" property="id"/>
@@ -26,7 +26,50 @@
         WHERE prompt_id = #{promptId}
     </select>
 
-    <select id="queryById" parameterType="long" resultMap="dataMap">
+    <update id="loadPromptContent">
+        UPDATE ai_prompt
+        SET prompt_content = #{promptContent}
+        WHERE prompt_id = #{promptId}
+    </update>
+
+    <select id="page" resultMap="dataMap">
+        SELECT id,
+               prompt_id,
+               prompt_name,
+               prompt_content,
+               prompt_desc,
+               prompt_status,
+               create_time,
+               update_time
+        FROM ai_prompt
+        <where>
+            <if test="idKeyword != null and idKeyword != ''">
+                AND prompt_id LIKE CONCAT('%', #{idKeyword}, '%')
+            </if>
+            <if test="nameKeyword != null and nameKeyword != ''">
+                AND prompt_name LIKE CONCAT('%', #{nameKeyword}, '%')
+            </if>
+        </where>
+        ORDER BY update_time DESC, id DESC
+        <if test="offset != null and size != null">
+            LIMIT #{offset}, #{size}
+        </if>
+    </select>
+
+    <select id="count" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM ai_prompt
+        <where>
+            <if test="idKeyword != null and idKeyword != ''">
+                AND prompt_id LIKE CONCAT('%', #{idKeyword}, '%')
+            </if>
+            <if test="nameKeyword != null and nameKeyword != ''">
+                AND prompt_name LIKE CONCAT('%', #{nameKeyword}, '%')
+            </if>
+        </where>
+    </select>
+
+    <select id="query" resultMap="dataMap">
         SELECT id,
                prompt_id,
                prompt_name,
@@ -39,52 +82,7 @@
         WHERE id = #{id}
     </select>
 
-    <select id="queryClientIdListByPromptId" resultType="java.lang.String">
-        SELECT client_id
-        FROM ai_config
-        WHERE config_type = 'prompt' AND config_value = #{promptId}
-    </select>
-
-    <select id="queryPage" resultMap="dataMap">
-        SELECT id,
-               prompt_id,
-               prompt_name,
-               prompt_content,
-               prompt_desc,
-               prompt_status,
-               create_time,
-               update_time
-        FROM ai_prompt
-        <where>
-            <if test="keyword != null and keyword != ''">
-                AND (prompt_id LIKE CONCAT('%', #{keyword}, '%')
-                 OR prompt_name LIKE CONCAT('%', #{keyword}, '%'))
-            </if>
-            <if test="status != null">
-                AND prompt_status = #{status}
-            </if>
-        </where>
-        ORDER BY id DESC
-        <if test="offset != null and size != null">
-            LIMIT #{offset}, #{size}
-        </if>
-    </select>
-
-    <select id="count" resultType="long">
-        SELECT COUNT(1)
-        FROM ai_prompt
-        <where>
-            <if test="keyword != null and keyword != ''">
-                AND (prompt_id LIKE CONCAT('%', #{keyword}, '%')
-                 OR prompt_name LIKE CONCAT('%', #{keyword}, '%'))
-            </if>
-            <if test="status != null">
-                AND prompt_status = #{status}
-            </if>
-        </where>
-    </select>
-
-    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="com.dasi.infrastructure.persistent.po.AiPrompt">
         INSERT INTO ai_prompt (prompt_id,
                                prompt_name,
                                prompt_content,
@@ -97,7 +95,7 @@
                 #{promptStatus})
     </insert>
 
-    <update id="update">
+    <update id="update" parameterType="com.dasi.infrastructure.persistent.po.AiPrompt">
         UPDATE ai_prompt
         <set>
             <if test="promptId != null">prompt_id = #{promptId},</if>
@@ -109,13 +107,15 @@
         WHERE id = #{id}
     </update>
 
-    <delete id="delete" parameterType="long">
-        DELETE FROM ai_prompt WHERE id = #{id}
-    </delete>
-
-    <update id="loadPromptContent">
+    <update id="toggle" parameterType="com.dasi.infrastructure.persistent.po.AiPrompt">
         UPDATE ai_prompt
-        SET prompt_content = #{promptContent}
-        WHERE prompt_id = #{promptId}
+        SET prompt_status = #{promptStatus}
+        WHERE id = #{id}
     </update>
+
+    <delete id="delete">
+        DELETE
+        FROM ai_prompt
+        WHERE id = #{id}
+    </delete>
 </mapper>

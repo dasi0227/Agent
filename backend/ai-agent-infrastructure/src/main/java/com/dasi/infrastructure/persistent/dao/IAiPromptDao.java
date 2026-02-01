@@ -13,21 +13,22 @@ public interface IAiPromptDao {
 
     void loadPromptContent(String promptId, String promptContent);
 
-    AiPrompt queryById(Long id);
+    List<AiPrompt> page(@Param("idKeyword") String idKeyword,
+                        @Param("nameKeyword") String nameKeyword,
+                        @Param("offset") Integer offset,
+                        @Param("size") Integer size);
 
-    List<String> queryClientIdListByPromptId(String promptId);
+    Integer count(@Param("idKeyword") String idKeyword,
+                  @Param("nameKeyword") String nameKeyword);
 
-    List<AiPrompt> queryPage(@Param("keyword") String keyword,
-                             @Param("status") Integer status,
-                             @Param("offset") Integer offset,
-                             @Param("size") Integer size);
-
-    Long count(@Param("keyword") String keyword, @Param("status") Integer status);
+    AiPrompt query(@Param("id") Long id);
 
     void insert(AiPrompt aiPrompt);
 
     void update(AiPrompt aiPrompt);
 
-    void delete(Long id);
+    void delete(@Param("id") Long id);
+
+    void toggle(AiPrompt aiPrompt);
 
 }

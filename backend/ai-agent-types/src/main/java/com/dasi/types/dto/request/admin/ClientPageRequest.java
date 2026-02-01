@@ -14,10 +14,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ClientPageRequest {
 
-    private String keyword;
     private String idKeyword;
+
     private String nameKeyword;
+
     private String modelId;
+
     private String clientType;
 
     @NotNull

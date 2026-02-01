@@ -67,7 +67,47 @@
         WHERE mcp_status = 1 AND mcp_chat = 1
     </select>
 
-    <select id="queryById" parameterType="long" resultMap="dataMap">
+    <select id="page" resultMap="dataMap">
+        SELECT id,
+               mcp_id,
+               mcp_name,
+               mcp_type,
+               mcp_config,
+               mcp_desc,
+               mcp_timeout,
+               mcp_chat,
+               mcp_status,
+               create_time,
+               update_time
+        FROM ai_mcp
+        <where>
+            <if test="idKeyword != null and idKeyword != ''">
+                AND mcp_id LIKE CONCAT('%', #{idKeyword}, '%')
+            </if>
+            <if test="nameKeyword != null and nameKeyword != ''">
+                AND mcp_name LIKE CONCAT('%', #{nameKeyword}, '%')
+            </if>
+        </where>
+        ORDER BY update_time DESC, id DESC
+        <if test="offset != null and size != null">
+            LIMIT #{offset}, #{size}
+        </if>
+    </select>
+
+    <select id="count" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM ai_mcp
+        <where>
+            <if test="idKeyword != null and idKeyword != ''">
+                AND mcp_id LIKE CONCAT('%', #{idKeyword}, '%')
+            </if>
+            <if test="nameKeyword != null and nameKeyword != ''">
+                AND mcp_name LIKE CONCAT('%', #{nameKeyword}, '%')
+            </if>
+        </where>
+    </select>
+
+    <select id="query" resultMap="dataMap">
         SELECT id,
                mcp_id,
                mcp_name,
@@ -83,55 +123,7 @@
         WHERE id = #{id}
     </select>
 
-    <select id="queryPage" resultMap="dataMap">
-        SELECT id,
-               mcp_id,
-               mcp_name,
-               mcp_type,
-               mcp_config,
-               mcp_desc,
-               mcp_timeout,
-               mcp_chat,
-               mcp_status,
-               create_time,
-               update_time
-        FROM ai_mcp
-        <where>
-            <if test="keyword != null and keyword != ''">
-                AND (mcp_id LIKE CONCAT('%', #{keyword}, '%')
-                  OR mcp_name LIKE CONCAT('%', #{keyword}, '%'))
-            </if>
-            <if test="mcpType != null and mcpType != ''">
-                AND mcp_type = #{mcpType}
-            </if>
-            <if test="status != null">
-                AND mcp_status = #{status}
-            </if>
-        </where>
-        ORDER BY id DESC
-        <if test="offset != null and size != null">
-            LIMIT #{offset}, #{size}
-        </if>
-    </select>
-
-    <select id="count" resultType="long">
-        SELECT COUNT(1)
-        FROM ai_mcp
-        <where>
-            <if test="keyword != null and keyword != ''">
-                AND (mcp_id LIKE CONCAT('%', #{keyword}, '%')
-                  OR mcp_name LIKE CONCAT('%', #{keyword}, '%'))
-            </if>
-            <if test="mcpType != null and mcpType != ''">
-                AND mcp_type = #{mcpType}
-            </if>
-            <if test="status != null">
-                AND mcp_status = #{status}
-            </if>
-        </where>
-    </select>
-
-    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="com.dasi.infrastructure.persistent.po.AiMcp">
         INSERT INTO ai_mcp (mcp_id,
                             mcp_name,
                             mcp_type,
@@ -150,7 +142,7 @@
                 #{mcpStatus})
     </insert>
 
-    <update id="update">
+    <update id="update" parameterType="com.dasi.infrastructure.persistent.po.AiMcp">
         UPDATE ai_mcp
         <set>
             <if test="mcpId != null">mcp_id = #{mcpId},</if>
@@ -165,8 +157,15 @@
         WHERE id = #{id}
     </update>
 
-    <delete id="delete" parameterType="long">
-        DELETE FROM ai_mcp WHERE id = #{id}
-    </delete>
+    <update id="toggle" parameterType="com.dasi.infrastructure.persistent.po.AiMcp">
+        UPDATE ai_mcp
+        SET mcp_status = #{mcpStatus}
+        WHERE id = #{id}
+    </update>
 
+    <delete id="delete">
+        DELETE
+        FROM ai_mcp
+        WHERE id = #{id}
+    </delete>
 </mapper>

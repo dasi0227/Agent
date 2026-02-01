@@ -31,71 +31,61 @@
         WHERE advisor_id = #{advisorId}
     </select>
 
-    <select id="queryById" parameterType="long" resultMap="dataMap">
-        SELECT
-            id,
-            advisor_id,
-            advisor_name,
-            advisor_type,
-            advisor_desc,
-            advisor_order,
-            advisor_param,
-            advisor_status,
-            create_time,
-            update_time
-        FROM ai_advisor
-        WHERE id = #{id}
-    </select>
-
-    <select id="queryPage" resultMap="dataMap">
-        SELECT
-            id,
-            advisor_id,
-            advisor_name,
-            advisor_type,
-            advisor_desc,
-            advisor_order,
-            advisor_param,
-            advisor_status,
-            create_time,
-            update_time
+    <select id="page" resultMap="dataMap">
+        SELECT id,
+               advisor_id,
+               advisor_name,
+               advisor_type,
+               advisor_desc,
+               advisor_order,
+               advisor_param,
+               advisor_status,
+               create_time,
+               update_time
         FROM ai_advisor
         <where>
-            <if test="keyword != null and keyword != ''">
-                AND (advisor_id LIKE CONCAT('%', #{keyword}, '%')
-                 OR advisor_name LIKE CONCAT('%', #{keyword}, '%'))
+            <if test="idKeyword != null and idKeyword != ''">
+                AND advisor_id LIKE CONCAT('%', #{idKeyword}, '%')
             </if>
-            <if test="advisorType != null and advisorType != ''">
-                AND advisor_type = #{advisorType}
-            </if>
-            <if test="status != null">
-                AND advisor_status = #{status}
+            <if test="nameKeyword != null and nameKeyword != ''">
+                AND advisor_name LIKE CONCAT('%', #{nameKeyword}, '%')
             </if>
         </where>
-        ORDER BY id DESC
+        ORDER BY update_time DESC, id DESC
         <if test="offset != null and size != null">
             LIMIT #{offset}, #{size}
         </if>
     </select>
 
-    <select id="count" resultType="long">
+    <select id="count" resultType="java.lang.Integer">
         SELECT COUNT(1)
         FROM ai_advisor
         <where>
-            <if test="keyword != null and keyword != ''">
-                AND (advisor_id LIKE CONCAT('%', #{keyword}, '%')
-                 OR advisor_name LIKE CONCAT('%', #{keyword}, '%'))
+            <if test="idKeyword != null and idKeyword != ''">
+                AND advisor_id LIKE CONCAT('%', #{idKeyword}, '%')
             </if>
-            <if test="advisorType != null and advisorType != ''">
-                AND advisor_type = #{advisorType}
-            </if>
-            <if test="status != null">
-                AND advisor_status = #{status}
+            <if test="nameKeyword != null and nameKeyword != ''">
+                AND advisor_name LIKE CONCAT('%', #{nameKeyword}, '%')
             </if>
         </where>
     </select>
 
-    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+    <select id="query" resultMap="dataMap">
+        SELECT id,
+               advisor_id,
+               advisor_name,
+               advisor_type,
+               advisor_desc,
+               advisor_order,
+               advisor_param,
+               advisor_status,
+               create_time,
+               update_time
+        FROM ai_advisor
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.dasi.infrastructure.persistent.po.AiAdvisor">
         INSERT INTO ai_advisor (advisor_id,
                                 advisor_name,
                                 advisor_type,
@@ -112,7 +102,7 @@
                 #{advisorStatus})
     </insert>
 
-    <update id="update">
+    <update id="update" parameterType="com.dasi.infrastructure.persistent.po.AiAdvisor">
         UPDATE ai_advisor
         <set>
             <if test="advisorId != null">advisor_id = #{advisorId},</if>
@@ -126,7 +116,15 @@
         WHERE id = #{id}
     </update>
 
-    <delete id="delete" parameterType="long">
-        DELETE FROM ai_advisor WHERE id = #{id}
+    <update id="toggle" parameterType="com.dasi.infrastructure.persistent.po.AiAdvisor">
+        UPDATE ai_advisor
+        SET advisor_status = #{advisorStatus}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE
+        FROM ai_advisor
+        WHERE id = #{id}
     </delete>
 </mapper>

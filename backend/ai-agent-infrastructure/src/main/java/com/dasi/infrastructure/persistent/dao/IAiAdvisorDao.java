@@ -11,22 +11,22 @@ public interface IAiAdvisorDao {
 
     AiAdvisor queryByAdvisorId(String advisorId);
 
-    AiAdvisor queryById(Long id);
+    List<AiAdvisor> page(@Param("idKeyword") String idKeyword,
+                         @Param("nameKeyword") String nameKeyword,
+                         @Param("offset") Integer offset,
+                         @Param("size") Integer size);
 
-    List<AiAdvisor> queryPage(@Param("keyword") String keyword,
-                              @Param("advisorType") String advisorType,
-                              @Param("status") Integer status,
-                              @Param("offset") Integer offset,
-                              @Param("size") Integer size);
+    Integer count(@Param("idKeyword") String idKeyword,
+                  @Param("nameKeyword") String nameKeyword);
 
-    Long count(@Param("keyword") String keyword,
-               @Param("advisorType") String advisorType,
-               @Param("status") Integer status);
+    AiAdvisor query(@Param("id") Long id);
 
     void insert(AiAdvisor aiAdvisor);
 
     void update(AiAdvisor aiAdvisor);
 
-    void delete(Long id);
+    void delete(@Param("id") Long id);
+
+    void toggle(AiAdvisor aiAdvisor);
 
 }

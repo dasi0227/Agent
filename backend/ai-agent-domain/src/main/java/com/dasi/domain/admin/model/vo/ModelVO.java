@@ -18,6 +18,5 @@ public class ModelVO {
     private String modelName;
     private String modelType;
     private Integer modelStatus;
-    private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

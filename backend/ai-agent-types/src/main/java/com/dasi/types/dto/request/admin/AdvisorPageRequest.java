@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AdvisorPageRequest {
 
-    private String keyword;
     private String idKeyword;
+
     private String nameKeyword;
 
     @NotNull

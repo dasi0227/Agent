@@ -13,6 +13,8 @@ import java.util.List;
 @AllArgsConstructor
 public class PageResult<T> {
 
+    private Integer total;
+
     private Integer pageNum;
 
     private Integer pageSum;

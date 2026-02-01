@@ -14,9 +14,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ModelPageRequest {
 
-    private String keyword;
     private String idKeyword;
+
     private String nameKeyword;
+
     private String apiId;
 
     @NotNull

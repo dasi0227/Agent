@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class McpManageRequest {
 
+    @NotNull
     private Long id;
 
     @NotBlank
@@ -25,7 +26,7 @@ public class McpManageRequest {
     private String mcpType;
 
     @NotNull
-    private Object mcpConfig;
+    private String mcpConfig;
 
     private String mcpDesc;
 
