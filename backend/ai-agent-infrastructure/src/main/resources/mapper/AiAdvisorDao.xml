@@ -70,7 +70,7 @@
         </where>
     </select>
 
-    <select id="query" resultMap="dataMap">
+    <select id="queryById" resultMap="dataMap">
         SELECT id,
                advisor_id,
                advisor_name,

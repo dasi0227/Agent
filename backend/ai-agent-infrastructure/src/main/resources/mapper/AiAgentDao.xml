@@ -75,7 +75,7 @@
         </where>
     </select>
 
-    <select id="query" resultMap="dataMap">
+    <select id="queryById" resultMap="dataMap">
         SELECT id,
                agent_id,
                agent_name,

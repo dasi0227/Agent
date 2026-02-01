@@ -1,7 +1,8 @@
 package com.dasi.domain.admin.repository;
 
 import com.dasi.domain.admin.model.vo.*;
-import com.dasi.types.dto.request.admin.*;
+import com.dasi.types.dto.request.admin.manage.*;
+import com.dasi.types.dto.request.admin.page.*;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ public interface IAdminRepository {
     List<ApiVO> apiPage(ApiPageRequest apiPageRequest);
     Integer apiCount(ApiPageRequest apiPageRequest);
     ApiVO apiQuery(Long id);
+    ApiVO apiQuery(String apiId);
     void apiInsert(ApiManageRequest apiManageRequest);
     void apiUpdate(ApiManageRequest apiManageRequest);
     void apiDelete(Long id);
@@ -20,6 +22,7 @@ public interface IAdminRepository {
     List<ModelVO> modelPage(ModelPageRequest request);
     Integer modelCount(ModelPageRequest request);
     ModelVO modelQuery(Long id);
+    ModelVO modelQuery(String modelId);
     void modelInsert(ModelManageRequest request);
     void modelUpdate(ModelManageRequest request);
     void modelDelete(Long id);
@@ -29,6 +32,7 @@ public interface IAdminRepository {
     List<McpVO> mcpPage(McpPageRequest request);
     Integer mcpCount(McpPageRequest request);
     McpVO mcpQuery(Long id);
+    McpVO mcpQuery(String mcpId);
     void mcpInsert(McpManageRequest request);
     void mcpUpdate(McpManageRequest request);
     void mcpDelete(Long id);
@@ -38,6 +42,7 @@ public interface IAdminRepository {
     List<AdvisorVO> advisorPage(AdvisorPageRequest request);
     Integer advisorCount(AdvisorPageRequest request);
     AdvisorVO advisorQuery(Long id);
+    AdvisorVO advisorQuery(String advisorId);
     void advisorInsert(AdvisorManageRequest request);
     void advisorUpdate(AdvisorManageRequest request);
     void advisorDelete(Long id);
@@ -47,6 +52,7 @@ public interface IAdminRepository {
     List<PromptVO> promptPage(PromptPageRequest request);
     Integer promptCount(PromptPageRequest request);
     PromptVO promptQuery(Long id);
+    PromptVO promptQuery(String promptId);
     void promptInsert(PromptManageRequest request);
     void promptUpdate(PromptManageRequest request);
     void promptDelete(Long id);
@@ -56,6 +62,7 @@ public interface IAdminRepository {
     List<ClientVO> clientPage(ClientPageRequest request);
     Integer clientCount(ClientPageRequest request);
     ClientVO clientQuery(Long id);
+    ClientVO clientQuery(String clientId);
     void clientInsert(ClientManageRequest request);
     void clientUpdate(ClientManageRequest request);
     void clientDelete(Long id);
@@ -65,6 +72,7 @@ public interface IAdminRepository {
     List<AdminAgentVO> agentPage(AgentPageRequest request);
     Integer agentCount(AgentPageRequest request);
     AdminAgentVO agentQuery(Long id);
+    AdminAgentVO agentQuery(String agentId);
     void agentInsert(AgentManageRequest request);
     void agentUpdate(AgentManageRequest request);
     void agentDelete(Long id);
@@ -74,6 +82,7 @@ public interface IAdminRepository {
     List<UserVO> userPage(UserPageRequest request);
     Integer userCount(UserPageRequest request);
     UserVO userQuery(Long id);
+    UserVO userQuery(String username);
     void userInsert(UserManageRequest request);
     void userUpdate(UserManageRequest request);
     void userDelete(Long id);
@@ -84,5 +93,6 @@ public interface IAdminRepository {
     List<String> queryClientDependOnMcp(String mcpId);
     List<String> queryModelDependOnApi(String apiId);
     List<String> queryClientDependOnModel(String modelId);
+    List<String> queryAgentDependOnClient(String clientId);
 
 }

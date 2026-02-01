@@ -49,7 +49,7 @@ public class TaskService implements ITaskService {
             scheduleVO.setScheduleExecutor(() -> {
                 try {
                     ExecuteRequestEntity executeRequestEntity = ExecuteRequestEntity.builder()
-                            .aiAgentId(aiTaskVO.getAgentId())
+                            .agentId(aiTaskVO.getAgentId())
                             .sessionId("s-task-" + System.currentTimeMillis())
                             .maxRetry(aiTaskVO.getTaskParam().getMaxRetry())
                             .maxRound(aiTaskVO.getTaskParam().getMaxRound())

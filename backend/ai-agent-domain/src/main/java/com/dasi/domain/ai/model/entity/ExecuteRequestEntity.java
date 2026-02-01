@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ExecuteRequestEntity {
 
-    private String aiAgentId;
+    private String agentId;
 
     private String userMessage;
 

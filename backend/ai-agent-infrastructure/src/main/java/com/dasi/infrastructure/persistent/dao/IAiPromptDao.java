@@ -9,7 +9,7 @@ import java.util.List;
 @Mapper
 public interface IAiPromptDao {
 
-    AiPrompt queryByPromptId(String promptId);
+    AiPrompt queryByPromptId(@Param("promptId") String promptId);
 
     void loadPromptContent(String promptId, String promptContent);
 
@@ -21,7 +21,7 @@ public interface IAiPromptDao {
     Integer count(@Param("idKeyword") String idKeyword,
                   @Param("nameKeyword") String nameKeyword);
 
-    AiPrompt query(@Param("id") Long id);
+    AiPrompt queryById(@Param("id") Long id);
 
     void insert(AiPrompt aiPrompt);
 

@@ -56,7 +56,7 @@ public class AiController implements IAiApi {
         SseEmitter sseEmitter = new SseEmitter(0L);
 
         ExecuteRequestEntity executeRequestEntity = ExecuteRequestEntity.builder()
-                .aiAgentId(aiWorkRequest.getAiAgentId())
+                .agentId(aiWorkRequest.getAiAgentId())
                 .userMessage(aiWorkRequest.getUserMessage())
                 .sessionId(aiWorkRequest.getSessionId())
                 .maxRound(aiWorkRequest.getMaxRound())

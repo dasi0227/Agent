@@ -8,29 +8,10 @@ import java.util.List;
 
 @Mapper
 public interface IAiFlowDao {
-    List<AiFlow> queryByAgentId(String aiAgentId);
+    List<AiFlow> queryByAgentId(@Param("agentId") String agentId);
 
-    void loadFlowPrompt(String clientId, String flowPrompt);
+    void loadFlowPrompt(@Param("clientId") String clientId, @Param("flowPrompt") String flowPrompt);
 
-    AiFlow queryById(Long id);
+    List<String> queryAgentIdByClientId(@Param("clientId") String clientId);
 
-    List<AiFlow> queryPage(@Param("agentId") String agentId,
-                           @Param("clientId") String clientId,
-                           @Param("status") Integer status,
-                           @Param("offset") Integer offset,
-                           @Param("size") Integer size);
-
-    Long count(@Param("agentId") String agentId,
-               @Param("clientId") String clientId,
-               @Param("status") Integer status);
-
-    void insert(AiFlow aiFlow);
-
-    void update(AiFlow aiFlow);
-
-    void delete(Long id);
-
-    List<AiFlow> queryByClientId(String clientId);
-
-    void updateStatus(@Param("id") Long id, @Param("status") Integer status);
 }

@@ -17,7 +17,7 @@ public interface IAiApiDao {
 
     Integer count(@Param("idKeyword") String idKeyword);
 
-    AiApi query(@Param("id") Long id);
+    AiApi queryById(@Param("id") Long id);
 
     void insert(AiApi aiApi);
 

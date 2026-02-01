@@ -19,7 +19,7 @@ public class ExecuteLoopRootNode extends AbstractExecuteNode {
     @Override
     protected String doApply(ExecuteRequestEntity executeRequestEntity, ExecuteContext executeContext) throws Exception {
 
-        Map<String, AiFlowVO> aiFlowVOMap = aiRepository.queryAiFlowVOMapByAgentId(executeRequestEntity.getAiAgentId());
+        Map<String, AiFlowVO> aiFlowVOMap = aiRepository.queryAiFlowVOMapByAgentId(executeRequestEntity.getAgentId());
 
         // 客户端链
         executeContext.setAiFlowVOMap(aiFlowVOMap);

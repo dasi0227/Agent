@@ -8,7 +8,7 @@ import java.util.List;
 
 @Mapper
 public interface IAiClientDao {
-    AiClient queryByClientId(String clientId);
+    AiClient queryByClientId(@Param("clientId") String clientId);
 
     List<AiClient> queryChatClientList();
 
@@ -24,7 +24,7 @@ public interface IAiClientDao {
                   @Param("modelId") String modelId,
                   @Param("clientType") String clientType);
 
-    AiClient query(@Param("id") Long id);
+    AiClient queryById(@Param("id") Long id);
 
     void insert(AiClient aiClient);
 
