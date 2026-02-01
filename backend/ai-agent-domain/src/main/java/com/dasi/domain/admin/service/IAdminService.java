@@ -1,10 +1,7 @@
 package com.dasi.domain.admin.service;
 
-import com.dasi.domain.admin.model.command.*;
-import com.dasi.domain.admin.model.query.*;
 import com.dasi.domain.admin.model.vo.*;
-import com.dasi.types.dto.request.admin.ApiManageRequest;
-import com.dasi.types.dto.request.admin.ApiPageRequest;
+import com.dasi.types.dto.request.admin.*;
 import com.dasi.types.dto.result.PageResult;
 
 public interface IAdminService {
@@ -21,87 +18,89 @@ public interface IAdminService {
     void apiToggle(String apiId, Integer status);
 
     // Model
-    PageResult<ModelVO> pageModel(ModelQuery query);
+    PageResult<ModelVO> modelPage(ModelPageRequest request);
 
-    ModelVO createModel(ModelCommand command);
+    ModelVO modelCreate(ModelManageRequest request);
 
-    ModelVO updateModel(ModelCommand command);
+    ModelVO modelUpdate(ModelManageRequest request);
 
-    void deleteModel(Long id);
+    void modelDelete(String modelId);
 
-    ModelVO switchModelStatus(Long id, Integer status);
+    ModelVO modelToggle(String modelId, Integer status);
 
-    // MCP
-    PageResult<McpVO> pageMcp(McpQuery query);
+    // Mcp
+    PageResult<McpVO> mcpPage(McpPageRequest request);
 
-    McpVO createMcp(McpCommand command);
+    McpVO mcpCreate(McpManageRequest request);
 
-    McpVO updateMcp(McpCommand command);
+    McpVO mcpUpdate(McpManageRequest request);
 
-    void deleteMcp(Long id);
+    void mcpDelete(String mcpId);
 
-    McpVO switchMcpStatus(Long id, Integer status);
+    McpVO mcpToggle(String mcpId, Integer status);
 
     // Advisor
-    PageResult<AdvisorVO> pageAdvisor(AdvisorQuery query);
+    PageResult<AdvisorVO> advisorPage(AdvisorPageRequest request);
 
-    AdvisorVO createAdvisor(AdvisorCommand command);
+    AdvisorVO advisorCreate(AdvisorManageRequest request);
 
-    AdvisorVO updateAdvisor(AdvisorCommand command);
+    AdvisorVO advisorUpdate(AdvisorManageRequest request);
 
-    void deleteAdvisor(Long id);
+    void advisorDelete(String advisorId);
 
-    AdvisorVO switchAdvisorStatus(Long id, Integer status);
+    AdvisorVO advisorToggle(String advisorId, Integer status);
 
     // Prompt
-    PageResult<PromptVO> pagePrompt(PromptQuery query);
+    PageResult<PromptVO> promptPage(PromptPageRequest request);
 
-    PromptVO createPrompt(PromptCommand command);
+    PromptVO promptCreate(PromptManageRequest request);
 
-    PromptVO updatePrompt(PromptCommand command);
+    PromptVO promptUpdate(PromptManageRequest request);
 
-    void deletePrompt(Long id);
+    void promptDelete(String promptId);
 
-    PromptVO switchPromptStatus(Long id, Integer status);
+    PromptVO promptToggle(String promptId, Integer status);
 
     // Client
-    PageResult<ClientVO> pageClient(ClientQuery query);
+    PageResult<ClientVO> clientPage(ClientPageRequest request);
 
-    ClientVO createClient(ClientCommand command);
+    ClientVO clientCreate(ClientManageRequest request);
 
-    ClientVO updateClient(ClientCommand command);
+    ClientVO clientUpdate(ClientManageRequest request);
 
-    void deleteClient(Long id);
+    void clientDelete(String clientId);
 
-    ClientVO switchClientStatus(Long id, Integer status);
+    ClientVO clientToggle(String clientId, Integer status);
 
     // Flow
-    PageResult<FlowVO> pageFlow(FlowQuery query);
+    PageResult<FlowVO> flowPage(FlowPageRequest request);
 
-    FlowVO createFlow(FlowCommand command);
+    FlowVO flowCreate(FlowManageRequest request);
 
-    FlowVO updateFlow(FlowCommand command);
+    FlowVO flowUpdate(FlowManageRequest request);
 
-    void deleteFlow(Long id);
+    void flowDelete(String flowId);
 
-    FlowVO switchFlowStatus(Long id, Integer status);
+    FlowVO flowToggle(String flowId, Integer status);
 
-    PageResult<AdminAgentVO> pageAgent(AgentQuery query);
+    // Agent
+    PageResult<AdminAgentVO> agentPage(AgentPageRequest request);
 
-    AdminAgentVO createAgent(AgentCommand command);
+    AdminAgentVO agentCreate(AgentManageRequest request);
 
-    AdminAgentVO updateAgent(AgentCommand command);
+    AdminAgentVO agentUpdate(AgentManageRequest request);
 
-    void deleteAgent(Long id);
+    void agentDelete(String agentId);
 
-    AdminAgentVO switchAgentStatus(Long id, Integer status);
+    AdminAgentVO agentToggle(String agentId, Integer status);
 
-    PageResult<UserAdminVO> pageUser(UserQuery query);
+    // User
+    PageResult<UserAdminVO> userPage(UserPageRequest request);
 
-    UserAdminVO createUser(UserCommand command);
+    UserAdminVO userCreate(UserManageRequest request);
 
-    UserAdminVO updateUser(UserCommand command);
+    UserAdminVO userUpdate(UserManageRequest request);
 
-    void deleteUser(Long id);
+    void userDelete(String userId);
 
 }

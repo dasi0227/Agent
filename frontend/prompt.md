@@ -1,22 +1,3 @@
-现在请你在后端对我的 AdminController/AdminService/AdminRepository/XxxDao 进行完整的代码重构
-
-注意我在你原先的基础上将 domain-admin-api 模块中的代码进行了自定义修改，现在请你对其他模块进行重构，跟我保持一样的风格和结构
-
-核心重构原则
-- 统一执行路径：严格遵循我的代码逻辑和执行路径
-- 简化参数传递：所有方法统一使用 ApiManageRequest 作为唯一传参对象，不再创建AdminXxx和XXXCommand等传输对象
-- 参数校验提前：直接使用 validation 进行校验，而不是在 Service 层进行校验
-- 清理缓存代码：暂时移除所有clearXxxCache()方法调用
-- 代码组织：相关方法集中放置，保持API风格的一致性
-
-代码规范要求（尽量保持一致）
-- 按照现有 API 模块的代码风格进行重构
-- 保持相同的包结构和类层级关系
-- 使用相同的命名约定和代码格式
-- 保持相同的异常处理模式
-- 遵循相同的业务逻辑执行顺序
-- 使用相同的工具类和辅助方法
-- 保持相同的分页查询处理方式
-- 遵循相同的依赖关系检查逻辑
-
-你只需要专注在 backend，frontend 暂时不需要修改
+如下修改
+1. 所有 switchXxxStatus 和 xxxStatus 方法应该改为叫做 xxxToggle 方法
+2. 所有 delete 和 toggle 方法的参数应该都直接是 String xxxId，不需要也不应该传递 Long 和 parseLong
