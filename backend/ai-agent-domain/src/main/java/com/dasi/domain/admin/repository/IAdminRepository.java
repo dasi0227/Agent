@@ -5,6 +5,14 @@ import com.dasi.domain.admin.model.vo.ApiVO;
 import com.dasi.domain.login.model.User;
 import com.dasi.types.dto.request.admin.ApiManageRequest;
 import com.dasi.types.dto.request.admin.ApiPageRequest;
+import com.dasi.types.dto.request.admin.AgentManageRequest;
+import com.dasi.types.dto.request.admin.AdvisorManageRequest;
+import com.dasi.types.dto.request.admin.ClientManageRequest;
+import com.dasi.types.dto.request.admin.FlowManageRequest;
+import com.dasi.types.dto.request.admin.McpManageRequest;
+import com.dasi.types.dto.request.admin.ModelManageRequest;
+import com.dasi.types.dto.request.admin.PromptManageRequest;
+import com.dasi.types.dto.request.admin.UserManageRequest;
 
 import java.util.List;
 
@@ -36,9 +44,9 @@ public interface IAdminRepository {
 
     AdminModel queryModelByModelId(String modelId);
 
-    void insertModel(AdminModel model);
+    void insertModel(ModelManageRequest request);
 
-    void updateModel(AdminModel model);
+    void updateModel(ModelManageRequest request);
 
     void deleteModel(Long id);
 
@@ -53,9 +61,9 @@ public interface IAdminRepository {
 
     AdminMcp queryMcpByMcpId(String mcpId);
 
-    void insertMcp(AdminMcp mcp);
+    void insertMcp(McpManageRequest request);
 
-    void updateMcp(AdminMcp mcp);
+    void updateMcp(McpManageRequest request);
 
     void deleteMcp(Long id);
 
@@ -70,9 +78,9 @@ public interface IAdminRepository {
 
     AdminAdvisor queryAdvisorByAdvisorId(String advisorId);
 
-    void insertAdvisor(AdminAdvisor advisor);
+    void insertAdvisor(AdvisorManageRequest request);
 
-    void updateAdvisor(AdminAdvisor advisor);
+    void updateAdvisor(AdvisorManageRequest request);
 
     void deleteAdvisor(Long id);
 
@@ -87,9 +95,9 @@ public interface IAdminRepository {
 
     AdminPrompt queryPromptByPromptId(String promptId);
 
-    void insertPrompt(AdminPrompt prompt);
+    void insertPrompt(PromptManageRequest request);
 
-    void updatePrompt(AdminPrompt prompt);
+    void updatePrompt(PromptManageRequest request);
 
     void deletePrompt(Long id);
 
@@ -104,9 +112,9 @@ public interface IAdminRepository {
 
     AdminClient queryClientByClientId(String clientId);
 
-    void insertClient(AdminClient client);
+    void insertClient(ClientManageRequest request);
 
-    void updateClient(AdminClient client);
+    void updateClient(ClientManageRequest request);
 
     void deleteClient(Long id);
 
@@ -121,9 +129,9 @@ public interface IAdminRepository {
 
     AdminFlow queryFlowById(Long id);
 
-    void insertFlow(AdminFlow flow);
+    void insertFlow(FlowManageRequest request);
 
-    void updateFlow(AdminFlow flow);
+    void updateFlow(FlowManageRequest request);
 
     void deleteFlow(Long id);
 
@@ -138,9 +146,9 @@ public interface IAdminRepository {
 
     AdminAgent queryAgentByAgentId(String agentId);
 
-    void insertAgent(AdminAgent agent);
+    void insertAgent(AgentManageRequest request);
 
-    void updateAgent(AdminAgent agent);
+    void updateAgent(AgentManageRequest request);
 
     void deleteAgent(Long id);
 
@@ -155,9 +163,9 @@ public interface IAdminRepository {
 
     User queryUserByUsername(String username);
 
-    void insertUser(User user);
+    void insertUser(UserManageRequest request);
 
-    void updateUser(User user);
+    void updateUser(UserManageRequest request);
 
     void deleteUser(Long id);
 

@@ -1,16 +1,12 @@
 package com.dasi.trigger.http;
 
-import com.dasi.domain.admin.model.command.*;
-import com.dasi.domain.admin.model.query.*;
 import com.dasi.domain.admin.model.vo.*;
 import com.dasi.domain.admin.service.IAdminService;
-import com.dasi.types.dto.request.admin.ApiManageRequest;
-import com.dasi.types.dto.request.admin.ApiPageRequest;
+import com.dasi.types.dto.request.admin.*;
 import com.dasi.types.dto.result.PageResult;
 import com.dasi.types.dto.result.Result;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +21,7 @@ public class AdminController {
     private IAdminService adminService;
 
     // -------------------- API --------------------
-    @GetMapping("/api/page")
+    @PostMapping("/api/page")
     public Result<PageResult<ApiVO>> apiPage(@Valid @RequestBody ApiPageRequest apiPageRequest) {
         return Result.success(adminService.apiPage(apiPageRequest));
     }
@@ -48,532 +44,221 @@ public class AdminController {
         return Result.success();
     }
 
-    @PutMapping("/api/toggle")
+    @PostMapping("/api/toggle")
     public Result<Void> apiToggle(@PathParam("apiId") String apiId, @PathParam("apiStatus") Integer apiStatus) {
         adminService.apiToggle(apiId, apiStatus);
         return Result.success();
     }
 
     // -------------------- Model --------------------
-    @GetMapping("/models")
-    public Result<PageResult<ModelVO>> listModels(@RequestParam(value = "keyword", required = false) String keyword,
-                                                  @RequestParam(value = "idKeyword", required = false) String idKeyword,
-                                                  @RequestParam(value = "nameKeyword", required = false) String nameKeyword,
-                                                  @RequestParam(value = "apiId", required = false) String apiId,
-                                                  @RequestParam(value = "page", required = false) Integer page,
-                                                  @RequestParam(value = "size", required = false) Integer size) {
-        ModelQuery query = ModelQuery.builder()
-                .keyword(keyword != null ? keyword : firstNonNull(idKeyword, nameKeyword))
-                .apiId(apiId)
-                .page(page)
-                .size(size)
-                .build();
-        return Result.success(adminService.pageModel(query));
+    @PostMapping("/model/page")
+    public Result<PageResult<ModelVO>> modelPage(@Valid @RequestBody ModelPageRequest modelPageRequest) {
+        return Result.success(adminService.modelPage(modelPageRequest));
     }
 
-    @PostMapping("/models")
-    public Result<ModelVO> createModel(@RequestBody ModelRequest request) {
-        ModelCommand command = ModelCommand.builder()
-                .modelId(request.getModelId())
-                .apiId(request.getApiId())
-                .modelName(request.getModelName())
-                .modelType(request.getModelType())
-                .modelStatus(request.getModelStatus())
-                .build();
-        return Result.success(adminService.createModel(command));
+    @PostMapping("/model/insert")
+    public Result<ModelVO> createModel(@Valid @RequestBody ModelManageRequest request) {
+        return Result.success(adminService.modelCreate(request));
     }
 
-    @PutMapping("/models/{id}")
-    public Result<ModelVO> updateModel(@PathVariable("id") Long id, @RequestBody ModelRequest request) {
-        ModelCommand command = ModelCommand.builder()
-                .id(id)
-                .modelId(request.getModelId())
-                .apiId(request.getApiId())
-                .modelName(request.getModelName())
-                .modelType(request.getModelType())
-                .modelStatus(request.getModelStatus())
-                .build();
-        return Result.success(adminService.updateModel(command));
+    @PostMapping("/model/update")
+    public Result<ModelVO> updateModel(@Valid @RequestBody ModelManageRequest request) {
+        return Result.success(adminService.modelUpdate(request));
     }
 
-    @DeleteMapping("/models/{id}")
-    public Result<Void> deleteModel(@PathVariable("id") Long id) {
-        adminService.deleteModel(id);
+    @PostMapping("/model/delete")
+    public Result<Void> deleteModel(@PathParam("modelId") String modelId) {
+        adminService.modelDelete(modelId);
         return Result.success();
     }
 
-    @PutMapping("/models/{id}/status")
-    public Result<ModelVO> switchModelStatus(@PathVariable("id") Long id, @RequestBody StatusRequest request) {
-        return Result.success(adminService.switchModelStatus(id, request.getStatus()));
+    @PostMapping("/model/toggle")
+    public Result<ModelVO> modelToggle(@PathParam("modelId") String modelId, @PathParam("modelStatus") Integer modelStatus) {
+        return Result.success(adminService.modelToggle(modelId, modelStatus));
     }
 
     // -------------------- MCP --------------------
-    @GetMapping("/mcps")
-    public Result<PageResult<McpVO>> listMcps(@RequestParam(value = "keyword", required = false) String keyword,
-                                              @RequestParam(value = "idKeyword", required = false) String idKeyword,
-                                              @RequestParam(value = "nameKeyword", required = false) String nameKeyword,
-                                              @RequestParam(value = "page", required = false) Integer page,
-                                              @RequestParam(value = "size", required = false) Integer size) {
-        McpQuery query = McpQuery.builder()
-                .keyword(keyword != null ? keyword : firstNonNull(idKeyword, nameKeyword))
-                .page(page)
-                .size(size)
-                .build();
-        return Result.success(adminService.pageMcp(query));
+    @PostMapping("/mcp/page")
+    public Result<PageResult<McpVO>> listMcps(@Valid @RequestBody McpPageRequest request) {
+        return Result.success(adminService.mcpPage(request));
     }
 
-    @PostMapping("/mcps")
-    public Result<McpVO> createMcp(@RequestBody McpRequest request) {
-        McpCommand command = McpCommand.builder()
-                .mcpId(request.getMcpId())
-                .mcpName(request.getMcpName())
-                .mcpType(request.getMcpType())
-                .mcpConfig(request.getMcpConfig())
-                .mcpDesc(request.getMcpDesc())
-                .mcpTimeout(request.getMcpTimeout())
-                .mcpChat(request.getMcpChat())
-                .mcpStatus(request.getMcpStatus())
-                .build();
-        return Result.success(adminService.createMcp(command));
+    @PostMapping("/mcp/insert")
+    public Result<McpVO> createMcp(@Valid @RequestBody McpManageRequest request) {
+        return Result.success(adminService.mcpCreate(request));
     }
 
-    @PutMapping("/mcps/{id}")
-    public Result<McpVO> updateMcp(@PathVariable("id") Long id, @RequestBody McpRequest request) {
-        McpCommand command = McpCommand.builder()
-                .id(id)
-                .mcpId(request.getMcpId())
-                .mcpName(request.getMcpName())
-                .mcpType(request.getMcpType())
-                .mcpConfig(request.getMcpConfig())
-                .mcpDesc(request.getMcpDesc())
-                .mcpTimeout(request.getMcpTimeout())
-                .mcpChat(request.getMcpChat())
-                .mcpStatus(request.getMcpStatus())
-                .build();
-        return Result.success(adminService.updateMcp(command));
+    @PostMapping("/mcp/update")
+    public Result<McpVO> updateMcp(@Valid @RequestBody McpManageRequest request) {
+        return Result.success(adminService.mcpUpdate(request));
     }
 
-    @DeleteMapping("/mcps/{id}")
-    public Result<Void> deleteMcp(@PathVariable("id") Long id) {
-        adminService.deleteMcp(id);
+    @PostMapping("/mcp/delete")
+    public Result<Void> deleteMcp(@PathParam("mcpId") String mcpId) {
+        adminService.mcpDelete(mcpId);
         return Result.success();
     }
 
-    @PutMapping("/mcps/{id}/status")
-    public Result<McpVO> switchMcpStatus(@PathVariable("id") Long id, @RequestBody StatusRequest request) {
-        return Result.success(adminService.switchMcpStatus(id, request.getStatus()));
+    @PostMapping("/mcp/toggle")
+    public Result<McpVO> mcpToggle(@PathParam("mcpId") String mcpId, @PathParam("mcpStatus") Integer mcpStatus) {
+        return Result.success(adminService.mcpToggle(mcpId, mcpStatus));
     }
 
     // -------------------- Advisor --------------------
-    @GetMapping("/advisors")
-    public Result<PageResult<AdvisorVO>> listAdvisors(@RequestParam(value = "keyword", required = false) String keyword,
-                                                      @RequestParam(value = "idKeyword", required = false) String idKeyword,
-                                                      @RequestParam(value = "nameKeyword", required = false) String nameKeyword,
-                                                      @RequestParam(value = "page", required = false) Integer page,
-                                                      @RequestParam(value = "size", required = false) Integer size) {
-        AdvisorQuery query = AdvisorQuery.builder()
-                .keyword(keyword != null ? keyword : firstNonNull(idKeyword, nameKeyword))
-                .page(page)
-                .size(size)
-                .build();
-        return Result.success(adminService.pageAdvisor(query));
+    @PostMapping("/advisor/page")
+    public Result<PageResult<AdvisorVO>> listAdvisors(@Valid @RequestBody AdvisorPageRequest request) {
+        return Result.success(adminService.advisorPage(request));
     }
 
-    @PostMapping("/advisors")
-    public Result<AdvisorVO> createAdvisor(@RequestBody AdvisorRequest request) {
-        AdvisorCommand command = AdvisorCommand.builder()
-                .advisorId(request.getAdvisorId())
-                .advisorName(request.getAdvisorName())
-                .advisorType(request.getAdvisorType())
-                .advisorDesc(request.getAdvisorDesc())
-                .advisorOrder(request.getAdvisorOrder())
-                .advisorParam(request.getAdvisorParam())
-                .advisorStatus(request.getAdvisorStatus())
-                .build();
-        return Result.success(adminService.createAdvisor(command));
+    @PostMapping("/advisor/insert")
+    public Result<AdvisorVO> createAdvisor(@Valid @RequestBody AdvisorManageRequest request) {
+        return Result.success(adminService.advisorCreate(request));
     }
 
-    @PutMapping("/advisors/{id}")
-    public Result<AdvisorVO> updateAdvisor(@PathVariable("id") Long id, @RequestBody AdvisorRequest request) {
-        AdvisorCommand command = AdvisorCommand.builder()
-                .id(id)
-                .advisorId(request.getAdvisorId())
-                .advisorName(request.getAdvisorName())
-                .advisorType(request.getAdvisorType())
-                .advisorDesc(request.getAdvisorDesc())
-                .advisorOrder(request.getAdvisorOrder())
-                .advisorParam(request.getAdvisorParam())
-                .advisorStatus(request.getAdvisorStatus())
-                .build();
-        return Result.success(adminService.updateAdvisor(command));
+    @PostMapping("/advisor/update")
+    public Result<AdvisorVO> updateAdvisor(@Valid @RequestBody AdvisorManageRequest request) {
+        return Result.success(adminService.advisorUpdate(request));
     }
 
-    @DeleteMapping("/advisors/{id}")
-    public Result<Void> deleteAdvisor(@PathVariable("id") Long id) {
-        adminService.deleteAdvisor(id);
+    @PostMapping("/advisor/delete")
+    public Result<Void> deleteAdvisor(@PathParam("advisorId") String advisorId) {
+        adminService.advisorDelete(advisorId);
         return Result.success();
     }
 
-    @PutMapping("/advisors/{id}/status")
-    public Result<AdvisorVO> switchAdvisorStatus(@PathVariable("id") Long id, @RequestBody StatusRequest request) {
-        return Result.success(adminService.switchAdvisorStatus(id, request.getStatus()));
+    @PostMapping("/advisor/toggle")
+    public Result<AdvisorVO> advisorToggle(@PathParam("advisorId") String advisorId, @PathParam("advisorStatus") Integer advisorStatus) {
+        return Result.success(adminService.advisorToggle(advisorId, advisorStatus));
     }
 
     // -------------------- Prompt --------------------
-    @GetMapping("/prompts")
-    public Result<PageResult<PromptVO>> listPrompts(@RequestParam(value = "keyword", required = false) String keyword,
-                                                    @RequestParam(value = "idKeyword", required = false) String idKeyword,
-                                                    @RequestParam(value = "nameKeyword", required = false) String nameKeyword,
-                                                    @RequestParam(value = "page", required = false) Integer page,
-                                                    @RequestParam(value = "size", required = false) Integer size) {
-        PromptQuery query = PromptQuery.builder()
-                .keyword(keyword != null ? keyword : firstNonNull(idKeyword, nameKeyword))
-                .page(page)
-                .size(size)
-                .build();
-        return Result.success(adminService.pagePrompt(query));
+    @PostMapping("/prompt/page")
+    public Result<PageResult<PromptVO>> listPrompts(@Valid @RequestBody PromptPageRequest request) {
+        return Result.success(adminService.promptPage(request));
     }
 
-    @PostMapping("/prompts")
-    public Result<PromptVO> createPrompt(@RequestBody PromptRequest request) {
-        PromptCommand command = PromptCommand.builder()
-                .promptId(request.getPromptId())
-                .promptName(request.getPromptName())
-                .promptContent(request.getPromptContent())
-                .promptDesc(request.getPromptDesc())
-                .promptStatus(request.getPromptStatus())
-                .build();
-        return Result.success(adminService.createPrompt(command));
+    @PostMapping("/prompt/insert")
+    public Result<PromptVO> createPrompt(@Valid @RequestBody PromptManageRequest request) {
+        return Result.success(adminService.promptCreate(request));
     }
 
-    @PutMapping("/prompts/{id}")
-    public Result<PromptVO> updatePrompt(@PathVariable("id") Long id, @RequestBody PromptRequest request) {
-        PromptCommand command = PromptCommand.builder()
-                .id(id)
-                .promptId(request.getPromptId())
-                .promptName(request.getPromptName())
-                .promptContent(request.getPromptContent())
-                .promptDesc(request.getPromptDesc())
-                .promptStatus(request.getPromptStatus())
-                .build();
-        return Result.success(adminService.updatePrompt(command));
+    @PostMapping("/prompt/update")
+    public Result<PromptVO> updatePrompt(@Valid @RequestBody PromptManageRequest request) {
+        return Result.success(adminService.promptUpdate(request));
     }
 
-    @DeleteMapping("/prompts/{id}")
-    public Result<Void> deletePrompt(@PathVariable("id") Long id) {
-        adminService.deletePrompt(id);
+    @PostMapping("/prompt/delete")
+    public Result<Void> deletePrompt(@PathParam("promptId") String promptId) {
+        adminService.promptDelete(promptId);
         return Result.success();
     }
 
-    @PutMapping("/prompts/{id}/status")
-    public Result<PromptVO> switchPromptStatus(@PathVariable("id") Long id, @RequestBody StatusRequest request) {
-        return Result.success(adminService.switchPromptStatus(id, request.getStatus()));
+    @PostMapping("/prompt/toggle")
+    public Result<PromptVO> promptToggle(@PathParam("promptId") String promptId, @PathParam("promptStatus") Integer promptStatus) {
+        return Result.success(adminService.promptToggle(promptId, promptStatus));
     }
 
     // -------------------- Client --------------------
-    @GetMapping("/clients")
-    public Result<PageResult<ClientVO>> listClients(@RequestParam(value = "keyword", required = false) String keyword,
-                                                    @RequestParam(value = "idKeyword", required = false) String idKeyword,
-                                                    @RequestParam(value = "nameKeyword", required = false) String nameKeyword,
-                                                    @RequestParam(value = "modelId", required = false) String modelId,
-                                                    @RequestParam(value = "type", required = false) String type,
-                                                    @RequestParam(value = "page", required = false) Integer page,
-                                                    @RequestParam(value = "size", required = false) Integer size) {
-        ClientQuery query = ClientQuery.builder()
-                .keyword(keyword != null ? keyword : firstNonNull(idKeyword, nameKeyword))
-                .modelId(modelId)
-                .clientType(type)
-                .page(page)
-                .size(size)
-                .build();
-        return Result.success(adminService.pageClient(query));
+    @PostMapping("/client/page")
+    public Result<PageResult<ClientVO>> listClients(@Valid @RequestBody ClientPageRequest request) {
+        return Result.success(adminService.clientPage(request));
     }
 
-    @PostMapping("/clients")
-    public Result<ClientVO> createClient(@RequestBody ClientRequest request) {
-        ClientCommand command = ClientCommand.builder()
-                .clientId(request.getClientId())
-                .clientType(request.getClientType())
-                .modelId(request.getModelId())
-                .modelName(request.getModelName())
-                .clientName(request.getClientName())
-                .clientDesc(request.getClientDesc())
-                .clientStatus(request.getClientStatus())
-                .build();
-        return Result.success(adminService.createClient(command));
+    @PostMapping("/client/insert")
+    public Result<ClientVO> createClient(@Valid @RequestBody ClientManageRequest request) {
+        return Result.success(adminService.clientCreate(request));
     }
 
-    @PutMapping("/clients/{id}")
-    public Result<ClientVO> updateClient(@PathVariable("id") Long id, @RequestBody ClientRequest request) {
-        ClientCommand command = ClientCommand.builder()
-                .id(id)
-                .clientId(request.getClientId())
-                .clientType(request.getClientType())
-                .modelId(request.getModelId())
-                .modelName(request.getModelName())
-                .clientName(request.getClientName())
-                .clientDesc(request.getClientDesc())
-                .clientStatus(request.getClientStatus())
-                .build();
-        return Result.success(adminService.updateClient(command));
+    @PostMapping("/client/update")
+    public Result<ClientVO> updateClient(@Valid @RequestBody ClientManageRequest request) {
+        return Result.success(adminService.clientUpdate(request));
     }
 
-    @DeleteMapping("/clients/{id}")
-    public Result<Void> deleteClient(@PathVariable("id") Long id) {
-        adminService.deleteClient(id);
+    @PostMapping("/client/delete")
+    public Result<Void> deleteClient(@PathParam("clientId") String clientId) {
+        adminService.clientDelete(clientId);
         return Result.success();
     }
 
-    @PutMapping("/clients/{id}/status")
-    public Result<ClientVO> switchClientStatus(@PathVariable("id") Long id, @RequestBody StatusRequest request) {
-        return Result.success(adminService.switchClientStatus(id, request.getStatus()));
+    @PostMapping("/client/toggle")
+    public Result<ClientVO> clientToggle(@PathParam("clientId") String clientId, @PathParam("clientStatus") Integer clientStatus) {
+        return Result.success(adminService.clientToggle(clientId, clientStatus));
     }
 
     // -------------------- Flow --------------------
-    @GetMapping("/flows")
-    public Result<PageResult<FlowVO>> listFlows(@RequestParam(value = "agentId", required = false) String agentId,
-                                                @RequestParam(value = "clientId", required = false) String clientId,
-                                                @RequestParam(value = "status", required = false) Integer status,
-                                                @RequestParam(value = "page", required = false) Integer page,
-                                                @RequestParam(value = "size", required = false) Integer size) {
-        FlowQuery query = FlowQuery.builder()
-                .agentId(agentId)
-                .clientId(clientId)
-                .status(status)
-                .page(page)
-                .size(size)
-                .build();
-        return Result.success(adminService.pageFlow(query));
+    @PostMapping("/flow/page")
+    public Result<PageResult<FlowVO>> listFlows(@Valid @RequestBody FlowPageRequest request) {
+        return Result.success(adminService.flowPage(request));
     }
 
-    @PostMapping("/flows")
-    public Result<FlowVO> createFlow(@RequestBody FlowRequest request) {
-        FlowCommand command = FlowCommand.builder()
-                .agentId(request.getAgentId())
-                .clientId(request.getClientId())
-                .clientType(request.getClientType())
-                .flowPrompt(request.getFlowPrompt())
-                .flowSeq(request.getFlowSeq())
-                .flowStatus(request.getFlowStatus())
-                .build();
-        return Result.success(adminService.createFlow(command));
+    @PostMapping("/flow/insert")
+    public Result<FlowVO> createFlow(@Valid @RequestBody FlowManageRequest request) {
+        return Result.success(adminService.flowCreate(request));
     }
 
-    @PutMapping("/flows/{id}")
-    public Result<FlowVO> updateFlow(@PathVariable("id") Long id, @RequestBody FlowRequest request) {
-        FlowCommand command = FlowCommand.builder()
-                .id(id)
-                .agentId(request.getAgentId())
-                .clientId(request.getClientId())
-                .clientType(request.getClientType())
-                .flowPrompt(request.getFlowPrompt())
-                .flowSeq(request.getFlowSeq())
-                .flowStatus(request.getFlowStatus())
-                .build();
-        return Result.success(adminService.updateFlow(command));
+    @PostMapping("/flow/update")
+    public Result<FlowVO> updateFlow(@Valid @RequestBody FlowManageRequest request) {
+        return Result.success(adminService.flowUpdate(request));
     }
 
-    @DeleteMapping("/flows/{id}")
-    public Result<Void> deleteFlow(@PathVariable("id") Long id) {
-        adminService.deleteFlow(id);
+    @PostMapping("/flow/delete")
+    public Result<Void> deleteFlow(@PathParam("flowId") String flowId) {
+        adminService.flowDelete(flowId);
         return Result.success();
     }
 
-    @PutMapping("/flows/{id}/status")
-    public Result<FlowVO> switchFlowStatus(@PathVariable("id") Long id, @RequestBody StatusRequest request) {
-        return Result.success(adminService.switchFlowStatus(id, request.getStatus()));
+    @PostMapping("/flow/toggle")
+    public Result<FlowVO> flowToggle(@PathParam("flowId") String flowId, @PathParam("flowStatus") Integer flowStatus) {
+        return Result.success(adminService.flowToggle(flowId, flowStatus));
     }
 
     // -------------------- Agent --------------------
-    @GetMapping("/agents")
-    public Result<PageResult<AdminAgentVO>> listAgents(@RequestParam(value = "keyword", required = false) String keyword,
-                                                       @RequestParam(value = "idKeyword", required = false) String idKeyword,
-                                                       @RequestParam(value = "nameKeyword", required = false) String nameKeyword,
-                                                       @RequestParam(value = "type", required = false) String type,
-                                                       @RequestParam(value = "page", required = false) Integer page,
-                                                       @RequestParam(value = "size", required = false) Integer size) {
-        AgentQuery query = AgentQuery.builder()
-                .keyword(keyword != null ? keyword : firstNonNull(idKeyword, nameKeyword))
-                .agentType(type)
-                .page(page)
-                .size(size)
-                .build();
-        return Result.success(adminService.pageAgent(query));
+    @PostMapping("/agent/page")
+    public Result<PageResult<AdminAgentVO>> listAgents(@Valid @RequestBody AgentPageRequest request) {
+        return Result.success(adminService.agentPage(request));
     }
 
-    @PostMapping("/agents")
-    public Result<AdminAgentVO> createAgent(@RequestBody AgentRequest request) {
-        AgentCommand command = AgentCommand.builder()
-                .agentId(request.getAgentId())
-                .agentName(request.getAgentName())
-                .agentType(request.getAgentType())
-                .agentDesc(request.getAgentDesc())
-                .agentStatus(request.getAgentStatus())
-                .build();
-        return Result.success(adminService.createAgent(command));
+    @PostMapping("/agent/insert")
+    public Result<AdminAgentVO> createAgent(@Valid @RequestBody AgentManageRequest request) {
+        return Result.success(adminService.agentCreate(request));
     }
 
-    @PutMapping("/agents/{id}")
-    public Result<AdminAgentVO> updateAgent(@PathVariable("id") Long id, @RequestBody AgentRequest request) {
-        AgentCommand command = AgentCommand.builder()
-                .id(id)
-                .agentId(request.getAgentId())
-                .agentName(request.getAgentName())
-                .agentType(request.getAgentType())
-                .agentDesc(request.getAgentDesc())
-                .agentStatus(request.getAgentStatus())
-                .build();
-        return Result.success(adminService.updateAgent(command));
+    @PostMapping("/agent/update")
+    public Result<AdminAgentVO> updateAgent(@Valid @RequestBody AgentManageRequest request) {
+        return Result.success(adminService.agentUpdate(request));
     }
 
-    @DeleteMapping("/agents/{id}")
-    public Result<Void> deleteAgent(@PathVariable("id") Long id) {
-        adminService.deleteAgent(id);
+    @PostMapping("/agent/delete")
+    public Result<Void> deleteAgent(@PathParam("agentId") String agentId) {
+        adminService.agentDelete(agentId);
         return Result.success();
     }
 
-    @PutMapping("/agents/{id}/status")
-    public Result<AdminAgentVO> switchAgentStatus(@PathVariable("id") Long id, @RequestBody StatusRequest request) {
-        return Result.success(adminService.switchAgentStatus(id, request.getStatus()));
+    @PostMapping("/agent/toggle")
+    public Result<AdminAgentVO> agentToggle(@PathParam("agentId") String agentId, @PathParam("agentStatus") Integer agentStatus) {
+        return Result.success(adminService.agentToggle(agentId, agentStatus));
     }
 
     // -------------------- User --------------------
-    @GetMapping("/users")
-    public Result<PageResult<UserAdminVO>> listUsers(@RequestParam(value = "username", required = false) String username,
-                                                     @RequestParam(value = "role", required = false) String role,
-                                                     @RequestParam(value = "page", required = false) Integer page,
-                                                     @RequestParam(value = "size", required = false) Integer size) {
-        UserQuery query = UserQuery.builder()
-                .username(username)
-                .role(role)
-                .page(page)
-                .size(size)
-                .build();
-        return Result.success(adminService.pageUser(query));
+    @PostMapping("/user/page")
+    public Result<PageResult<UserAdminVO>> listUsers(@Valid @RequestBody UserPageRequest request) {
+        return Result.success(adminService.userPage(request));
     }
 
-    @PostMapping("/users")
-    public Result<UserAdminVO> createUser(@RequestBody UserRequest request) {
-        UserCommand command = UserCommand.builder()
-                .username(request.getUsername())
-                .password(request.getPassword())
-                .role(request.getRole())
-                .build();
-        return Result.success(adminService.createUser(command));
+    @PostMapping("/user/insert")
+    public Result<UserAdminVO> createUser(@Valid @RequestBody UserManageRequest request) {
+        return Result.success(adminService.userCreate(request));
     }
 
-    @PutMapping("/users/{id}")
-    public Result<UserAdminVO> updateUser(@PathVariable("id") Long id, @RequestBody UserRequest request) {
-        UserCommand command = UserCommand.builder()
-                .id(id)
-                .username(request.getUsername())
-                .password(request.getPassword())
-                .role(request.getRole())
-                .build();
-        return Result.success(adminService.updateUser(command));
+    @PostMapping("/user/update")
+    public Result<UserAdminVO> updateUser(@Valid @RequestBody UserManageRequest request) {
+        return Result.success(adminService.userUpdate(request));
     }
 
-    @DeleteMapping("/users/{id}")
-    public Result<Void> deleteUser(@PathVariable("id") Long id) {
-        adminService.deleteUser(id);
+    @PostMapping("/user/delete")
+    public Result<Void> deleteUser(@PathParam("userId") String userId) {
+        adminService.userDelete(userId);
         return Result.success();
     }
 
-    // -------------------- Request DTOs --------------------
-    @Data
-    private static class ApiRequest {
-        private String apiId;
-        private String apiBaseUrl;
-        private String apiKey;
-        private String apiCompletionsPath;
-        private String apiEmbeddingsPath;
-        private Integer apiStatus;
-    }
-
-    @Data
-    private static class ModelRequest {
-        private String modelId;
-        private String apiId;
-        private String modelName;
-        private String modelType;
-        private Integer modelStatus;
-    }
-
-    @Data
-    private static class McpRequest {
-        private String mcpId;
-        private String mcpName;
-        private String mcpType;
-        private String mcpConfig;
-        private String mcpDesc;
-        private Integer mcpTimeout;
-        private Integer mcpChat;
-        private Integer mcpStatus;
-    }
-
-    @Data
-    private static class AdvisorRequest {
-        private String advisorId;
-        private String advisorName;
-        private String advisorType;
-        private String advisorDesc;
-        private Integer advisorOrder;
-        private String advisorParam;
-        private Integer advisorStatus;
-    }
-
-    @Data
-    private static class PromptRequest {
-        private String promptId;
-        private String promptName;
-        private String promptContent;
-        private String promptDesc;
-        private Integer promptStatus;
-    }
-
-    @Data
-    private static class ClientRequest {
-        private String clientId;
-        private String clientType;
-        private String modelId;
-        private String modelName;
-        private String clientName;
-        private String clientDesc;
-        private Integer clientStatus;
-    }
-
-    @Data
-    private static class FlowRequest {
-        private String agentId;
-        private String clientId;
-        private String clientType;
-        private String flowPrompt;
-        private Integer flowSeq;
-        private Integer flowStatus;
-    }
-
-    @Data
-    private static class AgentRequest {
-        private String agentId;
-        private String agentName;
-        private String agentType;
-        private String agentDesc;
-        private Integer agentStatus;
-    }
-
-    @Data
-    private static class UserRequest {
-        private String username;
-        private String password;
-        private String role;
-    }
-
-    @Data
-    private static class StatusRequest {
-        private Integer status;
-    }
-
-    private String firstNonNull(String a, String b) {
-        return a != null && !a.isEmpty() ? a : b;
-    }
 }

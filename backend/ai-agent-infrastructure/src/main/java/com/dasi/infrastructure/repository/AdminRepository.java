@@ -4,29 +4,24 @@ import com.dasi.domain.admin.model.*;
 import com.dasi.domain.admin.model.vo.ApiVO;
 import com.dasi.domain.admin.repository.IAdminRepository;
 import com.dasi.domain.login.model.User;
-import com.dasi.domain.util.IRedisService;
 import com.dasi.infrastructure.persistent.dao.*;
 import com.dasi.infrastructure.persistent.po.*;
 import com.dasi.types.dto.request.admin.ApiManageRequest;
 import com.dasi.types.dto.request.admin.ApiPageRequest;
+import com.dasi.types.dto.request.admin.AgentManageRequest;
+import com.dasi.types.dto.request.admin.AdvisorManageRequest;
+import com.dasi.types.dto.request.admin.ClientManageRequest;
+import com.dasi.types.dto.request.admin.FlowManageRequest;
+import com.dasi.types.dto.request.admin.McpManageRequest;
+import com.dasi.types.dto.request.admin.ModelManageRequest;
+import com.dasi.types.dto.request.admin.PromptManageRequest;
+import com.dasi.types.dto.request.admin.UserManageRequest;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import static com.dasi.types.constant.RedisConstant.LIST_CHAT_CLIENT_KEY;
-import static com.dasi.types.constant.RedisConstant.LIST_WORK_AGENT_KEY;
-import static com.dasi.types.constant.RedisConstant.PO_ADVISOR_PREFIX;
-import static com.dasi.types.constant.RedisConstant.PO_AGENT_PREFIX;
-import static com.dasi.types.constant.RedisConstant.PO_API_PREFIX;
-import static com.dasi.types.constant.RedisConstant.PO_CLIENT_PREFIX;
-import static com.dasi.types.constant.RedisConstant.PO_LIST_CONFIG_PREFIX;
-import static com.dasi.types.constant.RedisConstant.PO_LIST_FLOW_PREFIX;
-import static com.dasi.types.constant.RedisConstant.PO_MCP_PREFIX;
-import static com.dasi.types.constant.RedisConstant.PO_MODEL_PREFIX;
-import static com.dasi.types.constant.RedisConstant.PO_PROMPT_PREFIX;
+import java.util.ArrayList;
 
 @Repository
 public class AdminRepository implements IAdminRepository {
@@ -60,9 +55,6 @@ public class AdminRepository implements IAdminRepository {
 
     @Resource
     private IUserDao userDao;
-
-    @Resource
-    private IRedisService redisService;
 
     // -------------------- API --------------------
     @Override
@@ -169,26 +161,19 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
-    public void insertModel(AdminModel model) {
-        AiModel po = toPo(model);
+    public void insertModel(ModelManageRequest request) {
+        AiModel po = toModelPo(request);
         aiModelDao.insert(po);
-        model.setId(po.getId());
-        clearModelCache(model.getModelId());
     }
 
     @Override
-    public void updateModel(AdminModel model) {
-        aiModelDao.update(toPo(model));
-        clearModelCache(model.getModelId());
+    public void updateModel(ModelManageRequest request) {
+        aiModelDao.update(toModelPo(request));
     }
 
     @Override
     public void deleteModel(Long id) {
-        AdminModel exist = queryModelById(id);
         aiModelDao.delete(id);
-        if (exist != null) {
-            clearModelCache(exist.getModelId());
-        }
     }
 
     @Override
@@ -222,26 +207,19 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
-    public void insertMcp(AdminMcp mcp) {
-        AiMcp po = toPo(mcp);
+    public void insertMcp(McpManageRequest request) {
+        AiMcp po = toMcpPo(request);
         aiMcpDao.insert(po);
-        mcp.setId(po.getId());
-        clearMcpCache(mcp.getMcpId());
     }
 
     @Override
-    public void updateMcp(AdminMcp mcp) {
-        aiMcpDao.update(toPo(mcp));
-        clearMcpCache(mcp.getMcpId());
+    public void updateMcp(McpManageRequest request) {
+        aiMcpDao.update(toMcpPo(request));
     }
 
     @Override
     public void deleteMcp(Long id) {
-        AdminMcp exist = queryMcpById(id);
         aiMcpDao.delete(id);
-        if (exist != null) {
-            clearMcpCache(exist.getMcpId());
-        }
     }
 
     @Override
@@ -275,26 +253,19 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
-    public void insertAdvisor(AdminAdvisor advisor) {
-        AiAdvisor po = toPo(advisor);
+    public void insertAdvisor(AdvisorManageRequest request) {
+        AiAdvisor po = toAdvisorPo(request);
         aiAdvisorDao.insert(po);
-        advisor.setId(po.getId());
-        clearAdvisorCache(advisor.getAdvisorId());
     }
 
     @Override
-    public void updateAdvisor(AdminAdvisor advisor) {
-        aiAdvisorDao.update(toPo(advisor));
-        clearAdvisorCache(advisor.getAdvisorId());
+    public void updateAdvisor(AdvisorManageRequest request) {
+        aiAdvisorDao.update(toAdvisorPo(request));
     }
 
     @Override
     public void deleteAdvisor(Long id) {
-        AdminAdvisor exist = queryAdvisorById(id);
         aiAdvisorDao.delete(id);
-        if (exist != null) {
-            clearAdvisorCache(exist.getAdvisorId());
-        }
     }
 
     @Override
@@ -328,26 +299,19 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
-    public void insertPrompt(AdminPrompt prompt) {
-        AiPrompt po = toPo(prompt);
+    public void insertPrompt(PromptManageRequest request) {
+        AiPrompt po = toPromptPo(request);
         aiPromptDao.insert(po);
-        prompt.setId(po.getId());
-        clearPromptCache(prompt.getPromptId());
     }
 
     @Override
-    public void updatePrompt(AdminPrompt prompt) {
-        aiPromptDao.update(toPo(prompt));
-        clearPromptCache(prompt.getPromptId());
+    public void updatePrompt(PromptManageRequest request) {
+        aiPromptDao.update(toPromptPo(request));
     }
 
     @Override
     public void deletePrompt(Long id) {
-        AdminPrompt exist = queryPromptById(id);
         aiPromptDao.delete(id);
-        if (exist != null) {
-            clearPromptCache(exist.getPromptId());
-        }
     }
 
     @Override
@@ -381,26 +345,19 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
-    public void insertClient(AdminClient client) {
-        AiClient po = toPo(client);
+    public void insertClient(ClientManageRequest request) {
+        AiClient po = toClientPo(request);
         aiClientDao.insert(po);
-        client.setId(po.getId());
-        clearClientCache(client.getClientId());
     }
 
     @Override
-    public void updateClient(AdminClient client) {
-        aiClientDao.update(toPo(client));
-        clearClientCache(client.getClientId());
+    public void updateClient(ClientManageRequest request) {
+        aiClientDao.update(toClientPo(request));
     }
 
     @Override
     public void deleteClient(Long id) {
-        AdminClient exist = queryClientById(id);
         aiClientDao.delete(id);
-        if (exist != null) {
-            clearClientCache(exist.getClientId());
-        }
     }
 
     @Override
@@ -438,35 +395,24 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
-    public void insertFlow(AdminFlow flow) {
-        AiFlow po = toPo(flow);
+    public void insertFlow(FlowManageRequest request) {
+        AiFlow po = toFlowPo(request);
         aiFlowDao.insert(po);
-        flow.setId(po.getId());
-        clearFlowCache(flow.getAgentId());
     }
 
     @Override
-    public void updateFlow(AdminFlow flow) {
-        aiFlowDao.update(toPo(flow));
-        clearFlowCache(flow.getAgentId());
+    public void updateFlow(FlowManageRequest request) {
+        aiFlowDao.update(toFlowPo(request));
     }
 
     @Override
     public void deleteFlow(Long id) {
-        AdminFlow exist = queryFlowById(id);
         aiFlowDao.delete(id);
-        if (exist != null) {
-            clearFlowCache(exist.getAgentId());
-        }
     }
 
     @Override
     public void updateFlowStatus(Long id, Integer status) {
         aiFlowDao.updateStatus(id, status);
-        AdminFlow exist = queryFlowById(id);
-        if (exist != null) {
-            clearFlowCache(exist.getAgentId());
-        }
     }
 
     // -------------------- Agent --------------------
@@ -497,28 +443,19 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
-    public void insertAgent(AdminAgent agent) {
-        AiAgent po = toPo(agent);
+    public void insertAgent(AgentManageRequest request) {
+        AiAgent po = toAgentPo(request);
         aiAgentDao.insertAgent(po);
-        agent.setId(po.getId());
-        clearAgentCache(agent.getAgentId());
     }
 
     @Override
-    public void updateAgent(AdminAgent agent) {
-        aiAgentDao.updateAgent(toPo(agent));
-        clearAgentCache(agent.getAgentId());
+    public void updateAgent(AgentManageRequest request) {
+        aiAgentDao.updateAgent(toAgentPo(request));
     }
 
     @Override
     public void deleteAgent(Long id) {
-        AdminAgent exist = apiQuery(id);
         aiAgentDao.deleteAgent(id);
-        if (exist != null) {
-            clearAgentCache(exist.getAgentId());
-        } else {
-            redisService.delete(LIST_WORK_AGENT_KEY);
-        }
     }
 
     @Override
@@ -556,15 +493,14 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
-    public void insertUser(User user) {
-        com.dasi.infrastructure.persistent.po.User po = toPo(user);
+    public void insertUser(UserManageRequest request) {
+        com.dasi.infrastructure.persistent.po.User po = toUserPo(request);
         userDao.insert(po);
-        user.setId(po.getId());
     }
 
     @Override
-    public void updateUser(User user) {
-        userDao.update(toPo(user));
+    public void updateUser(UserManageRequest request) {
+        userDao.update(toUserPo(request));
     }
 
     @Override
@@ -607,19 +543,17 @@ public class AdminRepository implements IAdminRepository {
                 .build();
     }
 
-    private AiModel toPo(AdminModel model) {
-        if (model == null) {
+    private AiModel toModelPo(ModelManageRequest request) {
+        if (request == null) {
             return null;
         }
         return AiModel.builder()
-                .id(model.getId())
-                .modelId(model.getModelId())
-                .apiId(model.getApiId())
-                .modelName(model.getModelName())
-                .modelType(model.getModelType())
-                .modelStatus(model.getModelStatus())
-                .createTime(model.getCreateTime())
-                .updateTime(model.getUpdateTime())
+                .id(request.getId())
+                .modelId(request.getModelId())
+                .apiId(request.getApiId())
+                .modelName(request.getModelName())
+                .modelType(request.getModelType())
+                .modelStatus(request.getModelStatus())
                 .build();
     }
 
@@ -642,22 +576,20 @@ public class AdminRepository implements IAdminRepository {
                 .build();
     }
 
-    private AiMcp toPo(AdminMcp mcp) {
-        if (mcp == null) {
+    private AiMcp toMcpPo(McpManageRequest request) {
+        if (request == null) {
             return null;
         }
         return AiMcp.builder()
-                .id(mcp.getId())
-                .mcpId(mcp.getMcpId())
-                .mcpName(mcp.getMcpName())
-                .mcpType(mcp.getMcpType())
-                .mcpConfig(mcp.getMcpConfig())
-                .mcpDesc(mcp.getMcpDesc())
-                .mcpTimeout(mcp.getMcpTimeout())
-                .mcpChat(mcp.getMcpChat())
-                .mcpStatus(mcp.getMcpStatus())
-                .createTime(mcp.getCreateTime())
-                .updateTime(mcp.getUpdateTime())
+                .id(request.getId())
+                .mcpId(request.getMcpId())
+                .mcpName(request.getMcpName())
+                .mcpType(request.getMcpType())
+                .mcpConfig(request.getMcpConfig())
+                .mcpDesc(request.getMcpDesc())
+                .mcpTimeout(request.getMcpTimeout())
+                .mcpChat(request.getMcpChat())
+                .mcpStatus(request.getMcpStatus())
                 .build();
     }
 
@@ -679,21 +611,19 @@ public class AdminRepository implements IAdminRepository {
                 .build();
     }
 
-    private AiAdvisor toPo(AdminAdvisor advisor) {
-        if (advisor == null) {
+    private AiAdvisor toAdvisorPo(AdvisorManageRequest request) {
+        if (request == null) {
             return null;
         }
         return AiAdvisor.builder()
-                .id(advisor.getId())
-                .advisorId(advisor.getAdvisorId())
-                .advisorName(advisor.getAdvisorName())
-                .advisorType(advisor.getAdvisorType())
-                .advisorDesc(advisor.getAdvisorDesc())
-                .advisorOrder(advisor.getAdvisorOrder())
-                .advisorParam(advisor.getAdvisorParam())
-                .advisorStatus(advisor.getAdvisorStatus())
-                .createTime(advisor.getCreateTime())
-                .updateTime(advisor.getUpdateTime())
+                .id(request.getId())
+                .advisorId(request.getAdvisorId())
+                .advisorName(request.getAdvisorName())
+                .advisorType(request.getAdvisorType())
+                .advisorDesc(request.getAdvisorDesc())
+                .advisorOrder(request.getAdvisorOrder())
+                .advisorParam(request.getAdvisorParam())
+                .advisorStatus(request.getAdvisorStatus())
                 .build();
     }
 
@@ -713,19 +643,17 @@ public class AdminRepository implements IAdminRepository {
                 .build();
     }
 
-    private AiPrompt toPo(AdminPrompt prompt) {
-        if (prompt == null) {
+    private AiPrompt toPromptPo(PromptManageRequest request) {
+        if (request == null) {
             return null;
         }
         return AiPrompt.builder()
-                .id(prompt.getId())
-                .promptId(prompt.getPromptId())
-                .promptName(prompt.getPromptName())
-                .promptContent(prompt.getPromptContent())
-                .promptDesc(prompt.getPromptDesc())
-                .promptStatus(prompt.getPromptStatus())
-                .createTime(prompt.getCreateTime())
-                .updateTime(prompt.getUpdateTime())
+                .id(request.getId())
+                .promptId(request.getPromptId())
+                .promptName(request.getPromptName())
+                .promptContent(request.getPromptContent())
+                .promptDesc(request.getPromptDesc())
+                .promptStatus(request.getPromptStatus())
                 .build();
     }
 
@@ -747,21 +675,19 @@ public class AdminRepository implements IAdminRepository {
                 .build();
     }
 
-    private AiClient toPo(AdminClient client) {
-        if (client == null) {
+    private AiClient toClientPo(ClientManageRequest request) {
+        if (request == null) {
             return null;
         }
         return AiClient.builder()
-                .id(client.getId())
-                .clientId(client.getClientId())
-                .clientType(client.getClientType())
-                .modelId(client.getModelId())
-                .modelName(client.getModelName())
-                .clientName(client.getClientName())
-                .clientDesc(client.getClientDesc())
-                .clientStatus(client.getClientStatus())
-                .createTime(client.getCreateTime())
-                .updateTime(client.getUpdateTime())
+                .id(request.getId())
+                .clientId(request.getClientId())
+                .clientType(request.getClientType())
+                .modelId(request.getModelId())
+                .modelName(request.getModelName())
+                .clientName(request.getClientName())
+                .clientDesc(request.getClientDesc())
+                .clientStatus(request.getClientStatus())
                 .build();
     }
 
@@ -782,20 +708,18 @@ public class AdminRepository implements IAdminRepository {
                 .build();
     }
 
-    private AiFlow toPo(AdminFlow flow) {
-        if (flow == null) {
+    private AiFlow toFlowPo(FlowManageRequest request) {
+        if (request == null) {
             return null;
         }
         return AiFlow.builder()
-                .id(flow.getId())
-                .agentId(flow.getAgentId())
-                .clientId(flow.getClientId())
-                .clientType(flow.getClientType())
-                .flowPrompt(flow.getFlowPrompt())
-                .flowSeq(flow.getFlowSeq())
-                .flowStatus(flow.getFlowStatus())
-                .createTime(flow.getCreateTime())
-                .updateTime(flow.getUpdateTime())
+                .id(request.getId())
+                .agentId(request.getAgentId())
+                .clientId(request.getClientId())
+                .clientType(request.getClientType())
+                .flowPrompt(request.getFlowPrompt())
+                .flowSeq(request.getFlowSeq())
+                .flowStatus(request.getFlowStatus())
                 .build();
     }
 
@@ -815,19 +739,17 @@ public class AdminRepository implements IAdminRepository {
                 .build();
     }
 
-    private AiAgent toPo(AdminAgent agent) {
-        if (agent == null) {
+    private AiAgent toAgentPo(AgentManageRequest request) {
+        if (request == null) {
             return null;
         }
         return AiAgent.builder()
-                .id(agent.getId())
-                .agentId(agent.getAgentId())
-                .agentName(agent.getAgentName())
-                .agentType(agent.getAgentType())
-                .agentDesc(agent.getAgentDesc())
-                .agentStatus(agent.getAgentStatus())
-                .createTime(agent.getCreateTime())
-                .updateTime(agent.getUpdateTime())
+                .id(request.getId())
+                .agentId(request.getAgentId())
+                .agentName(request.getAgentName())
+                .agentType(request.getAgentType())
+                .agentDesc(request.getAgentDesc())
+                .agentStatus(request.getAgentStatus())
                 .build();
     }
 
@@ -845,63 +767,15 @@ public class AdminRepository implements IAdminRepository {
                 .build();
     }
 
-    private com.dasi.infrastructure.persistent.po.User toPo(User user) {
-        if (user == null) {
+    private com.dasi.infrastructure.persistent.po.User toUserPo(UserManageRequest request) {
+        if (request == null) {
             return null;
         }
         com.dasi.infrastructure.persistent.po.User po = new com.dasi.infrastructure.persistent.po.User();
-        po.setId(user.getId());
-        po.setUsername(user.getUsername());
-        po.setPassword(user.getPassword());
-        po.setRole(user.getRole());
-        po.setCreateTime(user.getCreateTime());
-        po.setUpdateTime(user.getUpdateTime());
+        po.setId(request.getId());
+        po.setUsername(request.getUsername());
+        po.setPassword(request.getPassword());
+        po.setRole(request.getRole());
         return po;
-    }
-
-    private void clearAgentCache(String agentId) {
-        redisService.delete(LIST_WORK_AGENT_KEY);
-        if (agentId != null) {
-            redisService.delete(PO_AGENT_PREFIX + agentId);
-        }
-    }
-
-    private void clearApiCache(String apiId) {
-        if (apiId == null) return;
-        redisService.delete(PO_API_PREFIX + apiId);
-    }
-
-    private void clearModelCache(String modelId) {
-        if (modelId == null) return;
-        redisService.delete(PO_MODEL_PREFIX + modelId);
-    }
-
-    private void clearMcpCache(String mcpId) {
-        if (mcpId == null) return;
-        redisService.delete(PO_MCP_PREFIX + mcpId);
-    }
-
-    private void clearAdvisorCache(String advisorId) {
-        if (advisorId == null) return;
-        redisService.delete(PO_ADVISOR_PREFIX + advisorId);
-    }
-
-    private void clearPromptCache(String promptId) {
-        if (promptId == null) return;
-        redisService.delete(PO_PROMPT_PREFIX + promptId);
-    }
-
-    private void clearClientCache(String clientId) {
-        if (clientId == null) return;
-        redisService.delete(PO_CLIENT_PREFIX + clientId);
-        redisService.delete(LIST_CHAT_CLIENT_KEY);
-        redisService.delete(PO_LIST_CONFIG_PREFIX + clientId + ":advisor");
-        redisService.delete(PO_LIST_CONFIG_PREFIX + clientId + ":prompt");
-        redisService.delete(PO_LIST_CONFIG_PREFIX + clientId + ":mcp");
-    }
-
-    private void clearFlowCache(String agentId) {
-        if (agentId == null) return;
-        redisService.delete(PO_LIST_FLOW_PREFIX + agentId);
     }
 }

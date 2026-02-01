@@ -15,4 +15,6 @@ public class PageConfig {
 
     private Integer size;
 
+    private Integer offset;
+
 }
