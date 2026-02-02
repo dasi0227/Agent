@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Chat from '../components/Chat.vue';
 import Work from '../components/Work.vue';
-import Login from '../components/Login.vue';
+import Auth from '../components/Auth.vue';
 import Admin from '../components/Admin.vue';
 import NotFound from '../components/NotFound.vue';
 import { getStoredAuth } from './pinia';
@@ -28,7 +28,15 @@ const routes = [
     {
         path: '/login',
         name: 'login',
-        component: Login,
+        component: Auth,
+        meta: {
+            hideSidebar: true
+        }
+    },
+    {
+        path: '/register',
+        name: 'register',
+        component: Auth,
         meta: {
             hideSidebar: true
         }
@@ -60,7 +68,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
     const auth = getStoredAuth();
-    if (!auth.token && to.path !== '/login') {
+    if (!auth.token && to.path !== '/login' && to.path !== '/register') {
         next({ path: '/login', replace: true });
         return;
     }

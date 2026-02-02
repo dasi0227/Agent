@@ -1,6 +1,5 @@
 import http, { streamFetch } from './request';
 
-
 const AI_BASE_PATH = '/api/v1/ai';
 const CHAT_COMPLETE_PATH = `${AI_BASE_PATH}/chat/complete`;
 const CHAT_STREAM_PATH = `${AI_BASE_PATH}/chat/stream`;
@@ -13,24 +12,33 @@ const QUERY_BASE_PATH = '/api/v1/query';
 const CHAT_CLIENTS_PATH = `${QUERY_BASE_PATH}/chat-client-list`;
 const CHAT_MCP_PATH = `${QUERY_BASE_PATH}/chat-mcp-list`;
 const AGENT_LIST_PATH = `${QUERY_BASE_PATH}/agent-list`;
-const RAG_TAGS_PATH = `${QUERY_BASE_PATH}/rag-tag-list`;
+const RAG_TAGS_PATH = `${QUERY_BASE_PATH}/chat-rag-list`;
 
-const AUTH_BASE_PATH = '/api/v1';
+const AUTH_BASE_PATH = '/api/v1/auth';
 const LOGIN_PATH = `${AUTH_BASE_PATH}/login`;
 const REGISTER_PATH = `${AUTH_BASE_PATH}/register`;
-const ME_PATH = `${AUTH_BASE_PATH}/me`;
+const PROFILE_PATH = `${AUTH_BASE_PATH}/profile`;
+const PASSWORD_PATH = `${AUTH_BASE_PATH}/password`;
 
 const ADMIN_BASE_PATH = '/api/v1/admin';
-const ADMIN_PATHS = {
-    api: 'apis',
-    model: 'models',
-    mcp: 'mcps',
-    advisor: 'advisors',
-    prompt: 'prompts',
-    client: 'clients',
-    flow: 'flows',
-    agent: 'agents',
-    user: 'users'
+const ADMIN_STATUS_PARAM = {
+    api: 'apiStatus',
+    model: 'modelStatus',
+    mcp: 'mcpStatus',
+    advisor: 'advisorStatus',
+    prompt: 'promptStatus',
+    client: 'clientStatus',
+    agent: 'agentStatus'
+};
+
+export const trimStrings = (input) => {
+    if (input === null || input === undefined) return input;
+    if (typeof input === 'string') return input.trim();
+    if (Array.isArray(input)) return input.map((item) => trimStrings(item));
+    if (typeof input === 'object') {
+        return Object.fromEntries(Object.entries(input).map(([k, v]) => [k, trimStrings(v)]));
+    }
+    return input;
 };
 
 export const fetchComplete = async ({
@@ -112,21 +120,13 @@ export const pickContentFromResult = (result) => {
     );
 };
 
-export const queryRagTags = async () => {
-    return http.get(RAG_TAGS_PATH);
-};
+export const queryRagTags = async () => http.get(RAG_TAGS_PATH);
 
-export const queryChatModels = async () => {
-    return http.get(CHAT_CLIENTS_PATH);
-};
+export const queryChatModels = async () => http.get(CHAT_CLIENTS_PATH);
 
-export const queryChatMcps = async () => {
-    return http.get(CHAT_MCP_PATH);
-};
+export const queryChatMcps = async () => http.get(CHAT_MCP_PATH);
 
-export const queryAgentList = async () => {
-    return http.get(AGENT_LIST_PATH);
-};
+export const queryAgentList = async () => http.get(AGENT_LIST_PATH);
 
 export const dispatchArmory = async ({ armoryType, armoryId }) => {
     return http.post(
@@ -182,28 +182,30 @@ export const uploadRagGit = async ({ repo, username, password }) => {
 };
 
 // Auth
-export const login = async ({ username, password }) => http.post(LOGIN_PATH, { username, password });
-export const register = async ({ username, password }) => http.post(REGISTER_PATH, { username, password });
-export const fetchProfile = async () => http.get(ME_PATH);
-export const updateProfile = async ({ username, oldPassword, newPassword }) =>
-    http.put(ME_PATH, { username, oldPassword, newPassword });
+export const login = async ({ username, password }) =>
+    http.post(LOGIN_PATH, trimStrings({ username, password }));
+export const register = async ({ username, password }) =>
+    http.post(REGISTER_PATH, trimStrings({ username, password }));
+export const fetchProfile = async () => http.post(PROFILE_PATH);
+export const updatePassword = async ({ id, username, oldPassword, newPassword }) =>
+    http.post(PASSWORD_PATH, trimStrings({ id, username, oldPassword, newPassword }));
 
-const buildAdminPath = (moduleKey) => `${ADMIN_BASE_PATH}/${ADMIN_PATHS[moduleKey]}`;
+// -------------------- Admin --------------------
+const buildAdminPath = (moduleKey, action) => `${ADMIN_BASE_PATH}/${moduleKey}/${action}`;
 
-export const fetchAdminList = async (moduleKey, params = {}) => http.get(buildAdminPath(moduleKey), { params });
-export const createAdminItem = async (moduleKey, payload) => http.post(buildAdminPath(moduleKey), payload);
-export const updateAdminItem = async (moduleKey, id, payload) => http.put(`${buildAdminPath(moduleKey)}/${id}`, payload);
-export const deleteAdminItem = async (moduleKey, id) => http.delete(`${buildAdminPath(moduleKey)}/${id}`);
-export const switchAdminStatus = async (moduleKey, id, status) =>
-    http.put(`${buildAdminPath(moduleKey)}/${id}/status`, { status });
+export const adminPage = async (moduleKey, payload = {}) =>
+    http.post(buildAdminPath(moduleKey, 'page'), trimStrings(payload));
 
-// Legacy aliases (kept for compatibility)
-export const fetchAdminAgents = (params = {}) => fetchAdminList('agent', params);
-export const createAdminAgent = (payload) => createAdminItem('agent', payload);
-export const updateAdminAgent = (id, payload) => updateAdminItem('agent', id, payload);
-export const deleteAdminAgent = (id) => deleteAdminItem('agent', id);
+export const adminInsert = async (moduleKey, payload = {}) =>
+    http.post(buildAdminPath(moduleKey, 'insert'), trimStrings(payload));
 
-export const fetchAdminUsers = (params = {}) => fetchAdminList('user', params);
-export const createAdminUser = (payload) => createAdminItem('user', payload);
-export const updateAdminUser = (id, payload) => updateAdminItem('user', id, payload);
-export const deleteAdminUser = (id) => deleteAdminItem('user', id);
+export const adminUpdate = async (moduleKey, payload = {}) =>
+    http.post(buildAdminPath(moduleKey, 'update'), trimStrings(payload));
+
+export const adminDelete = async (moduleKey, id) =>
+    http.post(buildAdminPath(moduleKey, 'delete'), null, { params: { id } });
+
+export const adminToggle = async (moduleKey, id, status) => {
+    const statusKey = ADMIN_STATUS_PARAM[moduleKey];
+    return http.post(buildAdminPath(moduleKey, 'toggle'), null, { params: { id, [statusKey]: status } });
+};
