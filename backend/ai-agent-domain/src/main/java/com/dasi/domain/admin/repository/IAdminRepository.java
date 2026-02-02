@@ -1,9 +1,8 @@
 package com.dasi.domain.admin.repository;
 
 import com.dasi.domain.admin.model.vo.*;
-import com.dasi.types.dto.request.admin.page.ConfigListRequest;
 import com.dasi.types.dto.request.admin.manage.*;
-import com.dasi.types.dto.request.admin.page.*;
+import com.dasi.types.dto.request.admin.query.*;
 
 import java.util.List;
 
@@ -70,10 +69,11 @@ public interface IAdminRepository {
     void clientToggle(Long id, Integer status);
 
     // Agent
-    List<AdminAgentVO> agentPage(AgentPageRequest request);
+    List<AgentVO> agentPage(AgentPageRequest request);
+    List<AgentVO> agentList(AgentListRequest request);
     Integer agentCount(AgentPageRequest request);
-    AdminAgentVO agentQuery(Long id);
-    AdminAgentVO agentQuery(String agentId);
+    AgentVO agentQuery(Long id);
+    AgentVO agentQuery(String agentId);
     void agentInsert(AgentManageRequest request);
     void agentUpdate(AgentManageRequest request);
     void agentDelete(Long id);
@@ -97,6 +97,15 @@ public interface IAdminRepository {
     void configDelete(Long id);
     void configToggle(Long id, Integer status);
 
+    // Flow
+    List<ClientDetailVO> flowClient();
+    List<FlowVO> flowAgent(String agentId);
+    FlowVO flowQuery(String agentId, String clientId);
+    FlowVO flowQuery(Long id);
+    void flowInsert(FLowManageRequest request);
+    void flowUpdate(FLowManageRequest request);
+    void flowDelete(Long id);
+
     // Depend
     List<String> queryClientDependOnPrompt(String promptId);
     List<String> queryClientDependOnAdvisor(String advisorId);
@@ -105,8 +114,9 @@ public interface IAdminRepository {
     List<String> queryClientDependOnModel(String modelId);
     List<String> queryAgentDependOnClient(String clientId);
 
-    // List
+    // Option
     List<String> listApiId();
     List<String> listModelId();
+
 
 }

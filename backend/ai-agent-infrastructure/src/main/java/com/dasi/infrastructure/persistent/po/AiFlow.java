@@ -31,9 +31,6 @@ public class AiFlow {
     /** 工作流顺序 */
     private Integer flowSeq;
 
-    /** 状态：0-禁用，1-启用 */
-    private Integer flowStatus;
-
     /** 创建时间 */
     private LocalDateTime createTime;
 

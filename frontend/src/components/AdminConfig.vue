@@ -239,7 +239,7 @@ onMounted(async () => {
                             class="rounded-[10px] border border-[#e2e8f0] bg-[#f8fafc] shadow-inner"
                         >
                             <div class="flex items-center justify-between border-b border-[#e2e8f0] px-4 py-3">
-                                <div class="text-[16px] font-semibold text-[#0f172a]">{{ card.clientId }}</div>
+                                <div class="text-[20px] font-semibold text-[#0f172a]">{{ card.clientId }}</div>
                                 <button
                                     class="rounded-[10px] bg-[#0f172a] px-3 py-2 text-[12px] font-semibold text-white shadow"
                                     type="button"

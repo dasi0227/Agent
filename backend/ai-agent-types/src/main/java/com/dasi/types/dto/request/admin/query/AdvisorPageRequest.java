@@ -1,4 +1,4 @@
-package com.dasi.types.dto.request.admin.page;
+package com.dasi.types.dto.request.admin.query;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -10,11 +10,13 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class ApiPageRequest {
+@AllArgsConstructor
+public class AdvisorPageRequest {
 
     private String idKeyword;
+
+    private String nameKeyword;
 
     @NotNull
     @Min(1)
@@ -24,5 +26,4 @@ public class ApiPageRequest {
     @Min(1)
     @Max(10)
     private Integer pageSize;
-
 }

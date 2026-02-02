@@ -15,4 +15,13 @@ public interface IAiFlowDao {
 
     List<String> queryAgentIdByClientId(@Param("clientId") String clientId);
 
+    AiFlow queryByAgentIdAndClientId(@Param("agentId") String agentId, @Param("clientId") String clientId);
+
+    AiFlow queryById(@Param("id") Long id);
+
+    void insert(AiFlow aiFlow);
+
+    void update(AiFlow aiFlow);
+
+    void delete(@Param("id") Long id);
 }

@@ -1,16 +1,17 @@
 package com.dasi.infrastructure.repository;
 
+import com.dasi.domain.admin.model.enumeration.AiConfigType;
 import com.dasi.domain.admin.model.vo.*;
 import com.dasi.domain.admin.repository.IAdminRepository;
 import com.dasi.infrastructure.persistent.dao.*;
 import com.dasi.infrastructure.persistent.po.*;
-import com.dasi.types.dto.request.admin.page.ConfigListRequest;
 import com.dasi.types.dto.request.admin.manage.*;
-import com.dasi.types.dto.request.admin.page.*;
+import com.dasi.types.dto.request.admin.query.*;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.dasi.domain.admin.model.enumeration.AiConfigType.*;
@@ -104,34 +105,6 @@ public class AdminRepository implements IAdminRepository {
         aiApiDao.toggle(aiApi);
     }
 
-    private ApiVO toApiVO(AiApi po) {
-        if (po == null) {
-            return null;
-        }
-        return ApiVO.builder()
-                .id(po.getId())
-                .apiId(po.getApiId())
-                .apiBaseUrl(po.getApiBaseUrl())
-                .apiKey(po.getApiKey())
-                .apiCompletionsPath(po.getApiCompletionsPath())
-                .apiEmbeddingsPath(po.getApiEmbeddingsPath())
-                .apiStatus(po.getApiStatus())
-                .updateTime(po.getUpdateTime())
-                .build();
-    }
-
-    private AiApi toApiPO(ApiManageRequest request) {
-        return AiApi.builder()
-                .id(request.getId())
-                .apiId(request.getApiId())
-                .apiBaseUrl(request.getApiBaseUrl())
-                .apiKey(request.getApiKey())
-                .apiCompletionsPath(request.getApiCompletionsPath())
-                .apiEmbeddingsPath(request.getApiEmbeddingsPath())
-                .apiStatus(request.getApiStatus())
-                .build();
-    }
-
     // -------------------- Model --------------------
     @Override
     public List<ModelVO> modelPage(ModelPageRequest request) {
@@ -191,32 +164,6 @@ public class AdminRepository implements IAdminRepository {
         aiModelDao.toggle(po);
     }
 
-    private AiModel toModelPo(ModelManageRequest request) {
-        return AiModel.builder()
-                .id(request.getId())
-                .modelId(request.getModelId())
-                .apiId(request.getApiId())
-                .modelName(request.getModelName())
-                .modelType(request.getModelType())
-                .modelStatus(request.getModelStatus())
-                .build();
-    }
-
-    private ModelVO toModelVO(AiModel po) {
-        if (po == null) {
-            return null;
-        }
-        return ModelVO.builder()
-                .id(po.getId())
-                .modelId(po.getModelId())
-                .apiId(po.getApiId())
-                .modelName(po.getModelName())
-                .modelType(po.getModelType())
-                .modelStatus(po.getModelStatus())
-                .updateTime(po.getUpdateTime())
-                .build();
-    }
-
     // -------------------- MCP --------------------
     @Override
     public List<McpVO> mcpPage(McpPageRequest request) {
@@ -267,39 +214,6 @@ public class AdminRepository implements IAdminRepository {
         aiMcpDao.toggle(po);
     }
 
-    private McpVO toMcpVO(AiMcp po) {
-        if (po == null) {
-            return null;
-        }
-        return McpVO.builder()
-                .id(po.getId())
-                .mcpId(po.getMcpId())
-                .mcpName(po.getMcpName())
-                .mcpType(po.getMcpType())
-                .mcpConfig(po.getMcpConfig())
-                .mcpDesc(po.getMcpDesc())
-                .mcpTimeout(po.getMcpTimeout())
-                .mcpChat(po.getMcpChat())
-                .mcpStatus(po.getMcpStatus())
-                .updateTime(po.getUpdateTime())
-                .build();
-    }
-
-    private AiMcp toMcpPo(McpManageRequest request) {
-        return AiMcp.builder()
-                .id(request.getId())
-                .mcpId(request.getMcpId())
-                .mcpName(request.getMcpName())
-                .mcpType(request.getMcpType())
-                .mcpConfig(request.getMcpConfig())
-                .mcpDesc(request.getMcpDesc())
-                .mcpTimeout(request.getMcpTimeout())
-                .mcpChat(request.getMcpChat())
-                .mcpStatus(request.getMcpStatus())
-                .build();
-    }
-
-
     // -------------------- Advisor --------------------
     @Override
     public List<AdvisorVO> advisorPage(AdvisorPageRequest request) {
@@ -348,36 +262,6 @@ public class AdminRepository implements IAdminRepository {
                 .advisorStatus(status)
                 .build();
         aiAdvisorDao.toggle(po);
-    }
-
-    private AdvisorVO toAdvisorVO(AiAdvisor po) {
-        if (po == null) {
-            return null;
-        }
-        return AdvisorVO.builder()
-                .id(po.getId())
-                .advisorId(po.getAdvisorId())
-                .advisorName(po.getAdvisorName())
-                .advisorType(po.getAdvisorType())
-                .advisorDesc(po.getAdvisorDesc())
-                .advisorOrder(po.getAdvisorOrder())
-                .advisorParam(po.getAdvisorParam())
-                .advisorStatus(po.getAdvisorStatus())
-                .updateTime(po.getUpdateTime())
-                .build();
-    }
-
-    private AiAdvisor toAdvisorPo(AdvisorManageRequest request) {
-        return AiAdvisor.builder()
-                .id(request.getId())
-                .advisorId(request.getAdvisorId())
-                .advisorName(request.getAdvisorName())
-                .advisorType(request.getAdvisorType())
-                .advisorDesc(request.getAdvisorDesc())
-                .advisorOrder(request.getAdvisorOrder())
-                .advisorParam(request.getAdvisorParam())
-                .advisorStatus(request.getAdvisorStatus())
-                .build();
     }
 
     // -------------------- Prompt --------------------
@@ -430,32 +314,6 @@ public class AdminRepository implements IAdminRepository {
         aiPromptDao.toggle(po);
     }
 
-    private PromptVO toPromptVO(AiPrompt po) {
-        if (po == null) {
-            return null;
-        }
-        return PromptVO.builder()
-                .id(po.getId())
-                .promptId(po.getPromptId())
-                .promptName(po.getPromptName())
-                .promptContent(po.getPromptContent())
-                .promptDesc(po.getPromptDesc())
-                .promptStatus(po.getPromptStatus())
-                .updateTime(po.getUpdateTime())
-                .build();
-    }
-
-    private AiPrompt toPromptPo(PromptManageRequest request) {
-        return AiPrompt.builder()
-                .id(request.getId())
-                .promptId(request.getPromptId())
-                .promptName(request.getPromptName())
-                .promptContent(request.getPromptContent())
-                .promptDesc(request.getPromptDesc())
-                .promptStatus(request.getPromptStatus())
-                .build();
-    }
-
     // -------------------- Client --------------------
     @Override
     public List<ClientVO> clientPage(ClientPageRequest request) {
@@ -506,40 +364,9 @@ public class AdminRepository implements IAdminRepository {
         aiClientDao.toggle(po);
     }
 
-
-    private ClientVO toClientVO(AiClient po) {
-        if (po == null) {
-            return null;
-        }
-        return ClientVO.builder()
-                .id(po.getId())
-                .clientId(po.getClientId())
-                .clientType(po.getClientType())
-                .modelId(po.getModelId())
-                .modelName(po.getModelName())
-                .clientName(po.getClientName())
-                .clientDesc(po.getClientDesc())
-                .clientStatus(po.getClientStatus())
-                .updateTime(po.getUpdateTime())
-                .build();
-    }
-
-    private AiClient toClientPo(ClientManageRequest request) {
-        return AiClient.builder()
-                .id(request.getId())
-                .clientId(request.getClientId())
-                .clientType(request.getClientType())
-                .modelId(request.getModelId())
-                .modelName(request.getModelName())
-                .clientName(request.getClientName())
-                .clientDesc(request.getClientDesc())
-                .clientStatus(request.getClientStatus())
-                .build();
-    }
-
     // -------------------- Agent --------------------
     @Override
-    public List<AdminAgentVO> agentPage(AgentPageRequest request) {
+    public List<AgentVO> agentPage(AgentPageRequest request) {
         Integer offset = (request.getPageNum() - 1) * request.getPageSize();
         List<AiAgent> poList = aiAgentDao.page(request.getIdKeyword(), request.getNameKeyword(), request.getAgentType(), offset, request.getPageSize());
         if (CollectionUtils.isEmpty(poList)) {
@@ -549,17 +376,23 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
+    public List<AgentVO> agentList(AgentListRequest request) {
+        List<AiAgent> poList = aiAgentDao.list(request.getIdKeyword(), request.getNameKeyword(), request.getAgentType());
+        return poList.stream().map(this::toAgentVO).toList();
+    }
+
+    @Override
     public Integer agentCount(AgentPageRequest request) {
         return aiAgentDao.count(request.getIdKeyword(), request.getNameKeyword(), request.getAgentType());
     }
 
     @Override
-    public AdminAgentVO agentQuery(Long id) {
+    public AgentVO agentQuery(Long id) {
         return toAgentVO(aiAgentDao.queryById(id));
     }
 
     @Override
-    public AdminAgentVO agentQuery(String agentId) {
+    public AgentVO agentQuery(String agentId) {
         return toAgentVO(aiAgentDao.queryAgentByAgentId(agentId));
     }
 
@@ -585,32 +418,6 @@ public class AdminRepository implements IAdminRepository {
                 .agentStatus(status)
                 .build();
         aiAgentDao.toggle(po);
-    }
-
-    private AdminAgentVO toAgentVO(AiAgent po) {
-        if (po == null) {
-            return null;
-        }
-        return AdminAgentVO.builder()
-                .id(po.getId())
-                .agentId(po.getAgentId())
-                .agentName(po.getAgentName())
-                .agentType(po.getAgentType())
-                .agentDesc(po.getAgentDesc())
-                .agentStatus(po.getAgentStatus())
-                .updateTime(po.getUpdateTime())
-                .build();
-    }
-
-    private AiAgent toAgentPo(AgentManageRequest request) {
-        return AiAgent.builder()
-                .id(request.getId())
-                .agentId(request.getAgentId())
-                .agentName(request.getAgentName())
-                .agentType(request.getAgentType())
-                .agentDesc(request.getAgentDesc())
-                .agentStatus(request.getAgentStatus())
-                .build();
     }
 
     // -------------------- User --------------------
@@ -655,27 +462,6 @@ public class AdminRepository implements IAdminRepository {
         userDao.delete(id);
     }
 
-    private UserVO toUserVO(User po) {
-        if (po == null) {
-            return null;
-        }
-        return UserVO.builder()
-                .id(po.getId())
-                .username(po.getUsername())
-                .role(po.getRole())
-                .updateTime(po.getUpdateTime())
-                .build();
-    }
-
-    private User toUserPo(UserManageRequest request) {
-        return User.builder()
-                .id(request.getId())
-                .username(request.getUsername())
-                .password(request.getPassword())
-                .role(request.getRole())
-                .build();
-    }
-
     // -------------------- Config --------------------
     @Override
     public List<ConfigVO> configList(ConfigListRequest request) {
@@ -713,30 +499,98 @@ public class AdminRepository implements IAdminRepository {
         aiConfigDao.toggle(id, status);
     }
 
-    private AiConfig toConfigPO(ConfigManageRequest request) {
-        return AiConfig.builder()
-                .id(request.getId())
-                .clientId(request.getClientId())
-                .configType(request.getConfigType())
-                .configValue(request.getConfigValue())
-                .configParam(request.getConfigParam())
-                .configStatus(request.getConfigStatus())
-                .build();
+    // -------------------- Flow --------------------
+    @Override
+    public List<ClientDetailVO> flowClient() {
+        List<ClientDetailVO> clientDetailVOList = new ArrayList<>();
+
+        List<AiClient> aiClientList = aiClientDao.list();
+        if (aiClientList.isEmpty()) {
+            return clientDetailVOList;
+        }
+
+        for (AiClient aiClient : aiClientList) {
+            String clientId = aiClient.getClientId();
+            ClientVO clientVO = toClientVO(aiClient);
+
+            String modelId = aiClient.getModelId();
+            AiModel aiModel = aiModelDao.queryByModelId(modelId);
+            ModelVO modelVO = toModelVO(aiModel);
+
+            String apiId = aiModel.getApiId();
+            AiApi aiApi = aiApiDao.queryByApiId(apiId);
+            ApiVO apiVO = toApiVO(aiApi);
+
+            List<AiConfig> aiConfigList = aiConfigDao.queryByClientId(clientId);
+            if (aiConfigList.isEmpty()) {
+                continue;
+            }
+
+            List<McpVO> mcpVOList = new ArrayList<>();
+            List<AdvisorVO> advisorVOList = new ArrayList<>();
+            List<PromptVO> promptVOList = new ArrayList<>();
+            for (AiConfig aiConfig : aiConfigList) {
+                switch (AiConfigType.fromString(aiConfig.getConfigType())) {
+                    case MCP -> {
+                        AiMcp aiMcp = aiMcpDao.queryByMcpId(aiConfig.getConfigValue());
+                        mcpVOList.add(toMcpVO(aiMcp));
+                    }
+                    case ADVISOR -> {
+                        AiAdvisor aiAdvisor = aiAdvisorDao.queryByAdvisorId(aiConfig.getConfigValue());
+                        advisorVOList.add(toAdvisorVO(aiAdvisor));
+                    }
+                    case PROMPT -> {
+                        AiPrompt aiPrompt = aiPromptDao.queryByPromptId(aiConfig.getConfigValue());
+                        promptVOList.add(toPromptVO(aiPrompt));
+                    }
+                }
+            }
+
+            ClientDetailVO clientDetailVO = ClientDetailVO.builder()
+                    .clientId(clientId)
+                    .client(clientVO)
+                    .model(modelVO)
+                    .api(apiVO)
+                    .mcpList(mcpVOList)
+                    .advisorList(advisorVOList)
+                    .promptList(promptVOList)
+                    .build();
+
+            clientDetailVOList.add(clientDetailVO);
+        }
+
+        return clientDetailVOList;
     }
 
-    private ConfigVO toConfigVO(AiConfig po) {
-        if (po == null) {
-            return null;
-        }
-        return ConfigVO.builder()
-                .id(po.getId())
-                .clientId(po.getClientId())
-                .configType(po.getConfigType())
-                .configValue(po.getConfigValue())
-                .configParam(po.getConfigParam())
-                .configStatus(po.getConfigStatus())
-                .updateTime(po.getUpdateTime())
-                .build();
+    @Override
+    public List<FlowVO> flowAgent(String agentId) {
+        List<AiFlow> poList = aiFlowDao.queryByAgentId(agentId);
+        return poList.stream().map(this::toFlowVO).toList();
+    }
+
+    @Override
+    public FlowVO flowQuery(String agentId, String clientId) {
+        return toFlowVO(aiFlowDao.queryByAgentIdAndClientId(agentId, clientId));
+    }
+
+    @Override
+    public FlowVO flowQuery(Long id) {
+        return toFlowVO(aiFlowDao.queryById(id));
+    }
+
+    @Override
+    public void flowInsert(FLowManageRequest request) {
+        aiFlowDao.insert(toFlowPO(request));
+    }
+
+    @Override
+    public void flowUpdate(FLowManageRequest request) {
+        aiFlowDao.update(toFlowPO(request));
+    }
+
+    @Override
+    public void flowDelete(Long id) {
+        aiFlowDao.delete(id);
     }
 
     // -------------------- Depend --------------------
@@ -778,6 +632,278 @@ public class AdminRepository implements IAdminRepository {
     @Override
     public List<String> listModelId() {
         return aiModelDao.listModelId();
+    }
+
+    // -------------------- Util --------------------
+    private ApiVO toApiVO(AiApi po) {
+        if (po == null) {
+            return null;
+        }
+        return ApiVO.builder()
+                .id(po.getId())
+                .apiId(po.getApiId())
+                .apiBaseUrl(po.getApiBaseUrl())
+                .apiKey(po.getApiKey())
+                .apiCompletionsPath(po.getApiCompletionsPath())
+                .apiEmbeddingsPath(po.getApiEmbeddingsPath())
+                .apiStatus(po.getApiStatus())
+                .updateTime(po.getUpdateTime())
+                .build();
+    }
+
+    private AiApi toApiPO(ApiManageRequest request) {
+        return AiApi.builder()
+                .id(request.getId())
+                .apiId(request.getApiId())
+                .apiBaseUrl(request.getApiBaseUrl())
+                .apiKey(request.getApiKey())
+                .apiCompletionsPath(request.getApiCompletionsPath())
+                .apiEmbeddingsPath(request.getApiEmbeddingsPath())
+                .apiStatus(request.getApiStatus())
+                .build();
+    }
+
+    private AiModel toModelPo(ModelManageRequest request) {
+        return AiModel.builder()
+                .id(request.getId())
+                .modelId(request.getModelId())
+                .apiId(request.getApiId())
+                .modelName(request.getModelName())
+                .modelType(request.getModelType())
+                .modelStatus(request.getModelStatus())
+                .build();
+    }
+
+    private ModelVO toModelVO(AiModel po) {
+        if (po == null) {
+            return null;
+        }
+        return ModelVO.builder()
+                .id(po.getId())
+                .modelId(po.getModelId())
+                .apiId(po.getApiId())
+                .modelName(po.getModelName())
+                .modelType(po.getModelType())
+                .modelStatus(po.getModelStatus())
+                .updateTime(po.getUpdateTime())
+                .build();
+    }
+
+    private McpVO toMcpVO(AiMcp po) {
+        if (po == null) {
+            return null;
+        }
+        return McpVO.builder()
+                .id(po.getId())
+                .mcpId(po.getMcpId())
+                .mcpName(po.getMcpName())
+                .mcpType(po.getMcpType())
+                .mcpConfig(po.getMcpConfig())
+                .mcpDesc(po.getMcpDesc())
+                .mcpTimeout(po.getMcpTimeout())
+                .mcpChat(po.getMcpChat())
+                .mcpStatus(po.getMcpStatus())
+                .updateTime(po.getUpdateTime())
+                .build();
+    }
+
+    private AiMcp toMcpPo(McpManageRequest request) {
+        return AiMcp.builder()
+                .id(request.getId())
+                .mcpId(request.getMcpId())
+                .mcpName(request.getMcpName())
+                .mcpType(request.getMcpType())
+                .mcpConfig(request.getMcpConfig())
+                .mcpDesc(request.getMcpDesc())
+                .mcpTimeout(request.getMcpTimeout())
+                .mcpChat(request.getMcpChat())
+                .mcpStatus(request.getMcpStatus())
+                .build();
+    }
+
+    private AdvisorVO toAdvisorVO(AiAdvisor po) {
+        if (po == null) {
+            return null;
+        }
+        return AdvisorVO.builder()
+                .id(po.getId())
+                .advisorId(po.getAdvisorId())
+                .advisorName(po.getAdvisorName())
+                .advisorType(po.getAdvisorType())
+                .advisorDesc(po.getAdvisorDesc())
+                .advisorOrder(po.getAdvisorOrder())
+                .advisorParam(po.getAdvisorParam())
+                .advisorStatus(po.getAdvisorStatus())
+                .updateTime(po.getUpdateTime())
+                .build();
+    }
+
+    private AiAdvisor toAdvisorPo(AdvisorManageRequest request) {
+        return AiAdvisor.builder()
+                .id(request.getId())
+                .advisorId(request.getAdvisorId())
+                .advisorName(request.getAdvisorName())
+                .advisorType(request.getAdvisorType())
+                .advisorDesc(request.getAdvisorDesc())
+                .advisorOrder(request.getAdvisorOrder())
+                .advisorParam(request.getAdvisorParam())
+                .advisorStatus(request.getAdvisorStatus())
+                .build();
+    }
+
+    private PromptVO toPromptVO(AiPrompt po) {
+        if (po == null) {
+            return null;
+        }
+        return PromptVO.builder()
+                .id(po.getId())
+                .promptId(po.getPromptId())
+                .promptName(po.getPromptName())
+                .promptContent(po.getPromptContent())
+                .promptDesc(po.getPromptDesc())
+                .promptStatus(po.getPromptStatus())
+                .updateTime(po.getUpdateTime())
+                .build();
+    }
+
+    private AiPrompt toPromptPo(PromptManageRequest request) {
+        return AiPrompt.builder()
+                .id(request.getId())
+                .promptId(request.getPromptId())
+                .promptName(request.getPromptName())
+                .promptContent(request.getPromptContent())
+                .promptDesc(request.getPromptDesc())
+                .promptStatus(request.getPromptStatus())
+                .build();
+    }
+
+    private ClientVO toClientVO(AiClient po) {
+        if (po == null) {
+            return null;
+        }
+        return ClientVO.builder()
+                .id(po.getId())
+                .clientId(po.getClientId())
+                .clientType(po.getClientType())
+                .modelId(po.getModelId())
+                .modelName(po.getModelName())
+                .clientName(po.getClientName())
+                .clientDesc(po.getClientDesc())
+                .clientStatus(po.getClientStatus())
+                .updateTime(po.getUpdateTime())
+                .build();
+    }
+
+    private AiClient toClientPo(ClientManageRequest request) {
+        return AiClient.builder()
+                .id(request.getId())
+                .clientId(request.getClientId())
+                .clientType(request.getClientType())
+                .modelId(request.getModelId())
+                .modelName(request.getModelName())
+                .clientName(request.getClientName())
+                .clientDesc(request.getClientDesc())
+                .clientStatus(request.getClientStatus())
+                .build();
+    }
+
+    private AgentVO toAgentVO(AiAgent po) {
+        if (po == null) {
+            return null;
+        }
+        return AgentVO.builder()
+                .id(po.getId())
+                .agentId(po.getAgentId())
+                .agentName(po.getAgentName())
+                .agentType(po.getAgentType())
+                .agentDesc(po.getAgentDesc())
+                .agentStatus(po.getAgentStatus())
+                .updateTime(po.getUpdateTime())
+                .build();
+    }
+
+    private AiAgent toAgentPo(AgentManageRequest request) {
+        return AiAgent.builder()
+                .id(request.getId())
+                .agentId(request.getAgentId())
+                .agentName(request.getAgentName())
+                .agentType(request.getAgentType())
+                .agentDesc(request.getAgentDesc())
+                .agentStatus(request.getAgentStatus())
+                .build();
+    }
+
+    private UserVO toUserVO(User po) {
+        if (po == null) {
+            return null;
+        }
+        return UserVO.builder()
+                .id(po.getId())
+                .username(po.getUsername())
+                .role(po.getRole())
+                .updateTime(po.getUpdateTime())
+                .build();
+    }
+
+    private User toUserPo(UserManageRequest request) {
+        return User.builder()
+                .id(request.getId())
+                .username(request.getUsername())
+                .password(request.getPassword())
+                .role(request.getRole())
+                .build();
+    }
+
+    private AiConfig toConfigPO(ConfigManageRequest request) {
+        return AiConfig.builder()
+                .id(request.getId())
+                .clientId(request.getClientId())
+                .configType(request.getConfigType())
+                .configValue(request.getConfigValue())
+                .configParam(request.getConfigParam())
+                .configStatus(request.getConfigStatus())
+                .build();
+    }
+
+    private ConfigVO toConfigVO(AiConfig po) {
+        if (po == null) {
+            return null;
+        }
+        return ConfigVO.builder()
+                .id(po.getId())
+                .clientId(po.getClientId())
+                .configType(po.getConfigType())
+                .configValue(po.getConfigValue())
+                .configParam(po.getConfigParam())
+                .configStatus(po.getConfigStatus())
+                .updateTime(po.getUpdateTime())
+                .build();
+    }
+
+    private FlowVO toFlowVO(AiFlow po) {
+        if (po == null) {
+            return null;
+        }
+        return FlowVO.builder()
+                .id(po.getId())
+                .agentId(po.getAgentId())
+                .clientId(po.getClientId())
+                .clientRole(po.getClientRole())
+                .flowPrompt(po.getFlowPrompt())
+                .flowSeq(po.getFlowSeq())
+                .updateTime(po.getUpdateTime())
+                .build();
+    }
+
+    private AiFlow toFlowPO(FLowManageRequest request) {
+        return AiFlow.builder()
+                .id(request.getId())
+                .agentId(request.getAgentId())
+                .clientId(request.getClientId())
+                .clientRole(request.getClientRole())
+                .flowPrompt(request.getFlowPrompt())
+                .flowSeq(request.getFlowSeq())
+                .build();
     }
 
 }

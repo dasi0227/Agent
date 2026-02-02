@@ -21,21 +21,7 @@ public enum AiType {
     private String name;
 
     private String type;
-
-    public static AiType fromType(String type) {
-        if (type == null) {
-            throw new IllegalArgumentException("AiType type is Null" );
-        }
-
-        for (AiType value : values()) {
-            if (value.type.equals(type)) {
-                return value;
-            }
-        }
-
-        throw new IllegalArgumentException("Unknown AiType type: " + type);
-    }
-
+    
     public String getBeanName(String id) {
         return "bean_" + id;
     }

@@ -17,17 +17,17 @@ public enum AiMcpType {
 
     private String type;
 
-    public static AiMcpType fromCode(String code) {
-        if (code == null) {
-            throw new IllegalArgumentException("AiMcpType code is Null" );
+    public static AiMcpType fromString(String str) {
+        if (str == null) {
+            throw new IllegalArgumentException("AiMcpType str is Null" );
         }
 
-        for (AiMcpType type : values()) {
-            if (type.type.equals(code)) {
-                return type;
+        for (AiMcpType mcpType : values()) {
+            if (mcpType.type.equals(str)) {
+                return mcpType;
             }
         }
 
-        throw new IllegalArgumentException("Unknown AiMcpType code: " + code);
+        throw new IllegalArgumentException("Unknown AiMcpType str: " + str);
     }
 }

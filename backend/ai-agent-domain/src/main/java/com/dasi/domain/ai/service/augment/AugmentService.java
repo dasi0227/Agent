@@ -105,7 +105,7 @@ public class AugmentService implements IAugmentService {
 
             McpSyncClient mcpSyncClient = null;
 
-            switch (AiMcpType.fromCode(aiMcpVO.getMcpType())) {
+            switch (AiMcpType.fromString(aiMcpVO.getMcpType())) {
                 case SSE -> {
                     AiMcpVO.SseConfig sseConfig = aiMcpVO.getSseConfig();
                     String baseUri = sseConfig.getBaseUri();
