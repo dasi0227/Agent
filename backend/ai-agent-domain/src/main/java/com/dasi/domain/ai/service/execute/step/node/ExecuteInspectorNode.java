@@ -12,8 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 
-import static com.dasi.domain.ai.model.enumeration.AiRoleType.INSPECTOR;
-import static com.dasi.domain.ai.model.enumeration.AiRoleType.PLANNER;
+import static com.dasi.domain.ai.model.enumeration.AiClientRole.INSPECTOR;
+import static com.dasi.domain.ai.model.enumeration.AiClientRole.PLANNER;
 import static com.dasi.domain.ai.model.enumeration.AiSectionType.INSPECTOR_MCP;
 import static com.dasi.domain.ai.model.enumeration.AiType.CLIENT;
 import static com.dasi.types.constant.ChatConstant.CHAT_MEMORY_CONVERSATION_ID_KEY;
@@ -33,7 +33,7 @@ public class ExecuteInspectorNode extends AbstractExecuteNode {
         try {
 
             // 获取客户端
-            AiFlowVO aiFlowVO = executeContext.getAiFlowVOMap().get(INSPECTOR.getType());
+            AiFlowVO aiFlowVO = executeContext.getAiFlowVOMap().get(INSPECTOR.getRole());
             String clientBeanName = CLIENT.getBeanName(aiFlowVO.getClientId());
             ChatClient inspectorClient = getBean(clientBeanName);
 

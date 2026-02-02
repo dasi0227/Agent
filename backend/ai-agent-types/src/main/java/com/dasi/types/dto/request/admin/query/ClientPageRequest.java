@@ -22,6 +22,8 @@ public class ClientPageRequest {
 
     private String clientType;
 
+    private String clientRole;
+
     @NotNull
     @Min(1)
     private Integer pageNum;

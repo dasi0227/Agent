@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public enum UserRoleType {
+public enum UserRole {
 
     ADMIN("管理员", "admin"),
     ACCOUNT("用户", "account")
@@ -15,6 +15,6 @@ public enum UserRoleType {
 
     private String name;
 
-    private String type;
+    private String role;
 
 }

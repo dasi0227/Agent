@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.dasi.domain.ai.model.enumeration.AiRoleType.*;
+import static com.dasi.domain.ai.model.enumeration.AiClientRole.*;
 import static com.dasi.domain.ai.model.enumeration.AiSectionType.PLANNER_STEP;
 import static com.dasi.domain.ai.model.enumeration.AiType.CLIENT;
 import static com.dasi.types.constant.ChatConstant.CHAT_MEMORY_CONVERSATION_ID_KEY;
@@ -39,7 +39,7 @@ public class ExecutePlannerNode extends AbstractExecuteNode {
 
         try {
             // 获取客户端
-            AiFlowVO aiFlowVO = executeContext.getAiFlowVOMap().get(PLANNER.getType());
+            AiFlowVO aiFlowVO = executeContext.getAiFlowVOMap().get(PLANNER.getRole());
             String clientBeanName = CLIENT.getBeanName(aiFlowVO.getClientId());
             ChatClient plannerClient = getBean(clientBeanName);
 

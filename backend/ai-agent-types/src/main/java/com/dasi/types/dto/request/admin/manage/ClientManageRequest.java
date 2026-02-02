@@ -21,6 +21,9 @@ public class ClientManageRequest {
     private String clientType;
 
     @NotBlank
+    private String clientRole;
+
+    @NotBlank
     private String modelId;
 
     private String modelName;

@@ -29,6 +29,11 @@ public class AiClientVO {
     private String clientType;
 
     /**
+     * 客户端角色
+     */
+    private String clientRole;
+
+    /**
      * 客户端描述
      */
     private String clientDesc;

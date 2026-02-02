@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public enum AiRoleType {
+public enum AiClientRole {
 
     ANALYZER("任务分析专家", "analyzer"),
     PERFORMER("任务执行专家", "performer"),
@@ -21,18 +21,18 @@ public enum AiRoleType {
 
     private String name;
 
-    private String type;
+    private String role;
 
     public String getExceptionType() {
-        return this.type + "_exception";
+        return this.role + "_exception";
     }
 
     public String getContextKey() {
-        return this.type + "_response";
+        return this.role + "_response";
     }
 
     public String getNodeName() {
-        return this.type + "Node";
+        return this.role + "Node";
     }
 
 }

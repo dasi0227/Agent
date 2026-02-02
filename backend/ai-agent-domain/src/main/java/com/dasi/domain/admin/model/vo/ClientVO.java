@@ -15,6 +15,7 @@ public class ClientVO {
     private Long id;
     private String clientId;
     private String clientType;
+    private String clientRole;
     private String modelId;
     private String modelName;
     private String clientName;

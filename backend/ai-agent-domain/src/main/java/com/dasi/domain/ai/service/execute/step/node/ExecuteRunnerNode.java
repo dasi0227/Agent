@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.dasi.domain.ai.model.enumeration.AiRoleType.*;
+import static com.dasi.domain.ai.model.enumeration.AiClientRole.*;
 import static com.dasi.domain.ai.model.enumeration.AiSectionType.RUNNER_RESULT;
 import static com.dasi.domain.ai.model.enumeration.AiSectionType.RUNNER_STATUS;
 import static com.dasi.domain.ai.model.enumeration.AiType.CLIENT;
@@ -41,7 +41,7 @@ public class ExecuteRunnerNode extends AbstractExecuteNode {
         try {
 
             // 获取客户端
-            AiFlowVO aiFlowVO = executeContext.getAiFlowVOMap().get(RUNNER.getType());
+            AiFlowVO aiFlowVO = executeContext.getAiFlowVOMap().get(RUNNER.getRole());
             String clientBeanName = CLIENT.getBeanName(aiFlowVO.getClientId());
             ChatClient runnerClient = getBean(clientBeanName);
 

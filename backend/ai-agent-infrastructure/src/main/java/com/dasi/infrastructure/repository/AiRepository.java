@@ -364,6 +364,7 @@ public class AiRepository implements IAiRepository {
                     .clientId(aiClient.getClientId())
                     .clientName(aiClient.getClientName())
                     .clientType(aiClient.getClientType())
+                    .clientRole(aiClient.getClientRole())
                     .clientDesc(aiClient.getClientDesc())
                     .modelId(aiClient.getModelId())
                     .modelName(aiClient.getModelName())

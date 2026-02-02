@@ -12,19 +12,21 @@ public interface IAiClientDao {
 
     List<AiClient> queryChatClientList();
 
-    List<AiClient> list();
+    List<AiClient> listWorkClient();
 
     List<AiClient> page(@Param("idKeyword") String idKeyword,
                         @Param("nameKeyword") String nameKeyword,
                         @Param("modelId") String modelId,
                         @Param("clientType") String clientType,
+                        @Param("clientRole") String clientRole,
                         @Param("offset") Integer offset,
                         @Param("size") Integer size);
 
     Integer count(@Param("idKeyword") String idKeyword,
                   @Param("nameKeyword") String nameKeyword,
                   @Param("modelId") String modelId,
-                  @Param("clientType") String clientType);
+                  @Param("clientType") String clientType,
+                  @Param("clientRole") String clientRole);
 
     AiClient queryById(@Param("id") Long id);
 

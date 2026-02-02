@@ -10,6 +10,7 @@ import {
     adminDelete,
     adminToggle,
     listClientType,
+    listClientRole,
     listAgentType,
     listUserRole,
     listApiId,
@@ -30,12 +31,13 @@ const moduleDefs = [
         group: 'model',
         title: 'CLIENT 管理',
         statusField: 'clientStatus',
-        search: ['idKeyword', 'nameKeyword', 'clientType', 'modelId'],
-        query: { idKeyword: '', nameKeyword: '', clientType: '', modelId: '', pageNum: 1, pageSize: 10 },
+        search: ['idKeyword', 'nameKeyword', 'clientType', 'clientRole', 'modelId'],
+        query: { idKeyword: '', nameKeyword: '', clientType: '', clientRole: '', modelId: '', pageNum: 1, pageSize: 10 },
         formDefaults: () => ({
             id: null,
             clientId: '',
             clientType: '',
+            clientRole: '',
             modelId: '',
             clientName: '',
             clientDesc: '',
@@ -45,6 +47,7 @@ const moduleDefs = [
             { prop: 'clientId', label: 'Client ID', required: true },
             { prop: 'clientName', label: '名称', required: true },
             { prop: 'clientType', label: '类型', type: 'select', required: true, optionsKey: 'clientTypes' },
+            { prop: 'clientRole', label: '角色', required: true },
             { prop: 'modelId', label: '模型 ID', type: 'select', optionsKey: 'modelIds', required: true },
             { prop: 'clientDesc', label: '描述', type: 'textarea' },
             { prop: 'clientStatus', label: '状态', type: 'switch' }
@@ -53,6 +56,7 @@ const moduleDefs = [
             { prop: 'clientId', label: 'ID' },
             { prop: 'clientName', label: '名称' },
             { prop: 'clientType', label: '类型' },
+            { prop: 'clientRole', label: '角色' },
             { prop: 'modelId', label: '模型ID' }
         ]
     },
@@ -338,6 +342,7 @@ const options = reactive({
     modelIds: [],
     agentTypes: [],
     clientTypes: [],
+    clientRoles: [],
     roles: [],
     agents: [],
     clients: []
@@ -369,6 +374,7 @@ const loadRefs = async () => {
 
     await Promise.all([
         loadList((val) => (options.clientTypes = val), listClientType),
+        loadList((val) => (options.clientRoles = val), listClientRole),
         loadList((val) => (options.agentTypes = val), listAgentType),
         loadList((val) => (options.roles = val), listUserRole),
         loadList((val) => (options.apiIds = val), listApiId),
@@ -580,15 +586,24 @@ const handleSelectModule = (key) => {
                                     <option v-for="opt in options.agentTypes" :key="opt" :value="opt">{{ opt }}</option>
                                 </select>
                             </template>
-                            <template v-else-if="field === 'clientType'">
-                                <select
-                                    v-model="stateMap[currentKey].query.clientType"
-                                    class="rounded-[10px] border border-[#e2e8f0] px-3 py-2 text-[13px] outline-none focus:border-[#1d4ed8]"
-                                >
-                                    <option value="">选择类型</option>
-                                    <option v-for="opt in options.clientTypes" :key="opt" :value="opt">{{ opt }}</option>
-                                </select>
-                            </template>
+            <template v-else-if="field === 'clientType'">
+                <select
+                    v-model="stateMap[currentKey].query.clientType"
+                    class="rounded-[10px] border border-[#e2e8f0] px-3 py-2 text-[13px] outline-none focus:border-[#1d4ed8]"
+                >
+                    <option value="">选择类型</option>
+                    <option v-for="opt in options.clientTypes" :key="opt" :value="opt">{{ opt }}</option>
+                </select>
+            </template>
+            <template v-else-if="field === 'clientRole'">
+                <select
+                    v-model="stateMap[currentKey].query.clientRole"
+                    class="rounded-[10px] border border-[#e2e8f0] px-3 py-2 text-[13px] outline-none focus:border-[#1d4ed8]"
+                >
+                    <option value="">选择角色</option>
+                    <option v-for="opt in options.clientRoles" :key="opt" :value="opt">{{ opt }}</option>
+                </select>
+            </template>
                             <template v-else-if="field === 'apiId'">
                                 <select
                                     v-model="stateMap[currentKey].query.apiId"
