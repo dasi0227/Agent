@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Chat from '../components/Chat.vue';
 import Work from '../components/Work.vue';
 import Auth from '../components/Auth.vue';
+import AuthAdmin from '../components/AuthAdmin.vue';
 import Admin from '../components/Admin.vue';
 import NotFound from '../components/NotFound.vue';
 import { getStoredAuth } from './pinia';
@@ -42,6 +43,14 @@ const routes = [
         }
     },
     {
+        path: '/admin/login',
+        name: 'admin-login',
+        component: AuthAdmin,
+        meta: {
+            hideSidebar: true
+        }
+    },
+    {
         path: '/admin',
         name: 'admin',
         component: Admin,
@@ -68,8 +77,8 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
     const auth = getStoredAuth();
-    if (!auth.token && to.path !== '/login' && to.path !== '/register') {
-        next({ path: '/login', replace: true });
+    if (!auth.token && to.meta?.requiresAdmin) {
+        next({ path: '/admin/login', replace: true });
         return;
     }
     if (to.meta?.requiresAuth && !auth.token) {
@@ -80,11 +89,7 @@ router.beforeEach((to, from, next) => {
         next({ path: '/login', replace: true });
         return;
     }
-    if (to.path === '/login' && auth.token) {
-        const target = auth?.user?.role === 'admin' ? '/admin' : '/chat';
-        next({ path: target, replace: true });
-        return;
-    }
+    // 已登录时仍允许访问 /login /register /admin/login（不强制跳转）
     next();
 });
 

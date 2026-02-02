@@ -5,7 +5,7 @@ import logoImg from '../assets/logo.jpg';
 import chatIcon from '../assets/chat.svg';
 import workIcon from '../assets/work.svg';
 import { useAgentStore, useAuthStore, useChatStore, useSettingsStore } from '../router/pinia';
-import { updateProfile } from '../request/api';
+import { updatePassword } from '../request/api';
 
 const router = useRouter();
 const route = useRoute();
@@ -191,20 +191,27 @@ const saveProfile = async () => {
         return;
     }
     try {
-        const resp = await updateProfile({
+        const resp = await updatePassword({
             username: profileForm.username,
             oldPassword: profileForm.oldPassword,
             newPassword: profileForm.newPassword
         });
         const payload = resp?.data || resp?.result || resp;
         const token = payload?.token || payload?.data?.token;
-        const user = payload?.user || payload?.data?.user;
-        if (token || user) {
-            authStore.setAuth({
-                token: token || authStore.token,
-                user: user || authStore.user
-            });
-        }
+        const user =
+            payload?.user ||
+            payload?.data?.user ||
+            (payload && (payload.username || payload.role || payload.id)
+                ? {
+                      id: payload.id ?? payload.data?.id,
+                      username: payload.username ?? payload.data?.username,
+                      role: payload.role ?? payload.data?.role
+                  }
+                : null);
+        authStore.setAuth({
+            token: token || authStore.token,
+            user: user || authStore.user
+        });
         showProfile.value = false;
     } catch (error) {
         profileError.value = error?.message || '更新失败，请稍后重试';
@@ -501,7 +508,7 @@ const handleLogout = () => {
                                 v-model="profileForm.newPassword"
                                 type="password"
                                 class="w-full rounded-[10px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] px-[10px] py-[10px] text-[14px] text-white outline-none focus:border-[#7bc8ff]"
-                                placeholder="不修改则留空"
+                                placeholder="输入新密码"
                             />
                         </div>
                     </div>
