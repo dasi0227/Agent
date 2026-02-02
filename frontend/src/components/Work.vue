@@ -5,7 +5,7 @@ import hljs from 'highlight.js';
 import DOMPurify from 'dompurify';
 import { dispatchArmory, executeAgentStream, queryAgentList } from '../request/api';
 import { normalizeError } from '../request/request';
-import { formatMcpJson } from '../utils/formatMcpJson';
+import { formatMcpJson } from '../utils/StringUtil';
 import { useAgentSettingsStore, useAgentStore } from '../router/pinia';
 
 const agentStore = useAgentStore();

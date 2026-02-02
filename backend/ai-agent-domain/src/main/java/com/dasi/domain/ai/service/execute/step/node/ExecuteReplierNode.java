@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 
-import static com.dasi.domain.ai.model.enumeration.AiClientType.REPLIER;
+import static com.dasi.domain.ai.model.enumeration.AiRoleType.REPLIER;
 import static com.dasi.domain.ai.model.enumeration.AiSectionType.REPLIER_OVERVIEW;
 import static com.dasi.domain.ai.model.enumeration.AiType.CLIENT;
 

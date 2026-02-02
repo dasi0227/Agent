@@ -95,4 +95,8 @@ public interface IAdminRepository {
     List<String> queryClientDependOnModel(String modelId);
     List<String> queryAgentDependOnClient(String clientId);
 
+    // List
+    List<String> listApiId();
+    List<String> listModelId();
+
 }

@@ -27,4 +27,5 @@ public interface IAiApiDao {
 
     void toggle(AiApi aiApi);
 
+    List<String> listApiId();
 }

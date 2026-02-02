@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
-import static com.dasi.domain.ai.model.enumeration.AiClientType.INSPECTOR;
+import static com.dasi.domain.ai.model.enumeration.AiRoleType.INSPECTOR;
 
 @Slf4j
 @Service

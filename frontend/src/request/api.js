@@ -1,4 +1,5 @@
 import http, { streamFetch } from './request';
+import { trimStrings } from '../utils/StringUtil';
 
 const AI_BASE_PATH = '/api/v1/ai';
 const CHAT_COMPLETE_PATH = `${AI_BASE_PATH}/chat/complete`;
@@ -29,16 +30,6 @@ const ADMIN_STATUS_PARAM = {
     prompt: 'promptStatus',
     client: 'clientStatus',
     agent: 'agentStatus'
-};
-
-export const trimStrings = (input) => {
-    if (input === null || input === undefined) return input;
-    if (typeof input === 'string') return input.trim();
-    if (Array.isArray(input)) return input.map((item) => trimStrings(item));
-    if (typeof input === 'object') {
-        return Object.fromEntries(Object.entries(input).map(([k, v]) => [k, trimStrings(v)]));
-    }
-    return input;
 };
 
 export const fetchComplete = async ({
@@ -209,3 +200,11 @@ export const adminToggle = async (moduleKey, id, status) => {
     const statusKey = ADMIN_STATUS_PARAM[moduleKey];
     return http.post(buildAdminPath(moduleKey, 'toggle'), null, { params: { id, [statusKey]: status } });
 };
+
+// ---- admin option lists ----
+const ADMIN_LIST_BASE = `${ADMIN_BASE_PATH}/list`;
+export const listClientType = async () => http.get(`${ADMIN_LIST_BASE}/clientType`);
+export const listAgentType = async () => http.get(`${ADMIN_LIST_BASE}/agentType`);
+export const listUserRole = async () => http.get(`${ADMIN_LIST_BASE}/userRole`);
+export const listApiId = async () => http.get(`${ADMIN_LIST_BASE}/apiId`);
+export const listModelId = async () => http.get(`${ADMIN_LIST_BASE}/modelId`);

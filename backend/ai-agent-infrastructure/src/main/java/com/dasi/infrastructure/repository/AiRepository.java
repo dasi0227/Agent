@@ -418,12 +418,12 @@ public class AiRepository implements IAiRepository {
             AiFlowVO aiFlowVO = AiFlowVO.builder()
                     .agentId(aiFlow.getAgentId())
                     .clientId(aiFlow.getClientId())
-                    .clientType(aiFlow.getClientType())
+                    .clientRole(aiFlow.getClientRole())
                     .flowPrompt(aiFlow.getFlowPrompt())
                     .flowSeq(aiFlow.getFlowSeq())
                     .build();
 
-            aiFlowVOMap.put(aiFlow.getClientType(), aiFlowVO);
+            aiFlowVOMap.put(aiFlow.getClientRole(), aiFlowVO);
         }
 
         return aiFlowVOMap;

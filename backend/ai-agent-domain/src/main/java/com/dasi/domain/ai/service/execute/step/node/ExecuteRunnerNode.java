@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.dasi.domain.ai.model.enumeration.AiClientType.*;
+import static com.dasi.domain.ai.model.enumeration.AiRoleType.*;
 import static com.dasi.domain.ai.model.enumeration.AiSectionType.RUNNER_RESULT;
 import static com.dasi.domain.ai.model.enumeration.AiSectionType.RUNNER_STATUS;
 import static com.dasi.domain.ai.model.enumeration.AiType.CLIENT;

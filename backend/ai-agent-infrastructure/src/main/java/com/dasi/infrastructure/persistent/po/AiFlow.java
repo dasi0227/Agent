@@ -23,7 +23,7 @@ public class AiFlow {
     private String clientId;
 
     /** 客户端ID */
-    private String clientType;
+    private String clientRole;
 
     /** 工作流提示词 */
     private String flowPrompt;

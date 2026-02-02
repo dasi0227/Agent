@@ -1,7 +1,19 @@
 <script setup>
 import { computed, reactive, ref, watch, onMounted } from 'vue';
-import SideMenu from './SideMenu.vue';
-import { adminPage, adminInsert, adminUpdate, adminDelete, adminToggle } from '../request/api';
+import SidebarAdmin from './SidebarAdmin.vue';
+import {
+    adminPage,
+    adminInsert,
+    adminUpdate,
+    adminDelete,
+    adminToggle,
+    listClientType,
+    listAgentType,
+    listUserRole,
+    listApiId,
+    listModelId
+} from '../request/api';
+import { formatDateTime } from '../utils/DatetimeUtil';
 import { normalizeError } from '../request/request';
 import { useAuthStore } from '../router/pinia';
 
@@ -26,19 +38,10 @@ const moduleDefs = [
             clientStatus: 1
         }),
         fields: [
-            { prop: 'clientId', label: 'Client ID *', required: true },
+            { prop: 'clientId', label: 'Client ID', required: true },
             { prop: 'clientName', label: '名称', required: true },
-            {
-                prop: 'clientType',
-                label: '类型',
-                type: 'select',
-                required: true,
-                options: [
-                    { label: 'work', value: 'work' },
-                    { label: 'chat', value: 'chat' }
-                ]
-            },
-            { prop: 'modelId', label: '模型 ID *', type: 'select', optionsKey: 'models', required: true },
+            { prop: 'clientType', label: '类型', type: 'select', required: true, optionsKey: 'clientTypes' },
+            { prop: 'modelId', label: '模型 ID', type: 'select', optionsKey: 'modelIds', required: true },
             { prop: 'clientDesc', label: '描述', type: 'textarea' },
             { prop: 'clientStatus', label: '状态', type: 'switch' }
         ],
@@ -67,7 +70,7 @@ const moduleDefs = [
             apiStatus: 1
         }),
         fields: [
-            { prop: 'apiId', label: 'API ID *', required: true },
+            { prop: 'apiId', label: 'API ID', required: true },
             { prop: 'apiBaseUrl', label: 'Base URL', required: true },
             { prop: 'apiKey', label: 'Key', required: true },
             { prop: 'apiCompletionsPath', label: '对话路径', required: true },
@@ -97,10 +100,10 @@ const moduleDefs = [
             modelStatus: 1
         }),
         fields: [
-            { prop: 'modelId', label: 'Model ID *', required: true },
+            { prop: 'modelId', label: 'Model ID', required: true },
             { prop: 'modelName', label: '名称', required: true },
             { prop: 'modelType', label: '类型', placeholder: '如 GPT' },
-            { prop: 'apiId', label: 'API', type: 'select', optionsKey: 'apis', required: true },
+            { prop: 'apiId', label: 'API', type: 'select', optionsKey: 'apiIds', required: true },
             { prop: 'modelStatus', label: '状态', type: 'switch' }
         ],
         columns: [
@@ -129,7 +132,7 @@ const moduleDefs = [
             mcpStatus: 1
         }),
         fields: [
-            { prop: 'mcpId', label: 'MCP ID *', required: true },
+            { prop: 'mcpId', label: 'MCP ID', required: true },
             { prop: 'mcpName', label: '名称', required: true },
             { prop: 'mcpType', label: '类型', required: true },
             { prop: 'mcpConfig', label: '配置', type: 'textarea', required: true },
@@ -163,7 +166,7 @@ const moduleDefs = [
             advisorStatus: 1
         }),
         fields: [
-            { prop: 'advisorId', label: 'Advisor ID *', required: true },
+            { prop: 'advisorId', label: 'Advisor ID', required: true },
             { prop: 'advisorName', label: '名称', required: true },
             { prop: 'advisorType', label: '类型', required: true },
             { prop: 'advisorOrder', label: '顺序', type: 'number' },
@@ -194,7 +197,7 @@ const moduleDefs = [
             promptStatus: 1
         }),
         fields: [
-            { prop: 'promptId', label: 'Prompt ID *', required: true },
+            { prop: 'promptId', label: 'Prompt ID', required: true },
             { prop: 'promptName', label: '名称', required: true },
             { prop: 'promptContent', label: '内容', type: 'textarea', required: true },
             { prop: 'promptDesc', label: '描述', type: 'textarea' },
@@ -254,17 +257,14 @@ const moduleDefs = [
             agentStatus: 1
         }),
         fields: [
-            { prop: 'agentId', label: 'Agent ID *', required: true },
+            { prop: 'agentId', label: 'Agent ID', required: true },
             { prop: 'agentName', label: '名称', required: true },
             {
                 prop: 'agentType',
                 label: '类型',
                 type: 'select',
                 required: true,
-                options: [
-                    { label: 'step', value: 'step' },
-                    { label: 'loop', value: 'loop' }
-                ]
+                optionsKey: 'agentTypes'
             },
             { prop: 'agentDesc', label: '描述', type: 'textarea' },
             { prop: 'agentStatus', label: '状态', type: 'switch' }
@@ -278,25 +278,29 @@ const moduleDefs = [
     }
 ];
 
+const modulesMap = Object.fromEntries(moduleDefs.map((m) => [m.key, m]));
+
 const moduleGroups = [
     {
         name: 'model',
         label: '模型管理',
-        items: moduleDefs.filter((m) => m.group === 'model')
+        items: ['agent', 'client', 'model']
+            .map((k) => modulesMap[k])
+            .filter(Boolean)
     },
     {
         name: 'base',
-        label: '基础管理',
-        items: moduleDefs.filter((m) => m.group === 'base')
+        label: '服务管理',
+        items: ['api', 'mcp', 'prompt', 'advisor']
+            .map((k) => modulesMap[k])
+            .filter(Boolean)
     },
     {
         name: 'user',
         label: '用户管理',
-        items: moduleDefs.filter((m) => m.group === 'user')
+        items: modulesMap['user'] ? [modulesMap['user']] : []
     }
 ];
-
-const modulesMap = Object.fromEntries(moduleDefs.map((m) => [m.key, m]));
 
 const currentKey = ref('agent');
 const modalVisible = ref(false);
@@ -338,8 +342,11 @@ const stateMap = reactive(
 );
 
 const options = reactive({
-    apis: [],
-    models: [],
+    apiIds: [],
+    modelIds: [],
+    agentTypes: [],
+    clientTypes: [],
+    roles: [],
     agents: [],
     clients: []
 });
@@ -354,30 +361,47 @@ const pageCount = computed(() => {
 
 const formatStatus = (val) => (val === 1 ? '启用' : '禁用');
 
+
 const showErrorDialog = (msg) => {
     errorDialog.visible = true;
     errorDialog.message = msg || '操作失败';
 };
 
 const loadRefs = async () => {
-    const load = async (key, moduleKey, idField, nameField) => {
+    const loadList = async (setter, fn) => {
         try {
-        const res = await adminPage(moduleKey, { pageNum: 1, pageSize: 10 });
+            const res = await fn();
             const payload = res?.data ?? res?.result ?? res;
-            options[key] =
-                payload?.list?.map((item) => ({
-                    value: item[idField] || item[Object.keys(item).find((k) => k.endsWith('Id'))],
-                    label: item[nameField] || item[Object.keys(item).find((k) => k.endsWith('Name'))] || item.username || ''
-                })) || [];
+            setter(payload?.list || payload || []);
         } catch (_) {
-            options[key] = [];
+            setter([]);
         }
     };
+
     await Promise.all([
-        load('apis', 'api', 'apiId', 'apiId'),
-        load('models', 'model', 'modelId', 'modelName'),
-        load('agents', 'agent', 'agentId', 'agentName'),
-        load('clients', 'client', 'clientId', 'clientName')
+        loadList((val) => (options.clientTypes = val), listClientType),
+        loadList((val) => (options.agentTypes = val), listAgentType),
+        loadList((val) => (options.roles = val), listUserRole),
+        loadList((val) => (options.apiIds = val), listApiId),
+        loadList((val) => (options.modelIds = val), listModelId),
+        (async () => {
+            const res = await adminPage('agent', { pageNum: 1, pageSize: 10 });
+            const payload = res?.data ?? res?.result ?? res;
+            options.agents =
+                payload?.list?.map((item) => ({
+                    value: item.agentId,
+                    label: item.agentName || item.agentId
+                })) || [];
+        })(),
+        (async () => {
+            const res = await adminPage('client', { pageNum: 1, pageSize: 10 });
+            const payload = res?.data ?? res?.result ?? res;
+            options.clients =
+                payload?.list?.map((item) => ({
+                    value: item.clientId,
+                    label: item.clientName || item.clientId
+                })) || [];
+        })()
     ]);
 };
 
@@ -501,7 +525,7 @@ const logout = () => {
 
 <template>
     <div class="flex h-screen bg-[#f8fafc]">
-        <SideMenu :groups="moduleGroups" :current="currentKey" @select="(k) => (currentKey = k)" />
+        <SidebarAdmin :groups="moduleGroups" :current="currentKey" @select="(k) => (currentKey = k)" />
         <div class="flex min-w-0 flex-1 flex-col">
             <header class="flex items-center justify-between border-b border-[#e2e8f0] bg-white px-6 py-4 shadow-sm">
                 <div class="text-[18px] font-semibold text-[#0f172a]">{{ currentModule.title }}</div>
@@ -530,7 +554,7 @@ const logout = () => {
                                 <input
                                     v-model="stateMap[currentKey].query.idKeyword"
                                     class="w-[160px] rounded-[10px] border border-[#e2e8f0] px-3 py-2 text-[13px] outline-none focus:border-[#1d4ed8]"
-                                    placeholder="ID 关键字 *"
+                                    placeholder="ID 关键字"
                                 />
                             </template>
                             <template v-else-if="field === 'nameKeyword'">
@@ -546,8 +570,7 @@ const logout = () => {
                                     class="rounded-[10px] border border-[#e2e8f0] px-3 py-2 text-[13px] outline-none focus:border-[#1d4ed8]"
                                 >
                                     <option value="">选择类型</option>
-                                    <option value="step">step</option>
-                                    <option value="loop">loop</option>
+                                    <option v-for="opt in options.agentTypes" :key="opt" :value="opt">{{ opt }}</option>
                                 </select>
                             </template>
                             <template v-else-if="field === 'clientType'">
@@ -556,8 +579,7 @@ const logout = () => {
                                     class="rounded-[10px] border border-[#e2e8f0] px-3 py-2 text-[13px] outline-none focus:border-[#1d4ed8]"
                                 >
                                     <option value="">选择类型</option>
-                                    <option value="work">work</option>
-                                    <option value="chat">chat</option>
+                                    <option v-for="opt in options.clientTypes" :key="opt" :value="opt">{{ opt }}</option>
                                 </select>
                             </template>
                             <template v-else-if="field === 'apiId'">
@@ -566,7 +588,7 @@ const logout = () => {
                                     class="rounded-[10px] border border-[#e2e8f0] px-3 py-2 text-[13px] outline-none focus:border-[#1d4ed8]"
                                 >
                                     <option value="">选择 API</option>
-                                    <option v-for="opt in options.apis" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                                    <option v-for="opt in options.apiIds" :key="opt" :value="opt">{{ opt }}</option>
                                 </select>
                             </template>
                             <template v-else-if="field === 'modelId'">
@@ -574,8 +596,8 @@ const logout = () => {
                                     v-model="stateMap[currentKey].query.modelId"
                                     class="rounded-[10px] border border-[#e2e8f0] px-3 py-2 text-[13px] outline-none focus:border-[#1d4ed8]"
                                 >
-                                    <option value="">选择模型</option>
-                                    <option v-for="opt in options.models" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                                    <option value="">选择 MODEL</option>
+                                    <option v-for="opt in options.modelIds" :key="opt" :value="opt">{{ opt }}</option>
                                 </select>
                             </template>
                             <template v-else-if="field === 'agentId'">
@@ -609,8 +631,7 @@ const logout = () => {
                                     class="rounded-[10px] border border-[#e2e8f0] px-3 py-2 text-[13px] outline-none focus:border-[#1d4ed8]"
                                 >
                                     <option value="">选择角色</option>
-                                    <option value="admin">admin</option>
-                                    <option value="account">account</option>
+                                    <option v-for="opt in options.roles" :key="opt" :value="opt">{{ opt }}</option>
                                 </select>
                             </template>
                             <template v-else>
@@ -628,24 +649,30 @@ const logout = () => {
                         >
                             查询
                         </button>
+                        <button
+                            class="rounded-[10px] bg-[#0f172a] px-4 py-2 text-[13px] font-semibold text-white shadow"
+                            type="button"
+                            @click="openCreate"
+                        >
+                            新增
+                        </button>
                     </div>
-                    <button
-                        class="rounded-[10px] bg-[#0f172a] px-4 py-2 text-[13px] font-semibold text-white shadow"
-                        type="button"
-                        @click="openCreate"
-                    >
-                        新增
-                    </button>
                 </div>
 
                 <div class="overflow-hidden rounded-[12px] border border-[#e2e8f0] bg-white">
-                    <table class="w-full border-collapse text-[13px]">
+                    <table class="w-full border-collapse text-[13px] table-fixed">
                         <thead class="bg-[#f8fafc] text-[#475569]">
                             <tr>
-                                <th v-for="col in currentModule.columns" :key="col.prop" class="px-3 py-2 text-left font-semibold">
+                                <th
+                                    v-for="col in currentModule.columns"
+                                    :key="col.prop"
+                                    class="px-3 py-2 text-left font-semibold"
+                                    style="width: 16%"
+                                >
                                     {{ col.label }}
                                 </th>
-                                <th class="px-3 py-2 text-left font-semibold">操作</th>
+                                <th class="px-3 py-2 text-left font-semibold" style="width: 18%">最近更新时间</th>
+                                <th class="px-3 py-2 text-left font-semibold" style="width: 20%">操作</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -660,8 +687,16 @@ const logout = () => {
                                 :key="row.id"
                                 class="border-t border-[#e2e8f0] hover:bg-[#f8fafc]"
                             >
-                                <td v-for="col in currentModule.columns" :key="col.prop" class="px-3 py-2 text-[#0f172a]">
+                                <td
+                                    v-for="col in currentModule.columns"
+                                    :key="col.prop"
+                                    class="px-3 py-2 text-[#0f172a] truncate"
+                                    :title="row[col.prop]"
+                                >
                                     {{ row[col.prop] ?? '-' }}
+                                </td>
+                                <td class="px-3 py-2 text-[#0f172a] truncate" :title="formatDateTime(row.updateTime || row.createTime)">
+                                    {{ formatDateTime(row.updateTime || row.createTime) }}
                                 </td>
                                 <td class="px-3 py-2">
                                     <div class="flex flex-wrap items-center gap-2">
@@ -685,7 +720,7 @@ const logout = () => {
                                             </button>
                                         </template>
                                         <button
-                                            class="rounded-[8px] border border-[#e2e8f0] px-3 py-1 text-[12px] font-semibold text-[#0f172a]"
+                                            class="rounded-[8px] border border-[#22c55e] px-3 py-1 text-[12px] font-semibold text-[#15803d] transition hover:bg-[#dcfce7]"
                                             type="button"
                                             @click="openEdit(row)"
                                         >
@@ -706,18 +741,20 @@ const logout = () => {
                 </div>
 
                 <div class="mt-3 flex items-center justify-between text-[13px] text-[#475569]">
-                    <div>共 {{ stateMap[currentKey].total }} 条 / 第 {{ stateMap[currentKey].query.pageNum }} / {{ pageCount }}</div>
+                    <div>共 {{ stateMap[currentKey].total }} 条，第 {{ stateMap[currentKey].query.pageNum }} / {{ pageCount }} 页</div>
                     <div class="flex gap-2">
                         <button
-                            class="rounded-[8px] border border-[#e2e8f0] px-3 py-2"
+                            class="rounded-[8px] border border-[#e2e8f0] px-3 py-2 text-[#0f172a] transition hover:bg-[#e0f2fe] hover:border-[#bfdbfe] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:border-[#e2e8f0]"
                             type="button"
+                            :disabled="stateMap[currentKey].query.pageNum <= 1"
                             @click="changePage(-1)"
                         >
                             上一页
                         </button>
                         <button
-                            class="rounded-[8px] border border-[#e2e8f0] px-3 py-2"
+                            class="rounded-[8px] border border-[#e2e8f0] px-3 py-2 text-[#0f172a] transition hover:bg-[#e0f2fe] hover:border-[#bfdbfe] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:border-[#e2e8f0]"
                             type="button"
+                            :disabled="stateMap[currentKey].query.pageNum >= pageCount"
                             @click="changePage(1)"
                         >
                             下一页

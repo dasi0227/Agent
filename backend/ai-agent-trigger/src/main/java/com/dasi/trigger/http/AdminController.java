@@ -11,6 +11,8 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/admin")
@@ -251,6 +253,32 @@ public class AdminController {
     public Result<Void> userDelete(@RequestParam("id") Long id) {
         adminService.userDelete(id);
         return Result.success();
+    }
+
+    // -------------------- list --------------------
+    @GetMapping("/list/clientType")
+    public Result<List<String>> listClientType() {
+        return Result.success(adminService.listClientType());
+    }
+
+    @GetMapping("/list/agentType")
+    public Result<List<String>> listAgentType() {
+        return Result.success(adminService.listAgentType());
+    }
+
+    @GetMapping("/list/userRole")
+    public Result<List<String>> listUserRole() {
+        return Result.success(adminService.listUserRole());
+    }
+
+    @GetMapping("/list/apiId")
+    public Result<List<String>> listApiId() {
+        return Result.success(adminService.listApiId());
+    }
+
+    @GetMapping("/list/modelId")
+    public Result<List<String>> listModelId() {
+        return Result.success(adminService.listModelId());
     }
 
 }

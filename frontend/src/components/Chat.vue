@@ -15,8 +15,8 @@ import {
     uploadRagGit
 } from '../request/api';
 import { normalizeError } from '../request/request';
-import { applyStreamToken, createStreamAccumulator, parseThinkText } from '../utils/parseThink';
-import { createTypewriter, DEFAULT_TYPEWRITER_SEGMENTS } from '../utils/typewriter';
+import { applyStreamToken, createStreamAccumulator, parseThinkText } from '../utils/StringUtil';
+import { createTypewriter, DEFAULT_TYPEWRITER_SEGMENTS } from '../utils/TypeWriter';
 import { useChatStore, useSettingsStore } from '../router/pinia';
 
 const chatStore = useChatStore();

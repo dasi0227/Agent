@@ -17,8 +17,8 @@ public class AiFlowVO {
     /** 客户端ID */
     private String clientId;
 
-    /** 客户端ID */
-    private String clientType;
+    /** 客户端角色 */
+    private String clientRole;
 
     /** 工作流提示词 */
     private String flowPrompt;

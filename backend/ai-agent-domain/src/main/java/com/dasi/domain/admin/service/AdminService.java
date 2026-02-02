@@ -1,5 +1,8 @@
 package com.dasi.domain.admin.service;
 
+import com.dasi.domain.admin.model.enumeration.AiAgentType;
+import com.dasi.domain.admin.model.enumeration.AiClientType;
+import com.dasi.domain.admin.model.enumeration.UserRoleType;
 import com.dasi.domain.admin.model.vo.*;
 import com.dasi.domain.admin.repository.IAdminRepository;
 import com.dasi.types.dto.request.admin.manage.*;
@@ -12,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -442,4 +446,34 @@ public class AdminService implements IAdminService {
         }
     }
 
+    @Override
+    public List<String> listClientType() {
+        return Arrays.stream(AiClientType.values())
+                .map(AiClientType::getType)
+                .toList();
+    }
+
+    @Override
+    public List<String> listAgentType() {
+        return Arrays.stream(AiAgentType.values())
+                .map(AiAgentType::getType)
+                .toList();
+    }
+
+    @Override
+    public List<String> listUserRole() {
+        return Arrays.stream(UserRoleType.values())
+                .map(UserRoleType::getType)
+                .toList();
+    }
+
+    @Override
+    public List<String> listApiId() {
+        return adminRepository.listApiId();
+    }
+
+    @Override
+    public List<String> listModelId() {
+        return adminRepository.listModelId();
+    }
 }
