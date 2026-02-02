@@ -29,7 +29,8 @@ const ADMIN_STATUS_PARAM = {
     advisor: 'advisorStatus',
     prompt: 'promptStatus',
     client: 'clientStatus',
-    agent: 'agentStatus'
+    agent: 'agentStatus',
+    config: 'configStatus'
 };
 
 export const fetchComplete = async ({
@@ -201,10 +202,19 @@ export const adminToggle = async (moduleKey, id, status) => {
     return http.post(buildAdminPath(moduleKey, 'toggle'), null, { params: { id, [statusKey]: status } });
 };
 
+// config 专用（非分页 Map）
+export const configList = async (payload = {}) => http.post(`${ADMIN_BASE_PATH}/config/list`, trimStrings(payload));
+export const configInsert = async (payload = {}) => http.post(`${ADMIN_BASE_PATH}/config/insert`, trimStrings(payload));
+export const configUpdate = async (payload = {}) => http.post(`${ADMIN_BASE_PATH}/config/update`, trimStrings(payload));
+export const configDelete = async (id) => http.post(`${ADMIN_BASE_PATH}/config/delete`, null, { params: { id } });
+export const configToggle = async (id, status) =>
+    http.post(`${ADMIN_BASE_PATH}/config/toggle`, null, { params: { id, configStatus: status } });
+
 // ---- admin option lists ----
 const ADMIN_LIST_BASE = `${ADMIN_BASE_PATH}/list`;
 export const listClientType = async () => http.get(`${ADMIN_LIST_BASE}/clientType`);
 export const listAgentType = async () => http.get(`${ADMIN_LIST_BASE}/agentType`);
+export const listConfigType = async () => http.get(`${ADMIN_LIST_BASE}/configType`);
 export const listUserRole = async () => http.get(`${ADMIN_LIST_BASE}/userRole`);
 export const listApiId = async () => http.get(`${ADMIN_LIST_BASE}/apiId`);
 export const listModelId = async () => http.get(`${ADMIN_LIST_BASE}/modelId`);

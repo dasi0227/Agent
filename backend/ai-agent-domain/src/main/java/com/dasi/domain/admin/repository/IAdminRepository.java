@@ -1,7 +1,7 @@
 package com.dasi.domain.admin.repository;
 
 import com.dasi.domain.admin.model.vo.*;
-import com.dasi.types.dto.request.admin.config.ConfigListRequest;
+import com.dasi.types.dto.request.admin.page.ConfigListRequest;
 import com.dasi.types.dto.request.admin.manage.*;
 import com.dasi.types.dto.request.admin.page.*;
 
