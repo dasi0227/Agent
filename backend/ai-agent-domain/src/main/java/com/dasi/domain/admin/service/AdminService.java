@@ -2,9 +2,11 @@ package com.dasi.domain.admin.service;
 
 import com.dasi.domain.admin.model.enumeration.AiAgentType;
 import com.dasi.domain.admin.model.enumeration.AiClientType;
+import com.dasi.domain.admin.model.enumeration.AiConfigType;
 import com.dasi.domain.admin.model.enumeration.UserRoleType;
 import com.dasi.domain.admin.model.vo.*;
 import com.dasi.domain.admin.repository.IAdminRepository;
+import com.dasi.types.dto.request.admin.config.ConfigListRequest;
 import com.dasi.types.dto.request.admin.manage.*;
 import com.dasi.types.dto.request.admin.page.*;
 import com.dasi.types.dto.result.PageResult;
@@ -16,7 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class AdminService implements IAdminService {
@@ -46,7 +51,7 @@ public class AdminService implements IAdminService {
     @Override
     public void apiInsert(ApiManageRequest request) {
         if (adminRepository.apiQuery(request.getApiId()) != null) {
-            throw new AdminException("API 的 ID 已存在，请修改后重新添加");
+            throw new AdminException("API 已存在，请修改后重新添加");
         }
         adminRepository.apiInsert(request);
     }
@@ -54,7 +59,7 @@ public class AdminService implements IAdminService {
     @Override
     public void apiUpdate(ApiManageRequest request) {
         if (adminRepository.apiQuery(request.getId()) == null) {
-            throw new AdminException("API 的 ID 不存在，请确认后重新更改");
+            throw new AdminException("API 不存在，请确认后重新更改");
         }
         adminRepository.apiUpdate(request);
     }
@@ -63,7 +68,7 @@ public class AdminService implements IAdminService {
     public void apiDelete(Long id) {
         ApiVO apiVO = adminRepository.apiQuery(id);
         if (apiVO == null) {
-            throw new AdminException("API 的 ID 不存在，请确认后重新删除");
+            throw new AdminException("API 不存在，请确认后重新删除");
         }
         assertNoDependency("模型", adminRepository.queryModelDependOnApi(apiVO.getApiId()));
         adminRepository.apiDelete(id);
@@ -73,7 +78,7 @@ public class AdminService implements IAdminService {
     public void apiToggle(Long id, Integer apiStatus) {
         ApiVO apiVO = adminRepository.apiQuery(id);
         if (apiVO == null) {
-            throw new AdminException("API 的 ID 不存在，请确认后重新切换");
+            throw new AdminException("API 不存在，请确认后重新切换");
         }
         if (apiStatus == 0) {
             assertNoDependency("模型", adminRepository.queryModelDependOnApi(apiVO.getApiId()));
@@ -100,7 +105,7 @@ public class AdminService implements IAdminService {
     @Override
     public void modelInsert(ModelManageRequest request) {
         if (adminRepository.modelQuery(request.getModelId()) != null) {
-            throw new AdminException("MODEL 的 ID 已存在，请修改后重新添加");
+            throw new AdminException("MODEL 已存在，请修改后重新添加");
         }
         adminRepository.modelInsert(request);
     }
@@ -108,7 +113,7 @@ public class AdminService implements IAdminService {
     @Override
     public void modelUpdate(ModelManageRequest request) {
         if (adminRepository.modelQuery(request.getId()) == null) {
-            throw new AdminException("MODEL 的 ID 不存在，请确认后重新更改");
+            throw new AdminException("MODEL 不存在，请确认后重新更改");
         }
         adminRepository.modelUpdate(request);
     }
@@ -117,7 +122,7 @@ public class AdminService implements IAdminService {
     public void modelDelete(Long id) {
         ModelVO modelVO = adminRepository.modelQuery(id);
         if (modelVO == null) {
-            throw new AdminException("MODEL 的 ID 不存在，请确认后重新删除");
+            throw new AdminException("MODEL 不存在，请确认后重新删除");
         }
         assertNoDependency("客户端", adminRepository.queryClientDependOnModel(modelVO.getModelId()));
         adminRepository.modelDelete(id);
@@ -127,7 +132,7 @@ public class AdminService implements IAdminService {
     public void modelToggle(Long id, Integer modelStatus) {
         ModelVO modelVO = adminRepository.modelQuery(id);
         if (modelVO == null) {
-            throw new AdminException("MODEL 的 ID 不存在，请确认后重新切换");
+            throw new AdminException("MODEL 不存在，请确认后重新切换");
         }
         if (modelStatus == 0) {
             assertNoDependency("客户端", adminRepository.queryClientDependOnModel(modelVO.getModelId()));
@@ -154,7 +159,7 @@ public class AdminService implements IAdminService {
     @Override
     public void mcpInsert(McpManageRequest request) {
         if (adminRepository.mcpQuery(request.getMcpId()) != null) {
-            throw new AdminException("MCP 的 ID 已存在，请修改后重新添加");
+            throw new AdminException("MCP 已存在，请修改后重新添加");
         }
         adminRepository.mcpInsert(request);
     }
@@ -162,7 +167,7 @@ public class AdminService implements IAdminService {
     @Override
     public void mcpUpdate(McpManageRequest request) {
         if (adminRepository.mcpQuery(request.getId()) == null) {
-            throw new AdminException("MCP 的 ID 不存在，请确认后重新更改");
+            throw new AdminException("MCP 不存在，请确认后重新更改");
         }
         adminRepository.mcpUpdate(request);
     }
@@ -171,7 +176,7 @@ public class AdminService implements IAdminService {
     public void mcpDelete(Long id) {
         McpVO mcpVO = adminRepository.mcpQuery(id);
         if (mcpVO == null) {
-            throw new AdminException("MCP 的 ID 不存在，请确认后重新删除");
+            throw new AdminException("MCP 不存在，请确认后重新删除");
         }
         assertNoDependency("客户端", adminRepository.queryClientDependOnMcp(mcpVO.getMcpId()));
         adminRepository.mcpDelete(id);
@@ -181,7 +186,7 @@ public class AdminService implements IAdminService {
     public void mcpToggle(Long id, Integer mcpStatus) {
         McpVO mcpVO = adminRepository.mcpQuery(id);
         if (mcpVO == null) {
-            throw new AdminException("MCP 的 ID 不存在，请确认后重新切换");
+            throw new AdminException("MCP 不存在，请确认后重新切换");
         }
         if (mcpStatus == 0) {
             assertNoDependency("客户端", adminRepository.queryClientDependOnMcp(mcpVO.getMcpId()));
@@ -208,7 +213,7 @@ public class AdminService implements IAdminService {
     @Override
     public void advisorInsert(AdvisorManageRequest request) {
         if (adminRepository.advisorQuery(request.getAdvisorId()) != null) {
-            throw new AdminException("ADVISOR 的 ID 已存在，请修改后重新添加");
+            throw new AdminException("ADVISOR 已存在，请修改后重新添加");
         }
         adminRepository.advisorInsert(request);
     }
@@ -216,7 +221,7 @@ public class AdminService implements IAdminService {
     @Override
     public void advisorUpdate(AdvisorManageRequest request) {
         if (adminRepository.advisorQuery(request.getId()) == null) {
-            throw new AdminException("ADVISOR 的 ID 不存在，请确认后重新更改");
+            throw new AdminException("ADVISOR 不存在，请确认后重新更改");
         }
         adminRepository.advisorUpdate(request);
     }
@@ -225,7 +230,7 @@ public class AdminService implements IAdminService {
     public void advisorDelete(Long id) {
         AdvisorVO advisorVO = adminRepository.advisorQuery(id);
         if (advisorVO == null) {
-            throw new AdminException("ADVISOR 的 ID 不存在，请确认后重新删除");
+            throw new AdminException("ADVISOR 不存在，请确认后重新删除");
         }
         assertNoDependency("客户端", adminRepository.queryClientDependOnAdvisor(advisorVO.getAdvisorId()));
         adminRepository.advisorDelete(id);
@@ -235,7 +240,7 @@ public class AdminService implements IAdminService {
     public void advisorToggle(Long id, Integer status) {
         AdvisorVO advisorVO = adminRepository.advisorQuery(id);
         if (advisorVO == null) {
-            throw new AdminException("ADVISOR 的 ID 不存在，请确认后重新切换");
+            throw new AdminException("ADVISOR 不存在，请确认后重新切换");
         }
         if (status == 0) {
             assertNoDependency("客户端", adminRepository.queryClientDependOnAdvisor(advisorVO.getAdvisorId()));
@@ -262,7 +267,7 @@ public class AdminService implements IAdminService {
     @Override
     public void promptInsert(PromptManageRequest request) {
         if (adminRepository.promptQuery(request.getPromptId()) != null) {
-            throw new AdminException("PROMPT 的 ID 已存在，请修改后重新添加");
+            throw new AdminException("PROMPT 已存在，请修改后重新添加");
         }
         adminRepository.promptInsert(request);
     }
@@ -270,7 +275,7 @@ public class AdminService implements IAdminService {
     @Override
     public void promptUpdate(PromptManageRequest request) {
         if (adminRepository.promptQuery(request.getId()) == null) {
-            throw new AdminException("PROMPT 的 ID 不存在，请确认后重新更改");
+            throw new AdminException("PROMPT 不存在，请确认后重新更改");
         }
         adminRepository.promptUpdate(request);
     }
@@ -279,7 +284,7 @@ public class AdminService implements IAdminService {
     public void promptDelete(Long id) {
         PromptVO promptVO = adminRepository.promptQuery(id);
         if (promptVO == null) {
-            throw new AdminException("PROMPT 的 ID 不存在，请确认后重新删除");
+            throw new AdminException("PROMPT 不存在，请确认后重新删除");
         }
         assertNoDependency("客户端", adminRepository.queryClientDependOnPrompt(promptVO.getPromptId()));
         adminRepository.promptDelete(id);
@@ -289,7 +294,7 @@ public class AdminService implements IAdminService {
     public void promptToggle(Long id, Integer status) {
         PromptVO promptVO = adminRepository.promptQuery(id);
         if (promptVO == null) {
-            throw new AdminException("PROMPT 的 ID 不存在，请确认后重新切换");
+            throw new AdminException("PROMPT 不存在，请确认后重新切换");
         }
         if (status == 0) {
             assertNoDependency("客户端", adminRepository.queryClientDependOnPrompt(promptVO.getPromptId()));
@@ -316,7 +321,7 @@ public class AdminService implements IAdminService {
     @Override
     public void clientInsert(ClientManageRequest request) {
         if (adminRepository.clientQuery(request.getClientId()) != null) {
-            throw new AdminException("CLIENT 的 ID 已存在，请修改后重新添加");
+            throw new AdminException("CLIENT 已存在，请修改后重新添加");
         }
         adminRepository.clientInsert(request);
     }
@@ -324,7 +329,7 @@ public class AdminService implements IAdminService {
     @Override
     public void clientUpdate(ClientManageRequest request) {
         if (adminRepository.clientQuery(request.getId()) == null) {
-            throw new AdminException("CLIENT 的 ID 不存在，请确认后重新更改");
+            throw new AdminException("CLIENT 不存在，请确认后重新更改");
         }
         adminRepository.clientUpdate(request);
     }
@@ -333,8 +338,9 @@ public class AdminService implements IAdminService {
     public void clientDelete(Long id) {
         ClientVO clientVO = adminRepository.clientQuery(id);
         if (clientVO == null) {
-            throw new AdminException("CLIENT 的 ID 不存在，请确认后重新删除");
+            throw new AdminException("CLIENT 不存在，请确认后重新删除");
         }
+        assertNoDependency("客户端", adminRepository.queryAgentDependOnClient(clientVO.getClientId()));
         adminRepository.clientDelete(id);
     }
 
@@ -342,7 +348,10 @@ public class AdminService implements IAdminService {
     public void clientToggle(Long id, Integer status) {
         ClientVO clientVO = adminRepository.clientQuery(id);
         if (clientVO == null) {
-            throw new AdminException("CLIENT 的 ID 不存在，请确认后重新切换");
+            throw new AdminException("CLIENT 不存在，请确认后重新切换");
+        }
+        if (status == 0) {
+            assertNoDependency("客户端", adminRepository.queryAgentDependOnClient(clientVO.getClientId()));
         }
         adminRepository.clientToggle(id, status);
     }
@@ -366,7 +375,7 @@ public class AdminService implements IAdminService {
     @Override
     public void agentInsert(AgentManageRequest request) {
         if (adminRepository.agentQuery(request.getAgentId()) != null) {
-            throw new AdminException("AGENT 的 ID 已存在，请修改后重新添加");
+            throw new AdminException("AGENT 已存在，请修改后重新添加");
         }
         adminRepository.agentInsert(request);
     }
@@ -374,7 +383,7 @@ public class AdminService implements IAdminService {
     @Override
     public void agentUpdate(AgentManageRequest request) {
         if (adminRepository.agentQuery(request.getId()) == null) {
-            throw new AdminException("AGENT 的 ID 不存在，请确认后重新更改");
+            throw new AdminException("AGENT 不存在，请确认后重新更改");
         }
         adminRepository.agentUpdate(request);
     }
@@ -383,7 +392,7 @@ public class AdminService implements IAdminService {
     public void agentDelete(Long id) {
         AdminAgentVO agentVO = adminRepository.agentQuery(id);
         if (agentVO == null) {
-            throw new AdminException("AGENT 的 ID 不存在，请确认后重新删除");
+            throw new AdminException("AGENT 不存在，请确认后重新删除");
         }
         adminRepository.agentDelete(id);
     }
@@ -392,7 +401,7 @@ public class AdminService implements IAdminService {
     public void agentToggle(Long id, Integer status) {
         AdminAgentVO agentVO = adminRepository.agentQuery(id);
         if (agentVO == null) {
-            throw new AdminException("AGENT 的 ID 不存在，请确认后重新切换");
+            throw new AdminException("AGENT 不存在，请确认后重新切换");
         }
         adminRepository.agentToggle(id, status);
     }
@@ -416,7 +425,7 @@ public class AdminService implements IAdminService {
     @Override
     public void userInsert(UserManageRequest request) {
         if (adminRepository.userQuery(request.getUsername()) != null) {
-            throw new AdminException("用户已存在");
+            throw new AdminException("USER 已存在，请修改后重新添加");
         }
         request.setPassword(passwordEncoder.encode(request.getPassword()));
         adminRepository.userInsert(request);
@@ -425,7 +434,7 @@ public class AdminService implements IAdminService {
     @Override
     public void userUpdate(UserManageRequest request) {
         if (adminRepository.userQuery(request.getId()) == null) {
-            throw new AdminException("用户不存在");
+            throw new AdminException("USER 不存在，请修改后重新更改");
         }
         request.setPassword(passwordEncoder.encode(request.getPassword()));
         adminRepository.userUpdate(request);
@@ -433,11 +442,60 @@ public class AdminService implements IAdminService {
 
     @Override
     public void userDelete(Long id) {
-        UserVO userVO = adminRepository.userQuery(id);
-        if (userVO == null) {
-            throw new AdminException("用户不存在");
+        if (adminRepository.userQuery(id) == null) {
+            throw new AdminException("USER 不存在，请修改后重新删除");
         }
         adminRepository.userDelete(id);
+    }
+
+    // -------------------- Config --------------------
+    @Override
+    public Map<String, List<ConfigVO>> configList(ConfigListRequest request) {
+        List<ConfigVO> configVOList = adminRepository.configList(request);
+        return configVOList.stream()
+                .collect(Collectors.groupingBy(
+                        ConfigVO::getClientId,
+                        LinkedHashMap::new,
+                        Collectors.toList()
+                ));
+    }
+
+    @Override
+    public void configInsert(ConfigManageRequest request) {
+        if (adminRepository.configQuery(request) != null) {
+            throw new AdminException("CONFIG 已存在，请修改后重新添加");
+        }
+        adminRepository.configInsert(request);
+    }
+
+    @Override
+    public void configUpdate(ConfigManageRequest request) {
+        if (adminRepository.configQuery(request.getId()) == null) {
+            throw new AdminException("CONFIG 不存在，请修改后重新更改");
+        }
+        adminRepository.configUpdate(request);
+    }
+
+    @Override
+    public void configDelete(Long id) {
+        ConfigVO configVO = adminRepository.configQuery(id);
+        if (configVO == null) {
+            throw new AdminException("CONFIG 不存在，请修改后重新删除");
+        }
+        assertNoDependency("客户端", adminRepository.queryAgentDependOnClient(configVO.getClientId()));
+        adminRepository.configDelete(id);
+    }
+
+    @Override
+    public void configToggle(Long id, Integer status) {
+        ConfigVO configVO  = adminRepository.configQuery(id);
+        if (configVO == null) {
+            throw new AdminException("CONFIG 不存在，请确认后重新切换");
+        }
+        if (status == 0) {
+            assertNoDependency("客户端", adminRepository.queryAgentDependOnClient(configVO.getClientId()));
+        }
+        adminRepository.configToggle(id, status);
     }
 
     private void assertNoDependency(String dependentName, List<String> dependents) {
@@ -468,6 +526,13 @@ public class AdminService implements IAdminService {
     }
 
     @Override
+    public List<String> listConfigType() {
+        return Arrays.stream(AiConfigType.values())
+                .map(AiConfigType::getType)
+                .toList();
+    }
+
+    @Override
     public List<String> listApiId() {
         return adminRepository.listApiId();
     }
@@ -476,4 +541,5 @@ public class AdminService implements IAdminService {
     public List<String> listModelId() {
         return adminRepository.listModelId();
     }
+
 }

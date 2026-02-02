@@ -4,6 +4,7 @@ import com.dasi.domain.admin.model.vo.*;
 import com.dasi.domain.admin.repository.IAdminRepository;
 import com.dasi.infrastructure.persistent.dao.*;
 import com.dasi.infrastructure.persistent.po.*;
+import com.dasi.types.dto.request.admin.config.ConfigListRequest;
 import com.dasi.types.dto.request.admin.manage.*;
 import com.dasi.types.dto.request.admin.page.*;
 import jakarta.annotation.Resource;
@@ -675,20 +676,83 @@ public class AdminRepository implements IAdminRepository {
                 .build();
     }
 
+    // -------------------- Config --------------------
+    @Override
+    public List<ConfigVO> configList(ConfigListRequest request) {
+        List<AiConfig> poList = aiConfigDao.list(request.getIdKeyword(), request.getValueKeyword(), request.getConfigType());
+        return poList.stream().map(this::toConfigVO).toList();
+    }
+
+    @Override
+    public ConfigVO configQuery(ConfigManageRequest request) {
+        return toConfigVO(aiConfigDao.queryByUniqueKey(request.getClientId(), request.getConfigType(), request.getConfigValue()));
+    }
+
+    @Override
+    public ConfigVO configQuery(Long id) {
+        return toConfigVO(aiConfigDao.queryById(id));
+    }
+
+    @Override
+    public void configInsert(ConfigManageRequest request) {
+        aiConfigDao.insert(toConfigPO(request));
+    }
+
+    @Override
+    public void configUpdate(ConfigManageRequest request) {
+        aiConfigDao.update(toConfigPO(request));
+    }
+
+    @Override
+    public void configDelete(Long id) {
+        aiConfigDao.delete(id);
+    }
+
+    @Override
+    public void configToggle(Long id, Integer status) {
+        aiConfigDao.toggle(id, status);
+    }
+
+    private AiConfig toConfigPO(ConfigManageRequest request) {
+        return AiConfig.builder()
+                .id(request.getId())
+                .clientId(request.getClientId())
+                .configType(request.getConfigType())
+                .configValue(request.getConfigValue())
+                .configParam(request.getConfigParam())
+                .configStatus(request.getConfigStatus())
+                .build();
+    }
+
+    private ConfigVO toConfigVO(AiConfig po) {
+        if (po == null) {
+            return null;
+        }
+        return ConfigVO.builder()
+                .id(po.getId())
+                .clientId(po.getClientId())
+                .configType(po.getConfigType())
+                .configValue(po.getConfigValue())
+                .configParam(po.getConfigParam())
+                .configStatus(po.getConfigStatus())
+                .updateTime(po.getUpdateTime())
+                .build();
+    }
+
     // -------------------- Depend --------------------
     @Override
     public List<String> queryClientDependOnPrompt(String promptId) {
-        return aiConfigDao.queryClientIdListByConfig(PROMPT.getType(), promptId);
+        return aiConfigDao.queryClientIdListByConfigTypeAndValue(PROMPT.getType(), promptId);
     }
 
     @Override
     public List<String> queryClientDependOnAdvisor(String advisorId) {
-        return aiConfigDao.queryClientIdListByConfig(ADVISOR.getType(), advisorId);
+        return aiConfigDao.queryClientIdListByConfigTypeAndValue(ADVISOR.getType(), advisorId);
     }
 
     @Override
     public List<String> queryClientDependOnMcp(String mcpId) {
-        return aiConfigDao.queryClientIdListByConfig(MCP.getType(), mcpId);
+        return aiConfigDao.queryClientIdListByConfigTypeAndValue(MCP.getType(), mcpId);
     }
 
     @Override

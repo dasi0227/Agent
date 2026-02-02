@@ -1,6 +1,7 @@
 package com.dasi.domain.admin.repository;
 
 import com.dasi.domain.admin.model.vo.*;
+import com.dasi.types.dto.request.admin.config.ConfigListRequest;
 import com.dasi.types.dto.request.admin.manage.*;
 import com.dasi.types.dto.request.admin.page.*;
 
@@ -86,6 +87,15 @@ public interface IAdminRepository {
     void userInsert(UserManageRequest request);
     void userUpdate(UserManageRequest request);
     void userDelete(Long id);
+
+    // Config
+    List<ConfigVO> configList(ConfigListRequest request);
+    ConfigVO configQuery(ConfigManageRequest request);
+    ConfigVO configQuery(Long id);
+    void configInsert(ConfigManageRequest request);
+    void configUpdate(ConfigManageRequest request);
+    void configDelete(Long id);
+    void configToggle(Long id, Integer status);
 
     // Depend
     List<String> queryClientDependOnPrompt(String promptId);
