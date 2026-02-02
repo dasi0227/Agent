@@ -40,7 +40,7 @@ public class ArmoryMcpNode extends AbstractArmoryNode {
         for (AiMcpVO aiMcpVO : aiMcpVOList) {
             McpSyncClient mcpSyncClient = null;
 
-            switch (AiMcpType.fromCode(aiMcpVO.getMcpType())) {
+            switch (AiMcpType.fromString(aiMcpVO.getMcpType())) {
                 case SSE -> {
                     AiMcpVO.SseConfig sseConfig = aiMcpVO.getSseConfig();
                     String baseUri = sseConfig.getBaseUri();

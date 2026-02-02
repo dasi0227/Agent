@@ -192,7 +192,7 @@ public class AiRepository implements IAiRepository {
 
                 if (advisorParam != null && !advisorParam.trim().isEmpty()) {
                     try {
-                        switch (AiAdvisorType.fromCode(aiAdvisor.getAdvisorType())) {
+                        switch (AiAdvisorType.fromString(aiAdvisor.getAdvisorType())) {
                             case MEMORY -> chatMemory = JSON.parseObject(advisorParam, AiAdvisorVO.ChatMemory.class);
                             case RAG -> ragAnswer = JSON.parseObject(advisorParam, AiAdvisorVO.RagAnswer.class);
                         }
@@ -309,7 +309,7 @@ public class AiRepository implements IAiRepository {
                         .build();
 
                 try {
-                    switch (AiMcpType.fromCode(aiMcp.getMcpType())) {
+                    switch (AiMcpType.fromString(aiMcp.getMcpType())) {
                         case SSE -> {
                             ObjectMapper objectMapper = new ObjectMapper();
                             AiMcpVO.SseConfig sseConfig = objectMapper.readValue(aiMcp.getMcpConfig(), AiMcpVO.SseConfig.class);

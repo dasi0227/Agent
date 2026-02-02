@@ -42,7 +42,7 @@ public class ArmoryAdvisorNode extends AbstractArmoryNode {
         for (AiAdvisorVO aiAdvisorVO : aiAdvisorVOList) {
             Advisor advisor = null;
 
-            switch (AiAdvisorType.fromCode(aiAdvisorVO.getAdvisorType())) {
+            switch (AiAdvisorType.fromString(aiAdvisorVO.getAdvisorType())) {
                 case RAG -> {
                     AiAdvisorVO.RagAnswer ragAnswer = aiAdvisorVO.getRagAnswer();
                     SearchRequest searchRequest = SearchRequest.builder()

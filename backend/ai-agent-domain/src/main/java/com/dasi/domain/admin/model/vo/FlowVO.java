@@ -18,6 +18,5 @@ public class FlowVO {
     private String clientRole;
     private String flowPrompt;
     private Integer flowSeq;
-    private Integer flowStatus;
     private LocalDateTime updateTime;
 }

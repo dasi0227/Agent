@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AdminAgentVO {
+public class AgentVO {
     private Long id;
     private String agentId;
     private String agentName;

@@ -1,4 +1,4 @@
-package com.dasi.types.dto.request.admin.page;
+package com.dasi.types.dto.request.admin.query;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -12,11 +12,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PromptPageRequest {
+public class AgentPageRequest {
 
     private String idKeyword;
 
     private String nameKeyword;
+
+    private String agentType;
 
     @NotNull
     @Min(1)

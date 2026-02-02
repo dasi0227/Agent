@@ -6,9 +6,9 @@ import com.dasi.domain.admin.model.enumeration.AiConfigType;
 import com.dasi.domain.admin.model.enumeration.UserRoleType;
 import com.dasi.domain.admin.model.vo.*;
 import com.dasi.domain.admin.repository.IAdminRepository;
-import com.dasi.types.dto.request.admin.page.ConfigListRequest;
+import com.dasi.types.dto.request.admin.query.ConfigListRequest;
 import com.dasi.types.dto.request.admin.manage.*;
-import com.dasi.types.dto.request.admin.page.*;
+import com.dasi.types.dto.request.admin.query.*;
 import com.dasi.types.dto.result.PageResult;
 import com.dasi.types.exception.AdminException;
 import com.dasi.types.exception.DependencyConflictException;
@@ -358,18 +358,23 @@ public class AdminService implements IAdminService {
 
     // -------------------- Agent --------------------
     @Override
-    public PageResult<AdminAgentVO> agentPage(AgentPageRequest request) {
-        List<AdminAgentVO> voList = adminRepository.agentPage(request);
+    public PageResult<AgentVO> agentPage(AgentPageRequest request) {
+        List<AgentVO> voList = adminRepository.agentPage(request);
         Integer total = adminRepository.agentCount(request);
         Integer size = request.getPageSize();
         Integer pageSum = (total + size - 1) / size;
-        return PageResult.<AdminAgentVO>builder()
+        return PageResult.<AgentVO>builder()
                 .list(voList)
                 .total(total)
                 .pageSum(pageSum)
                 .pageNum(request.getPageNum())
                 .pageSize(size)
                 .build();
+    }
+
+    @Override
+    public List<AgentVO> agentList(AgentListRequest request) {
+        return adminRepository.agentList(request);
     }
 
     @Override
@@ -390,7 +395,7 @@ public class AdminService implements IAdminService {
 
     @Override
     public void agentDelete(Long id) {
-        AdminAgentVO agentVO = adminRepository.agentQuery(id);
+        AgentVO agentVO = adminRepository.agentQuery(id);
         if (agentVO == null) {
             throw new AdminException("AGENT 不存在，请确认后重新删除");
         }
@@ -399,7 +404,7 @@ public class AdminService implements IAdminService {
 
     @Override
     public void agentToggle(Long id, Integer status) {
-        AdminAgentVO agentVO = adminRepository.agentQuery(id);
+        AgentVO agentVO = adminRepository.agentQuery(id);
         if (agentVO == null) {
             throw new AdminException("AGENT 不存在，请确认后重新切换");
         }
@@ -488,7 +493,7 @@ public class AdminService implements IAdminService {
 
     @Override
     public void configToggle(Long id, Integer status) {
-        ConfigVO configVO  = adminRepository.configQuery(id);
+        ConfigVO configVO = adminRepository.configQuery(id);
         if (configVO == null) {
             throw new AdminException("CONFIG 不存在，请确认后重新切换");
         }
@@ -498,12 +503,43 @@ public class AdminService implements IAdminService {
         adminRepository.configToggle(id, status);
     }
 
-    private void assertNoDependency(String dependentName, List<String> dependents) {
-        if (!CollectionUtils.isEmpty(dependents)) {
-            throw new DependencyConflictException("存在依赖，无法执行操作，相关" + dependentName + "：" + String.join(",", dependents), dependents);
-        }
+
+    // -------------------- Flow --------------------
+    @Override
+    public List<ClientDetailVO> flowClient() {
+        return adminRepository.flowClient();
     }
 
+    @Override
+    public List<FlowVO> flowAgent(String agentId) {
+        return adminRepository.flowAgent(agentId);
+    }
+
+    @Override
+    public void flowInsert(FLowManageRequest request) {
+        if (adminRepository.flowQuery(request.getAgentId(), request.getClientId()) != null) {
+            throw new AdminException("FLOW 已存在，请修改后重新添加");
+        }
+        adminRepository.flowInsert(request);
+    }
+
+    @Override
+    public void flowUpdate(FLowManageRequest request) {
+        if (adminRepository.flowQuery(request.getId()) == null) {
+            throw new AdminException("FLOW 不存在，请修改后重新更改");
+        }
+        adminRepository.flowUpdate(request);
+    }
+
+    @Override
+    public void flowDelete(Long id) {
+        if (adminRepository.flowQuery(id) == null) {
+            throw new AdminException("FLOW 不存在，请修改后重新删除");
+        }
+        adminRepository.flowDelete(id);
+    }
+
+    // -------------------- List --------------------
     @Override
     public List<String> listClientType() {
         return Arrays.stream(AiClientType.values())
@@ -540,6 +576,13 @@ public class AdminService implements IAdminService {
     @Override
     public List<String> listModelId() {
         return adminRepository.listModelId();
+    }
+
+
+    private void assertNoDependency(String dependentName, List<String> dependents) {
+        if (!CollectionUtils.isEmpty(dependents)) {
+            throw new DependencyConflictException("存在依赖，无法执行操作，相关" + dependentName + "：" + String.join(",", dependents), dependents);
+        }
     }
 
 }

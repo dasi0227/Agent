@@ -19,6 +19,10 @@ public interface IAiAgentDao {
                        @Param("offset") Integer offset,
                        @Param("size") Integer size);
 
+    List<AiAgent> list(@Param("idKeyword") String idKeyword,
+                       @Param("nameKeyword") String nameKeyword,
+                       @Param("agentType") String agentType);
+
     Integer count(@Param("idKeyword") String idKeyword,
                   @Param("nameKeyword") String nameKeyword,
                   @Param("agentType") String agentType);
@@ -32,5 +36,4 @@ public interface IAiAgentDao {
     void delete(@Param("id") Long id);
 
     void toggle(AiAgent aiAgent);
-
 }

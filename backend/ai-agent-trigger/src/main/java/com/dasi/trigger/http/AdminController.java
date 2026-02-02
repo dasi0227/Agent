@@ -2,9 +2,9 @@ package com.dasi.trigger.http;
 
 import com.dasi.domain.admin.model.vo.*;
 import com.dasi.domain.admin.service.IAdminService;
-import com.dasi.types.dto.request.admin.page.ConfigListRequest;
+import com.dasi.types.dto.request.admin.query.ConfigListRequest;
 import com.dasi.types.dto.request.admin.manage.*;
-import com.dasi.types.dto.request.admin.page.*;
+import com.dasi.types.dto.request.admin.query.*;
 import com.dasi.types.dto.result.PageResult;
 import com.dasi.types.dto.result.Result;
 import jakarta.annotation.Resource;
@@ -205,8 +205,13 @@ public class AdminController {
 
     // -------------------- Agent --------------------
     @PostMapping("/agent/page")
-    public Result<PageResult<AdminAgentVO>> agentPage(@Valid @RequestBody AgentPageRequest request) {
+    public Result<PageResult<AgentVO>> agentPage(@Valid @RequestBody AgentPageRequest request) {
         return Result.success(adminService.agentPage(request));
+    }
+
+    @PostMapping("/agent/list")
+    public Result<List<AgentVO>> agentList(@Valid @RequestBody AgentListRequest request) {
+        return Result.success(adminService.agentList(request));
     }
 
     @PostMapping("/agent/insert")
@@ -287,8 +292,36 @@ public class AdminController {
         return Result.success();
     }
 
+    // -------------------- Flow --------------------
+    @PostMapping("/flow/client")
+    public Result<List<ClientDetailVO>> flowClient() {
+        return Result.success(adminService.flowClient());
+    }
 
-    // -------------------- list --------------------
+    @PostMapping("/flow/agent")
+    public Result<List<FlowVO>> flowAgent(@RequestParam("agentId") String agentId) {
+        return Result.success(adminService.flowAgent(agentId));
+    }
+
+    @PostMapping("/flow/insert")
+    public Result<Void> flowInsert(@Valid @RequestBody FLowManageRequest request) {
+        adminService.flowInsert(request);
+        return Result.success();
+    }
+
+    @PostMapping("/flow/update")
+    public Result<Void> flowUpdate(@Valid @RequestBody FLowManageRequest request) {
+        adminService.flowUpdate(request);
+        return Result.success();
+    }
+
+    @PostMapping("/flow/delete")
+    public Result<Void> flowDelete(@RequestParam("id") Long id) {
+        adminService.flowDelete(id);
+        return Result.success();
+    }
+
+    // -------------------- List --------------------
     @GetMapping("/list/clientType")
     public Result<List<String>> listClientType() {
         return Result.success(adminService.listClientType());

@@ -14,15 +14,31 @@
     </resultMap>
 
     <select id="queryByClientIdAndConfigType" resultMap="dataMap">
-        SELECT client_id,
+        SELECT id,
+               client_id,
                config_type,
                config_value,
                config_param,
-               config_status
+               config_status,
+               create_time,
+               update_time
         FROM ai_config
         WHERE client_id = #{clientId}
           AND config_type = #{configType}
           AND config_status = 1
+    </select>
+
+    <select id="queryByClientId" resultMap="dataMap">
+        SELECT id,
+               client_id,
+               config_type,
+               config_value,
+               config_param,
+               config_status,
+               create_time,
+               update_time
+        FROM ai_config
+        WHERE client_id = #{clientId}
     </select>
 
     <select id="queryClientIdListByConfigType" resultType="java.lang.String">

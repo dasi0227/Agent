@@ -45,6 +45,20 @@
         WHERE client_type = 'chat'
     </select>
 
+    <select id="list" resultType="com.dasi.infrastructure.persistent.po.AiClient">
+        SELECT id,
+               client_id,
+               client_type,
+               model_id,
+               model_name,
+               client_name,
+               client_desc,
+               client_status,
+               create_time,
+               update_time
+        FROM ai_client
+    </select>
+
     <select id="page" resultMap="dataMap">
         SELECT id,
                client_id,

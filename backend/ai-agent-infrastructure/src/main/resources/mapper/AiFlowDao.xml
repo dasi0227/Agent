@@ -6,10 +6,9 @@
         <id column="id" property="id"/>
         <result column="agent_id" property="agentId"/>
         <result column="client_id" property="clientId"/>
-        <result column="client_type" property="clientRole"/>
+        <result column="client_role" property="clientRole"/>
         <result column="flow_prompt" property="flowPrompt"/>
         <result column="flow_seq" property="flowSeq"/>
-        <result column="flow_status" property="flowStatus"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
     </resultMap>
@@ -21,12 +20,11 @@
                client_role,
                flow_prompt,
                flow_seq,
-               flow_status,
                create_time,
                update_time
         FROM ai_flow
         WHERE agent_id = #{agentId}
-        ORDER BY flow_seq
+        ORDER BY flow_seq DESC, update_time DESC, id DESC
     </select>
 
     <select id="queryAgentIdByClientId" resultType="java.lang.String">
@@ -41,6 +39,54 @@
         WHERE client_id = #{clientId}
     </update>
 
+    <select id="queryByAgentIdAndClientId" resultMap="dataMap">
+        SELECT id,
+               agent_id,
+               client_id,
+               client_role,
+               flow_prompt,
+               flow_seq,
+               create_time,
+               update_time
+        FROM ai_flow
+        WHERE agent_id = #{agentId}
+          AND client_id = #{clientId}
+    </select>
 
+    <select id="queryById" resultMap="dataMap">
+        SELECT id,
+               agent_id,
+               client_id,
+               client_role,
+               flow_prompt,
+               flow_seq,
+               create_time,
+               update_time
+        FROM ai_flow
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.dasi.infrastructure.persistent.po.AiFlow">
+        INSERT INTO ai_flow (agent_id, client_id, client_role, flow_prompt, flow_seq)
+        VALUES (#{agentId}, #{clientId}, #{clientRole}, #{flowPrompt}, #{flowSeq})
+    </insert>
+
+    <update id="update" parameterType="com.dasi.infrastructure.persistent.po.AiFlow">
+        UPDATE ai_flow
+        <set>
+            <if test="agentId != null">agent_id = #{agentId},</if>
+            <if test="clientId != null">client_id = #{clientId},</if>
+            <if test="clientRole != null">client_role = #{clientRole},</if>
+            <if test="flowPrompt != null">flow_prompt = #{flowPrompt},</if>
+            <if test="flowSeq != null">flow_seq = #{flowSeq},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE
+        FROM ai_flow
+        WHERE id = #{id}
+    </delete>
 
 </mapper>

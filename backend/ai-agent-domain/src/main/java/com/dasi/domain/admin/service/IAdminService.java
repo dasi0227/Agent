@@ -1,9 +1,8 @@
 package com.dasi.domain.admin.service;
 
 import com.dasi.domain.admin.model.vo.*;
-import com.dasi.types.dto.request.admin.page.ConfigListRequest;
 import com.dasi.types.dto.request.admin.manage.*;
-import com.dasi.types.dto.request.admin.page.*;
+import com.dasi.types.dto.request.admin.query.*;
 import com.dasi.types.dto.result.PageResult;
 
 import java.util.List;
@@ -54,7 +53,8 @@ public interface IAdminService {
     void clientToggle(Long id, Integer status);
 
     // Agent
-    PageResult<AdminAgentVO> agentPage(AgentPageRequest request);
+    PageResult<AgentVO> agentPage(AgentPageRequest request);
+    List<AgentVO> agentList(AgentListRequest request);
     void agentInsert(AgentManageRequest request);
     void agentUpdate(AgentManageRequest request);
     void agentDelete(Long id);
@@ -72,6 +72,13 @@ public interface IAdminService {
     void configUpdate(ConfigManageRequest request);
     void configDelete(Long id);
     void configToggle(Long id, Integer configStatus);
+
+    // Flow
+    List<ClientDetailVO> flowClient();
+    List<FlowVO> flowAgent(String agentId);
+    void flowInsert(FLowManageRequest request);
+    void flowUpdate(FLowManageRequest request);
+    void flowDelete(Long id);
 
     // List
     List<String> listClientType();

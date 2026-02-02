@@ -14,6 +14,20 @@ public enum AiConfigType {
     ADVISOR("顾问", "advisor")
     ;
 
+    public static AiConfigType fromString(String str) {
+        if (str == null) {
+            throw new IllegalArgumentException("AiConfigType str is Null" );
+        }
+
+        for (AiConfigType configType : values()) {
+            if (configType.type.equals(str)) {
+                return configType;
+            }
+        }
+
+        throw new IllegalArgumentException("Unknown AiConfigType str: " + str);
+    }
+
     private String name;
 
     private String type;
