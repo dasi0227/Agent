@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dasi.infrastructure.persistent.dao.IAiConfigDao">
     <resultMap id="dataMap" type="com.dasi.infrastructure.persistent.po.AiConfig">
+        <id column="id" property="id"/>
         <result column="client_id" property="clientId"/>
         <result column="config_type" property="configType"/>
         <result column="config_value" property="configValue"/>
         <result column="config_param" property="configParam"/>
         <result column="config_status" property="configStatus"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <select id="queryByClientIdAndConfigType" resultMap="dataMap">
@@ -28,10 +31,100 @@
         WHERE config_type = #{configType}
     </select>
 
-    <select id="queryClientIdListByConfig" resultType="java.lang.String">
+    <select id="queryClientIdListByConfigTypeAndValue" resultType="java.lang.String">
         SELECT client_id
         FROM ai_config
         WHERE config_type = #{configType}
           AND config_value = #{configValue}
     </select>
+
+    <select id="list" resultMap="dataMap">
+        SELECT id,
+               client_id,
+               config_type,
+               config_value,
+               config_param,
+               config_status,
+               create_time,
+               update_time
+        FROM ai_config
+        <where>
+            <if test="idKeyword != null and idKeyword != ''">
+                AND client_id LIKE CONCAT('%', #{idKeyword}, '%')
+            </if>
+            <if test="valueKeyword != null and valueKeyword != ''">
+                AND config_value LIKE CONCAT('%', #{valueKeyword}, '%')
+            </if>
+            <if test="configType != null and configType != ''">
+                AND config_type = #{configType}
+            </if>
+        </where>
+        ORDER BY update_time DESC, id DESC
+    </select>
+
+    <select id="queryByUniqueKey" resultMap="dataMap">
+        SELECT id,
+               client_id,
+               config_type,
+               config_value,
+               config_param,
+               config_status,
+               create_time,
+               update_time
+        FROM ai_config
+        WHERE client_id = #{clientId}
+          AND config_type = #{configType}
+          AND config_value = #{configValue}
+    </select>
+
+    <select id="queryById" resultMap="dataMap">
+        SELECT id,
+               client_id,
+               config_type,
+               config_value,
+               config_param,
+               config_status,
+               create_time,
+               update_time
+        FROM ai_config
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.dasi.infrastructure.persistent.po.AiConfig">
+        INSERT INTO ai_config (client_id,
+                               config_type,
+                               config_value,
+                               config_param,
+                               config_status)
+        VALUES (#{clientId},
+                #{configType},
+                #{configValue},
+                #{configParam},
+                #{configStatus})
+    </insert>
+
+    <update id="update" parameterType="com.dasi.infrastructure.persistent.po.AiConfig">
+        UPDATE ai_config
+        <set>
+            <if test="clientId != null">client_id = #{clientId},</if>
+            <if test="configType != null">config_type = #{configType},</if>
+            <if test="configValue != null">config_value = #{configValue},</if>
+            <if test="configParam != null">config_param = #{configParam},</if>
+            <if test="configStatus != null">config_status = #{configStatus},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="toggle">
+        UPDATE ai_config
+        SET config_status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE
+        FROM ai_config
+        WHERE id = #{id}
+    </delete>
+
 </mapper>

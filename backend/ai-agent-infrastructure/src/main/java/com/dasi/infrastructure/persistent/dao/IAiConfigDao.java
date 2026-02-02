@@ -9,10 +9,30 @@ import java.util.List;
 @Mapper
 public interface IAiConfigDao {
 
-    List<AiConfig> queryByClientIdAndConfigType(@Param("clientId") String clientId, @Param("configType") String configType);
+    List<AiConfig> queryByClientIdAndConfigType(@Param("clientId") String clientId,
+                                                @Param("configType") String configType);
 
-    List<String> queryClientIdListByConfigType(String configType);
+    List<String> queryClientIdListByConfigType(@Param("configType") String configType);
 
-    List<String> queryClientIdListByConfig(@Param("configType") String configType, @Param("configValue") String configValue);
+    List<String> queryClientIdListByConfigTypeAndValue(@Param("configType") String configType,
+                                                       @Param("configValue") String configValue);
+
+    List<AiConfig> list(@Param("idKeyword") String idKeyword,
+                        @Param("valueKeyword") String valueKeyword,
+                        @Param("configType") String configType);
+
+    AiConfig queryByUniqueKey(@Param("clientId") String clientId,
+                              @Param("configType") String configType,
+                              @Param("configValue") String configValue);
+
+    AiConfig queryById(@Param("id") Long id);
+
+    void insert(AiConfig aiConfig);
+
+    void update(AiConfig aiConfig);
+
+    void delete(@Param("id") Long id);
+
+    void toggle(@Param("id") Long id, @Param("status") Integer status);
 
 }

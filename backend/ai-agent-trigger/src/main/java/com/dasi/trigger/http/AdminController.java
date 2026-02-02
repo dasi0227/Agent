@@ -2,6 +2,7 @@ package com.dasi.trigger.http;
 
 import com.dasi.domain.admin.model.vo.*;
 import com.dasi.domain.admin.service.IAdminService;
+import com.dasi.types.dto.request.admin.config.ConfigListRequest;
 import com.dasi.types.dto.request.admin.manage.*;
 import com.dasi.types.dto.request.admin.page.*;
 import com.dasi.types.dto.result.PageResult;
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -255,6 +257,37 @@ public class AdminController {
         return Result.success();
     }
 
+    // -------------------- Config --------------------
+    @PostMapping("/config/list")
+    public Result<Map<String, List<ConfigVO>>> configList(@Valid @RequestBody ConfigListRequest request) {
+        return Result.success(adminService.configList(request));
+    }
+
+    @PostMapping("/config/insert")
+    public Result<Void> configInsert(@Valid @RequestBody ConfigManageRequest request) {
+        adminService.configInsert(request);
+        return Result.success();
+    }
+
+    @PostMapping("/config/update")
+    public Result<Void> configUpdate(@Valid @RequestBody ConfigManageRequest request) {
+        adminService.configUpdate(request);
+        return Result.success();
+    }
+
+    @PostMapping("/config/delete")
+    public Result<Void> configDelete(@RequestParam("id") Long id) {
+        adminService.configDelete(id);
+        return Result.success();
+    }
+
+    @PostMapping("/config/toggle")
+    public Result<Void> configToggle(@RequestParam("id") Long id, @RequestParam("configStatus") Integer configStatus) {
+        adminService.configToggle(id, configStatus);
+        return Result.success();
+    }
+
+
     // -------------------- list --------------------
     @GetMapping("/list/clientType")
     public Result<List<String>> listClientType() {
@@ -264,6 +297,11 @@ public class AdminController {
     @GetMapping("/list/agentType")
     public Result<List<String>> listAgentType() {
         return Result.success(adminService.listAgentType());
+    }
+
+    @GetMapping("/list/configType")
+    public Result<List<String>> listConfigType() {
+        return Result.success(adminService.listConfigType());
     }
 
     @GetMapping("/list/userRole")

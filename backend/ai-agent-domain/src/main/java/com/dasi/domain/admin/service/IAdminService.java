@@ -1,11 +1,13 @@
 package com.dasi.domain.admin.service;
 
 import com.dasi.domain.admin.model.vo.*;
+import com.dasi.types.dto.request.admin.config.ConfigListRequest;
 import com.dasi.types.dto.request.admin.manage.*;
 import com.dasi.types.dto.request.admin.page.*;
 import com.dasi.types.dto.result.PageResult;
 
 import java.util.List;
+import java.util.Map;
 
 public interface IAdminService {
 
@@ -64,10 +66,19 @@ public interface IAdminService {
     void userUpdate(UserManageRequest request);
     void userDelete(Long id);
 
+    // Config
+    Map<String, List<ConfigVO>> configList(ConfigListRequest request);
+    void configInsert(ConfigManageRequest request);
+    void configUpdate(ConfigManageRequest request);
+    void configDelete(Long id);
+    void configToggle(Long id, Integer configStatus);
+
     // List
     List<String> listClientType();
     List<String> listAgentType();
     List<String> listUserRole();
     List<String> listApiId();
     List<String> listModelId();
+    List<String> listConfigType();
+
 }
