@@ -15,6 +15,8 @@ public class ClientDetailVO {
 
     private String clientId;
 
+    private String clientRole;
+
     private ClientVO client;
 
     private ModelVO model;

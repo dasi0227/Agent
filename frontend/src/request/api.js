@@ -218,3 +218,4 @@ export const listConfigType = async () => http.get(`${ADMIN_LIST_BASE}/configTyp
 export const listUserRole = async () => http.get(`${ADMIN_LIST_BASE}/userRole`);
 export const listApiId = async () => http.get(`${ADMIN_LIST_BASE}/apiId`);
 export const listModelId = async () => http.get(`${ADMIN_LIST_BASE}/modelId`);
+export const listClientRole = async () => http.get(`${ADMIN_LIST_BASE}/clientRole`);

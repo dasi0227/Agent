@@ -337,6 +337,11 @@ public class AdminController {
         return Result.success(adminService.listConfigType());
     }
 
+    @GetMapping("/list/clientRole")
+    public Result<List<String>> listClientRole() {
+        return Result.success(adminService.listClientRole());
+    }
+
     @GetMapping("/list/userRole")
     public Result<List<String>> listUserRole() {
         return Result.success(adminService.listUserRole());

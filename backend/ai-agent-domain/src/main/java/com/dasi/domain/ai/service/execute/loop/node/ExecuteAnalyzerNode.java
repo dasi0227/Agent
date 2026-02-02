@@ -11,9 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 
-import static com.dasi.domain.ai.model.enumeration.AiRoleType.ANALYZER;
-import static com.dasi.domain.ai.model.enumeration.AiRoleType.PERFORMER;
-import static com.dasi.domain.ai.model.enumeration.AiRoleType.SUMMARIZER;
+import static com.dasi.domain.ai.model.enumeration.AiClientRole.ANALYZER;
+import static com.dasi.domain.ai.model.enumeration.AiClientRole.PERFORMER;
+import static com.dasi.domain.ai.model.enumeration.AiClientRole.SUMMARIZER;
 import static com.dasi.domain.ai.model.enumeration.AiSectionType.*;
 import static com.dasi.domain.ai.model.enumeration.AiType.CLIENT;
 import static com.dasi.types.constant.ChatConstant.CHAT_MEMORY_CONVERSATION_ID_KEY;
@@ -38,7 +38,7 @@ public class ExecuteAnalyzerNode extends AbstractExecuteNode {
         try {
 
             // 获取客户端
-            AiFlowVO aiFlowVO = executeContext.getAiFlowVOMap().get(ANALYZER.getType());
+            AiFlowVO aiFlowVO = executeContext.getAiFlowVOMap().get(ANALYZER.getRole());
             String clientBeanName = CLIENT.getBeanName(aiFlowVO.getClientId());
             ChatClient analyzerClient = getBean(clientBeanName);
 

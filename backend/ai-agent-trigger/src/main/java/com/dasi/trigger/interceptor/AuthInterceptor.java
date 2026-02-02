@@ -18,7 +18,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import java.io.IOException;
 import java.util.Set;
 
-import static com.dasi.domain.admin.model.enumeration.UserRoleType.ADMIN;
+import static com.dasi.domain.admin.model.enumeration.UserRole.ADMIN;
 
 @Slf4j
 @Component
@@ -69,7 +69,7 @@ public class AuthInterceptor implements HandlerInterceptor {
 
         authContext.set(userVO);
 
-        if (uri.startsWith("/api/v1/admin") && (userVO.getRole() == null || !ADMIN.getType().equalsIgnoreCase(userVO.getRole()))) {
+        if (uri.startsWith("/api/v1/admin") && (userVO.getRole() == null || !ADMIN.getRole().equalsIgnoreCase(userVO.getRole()))) {
             return forbidden(response, "无权限访问该资源");
         }
 

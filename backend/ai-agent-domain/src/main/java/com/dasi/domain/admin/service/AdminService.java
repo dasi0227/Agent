@@ -1,12 +1,8 @@
 package com.dasi.domain.admin.service;
 
-import com.dasi.domain.admin.model.enumeration.AiAgentType;
-import com.dasi.domain.admin.model.enumeration.AiClientType;
-import com.dasi.domain.admin.model.enumeration.AiConfigType;
-import com.dasi.domain.admin.model.enumeration.UserRoleType;
+import com.dasi.domain.admin.model.enumeration.*;
 import com.dasi.domain.admin.model.vo.*;
 import com.dasi.domain.admin.repository.IAdminRepository;
-import com.dasi.types.dto.request.admin.query.ConfigListRequest;
 import com.dasi.types.dto.request.admin.manage.*;
 import com.dasi.types.dto.request.admin.query.*;
 import com.dasi.types.dto.result.PageResult;
@@ -555,9 +551,16 @@ public class AdminService implements IAdminService {
     }
 
     @Override
+    public List<String> listClientRole() {
+        return Arrays.stream(AiClientRole.values())
+                .map(AiClientRole::getRole)
+                .toList();
+    }
+
+    @Override
     public List<String> listUserRole() {
-        return Arrays.stream(UserRoleType.values())
-                .map(UserRoleType::getType)
+        return Arrays.stream(UserRole.values())
+                .map(UserRole::getRole)
                 .toList();
     }
 

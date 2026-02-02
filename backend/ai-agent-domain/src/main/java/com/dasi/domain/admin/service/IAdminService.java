@@ -83,6 +83,7 @@ public interface IAdminService {
     // List
     List<String> listClientType();
     List<String> listAgentType();
+    List<String> listClientRole();
     List<String> listUserRole();
     List<String> listApiId();
     List<String> listModelId();

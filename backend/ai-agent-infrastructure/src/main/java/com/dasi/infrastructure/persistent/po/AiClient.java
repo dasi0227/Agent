@@ -21,6 +21,9 @@ public class AiClient {
     /** 客户端类型：chat/work */
     private String clientType;
 
+    /** 客户端角色 */
+    private String clientRole;
+
     /** 模型 id */
     private String modelId;
 

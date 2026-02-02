@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import static com.dasi.domain.ai.model.enumeration.AiRoleType.*;
+import static com.dasi.domain.ai.model.enumeration.AiClientRole.*;
 
 @Data
 @Builder
@@ -28,35 +28,35 @@ public class ExecuteResponseEntity {
     private String sessionId;
 
     public static ExecuteResponseEntity createAnalyzerResponse(String sectionType, String sectionContent, Integer round, String sessionId) {
-        return createResponse(ANALYZER.getType(), sectionType, sectionContent, round, null, sessionId);
+        return createResponse(ANALYZER.getRole(), sectionType, sectionContent, round, null, sessionId);
     }
 
     public static ExecuteResponseEntity createPerformerResponse(String sectionType, String sectionContent, Integer round, String sessionId) {
-        return createResponse(PERFORMER.getType(), sectionType, sectionContent, round, null, sessionId);
+        return createResponse(PERFORMER.getRole(), sectionType, sectionContent, round, null, sessionId);
     }
 
     public static ExecuteResponseEntity createSupervisorResponse(String sectionType, String sectionContent, Integer round, String sessionId) {
-        return createResponse(SUPERVISOR.getType(), sectionType, sectionContent, round, null, sessionId);
+        return createResponse(SUPERVISOR.getRole(), sectionType, sectionContent, round, null, sessionId);
     }
 
     public static ExecuteResponseEntity createSummarizerResponse(String sectionType, String sectionContent, Integer round, String sessionId) {
-        return createResponse(SUMMARIZER.getType(), sectionType, sectionContent, round, null, sessionId);
+        return createResponse(SUMMARIZER.getRole(), sectionType, sectionContent, round, null, sessionId);
     }
 
     public static ExecuteResponseEntity createInspectorResponse(String sectionType, String sectionContent, String sessionId) {
-        return createResponse(INSPECTOR.getType(), sectionType, sectionContent, null, null, sessionId);
+        return createResponse(INSPECTOR.getRole(), sectionType, sectionContent, null, null, sessionId);
     }
 
     public static ExecuteResponseEntity createPlannerResponse(String sectionType, String sectionContent, String sessionId) {
-        return createResponse(PLANNER.getType(), sectionType, sectionContent, null, null, sessionId);
+        return createResponse(PLANNER.getRole(), sectionType, sectionContent, null, null, sessionId);
     }
 
     public static ExecuteResponseEntity createRunnerResponse(String sectionType, String sectionContent, Integer step, String sessionId) {
-        return createResponse(RUNNER.getType(), sectionType, sectionContent, null, step, sessionId);
+        return createResponse(RUNNER.getRole(), sectionType, sectionContent, null, step, sessionId);
     }
 
     public static ExecuteResponseEntity createReplierResponse(String sectionType, String sectionContent, String sessionId) {
-        return createResponse(REPLIER.getType(), sectionType, sectionContent, null, null, sessionId);
+        return createResponse(REPLIER.getRole(), sectionType, sectionContent, null, null, sessionId);
     }
 
     public static ExecuteResponseEntity createCompleteResponse(String sectionContent, String sessionId) {

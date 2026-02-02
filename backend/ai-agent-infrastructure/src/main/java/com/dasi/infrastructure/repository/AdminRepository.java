@@ -318,7 +318,7 @@ public class AdminRepository implements IAdminRepository {
     @Override
     public List<ClientVO> clientPage(ClientPageRequest request) {
         Integer offset = (request.getPageNum() - 1) * request.getPageSize();
-        List<AiClient> poList = aiClientDao.page(request.getIdKeyword(), request.getNameKeyword(), request.getModelId(), request.getClientType(), offset, request.getPageSize());
+        List<AiClient> poList = aiClientDao.page(request.getIdKeyword(), request.getNameKeyword(), request.getModelId(), request.getClientType(), request.getClientRole(), offset, request.getPageSize());
         if (CollectionUtils.isEmpty(poList)) {
             return List.of();
         }
@@ -327,7 +327,7 @@ public class AdminRepository implements IAdminRepository {
 
     @Override
     public Integer clientCount(ClientPageRequest request) {
-        return aiClientDao.count(request.getIdKeyword(), request.getNameKeyword(), request.getModelId(), request.getClientType());
+        return aiClientDao.count(request.getIdKeyword(), request.getNameKeyword(), request.getModelId(), request.getClientType(), request.getClientRole());
     }
 
     @Override
@@ -504,13 +504,14 @@ public class AdminRepository implements IAdminRepository {
     public List<ClientDetailVO> flowClient() {
         List<ClientDetailVO> clientDetailVOList = new ArrayList<>();
 
-        List<AiClient> aiClientList = aiClientDao.list();
+        List<AiClient> aiClientList = aiClientDao.listWorkClient();
         if (aiClientList.isEmpty()) {
             return clientDetailVOList;
         }
 
         for (AiClient aiClient : aiClientList) {
             String clientId = aiClient.getClientId();
+            String clientRole = aiClient.getClientRole();
             ClientVO clientVO = toClientVO(aiClient);
 
             String modelId = aiClient.getModelId();
@@ -548,6 +549,7 @@ public class AdminRepository implements IAdminRepository {
 
             ClientDetailVO clientDetailVO = ClientDetailVO.builder()
                     .clientId(clientId)
+                    .clientRole(clientRole)
                     .client(clientVO)
                     .model(modelVO)
                     .api(apiVO)
@@ -785,6 +787,7 @@ public class AdminRepository implements IAdminRepository {
                 .id(po.getId())
                 .clientId(po.getClientId())
                 .clientType(po.getClientType())
+                .clientRole(po.getClientRole())
                 .modelId(po.getModelId())
                 .modelName(po.getModelName())
                 .clientName(po.getClientName())
@@ -799,6 +802,7 @@ public class AdminRepository implements IAdminRepository {
                 .id(request.getId())
                 .clientId(request.getClientId())
                 .clientType(request.getClientType())
+                .clientRole(request.getClientRole())
                 .modelId(request.getModelId())
                 .modelName(request.getModelName())
                 .clientName(request.getClientName())
