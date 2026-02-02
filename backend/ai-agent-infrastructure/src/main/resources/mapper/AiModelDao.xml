@@ -85,6 +85,11 @@
         WHERE api_id = #{apiId}
     </select>
 
+    <select id="listModelId" resultType="java.lang.String">
+        SELECT model_id
+        FROM ai_model
+    </select>
+
     <insert id="insert" parameterType="com.dasi.infrastructure.persistent.po.AiModel">
         INSERT INTO ai_model (model_id,
                               api_id,

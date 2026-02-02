@@ -34,7 +34,7 @@ const handleSelect = (key) => emit('select', key);
 
 <template>
     <aside class="h-full w-[240px] shrink-0 border-r border-[#e2e8f0] bg-white shadow-sm">
-        <div class="px-4 py-4 text-[18px] font-semibold text-[#0f172a]">管理菜单</div>
+        <div class="px-4 py-4 text-[24px] font-semibold text-[#0f172a]">管理菜单</div>
         <div class="flex flex-col">
             <div v-for="group in groups" :key="group.name" class="border-t border-[#f1f5f9]">
                 <button

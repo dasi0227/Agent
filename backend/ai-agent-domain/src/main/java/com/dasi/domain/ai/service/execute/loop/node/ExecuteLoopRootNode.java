@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
-import static com.dasi.domain.ai.model.enumeration.AiClientType.ANALYZER;
+import static com.dasi.domain.ai.model.enumeration.AiRoleType.ANALYZER;
 
 @Slf4j
 @Service

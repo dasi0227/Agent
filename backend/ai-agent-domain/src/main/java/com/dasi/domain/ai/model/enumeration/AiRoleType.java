@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public enum AiClientType {
+public enum AiRoleType {
 
     ANALYZER("任务分析专家", "analyzer"),
     PERFORMER("任务执行专家", "performer"),

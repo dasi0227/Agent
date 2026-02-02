@@ -8,6 +8,7 @@ import java.util.List;
 
 @Mapper
 public interface IAiFlowDao {
+
     List<AiFlow> queryByAgentId(@Param("agentId") String agentId);
 
     void loadFlowPrompt(@Param("clientId") String clientId, @Param("flowPrompt") String flowPrompt);

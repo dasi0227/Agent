@@ -706,4 +706,14 @@ public class AdminRepository implements IAdminRepository {
         return aiFlowDao.queryAgentIdByClientId(clientId);
     }
 
+    @Override
+    public List<String> listApiId() {
+        return aiApiDao.listApiId();
+    }
+
+    @Override
+    public List<String> listModelId() {
+        return aiModelDao.listModelId();
+    }
+
 }

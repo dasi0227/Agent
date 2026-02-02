@@ -6,7 +6,7 @@
         <id column="id" property="id"/>
         <result column="agent_id" property="agentId"/>
         <result column="client_id" property="clientId"/>
-        <result column="client_type" property="clientType"/>
+        <result column="client_type" property="clientRole"/>
         <result column="flow_prompt" property="flowPrompt"/>
         <result column="flow_seq" property="flowSeq"/>
         <result column="flow_status" property="flowStatus"/>
@@ -18,7 +18,7 @@
         SELECT id,
                agent_id,
                client_id,
-               client_type,
+               client_role,
                flow_prompt,
                flow_seq,
                flow_status,

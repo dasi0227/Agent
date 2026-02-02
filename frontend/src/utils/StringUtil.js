@@ -1,3 +1,13 @@
+export const trimStrings = (input) => {
+    if (input === null || input === undefined) return input;
+    if (typeof input === 'string') return input.trim();
+    if (Array.isArray(input)) return input.map((item) => trimStrings(item));
+    if (typeof input === 'object') {
+        return Object.fromEntries(Object.entries(input).map(([k, v]) => [k, trimStrings(v)]));
+    }
+    return input;
+};
+
 const THINK_START = '<think>';
 const THINK_END = '</think>';
 
@@ -71,4 +81,42 @@ export const applyStreamToken = (accumulator, token) => {
         }
     }
     return accumulator;
+};
+
+const isLikelyJson = (text) => {
+    if (!text || typeof text !== 'string') return false;
+    const trimmed = text.trim();
+    if (!trimmed.startsWith('{') || !trimmed.endsWith('}')) return false;
+    try {
+        JSON.parse(trimmed);
+        return true;
+    } catch (error) {
+        return false;
+    }
+};
+
+const safeParseNestedJson = (value) => {
+    if (typeof value !== 'string') return value;
+    const trimmed = value.trim();
+    if (!(trimmed.startsWith('{') && trimmed.endsWith('}'))) return value;
+    try {
+        return JSON.parse(trimmed);
+    } catch (error) {
+        return value;
+    }
+};
+
+export const formatMcpJson = (content) => {
+    if (!isLikelyJson(content)) return content;
+    try {
+        const parsed = JSON.parse(content.trim());
+        if (parsed && typeof parsed === 'object') {
+            if (Object.prototype.hasOwnProperty.call(parsed, 'mcp_parameters')) {
+                parsed.mcp_parameters = safeParseNestedJson(parsed.mcp_parameters);
+            }
+        }
+        return JSON.stringify(parsed, null, 2);
+    } catch (error) {
+        return content;
+    }
 };

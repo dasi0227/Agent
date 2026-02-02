@@ -41,7 +41,6 @@ public class AuthInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String uri = request.getRequestURI();
-
         if (HttpMethod.OPTIONS.matches(request.getMethod())) {
             return true;
         }
@@ -74,6 +73,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             return forbidden(response, "无权限访问该资源");
         }
 
+        log.info("【后端服务】查询接口：uri={}", uri);
         return true;
     }
 

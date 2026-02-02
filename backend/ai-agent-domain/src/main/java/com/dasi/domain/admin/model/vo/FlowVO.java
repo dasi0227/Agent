@@ -15,7 +15,7 @@ public class FlowVO {
     private Long id;
     private String agentId;
     private String clientId;
-    private String clientType;
+    private String clientRole;
     private String flowPrompt;
     private Integer flowSeq;
     private Integer flowStatus;

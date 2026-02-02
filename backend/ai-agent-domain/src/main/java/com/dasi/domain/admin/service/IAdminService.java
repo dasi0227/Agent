@@ -5,6 +5,8 @@ import com.dasi.types.dto.request.admin.manage.*;
 import com.dasi.types.dto.request.admin.page.*;
 import com.dasi.types.dto.result.PageResult;
 
+import java.util.List;
+
 public interface IAdminService {
 
     // Api
@@ -62,4 +64,10 @@ public interface IAdminService {
     void userUpdate(UserManageRequest request);
     void userDelete(Long id);
 
+    // List
+    List<String> listClientType();
+    List<String> listAgentType();
+    List<String> listUserRole();
+    List<String> listApiId();
+    List<String> listModelId();
 }
