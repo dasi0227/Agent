@@ -6,7 +6,7 @@ import com.dasi.domain.admin.model.enumeration.AiConfigType;
 import com.dasi.domain.admin.model.enumeration.UserRoleType;
 import com.dasi.domain.admin.model.vo.*;
 import com.dasi.domain.admin.repository.IAdminRepository;
-import com.dasi.types.dto.request.admin.config.ConfigListRequest;
+import com.dasi.types.dto.request.admin.page.ConfigListRequest;
 import com.dasi.types.dto.request.admin.manage.*;
 import com.dasi.types.dto.request.admin.page.*;
 import com.dasi.types.dto.result.PageResult;

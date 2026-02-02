@@ -1,34 +1,51 @@
-现在你需要在 Admin.vue 中的管理菜单新增一个板块叫做“工作流管理”，放在最上面，即“模型管理”的上面，并且在其中新增两个模块分别是 CONFIG 和 FLOW
+## 身份与需求
 
-但是这两个模块对应的右侧主区域，除了 header 一样之外，数据展示不再是分页数据，你需要新建 AdminConfig.vue 和 AdminFlow.vue（分别对应 /admin/config 和 /admin/flow），而之前的你可以统一用 AdminTable.vue 统一作为 (/admin/agent,/admin/client,/admin/model,/admin/api,/admin/mcp,/admin/prompt,/admin/advisor,/admin/user)
+- 身份：你是一个资深全栈工程师（Vue3 + Spring Boot + MyBatis/DDD）
+- 任务：本次任务只做前端 Admin 后台的结构扩展与页面拆分：在保持现有 UI 风格与代码结构不变的前提下，新增“工作流管理”板块，并为 CONFIG/FLOW 采用独立页面（非分页表格），其余模块继续复用你已经实现的通用分页表格页面。
 
-- FLOW 暂不处理，用空白代替（注意！）
+## 阅读与对齐（不可跳过）【重要】
+1.	阅读前端现有目录与实现，特别是：
+- frontend/src/router/router.js：路由组织方式
+- frontend/src/request/api.js：接口定义方式
+- frontend/src/request/request.js：数据请求方式
+- frontend/src/router/pinia.js：数据存储方式
+- frontend/src/components：组件风格与封装方式
+
+2.	阅读后端现有目录与实现，特别是：
+- backend/ai-agent-trigger/src/main/java/com/dasi/trigger/http/AdminController.java
+- backend/ai-agent-types/src/main/java/com/dasi/types/dto/request/admin/page/ConfigListRequest.java
+- backend/ai-agent-types/src/main/java/com/dasi/types/dto/request/admin/manage/ConfigManageRequest.java
+- backend/ai-agent-domain/src/main/java/com/dasi/domain/admin/model/vo/ConfigVO.java
+
+## 本次修改目标（只改 Admin 后台相关前端）
+
+你已完成的：
+- Admin.vue：后台数据布局（内容区 + header）
+- SidebarAdmin.vue：侧边菜单布局：模型管理 / 基础管理 / 用户管理
+
+你现在需要新增与调整：
+1. 左侧菜单新增一个板块「工作流管理」，放在最上面（位于“模型管理”上方），该板块包含两个模块：
 - CONFIG
-  - 同样支持筛选条件
-  ```java
-  public class ConfigListRequest {
-      private String idKeyword;
-      private String valueKeyword;
-      private String configType;
+- FLOW
+2. 你需要将 Admin.vue 改名为 AdminTable.vue，并且用作统一分页 CRUD 页面，对应路由为，点击侧边菜单会自动切换路由，默认是 /admin/agent：/admin/agent,/admin/client,/admin/model,/admin/api,/admin/mcp,/admin/prompt,/admin/advisor,/admin/user）
+3. 路由新增两条：注意这两个页面不使用分页表格 AdminTable.vue 的统一逻辑（数据结构不同）。
+- /admin/config -> 新页面 AdminConfig.vue
+- /admin/flow -> 新页面 AdminFlow.vue
+4. FLOW 暂不处理：只要空白占位即可，但 header 与布局要与 Admin 一致，保证菜单切换与标题正常。
 
-  }
-  ```
-  - configType 从下面的接口获取
-  ```java
-  @GetMapping("/list/configType")
-  public Result<List<String>> listConfigType() {
-      return Result.success(adminService.listConfigType());
-  }
-  ```
-  - CONFIG 收到的数据为：Map<String, List<ConfigVO>>，展示效果是一个可以滑动的竖直列表，你需要根据 Map 的 clientId Key，将 List<ConfigVO> 的数据放到一个表格卡片展示（只需要给出configType、configValue、configParam），效果类似我给的图片，同时还有操作栏（和之前一样）；updateTime 是所有 Config 里面最近的 updateTime
-  ```java
-  public class ConfigVO {
-      private Long id;
-      private String clientId;
-      private String configType;
-      private String configValue;
-      private String configParam;
-      private Integer configStatus;
-      private LocalDateTime updateTime;
-  }
-  ```
+## CONFIG 页面需求（AdminConfig.vue）【重要】
+1. Header 与布局：保持 Admin 一致
+2. 查询/筛选：保持 Admin 一致，字段有 idKeyword、valueKeyword 和 configType（下拉选择（options 来自接口）
+3. 数据获取与展示结构（关键）：CONFIG 的列表接口返回的不是分页数组，而是 Map<String, List<ConfigVO>>
+4. 展示效果
+- 右侧主区域为一个可纵向滚动的列表（容器固定高度，内容溢出滚动）
+- Map 的每个 key（clientId）渲染为一个「卡片」
+- 卡片头部左侧：clientId（大号）
+- 卡片头部右侧：新增按钮
+- 卡片内容：一个表格，仅展示 3 列数据 + 操作列，样式与之前尽量保持调和
+
+## 约束
+- 严禁引入新的 UI 框架；严禁大改全局样式
+- 新增组件/页面必须放到你项目现有的合理目录下（views/components 的组织方式保持一致）
+- 不改后端、不改 DTO、不改 Controller
+- FLOW 页面暂时只做空白占位，但路由、菜单、header 必须完整

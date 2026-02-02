@@ -73,7 +73,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             return forbidden(response, "无权限访问该资源");
         }
 
-        log.info("【后端服务】查询接口：uri={}", uri);
+        log.info("【后端服务】服务接口：uri={}", uri);
         return true;
     }
 

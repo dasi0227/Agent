@@ -1,4 +1,4 @@
-package com.dasi.types.dto.request.admin.config;
+package com.dasi.types.dto.request.admin.page;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

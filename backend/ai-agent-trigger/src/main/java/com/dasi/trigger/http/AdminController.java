@@ -2,7 +2,7 @@ package com.dasi.trigger.http;
 
 import com.dasi.domain.admin.model.vo.*;
 import com.dasi.domain.admin.service.IAdminService;
-import com.dasi.types.dto.request.admin.config.ConfigListRequest;
+import com.dasi.types.dto.request.admin.page.ConfigListRequest;
 import com.dasi.types.dto.request.admin.manage.*;
 import com.dasi.types.dto.request.admin.page.*;
 import com.dasi.types.dto.result.PageResult;
