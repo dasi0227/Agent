@@ -1,4 +1,6 @@
 import axios from 'axios';
+import router from '../router/router';
+import { useAuthStore } from '../router/pinia';
 
 const BASE_URL = 'http://localhost:8066';
 const REQUEST_TIMEOUT = 600000;
@@ -49,6 +51,12 @@ export const normalizeError = (error) => {
 
 http.interceptors.request.use(
     (config) => {
+        let authStore;
+        try {
+            authStore = useAuthStore();
+        } catch (e) {
+            authStore = null;
+        }
         const storedSettings = localStorage.getItem(SETTINGS_KEY);
         const settings = storedSettings ? JSON.parse(storedSettings) : {};
         const storedAuth = localStorage.getItem(AUTH_KEY);
@@ -59,14 +67,11 @@ http.interceptors.request.use(
             Accept: 'application/json',
             ...(config.headers || {})
         };
-        const token = auth.token || settings.token;
+        const token = authStore?.token || auth.token || settings.token;
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
         config.metadata = { startTime: Date.now() };
-        console.log(
-            `[request] ${config.method?.toUpperCase() || 'GET'} ${config.baseURL || ''}${config.url} start`
-        );
         return config;
     },
     (error) => Promise.reject(normalizeError(error))
@@ -74,20 +79,18 @@ http.interceptors.request.use(
 
 http.interceptors.response.use(
     (response) => {
-        const duration = getDuration(response.config);
-        if (duration) {
-            console.log(`[response] ${response.config.url} done in ${duration}`);
-        }
         return response.data;
     },
     (error) => {
-        const duration = getDuration(error.config);
-        if (duration) {
-            console.warn(`[response error] ${error.config?.url || ''} failed in ${duration}`);
-        }
         const status = error?.response?.status;
+        let authStore;
+        try {
+            authStore = useAuthStore();
+        } catch (e) {
+            authStore = null;
+        }
         if (status === 401) {
-            localStorage.removeItem(AUTH_KEY);
+            authStore?.clear();
             try {
                 const settingsRaw = localStorage.getItem(SETTINGS_KEY);
                 if (settingsRaw) {
@@ -98,9 +101,11 @@ http.interceptors.response.use(
             } catch (_) {
                 // ignore
             }
-            if (window.location.pathname !== '/login') {
-                window.location.href = '/login';
+            if (router.currentRoute.value.path !== '/login') {
+                router.replace('/login');
             }
+        } else if (status === 403) {
+            window.alert('无权限访问该资源');
         }
         return Promise.reject(normalizeError(error));
     }
