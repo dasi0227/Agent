@@ -5,6 +5,9 @@ import com.dasi.domain.ai.model.entity.ExecuteRequestEntity;
 import com.dasi.domain.ai.service.augment.IAugmentService;
 import com.dasi.domain.ai.service.dispatch.IDispatchService;
 import com.dasi.domain.ai.service.rag.IRagService;
+import com.dasi.domain.query.service.IQueryService;
+import com.dasi.types.dto.response.query.QueryChatClientResponse;
+import com.dasi.types.dto.response.query.QueryWorkAgentResponse;
 import com.dasi.types.dto.request.ai.AiChatRequest;
 import com.dasi.types.dto.request.ai.AiArmoryRequest;
 import com.dasi.types.dto.request.ai.AiWorkRequest;
@@ -49,14 +52,30 @@ public class AiController implements IAiApi {
     @Resource
     private IRagService ragService;
 
+    @Resource
+    private IQueryService queryService;
+
     @Override
     @PostMapping(value = "/work/execute", produces = "text/event-stream")
     public SseEmitter execute(@Valid @RequestBody AiWorkRequest aiWorkRequest) {
 
         SseEmitter sseEmitter = new SseEmitter(0L);
+        String agentId = aiWorkRequest.getAiAgentId();
+        if (!isActiveWorkAgent(agentId)) {
+            try {
+                sseEmitter.send(SseEmitter.event()
+                        .name("error")
+                        .data("Agent 未启用或不存在"));
+            } catch (Exception e) {
+                log.error("【Agent 执行】状态校验失败：agentId={}", agentId, e);
+            } finally {
+                sseEmitter.complete();
+            }
+            return sseEmitter;
+        }
 
         ExecuteRequestEntity executeRequestEntity = ExecuteRequestEntity.builder()
-                .agentId(aiWorkRequest.getAiAgentId())
+                .agentId(agentId)
                 .userMessage(aiWorkRequest.getUserMessage())
                 .sessionId(aiWorkRequest.getSessionId())
                 .maxRound(aiWorkRequest.getMaxRound())
@@ -73,6 +92,11 @@ public class AiController implements IAiApi {
     public String complete(@Valid @RequestBody AiChatRequest aiChatRequest) {
 
         String clientId = aiChatRequest.getClientId();
+        if (isActiveChatClient(clientId)) {
+            log.warn("【AI 对话】client 未启用或不存在：clientId={}", clientId);
+            return CHAT_ERROR_RESPONSE;
+        }
+
         String userMessage = aiChatRequest.getUserMessage();
         String ragTag = aiChatRequest.getRagTag();
         String sessionId = aiChatRequest.getSessionId();
@@ -81,7 +105,7 @@ public class AiController implements IAiApi {
         Double presencePenalty = aiChatRequest.getPresencePenalty();
         Integer maxCompletionTokens = aiChatRequest.getMaxCompletionTokens();
 
-        log.info("【模型对话】完整对话开始：aiChatRequest={}", aiChatRequest);
+        log.info("【AI 对话】完整对话开始：aiChatRequest={}", aiChatRequest);
 
         try {
             ChatClient chatClient = applicationContext.getBean(CLIENT.getBeanName(clientId), ChatClient.class);
@@ -108,7 +132,7 @@ public class AiController implements IAiApi {
             }
             return response;
         } catch (Exception e) {
-            log.error("【模型对话】完整对话失败：clientId={}", clientId, e);
+            log.error("【AI 对话】完整对话失败：clientId={}", clientId, e);
             return CHAT_ERROR_RESPONSE;
         }
     }
@@ -118,6 +142,11 @@ public class AiController implements IAiApi {
     public Flux<String> stream(@Valid @RequestBody AiChatRequest aiChatRequest) {
 
         String clientId = aiChatRequest.getClientId();
+        if (isActiveChatClient(clientId)) {
+            log.warn("【AI 对话】client 未启用或不存在：clientId={}", clientId);
+            return Flux.just(CHAT_ERROR_RESPONSE);
+        }
+
         String userMessage = aiChatRequest.getUserMessage();
         String ragTag = aiChatRequest.getRagTag();
         String sessionId = aiChatRequest.getSessionId();
@@ -126,7 +155,7 @@ public class AiController implements IAiApi {
         Double presencePenalty = aiChatRequest.getPresencePenalty();
         Integer maxCompletionTokens = aiChatRequest.getMaxCompletionTokens();
 
-        log.info("【模型对话】流式对话开始：aiChatRequest={}", aiChatRequest);
+        log.info("【AI 对话】流式对话开始：aiChatRequest={}", aiChatRequest);
 
         try {
             ChatClient chatClient = applicationContext.getBean(CLIENT.getBeanName(clientId), ChatClient.class);
@@ -148,13 +177,13 @@ public class AiController implements IAiApi {
                     .toolCallbacks(toolCallbackList)
                     .stream()
                     .content()
-                    .doFinally(signalType -> log.info("【模型对话】流式对话结束：clientId={}, signal={}", clientId, signalType))
+                    .doFinally(signalType -> log.info("【AI 对话】流式对话结束：clientId={}, signal={}", clientId, signalType))
                     .onErrorResume(e -> {
-                        log.error("【模型对话】流式对话失败：clientId={}", clientId, e);
+                        log.error("【AI 对话】流式对话失败：clientId={}", clientId, e);
                         return Flux.just(CHAT_ERROR_RESPONSE);
                     });
         } catch (Exception e) {
-            log.error("【模型对话】流式对话失败：clientId={}", clientId, e);
+            log.error("【AI 对话】流式对话失败：clientId={}", clientId, e);
             return Flux.just(CHAT_ERROR_RESPONSE);
         }
     }
@@ -186,6 +215,28 @@ public class AiController implements IAiApi {
     public Result<Void> uploadGitRepo(@RequestBody AiUploadRequest aiUploadRequest) {
         ragService.uploadGitRepo(aiUploadRequest);
         return Result.success();
+    }
+
+    private boolean isActiveChatClient(String clientId) {
+        if (clientId == null || clientId.isBlank()) {
+            return true;
+        }
+        List<QueryChatClientResponse> list = queryService.queryChatClientResponseList();
+        if (list == null || list.isEmpty()) {
+            return true;
+        }
+        return list.stream().noneMatch(item -> clientId.equals(item.getClientId()));
+    }
+
+    private boolean isActiveWorkAgent(String agentId) {
+        if (agentId == null || agentId.isBlank()) {
+            return false;
+        }
+        List<QueryWorkAgentResponse> list = queryService.queryWorkAgentResponseList();
+        if (list == null || list.isEmpty()) {
+            return false;
+        }
+        return list.stream().anyMatch(item -> agentId.equals(item.getAgentId()));
     }
 
 }
