@@ -292,13 +292,22 @@ onMounted(async () => {
                                 状态：{{ selectedAgent.agentStatus === 1 ? '启用' : '禁用' }}
                             </span>
                         </div>
-                        <button
-                            class="rounded-[10px] border border-[#e2e8f0] px-3 py-2 text-[13px] font-semibold text-[#0f172a] transition hover:bg-[#f1f5f9]"
-                            type="button"
-                            @click="backToGrid"
-                        >
-                            返回列表
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <button
+                                class="rounded-[10px] border border-[#e2e8f0] px-3 py-2 text-[13px] font-semibold text-[#0f172a] transition hover:bg-[#f1f5f9]"
+                                type="button"
+                                @click="selectedAgent && router.push(`/admin/canvas?agentId=${selectedAgent.agentId}`)"
+                            >
+                                查看配置图
+                            </button>
+                            <button
+                                class="rounded-[10px] border border-[#e2e8f0] px-3 py-2 text-[13px] font-semibold text-[#0f172a] transition hover:bg-[#f1f5f9]"
+                                type="button"
+                                @click="backToGrid"
+                            >
+                                返回列表
+                            </button>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 gap-4 overflow-visible lg:grid-cols-4 lg:gap-x-10">
