@@ -70,18 +70,6 @@ public class AdminService implements IAdminService {
         adminRepository.apiDelete(id);
     }
 
-    @Override
-    public void apiToggle(Long id, Integer apiStatus) {
-        ApiVO apiVO = adminRepository.apiQuery(id);
-        if (apiVO == null) {
-            throw new AdminException("API 不存在，请确认后重新切换");
-        }
-        if (apiStatus == 0) {
-            assertNoDependency("模型", adminRepository.queryModelDependOnApi(apiVO.getApiId()));
-        }
-        adminRepository.apiToggle(id, apiStatus);
-    }
-
     // -------------------- Model --------------------
     @Override
     public PageResult<ModelVO> modelPage(ModelPageRequest request) {
@@ -122,18 +110,6 @@ public class AdminService implements IAdminService {
         }
         assertNoDependency("客户端", adminRepository.queryClientDependOnModel(modelVO.getModelId()));
         adminRepository.modelDelete(id);
-    }
-
-    @Override
-    public void modelToggle(Long id, Integer modelStatus) {
-        ModelVO modelVO = adminRepository.modelQuery(id);
-        if (modelVO == null) {
-            throw new AdminException("MODEL 不存在，请确认后重新切换");
-        }
-        if (modelStatus == 0) {
-            assertNoDependency("客户端", adminRepository.queryClientDependOnModel(modelVO.getModelId()));
-        }
-        adminRepository.modelToggle(id, modelStatus);
     }
 
     // -------------------- MCP --------------------
@@ -178,18 +154,6 @@ public class AdminService implements IAdminService {
         adminRepository.mcpDelete(id);
     }
 
-    @Override
-    public void mcpToggle(Long id, Integer mcpStatus) {
-        McpVO mcpVO = adminRepository.mcpQuery(id);
-        if (mcpVO == null) {
-            throw new AdminException("MCP 不存在，请确认后重新切换");
-        }
-        if (mcpStatus == 0) {
-            assertNoDependency("客户端", adminRepository.queryClientDependOnMcp(mcpVO.getMcpId()));
-        }
-        adminRepository.mcpToggle(id, mcpStatus);
-    }
-
     // -------------------- Advisor --------------------
     @Override
     public PageResult<AdvisorVO> advisorPage(AdvisorPageRequest request) {
@@ -232,18 +196,6 @@ public class AdminService implements IAdminService {
         adminRepository.advisorDelete(id);
     }
 
-    @Override
-    public void advisorToggle(Long id, Integer status) {
-        AdvisorVO advisorVO = adminRepository.advisorQuery(id);
-        if (advisorVO == null) {
-            throw new AdminException("ADVISOR 不存在，请确认后重新切换");
-        }
-        if (status == 0) {
-            assertNoDependency("客户端", adminRepository.queryClientDependOnAdvisor(advisorVO.getAdvisorId()));
-        }
-        adminRepository.advisorToggle(id, status);
-    }
-
     // -------------------- Prompt --------------------
     @Override
     public PageResult<PromptVO> promptPage(PromptPageRequest request) {
@@ -284,18 +236,6 @@ public class AdminService implements IAdminService {
         }
         assertNoDependency("客户端", adminRepository.queryClientDependOnPrompt(promptVO.getPromptId()));
         adminRepository.promptDelete(id);
-    }
-
-    @Override
-    public void promptToggle(Long id, Integer status) {
-        PromptVO promptVO = adminRepository.promptQuery(id);
-        if (promptVO == null) {
-            throw new AdminException("PROMPT 不存在，请确认后重新切换");
-        }
-        if (status == 0) {
-            assertNoDependency("客户端", adminRepository.queryClientDependOnPrompt(promptVO.getPromptId()));
-        }
-        adminRepository.promptToggle(id, status);
     }
 
     // -------------------- Client --------------------
@@ -512,7 +452,7 @@ public class AdminService implements IAdminService {
     }
 
     @Override
-    public void flowInsert(FLowManageRequest request) {
+    public void flowInsert(FlowManageRequest request) {
         if (adminRepository.flowQuery(request.getAgentId(), request.getClientId()) != null) {
             throw new AdminException("FLOW 已存在，请修改后重新添加");
         }
@@ -520,7 +460,7 @@ public class AdminService implements IAdminService {
     }
 
     @Override
-    public void flowUpdate(FLowManageRequest request) {
+    public void flowUpdate(FlowManageRequest request) {
         if (adminRepository.flowQuery(request.getId()) == null) {
             throw new AdminException("FLOW 不存在，请修改后重新更改");
         }

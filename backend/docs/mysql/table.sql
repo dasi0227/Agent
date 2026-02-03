@@ -12,7 +12,6 @@ CREATE TABLE `ai_api`
     `api_key`              VARCHAR(255) NOT NULL COMMENT '密钥',
     `api_completions_path` VARCHAR(255) NOT NULL COMMENT '对话路径',
     `api_embeddings_path`  VARCHAR(255) NOT NULL COMMENT '嵌入路径',
-    `api_status`           TINYINT      NOT NULL DEFAULT '1' COMMENT '状态：0-禁用，1-启用',
     `create_time`          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time`          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
 ) ENGINE = InnoDB
@@ -28,7 +27,6 @@ CREATE TABLE `ai_model`
     `api_id`       VARCHAR(32) NOT NULL COMMENT '接口 id',
     `model_name`   VARCHAR(32) NOT NULL COMMENT '模型名称',
     `model_type`   VARCHAR(32) NOT NULL COMMENT '模型类型',
-    `model_status` tinyINT     NOT NULL DEFAULT '1' COMMENT '状态：0-禁用，1-启用',
     `create_time`  DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time`  DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
 ) ENGINE = InnoDB
@@ -66,7 +64,6 @@ CREATE TABLE `ai_mcp`
     `mcp_desc`    VARCHAR(255) NOT NULL DEFAULT '暂无' COMMENT '工具描述',
     `mcp_timeout` INT          NOT NULL DEFAULT '180' COMMENT '请求超时时间',
     `mcp_chat`    INT          NOT NULL DEFAULT '0' COMMENT '是否允许对话使用：0-不允许，1-允许',
-    `mcp_status`  TINYINT      NOT NULL DEFAULT '1' COMMENT '状态：0-禁用，1-启用',
     `create_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
 ) ENGINE = InnoDB
@@ -82,7 +79,6 @@ CREATE TABLE `ai_prompt`
     `prompt_name`    VARCHAR(32)  NOT NULL COMMENT '提示词名称',
     `prompt_content` TEXT         NOT NULL COMMENT '提示词内容',
     `prompt_desc`    VARCHAR(255) NOT NULL DEFAULT '暂无' COMMENT '提示词描述',
-    `prompt_status`  TINYINT      NOT NULL DEFAULT '1' COMMENT '状态：0-禁用，1-启用',
     `create_time`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
 ) ENGINE = InnoDB
@@ -100,7 +96,6 @@ CREATE TABLE `ai_advisor`
     `advisor_desc`   VARCHAR(255) NOT NULL DEFAULT '暂无' COMMENT '顾问描述',
     `advisor_order`  TINYINT      NOT NULL DEFAULT '0' COMMENT '顾问顺序号',
     `advisor_param`  TEXT         NULL     DEFAULT NULL COMMENT '顾问参数配置',
-    `advisor_status` TINYINT      NOT NULL DEFAULT '1' COMMENT '状态：0-禁用，1-启用',
     `create_time`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
 ) ENGINE = InnoDB

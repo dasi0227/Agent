@@ -25,6 +25,4 @@ public class PromptManageRequest {
 
     private String promptDesc;
 
-    @Builder.Default
-    private Integer promptStatus = 1;
 }

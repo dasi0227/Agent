@@ -28,8 +28,6 @@ public interface IAiModelDao {
 
     void delete(@Param("id") Long id);
 
-    void toggle(AiModel aiModel);
-
     List<String> queryModelIdByApiId(@Param("apiId") String apiId);
 
     List<String> listModelId();

@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class FLowManageRequest {
+public class FlowManageRequest {
 
     private Long id;
 

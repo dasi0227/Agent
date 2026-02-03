@@ -19,6 +19,5 @@ public class AdvisorVO {
     private String advisorDesc;
     private Integer advisorOrder;
     private String advisorParam;
-    private Integer advisorStatus;
     private LocalDateTime updateTime;
 }

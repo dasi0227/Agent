@@ -38,9 +38,6 @@ public class AiMcp {
     /** 工具描述 */
     private String mcpDesc;
 
-    /** 状态：0-禁用，1-启用 */
-    private Integer mcpStatus;
-
     /** 创建时间 */
     private LocalDateTime createTime;
 

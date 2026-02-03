@@ -10,7 +10,6 @@
         <result column="advisor_desc" property="advisorDesc"/>
         <result column="advisor_order" property="advisorOrder"/>
         <result column="advisor_param" property="advisorParam"/>
-        <result column="advisor_status" property="advisorStatus"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
     </resultMap>
@@ -24,7 +23,6 @@
             advisor_desc,
             advisor_order,
             advisor_param,
-            advisor_status,
             create_time,
             update_time
         FROM ai_advisor
@@ -39,7 +37,6 @@
                advisor_desc,
                advisor_order,
                advisor_param,
-               advisor_status,
                create_time,
                update_time
         FROM ai_advisor
@@ -78,7 +75,6 @@
                advisor_desc,
                advisor_order,
                advisor_param,
-               advisor_status,
                create_time,
                update_time
         FROM ai_advisor
@@ -91,15 +87,13 @@
                                 advisor_type,
                                 advisor_desc,
                                 advisor_order,
-                                advisor_param,
-                                advisor_status)
+                                advisor_param)
         VALUES (#{advisorId},
                 #{advisorName},
                 #{advisorType},
                 #{advisorDesc},
                 #{advisorOrder},
-                #{advisorParam},
-                #{advisorStatus})
+                #{advisorParam})
     </insert>
 
     <update id="update" parameterType="com.dasi.infrastructure.persistent.po.AiAdvisor">
@@ -111,14 +105,7 @@
             <if test="advisorDesc != null">advisor_desc = #{advisorDesc},</if>
             <if test="advisorOrder != null">advisor_order = #{advisorOrder},</if>
             <if test="advisorParam != null">advisor_param = #{advisorParam},</if>
-            <if test="advisorStatus != null">advisor_status = #{advisorStatus},</if>
         </set>
-        WHERE id = #{id}
-    </update>
-
-    <update id="toggle" parameterType="com.dasi.infrastructure.persistent.po.AiAdvisor">
-        UPDATE ai_advisor
-        SET advisor_status = #{advisorStatus}
         WHERE id = #{id}
     </update>
 

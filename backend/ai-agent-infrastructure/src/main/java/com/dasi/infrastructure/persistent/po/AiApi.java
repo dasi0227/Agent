@@ -31,9 +31,6 @@ public class AiApi {
     /** 嵌入路径 */
     private String apiEmbeddingsPath;
 
-    /** 状态：0-禁用，1-启用 */
-    private Integer apiStatus;
-
     /** 创建时间 */
     private LocalDateTime createTime;
 

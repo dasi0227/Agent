@@ -99,12 +99,6 @@ public class AdminRepository implements IAdminRepository {
         aiApiDao.delete(id);
     }
 
-    @Override
-    public void apiToggle(Long id, Integer apiStatus) {
-        AiApi aiApi = AiApi.builder().id(id).apiStatus(apiStatus).build();
-        aiApiDao.toggle(aiApi);
-    }
-
     // -------------------- Model --------------------
     @Override
     public List<ModelVO> modelPage(ModelPageRequest request) {
@@ -155,15 +149,6 @@ public class AdminRepository implements IAdminRepository {
         aiModelDao.delete(id);
     }
 
-    @Override
-    public void modelToggle(Long id, Integer status) {
-        AiModel po = AiModel.builder()
-                .id(id)
-                .modelStatus(status)
-                .build();
-        aiModelDao.toggle(po);
-    }
-
     // -------------------- MCP --------------------
     @Override
     public List<McpVO> mcpPage(McpPageRequest request) {
@@ -203,15 +188,6 @@ public class AdminRepository implements IAdminRepository {
     @Override
     public void mcpDelete(Long id) {
         aiMcpDao.delete(id);
-    }
-
-    @Override
-    public void mcpToggle(Long id, Integer status) {
-        AiMcp po = AiMcp.builder()
-                .id(id)
-                .mcpStatus(status)
-                .build();
-        aiMcpDao.toggle(po);
     }
 
     // -------------------- Advisor --------------------
@@ -255,15 +231,6 @@ public class AdminRepository implements IAdminRepository {
         aiAdvisorDao.delete(id);
     }
 
-    @Override
-    public void advisorToggle(Long id, Integer status) {
-        AiAdvisor po = AiAdvisor.builder()
-                .id(id)
-                .advisorStatus(status)
-                .build();
-        aiAdvisorDao.toggle(po);
-    }
-
     // -------------------- Prompt --------------------
     @Override
     public List<PromptVO> promptPage(PromptPageRequest request) {
@@ -303,15 +270,6 @@ public class AdminRepository implements IAdminRepository {
     @Override
     public void promptDelete(Long id) {
         aiPromptDao.delete(id);
-    }
-
-    @Override
-    public void promptToggle(Long id, Integer status) {
-        AiPrompt po = AiPrompt.builder()
-                .id(id)
-                .promptStatus(status)
-                .build();
-        aiPromptDao.toggle(po);
     }
 
     // -------------------- Client --------------------
@@ -581,12 +539,12 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
-    public void flowInsert(FLowManageRequest request) {
+    public void flowInsert(FlowManageRequest request) {
         aiFlowDao.insert(toFlowPO(request));
     }
 
     @Override
-    public void flowUpdate(FLowManageRequest request) {
+    public void flowUpdate(FlowManageRequest request) {
         aiFlowDao.update(toFlowPO(request));
     }
 
@@ -648,7 +606,6 @@ public class AdminRepository implements IAdminRepository {
                 .apiKey(po.getApiKey())
                 .apiCompletionsPath(po.getApiCompletionsPath())
                 .apiEmbeddingsPath(po.getApiEmbeddingsPath())
-                .apiStatus(po.getApiStatus())
                 .updateTime(po.getUpdateTime())
                 .build();
     }
@@ -661,7 +618,6 @@ public class AdminRepository implements IAdminRepository {
                 .apiKey(request.getApiKey())
                 .apiCompletionsPath(request.getApiCompletionsPath())
                 .apiEmbeddingsPath(request.getApiEmbeddingsPath())
-                .apiStatus(request.getApiStatus())
                 .build();
     }
 
@@ -672,7 +628,6 @@ public class AdminRepository implements IAdminRepository {
                 .apiId(request.getApiId())
                 .modelName(request.getModelName())
                 .modelType(request.getModelType())
-                .modelStatus(request.getModelStatus())
                 .build();
     }
 
@@ -686,7 +641,6 @@ public class AdminRepository implements IAdminRepository {
                 .apiId(po.getApiId())
                 .modelName(po.getModelName())
                 .modelType(po.getModelType())
-                .modelStatus(po.getModelStatus())
                 .updateTime(po.getUpdateTime())
                 .build();
     }
@@ -704,7 +658,6 @@ public class AdminRepository implements IAdminRepository {
                 .mcpDesc(po.getMcpDesc())
                 .mcpTimeout(po.getMcpTimeout())
                 .mcpChat(po.getMcpChat())
-                .mcpStatus(po.getMcpStatus())
                 .updateTime(po.getUpdateTime())
                 .build();
     }
@@ -719,7 +672,6 @@ public class AdminRepository implements IAdminRepository {
                 .mcpDesc(request.getMcpDesc())
                 .mcpTimeout(request.getMcpTimeout())
                 .mcpChat(request.getMcpChat())
-                .mcpStatus(request.getMcpStatus())
                 .build();
     }
 
@@ -735,7 +687,6 @@ public class AdminRepository implements IAdminRepository {
                 .advisorDesc(po.getAdvisorDesc())
                 .advisorOrder(po.getAdvisorOrder())
                 .advisorParam(po.getAdvisorParam())
-                .advisorStatus(po.getAdvisorStatus())
                 .updateTime(po.getUpdateTime())
                 .build();
     }
@@ -749,7 +700,6 @@ public class AdminRepository implements IAdminRepository {
                 .advisorDesc(request.getAdvisorDesc())
                 .advisorOrder(request.getAdvisorOrder())
                 .advisorParam(request.getAdvisorParam())
-                .advisorStatus(request.getAdvisorStatus())
                 .build();
     }
 
@@ -763,7 +713,6 @@ public class AdminRepository implements IAdminRepository {
                 .promptName(po.getPromptName())
                 .promptContent(po.getPromptContent())
                 .promptDesc(po.getPromptDesc())
-                .promptStatus(po.getPromptStatus())
                 .updateTime(po.getUpdateTime())
                 .build();
     }
@@ -775,7 +724,6 @@ public class AdminRepository implements IAdminRepository {
                 .promptName(request.getPromptName())
                 .promptContent(request.getPromptContent())
                 .promptDesc(request.getPromptDesc())
-                .promptStatus(request.getPromptStatus())
                 .build();
     }
 
@@ -899,7 +847,7 @@ public class AdminRepository implements IAdminRepository {
                 .build();
     }
 
-    private AiFlow toFlowPO(FLowManageRequest request) {
+    private AiFlow toFlowPO(FlowManageRequest request) {
         return AiFlow.builder()
                 .id(request.getId())
                 .agentId(request.getAgentId())

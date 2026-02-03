@@ -8,7 +8,6 @@
         <result column="prompt_name" property="promptName"/>
         <result column="prompt_content" property="promptContent"/>
         <result column="prompt_desc" property="promptDesc"/>
-        <result column="prompt_status" property="promptStatus"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
     </resultMap>
@@ -19,7 +18,6 @@
                prompt_name,
                prompt_content,
                prompt_desc,
-               prompt_status,
                create_time,
                update_time
         FROM ai_prompt
@@ -38,7 +36,6 @@
                prompt_name,
                prompt_content,
                prompt_desc,
-               prompt_status,
                create_time,
                update_time
         FROM ai_prompt
@@ -75,7 +72,6 @@
                prompt_name,
                prompt_content,
                prompt_desc,
-               prompt_status,
                create_time,
                update_time
         FROM ai_prompt
@@ -86,13 +82,11 @@
         INSERT INTO ai_prompt (prompt_id,
                                prompt_name,
                                prompt_content,
-                               prompt_desc,
-                               prompt_status)
+                               prompt_desc)
         VALUES (#{promptId},
                 #{promptName},
                 #{promptContent},
-                #{promptDesc},
-                #{promptStatus})
+                #{promptDesc})
     </insert>
 
     <update id="update" parameterType="com.dasi.infrastructure.persistent.po.AiPrompt">
@@ -102,14 +96,7 @@
             <if test="promptName != null">prompt_name = #{promptName},</if>
             <if test="promptContent != null">prompt_content = #{promptContent},</if>
             <if test="promptDesc != null">prompt_desc = #{promptDesc},</if>
-            <if test="promptStatus != null">prompt_status = #{promptStatus},</if>
         </set>
-        WHERE id = #{id}
-    </update>
-
-    <update id="toggle" parameterType="com.dasi.infrastructure.persistent.po.AiPrompt">
-        UPDATE ai_prompt
-        SET prompt_status = #{promptStatus}
         WHERE id = #{id}
     </update>
 

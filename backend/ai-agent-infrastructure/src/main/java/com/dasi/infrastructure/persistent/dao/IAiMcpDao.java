@@ -31,6 +31,4 @@ public interface IAiMcpDao {
 
     void delete(@Param("id") Long id);
 
-    void toggle(AiMcp aiMcp);
-
 }

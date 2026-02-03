@@ -27,9 +27,6 @@ public class AiPrompt {
     /** 提示词描述 */
     private String promptDesc;
 
-    /** 状态：0-禁用，1-启用 */
-    private Integer promptStatus;
-
     /** 创建时间 */
     private LocalDateTime createTime;
 

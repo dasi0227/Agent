@@ -29,6 +29,4 @@ public interface IAiPromptDao {
 
     void delete(@Param("id") Long id);
 
-    void toggle(AiPrompt aiPrompt);
-
 }

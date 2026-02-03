@@ -16,7 +16,6 @@ public interface IAdminRepository {
     void apiInsert(ApiManageRequest apiManageRequest);
     void apiUpdate(ApiManageRequest apiManageRequest);
     void apiDelete(Long id);
-    void apiToggle(Long id, Integer status);
 
     // Model
     List<ModelVO> modelPage(ModelPageRequest request);
@@ -26,7 +25,6 @@ public interface IAdminRepository {
     void modelInsert(ModelManageRequest request);
     void modelUpdate(ModelManageRequest request);
     void modelDelete(Long id);
-    void modelToggle(Long id, Integer status);
 
     // Mcp
     List<McpVO> mcpPage(McpPageRequest request);
@@ -36,7 +34,6 @@ public interface IAdminRepository {
     void mcpInsert(McpManageRequest request);
     void mcpUpdate(McpManageRequest request);
     void mcpDelete(Long id);
-    void mcpToggle(Long id, Integer status);
 
     // Advisor
     List<AdvisorVO> advisorPage(AdvisorPageRequest request);
@@ -46,7 +43,6 @@ public interface IAdminRepository {
     void advisorInsert(AdvisorManageRequest request);
     void advisorUpdate(AdvisorManageRequest request);
     void advisorDelete(Long id);
-    void advisorToggle(Long id, Integer status);
 
     // Prompt
     List<PromptVO> promptPage(PromptPageRequest request);
@@ -56,7 +52,6 @@ public interface IAdminRepository {
     void promptInsert(PromptManageRequest request);
     void promptUpdate(PromptManageRequest request);
     void promptDelete(Long id);
-    void promptToggle(Long id, Integer status);
 
     // Client
     List<ClientVO> clientPage(ClientPageRequest request);
@@ -102,8 +97,8 @@ public interface IAdminRepository {
     List<FlowVO> flowAgent(String agentId);
     FlowVO flowQuery(String agentId, String clientId);
     FlowVO flowQuery(Long id);
-    void flowInsert(FLowManageRequest request);
-    void flowUpdate(FLowManageRequest request);
+    void flowInsert(FlowManageRequest request);
+    void flowUpdate(FlowManageRequest request);
     void flowDelete(Long id);
 
     // Depend

@@ -23,11 +23,6 @@ const PASSWORD_PATH = `${AUTH_BASE_PATH}/password`;
 
 const ADMIN_BASE_PATH = '/api/v1/admin';
 const ADMIN_STATUS_PARAM = {
-    api: 'apiStatus',
-    model: 'modelStatus',
-    mcp: 'mcpStatus',
-    advisor: 'advisorStatus',
-    prompt: 'promptStatus',
     client: 'clientStatus',
     agent: 'agentStatus',
     config: 'configStatus'
