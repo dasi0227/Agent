@@ -2,8 +2,10 @@
 import { computed, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import logoImg from '../assets/logo.jpg';
-import chatIcon from '../assets/chat.svg';
-import workIcon from '../assets/work.svg';
+import chatIconDark from '../assets/chat-white.svg';
+import chatIconLight from '../assets/chat-black.svg';
+import workIconDark from '../assets/work-white.svg';
+import workIconLight from '../assets/work-black.svg';
 import { useAgentStore, useAuthStore, useChatStore, useSettingsStore } from '../router/pinia';
 import { updatePassword } from '../request/api';
 
@@ -18,6 +20,9 @@ const settingsStore = useSettingsStore();
 const isLogin = computed(() => authStore.isLogin);
 const currentUser = computed(() => authStore.user || { username: '访客', role: 'guest' });
 const avatarChar = computed(() => (currentUser.value.username || '访客').slice(0, 1).toUpperCase());
+const isDarkTheme = computed(() => settingsStore.theme === 'dark');
+const chatIcon = computed(() => (isDarkTheme.value ? chatIconDark : chatIconLight));
+const workIcon = computed(() => (isDarkTheme.value ? workIconDark : workIconLight));
 
 const chats = computed(() => chatStore.chats);
 const currentChatId = computed(() => chatStore.currentChatId);
@@ -226,13 +231,17 @@ const handleLogout = () => {
     closeProfile();
     router.push('/login');
 };
+
+const toggleTheme = () => {
+    settingsStore.updateSettings({ theme: isDarkTheme.value ? 'light' : 'dark' });
+};
 </script>
 
 <template>
     <aside
         class="flex h-screen flex-col bg-[radial-gradient(120%_120%_at_0%_0%,#122544_0%,#0f172a_60%,#0b1220_100%)] p-[20px] text-[#e7ecf4] shadow-[10px_0_30px_rgba(0,0,0,0.08)] border-r border-[rgba(255,255,255,0.06)] max-[720px]:hidden"
     >
-        <div class="mb-[12px] flex items-center gap-[12px]">
+        <div class="mb-[12px] flex items-center justify-between gap-[12px]">
             <div class="flex items-center gap-[12px]">
                 <div
                     class="h-[44px] w-[44px] overflow-hidden rounded-[14px] border border-[rgba(255,255,255,0.2)] bg-[radial-gradient(120%_120%_at_0%_0%,rgba(111,125,255,0.2),rgba(83,197,255,0.1))]"
@@ -244,6 +253,23 @@ const handleLogout = () => {
                     <div class="text-[14px] text-[rgba(231,236,244,0.7)]">RAG · MCP · OPENAI</div>
                 </div>
             </div>
+            <button
+                class="grid h-[34px] w-[34px] place-items-center rounded-[10px] border border-[rgba(255,255,255,0.18)] bg-[rgba(255,255,255,0.08)] text-[rgba(231,236,244,0.9)] transition hover:bg-[rgba(255,255,255,0.14)] hover:text-white"
+                type="button"
+                :title="isDarkTheme ? '切换到白天' : '切换到黑天'"
+                @click="toggleTheme"
+            >
+                <svg v-if="isDarkTheme" viewBox="0 0 24 24" class="h-[18px] w-[18px]" fill="currentColor" aria-hidden="true">
+                    <path
+                        d="M12 3.75a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0112 3.75zm6.22 2.53a.75.75 0 011.06 1.06l-1.06 1.06a.75.75 0 11-1.06-1.06l1.06-1.06zM20.25 11.25a.75.75 0 010 1.5h-1.5a.75.75 0 010-1.5h1.5zm-2.47 6.72a.75.75 0 011.06-1.06l1.06 1.06a.75.75 0 11-1.06 1.06l-1.06-1.06zM12 18.75a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5a.75.75 0 01.75-.75zm-6.22-.78a.75.75 0 011.06 0l1.06 1.06a.75.75 0 11-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zM3.75 12a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5A.75.75 0 013.75 12zm2.47-6.72a.75.75 0 011.06 0l1.06 1.06a.75.75 0 11-1.06 1.06L6.22 6.34a.75.75 0 010-1.06zM12 7.5a4.5 4.5 0 100 9 4.5 4.5 0 000-9z"
+                    />
+                </svg>
+                <svg v-else viewBox="0 0 24 24" class="h-[18px] w-[18px]" fill="currentColor" aria-hidden="true">
+                    <path
+                        d="M21.752 15.002A9.718 9.718 0 0112 21.75 9.75 9.75 0 0112 2.25c.33 0 .658.016.983.048a.75.75 0 01.34 1.38 7.5 7.5 0 009.098 11.072.75.75 0 011.33.252z"
+                    />
+                </svg>
+            </button>
         </div>
 
         <div
@@ -393,7 +419,7 @@ const handleLogout = () => {
         <div class="flex items-center justify-between gap-[12px] rounded-[14px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] p-[12px]">
             <button class="flex items-center gap-[10px] text-left" type="button" @click="openProfile">
                 <div
-                    class="grid h-[40px] w-[40px] place-items-center rounded-[12px] bg-[linear-gradient(135deg,#e0f3ff,#c7e1ff)] font-bold text-[#0b1220]"
+                    class="grid h-[40px] w-[40px] place-items-center rounded-[12px] bg-[var(--avatar-bg)] font-bold text-[var(--avatar-text)]"
                 >
                     {{ avatarChar }}
                 </div>
@@ -401,14 +427,16 @@ const handleLogout = () => {
                     <div class="font-bold text-white">{{ currentUser.username || '访客' }}</div>
                 </div>
             </button>
-            <button
-                v-if="isLogin"
-                class="text-[14px] text-[rgba(231,236,244,0.8)] transition hover:text-white"
-                type="button"
-                @click="handleLogout"
-            >
-                退出登录
-            </button>
+            <div class="flex items-center gap-[8px]">
+                <button
+                    v-if="isLogin"
+                    class="main-logout rounded-[8px] px-2 py-1 text-[14px] text-[rgba(231,236,244,0.8)] transition hover:text-white"
+                    type="button"
+                    @click="handleLogout"
+                >
+                    退出登录
+                </button>
+            </div>
         </div>
 
         <div v-if="showDeleteConfirm" class="fixed inset-0 z-[20] grid place-items-center bg-[rgba(0,0,0,0.35)] p-[20px]" @click.self="showDeleteConfirm = false">

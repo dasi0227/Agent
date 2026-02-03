@@ -890,7 +890,7 @@ const handleUpload = async () => {
 <template>
     <section class="grid h-screen grid-rows-[var(--header-height)_1fr_auto_var(--footer-height)] bg-[var(--bg-page)]">
         <header
-            class="sticky top-0 z-10 h-[var(--header-height)] border-b border-[rgba(15,23,42,0.06)] bg-[#eef1f6] backdrop-blur-[6px]"
+            class="sticky top-0 z-10 h-[var(--header-height)] border-b border-[rgba(15,23,42,0.06)] bg-[var(--surface-3)] backdrop-blur-[6px]"
         >
             <div
                 class="flex h-full w-full items-center justify-between gap-[12px] pl-[24px] pr-[calc(24px+var(--scrollbar-w))] max-[720px]:pl-[8px] max-[720px]:pr-[calc(8px+var(--scrollbar-w))]"
@@ -1028,7 +1028,8 @@ const handleUpload = async () => {
                             <div
                                 v-for="(line, idx) in typewriterState.lines"
                                 :key="idx"
-                                class="text-[20px] font-extrabold leading-[1.4] tracking-[0.3px] text-transparent opacity-[0.92] bg-[linear-gradient(120deg,rgba(47,124,246,0.68),rgba(15,23,42,0.76))] bg-clip-text"
+                                class="text-[20px] font-extrabold leading-[1.4] tracking-[0.3px] text-transparent opacity-[0.94] bg-clip-text"
+                                :style="{ backgroundImage: 'var(--typewriter-gradient)' }"
                             >
                                 {{ line }}
                                 <span v-if="typewriterState.playing && idx === typewriterState.lineIndex" class="text-[var(--accent-color)] animate-caret">
@@ -1049,7 +1050,7 @@ const handleUpload = async () => {
                                         message.error
                                             ? 'bg-[linear-gradient(135deg,#ffe4e4,#ffd6d6)] border-[#f3b6b6] text-[#b91c1c]'
                                             : message.role === 'user'
-                                                ? 'bg-[linear-gradient(135deg,#e5f4ff,#eaf4ff)] border-[#c5e2ff]'
+                                                ? 'bg-[var(--bubble-user-bg)] border-[var(--bubble-user-border)]'
                                                 : 'bg-white border-[var(--border-color)]',
                                         message.pending ? 'border-dashed' : 'border-solid'
                                     ]"
@@ -1143,7 +1144,7 @@ const handleUpload = async () => {
             </div>
         </div>
 
-        <footer class="h-[var(--footer-height)] border-t border-[rgba(15,23,42,0.06)] bg-[#eef1f6] backdrop-blur-[6px]">
+        <footer class="h-[var(--footer-height)] border-t border-[rgba(15,23,42,0.06)] bg-[var(--surface-3)] backdrop-blur-[6px]">
             <div
                 class="mx-auto flex h-full w-full max-w-[900px] items-center justify-between pl-[24px] pr-[calc(24px+var(--scrollbar-w))] text-[13px] text-[var(--text-secondary)] max-[720px]:pl-[8px] max-[720px]:pr-[calc(8px+var(--scrollbar-w))]"
             >
@@ -1254,7 +1255,7 @@ const handleUpload = async () => {
                         <button
                             class="rounded-[10px] border border-[var(--border-color)] bg-[#f7f9fc] px-[12px] py-[8px] font-semibold text-[var(--text-secondary)] outline-none focus:outline-none focus:ring-0 focus-visible:ring-0"
                             :class="uploadForm.mode === 'file' ? 'border-[#4f8cff] text-[var(--accent-color)]' : ''"
-                            :style="uploadForm.mode === 'file' ? { backgroundColor: '#dbeafe', boxShadow: 'none', outline: 'none' } : {}"
+                            :style="uploadForm.mode === 'file' ? { backgroundColor: 'var(--accent-soft)', boxShadow: 'none', outline: 'none' } : {}"
                             type="button"
                             @click="uploadForm.mode = 'file'"
                         >
@@ -1263,7 +1264,7 @@ const handleUpload = async () => {
                         <button
                             class="rounded-[10px] border border-[var(--border-color)] bg-[#f7f9fc] px-[12px] py-[8px] font-semibold text-[var(--text-secondary)] outline-none focus:outline-none focus:ring-0 focus-visible:ring-0"
                             :class="uploadForm.mode === 'git' ? 'border-[#4f8cff] text-[var(--accent-color)]' : ''"
-                            :style="uploadForm.mode === 'git' ? { backgroundColor: '#dbeafe', boxShadow: 'none', outline: 'none' } : {}"
+                            :style="uploadForm.mode === 'git' ? { backgroundColor: 'var(--accent-soft)', boxShadow: 'none', outline: 'none' } : {}"
                             type="button"
                             @click="uploadForm.mode = 'git'"
                         >

@@ -220,9 +220,9 @@ onMounted(async () => {
                         <div
                             v-for="card in cards"
                             :key="card.clientId"
-                            class="rounded-[10px] border border-[#e2e8f0] bg-[#f8fafc] shadow-inner"
+                            class="config-card rounded-[10px] border border-[#e2e8f0] bg-[#f8fafc] shadow-inner"
                         >
-                            <div class="flex items-center justify-between border-b border-[#e2e8f0] px-4 py-3">
+                            <div class="config-card-header flex items-center justify-between border-b border-[#e2e8f0] px-4 py-3">
                                 <div class="text-[20px] font-semibold text-[#0f172a]">{{ card.clientId }}</div>
                                 <button
                                     class="rounded-[10px] bg-[#0f172a] px-3 py-2 text-[12px] font-semibold text-white shadow"
@@ -234,7 +234,7 @@ onMounted(async () => {
                             </div>
                             <div class="overflow-auto">
                                 <table class="w-full border-collapse text-[13px] table-fixed">
-                                    <thead class="bg-[#eef2ff] text-[#475569]">
+                                    <thead class="config-table-head bg-[#eef2ff] text-[#475569]">
                                         <tr>
                                             <th class="px-3 py-2 text-left font-semibold" style="width: 25%">配置类型</th>
                                             <th class="px-3 py-2 text-left font-semibold" style="width: 35%">配置ID</th>
@@ -246,12 +246,16 @@ onMounted(async () => {
                                         <tr v-if="card.list.length === 0">
                                             <td colspan="4" class="px-3 py-3 text-center text-[#94a3b8]">暂无配置</td>
                                         </tr>
-                                        <tr v-for="row in card.list" :key="row.id" class="border-t border-[#e2e8f0] hover:bg-[#f1f5f9]">
+                                        <tr
+                                            v-for="row in card.list"
+                                            :key="row.id"
+                                            class="config-table-row border-t border-[#e2e8f0] hover:bg-[#f1f5f9]"
+                                        >
                                             <td class="px-3 py-2 text-[#0f172a] truncate" :title="row.configType">{{ row.configType }}</td>
                                             <td class="px-3 py-2 text-[#0f172a] truncate" :title="row.configValue">{{ row.configValue }}</td>
                                             <td class="px-3 py-2 text-[#0f172a] truncate" :title="row.configParam">{{ row.configParam || '-' }}</td>
                                             <td class="px-3 py-2">
-                                                <div class="flex flex-wrap items-center gap-2">
+                                                <div class="admin-actions flex flex-wrap items-center gap-2">
                                                     <button
                                                         class="relative h-[22px] w-[50px] rounded-full text-[10px] font-semibold uppercase tracking-[0.5px] transition"
                                                         :class="row.configStatus === 1 ? 'bg-[#1d4ed8] text-white' : 'bg-[#cbd5e1] text-[#0f172a]'"

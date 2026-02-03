@@ -13,7 +13,8 @@ const defaultSettings = () => ({
     maxCompletionTokens: null,
     model: '',
     ragTag: '',
-    token: ''
+    token: '',
+    theme: 'light'
 });
 
 const loadSettings = () => {
@@ -113,7 +114,8 @@ export const useSettingsStore = defineStore('settings', {
                 maxCompletionTokens: this.maxCompletionTokens,
                 model: this.model,
                 ragTag: this.ragTag,
-                token: this.token
+                token: this.token,
+                theme: this.theme
             };
             localStorage.setItem(SETTINGS_KEY, JSON.stringify(payload));
         },
