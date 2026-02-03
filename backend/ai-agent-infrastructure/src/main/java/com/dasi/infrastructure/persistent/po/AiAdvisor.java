@@ -34,9 +34,6 @@ public class AiAdvisor {
     /** 顾问参数配置 */
     private String advisorParam;
 
-    /** 状态：0-禁用，1-启用 */
-    private Integer advisorStatus;
-
     /** 创建时间 */
     private LocalDateTime createTime;
 

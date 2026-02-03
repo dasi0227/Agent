@@ -26,6 +26,4 @@ public class ModelManageRequest {
     @NotBlank
     private String modelType;
 
-    @Builder.Default
-    private Integer modelStatus = 1;
 }

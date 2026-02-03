@@ -8,7 +8,6 @@
         <result column="api_id" property="apiId"/>
         <result column="model_name" property="modelName"/>
         <result column="model_type" property="modelType"/>
-        <result column="model_status" property="modelStatus"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
     </resultMap>
@@ -19,7 +18,6 @@
                api_id,
                model_name,
                model_type,
-               model_status,
                create_time,
                update_time
         FROM ai_model
@@ -32,7 +30,6 @@
                api_id,
                model_name,
                model_type,
-               model_status,
                create_time,
                update_time
         FROM ai_model
@@ -72,7 +69,6 @@
                api_id,
                model_name,
                model_type,
-               model_status,
                create_time,
                update_time
         FROM ai_model
@@ -94,13 +90,11 @@
         INSERT INTO ai_model (model_id,
                               api_id,
                               model_name,
-                              model_type,
-                              model_status)
+                              model_type)
         VALUES (#{modelId},
                 #{apiId},
                 #{modelName},
-                #{modelType},
-                #{modelStatus})
+                #{modelType})
     </insert>
 
     <update id="update" parameterType="com.dasi.infrastructure.persistent.po.AiModel">
@@ -110,14 +104,7 @@
             <if test="apiId != null">api_id = #{apiId},</if>
             <if test="modelName != null">model_name = #{modelName},</if>
             <if test="modelType != null">model_type = #{modelType},</if>
-            <if test="modelStatus != null">model_status = #{modelStatus},</if>
         </set>
-        WHERE id = #{id}
-    </update>
-
-    <update id="toggle" parameterType="com.dasi.infrastructure.persistent.po.AiModel">
-        UPDATE ai_model
-        SET model_status = #{modelStatus}
         WHERE id = #{id}
     </update>
 

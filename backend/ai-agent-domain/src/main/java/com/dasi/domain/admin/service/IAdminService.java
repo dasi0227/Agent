@@ -15,35 +15,30 @@ public interface IAdminService {
     void apiInsert(ApiManageRequest request);
     void apiUpdate(ApiManageRequest request);
     void apiDelete(Long id);
-    void apiToggle(Long id, Integer status);
 
     // Model
     PageResult<ModelVO> modelPage(ModelPageRequest request);
     void modelInsert(ModelManageRequest request);
     void modelUpdate(ModelManageRequest request);
     void modelDelete(Long id);
-    void modelToggle(Long id, Integer status);
 
     // Mcp
     PageResult<McpVO> mcpPage(McpPageRequest request);
     void mcpInsert(McpManageRequest request);
     void mcpUpdate(McpManageRequest request);
     void mcpDelete(Long id);
-    void mcpToggle(Long id, Integer status);
 
     // Advisor
     PageResult<AdvisorVO> advisorPage(AdvisorPageRequest request);
     void advisorInsert(AdvisorManageRequest request);
     void advisorUpdate(AdvisorManageRequest request);
     void advisorDelete(Long id);
-    void advisorToggle(Long id, Integer status);
 
     // Prompt
     PageResult<PromptVO> promptPage(PromptPageRequest request);
     void promptInsert(PromptManageRequest request);
     void promptUpdate(PromptManageRequest request);
     void promptDelete(Long id);
-    void promptToggle(Long id, Integer status);
 
     // Client
     PageResult<ClientVO> clientPage(ClientPageRequest request);
@@ -76,8 +71,8 @@ public interface IAdminService {
     // Flow
     List<ClientDetailVO> flowClient();
     List<FlowVO> flowAgent(String agentId);
-    void flowInsert(FLowManageRequest request);
-    void flowUpdate(FLowManageRequest request);
+    void flowInsert(FlowManageRequest request);
+    void flowUpdate(FlowManageRequest request);
     void flowDelete(Long id);
 
     // List

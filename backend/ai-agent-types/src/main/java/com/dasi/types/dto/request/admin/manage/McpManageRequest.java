@@ -33,6 +33,4 @@ public class McpManageRequest {
 
     private Integer mcpChat;
 
-    @Builder.Default
-    private Integer mcpStatus = 1;
 }

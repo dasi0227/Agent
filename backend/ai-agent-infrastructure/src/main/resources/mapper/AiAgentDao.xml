@@ -23,7 +23,6 @@
                create_time,
                update_time
         FROM ai_agent
-        WHERE agent_status = 1
     </select>
 
     <select id="queryAgentByAgentId" resultMap="dataMap">

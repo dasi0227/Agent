@@ -27,6 +27,4 @@ public interface IAiAdvisorDao {
 
     void delete(@Param("id") Long id);
 
-    void toggle(AiAdvisor aiAdvisor);
-
 }

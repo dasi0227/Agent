@@ -47,12 +47,6 @@ public class AdminController {
         return Result.success();
     }
 
-    @PostMapping("/api/toggle")
-    public Result<Void> apiToggle(@RequestParam("id") Long id, @RequestParam("apiStatus") Integer apiStatus) {
-        adminService.apiToggle(id, apiStatus);
-        return Result.success();
-    }
-
     // -------------------- Model --------------------
     @PostMapping("/model/page")
     public Result<PageResult<ModelVO>> modelPage(@Valid @RequestBody ModelPageRequest request) {
@@ -74,12 +68,6 @@ public class AdminController {
     @PostMapping("/model/delete")
     public Result<Void> modelDelete(@RequestParam("id") Long id) {
         adminService.modelDelete(id);
-        return Result.success();
-    }
-
-    @PostMapping("/model/toggle")
-    public Result<Void> modelToggle(@RequestParam("id") Long id, @RequestParam("modelStatus") Integer modelStatus) {
-        adminService.modelToggle(id, modelStatus);
         return Result.success();
     }
 
@@ -107,12 +95,6 @@ public class AdminController {
         return Result.success();
     }
 
-    @PostMapping("/mcp/toggle")
-    public Result<Void> mcpToggle(@RequestParam("id") Long id, @RequestParam("mcpStatus") Integer mcpStatus) {
-        adminService.mcpToggle(id, mcpStatus);
-        return Result.success();
-    }
-
     // -------------------- Advisor --------------------
     @PostMapping("/advisor/page")
     public Result<PageResult<AdvisorVO>> advisorPage(@Valid @RequestBody AdvisorPageRequest request) {
@@ -137,12 +119,6 @@ public class AdminController {
         return Result.success();
     }
 
-    @PostMapping("/advisor/toggle")
-    public Result<Void> advisorToggle(@RequestParam("id") Long id, @RequestParam("advisorStatus") Integer advisorStatus) {
-        adminService.advisorToggle(id, advisorStatus);
-        return Result.success();
-    }
-
     // -------------------- Prompt --------------------
     @PostMapping("/prompt/page")
     public Result<PageResult<PromptVO>> promptPage(@Valid @RequestBody PromptPageRequest request) {
@@ -164,12 +140,6 @@ public class AdminController {
     @PostMapping("/prompt/delete")
     public Result<Void> promptDelete(@RequestParam("id") Long id) {
         adminService.promptDelete(id);
-        return Result.success();
-    }
-
-    @PostMapping("/prompt/toggle")
-    public Result<Void> promptToggle(@RequestParam("id") Long id, @RequestParam("promptStatus") Integer promptStatus) {
-        adminService.promptToggle(id, promptStatus);
         return Result.success();
     }
 
@@ -304,13 +274,13 @@ public class AdminController {
     }
 
     @PostMapping("/flow/insert")
-    public Result<Void> flowInsert(@Valid @RequestBody FLowManageRequest request) {
+    public Result<Void> flowInsert(@Valid @RequestBody FlowManageRequest request) {
         adminService.flowInsert(request);
         return Result.success();
     }
 
     @PostMapping("/flow/update")
-    public Result<Void> flowUpdate(@Valid @RequestBody FLowManageRequest request) {
+    public Result<Void> flowUpdate(@Valid @RequestBody FlowManageRequest request) {
         adminService.flowUpdate(request);
         return Result.success();
     }

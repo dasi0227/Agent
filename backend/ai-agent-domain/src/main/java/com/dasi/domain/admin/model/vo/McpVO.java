@@ -20,6 +20,5 @@ public class McpVO {
     private String mcpDesc;
     private Integer mcpTimeout;
     private Integer mcpChat;
-    private Integer mcpStatus;
     private LocalDateTime updateTime;
 }

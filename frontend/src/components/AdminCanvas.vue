@@ -449,16 +449,14 @@ const formSchemas = {
             { prop: 'modelId', label: 'Model ID', required: true },
             { prop: 'modelName', label: '名称', required: true },
             { prop: 'modelType', label: '类型', required: true },
-            { prop: 'apiId', label: 'API', type: 'select', optionsKey: 'apiIds', required: true },
-            { prop: 'modelStatus', label: '状态', type: 'switch' }
+            { prop: 'apiId', label: 'API', type: 'select', optionsKey: 'apiIds', required: true }
         ],
         defaults: () => ({
             id: null,
             modelId: '',
             modelName: '',
             modelType: '',
-            apiId: '',
-            modelStatus: 1
+            apiId: ''
         })
     },
     api: {
@@ -469,8 +467,7 @@ const formSchemas = {
             { prop: 'apiBaseUrl', label: 'Base URL', required: true },
             { prop: 'apiKey', label: 'Key', required: true },
             { prop: 'apiCompletionsPath', label: '对话路径', required: true },
-            { prop: 'apiEmbeddingsPath', label: 'Embedding 路径', required: true },
-            { prop: 'apiStatus', label: '状态', type: 'switch' }
+            { prop: 'apiEmbeddingsPath', label: 'Embedding 路径', required: true }
         ],
         defaults: () => ({
             id: null,
@@ -478,8 +475,7 @@ const formSchemas = {
             apiBaseUrl: '',
             apiKey: '',
             apiCompletionsPath: '',
-            apiEmbeddingsPath: '',
-            apiStatus: 1
+            apiEmbeddingsPath: ''
         })
     },
     prompt: {
@@ -489,16 +485,14 @@ const formSchemas = {
             { prop: 'promptId', label: 'Prompt ID', required: true },
             { prop: 'promptName', label: '名称', required: true },
             { prop: 'promptContent', label: '内容', type: 'textarea', required: true },
-            { prop: 'promptDesc', label: '描述', type: 'textarea' },
-            { prop: 'promptStatus', label: '状态', type: 'switch' }
+            { prop: 'promptDesc', label: '描述', type: 'textarea' }
         ],
         defaults: () => ({
             id: null,
             promptId: '',
             promptName: '',
             promptContent: '',
-            promptDesc: '',
-            promptStatus: 1
+            promptDesc: ''
         })
     },
     advisor: {
@@ -510,8 +504,7 @@ const formSchemas = {
             { prop: 'advisorType', label: '类型', required: true },
             { prop: 'advisorOrder', label: '顺序', type: 'number' },
             { prop: 'advisorDesc', label: '描述', type: 'textarea' },
-            { prop: 'advisorParam', label: '参数', type: 'textarea' },
-            { prop: 'advisorStatus', label: '状态', type: 'switch' }
+            { prop: 'advisorParam', label: '参数', type: 'textarea' }
         ],
         defaults: () => ({
             id: null,
@@ -520,8 +513,7 @@ const formSchemas = {
             advisorType: '',
             advisorOrder: 0,
             advisorDesc: '',
-            advisorParam: '',
-            advisorStatus: 1
+            advisorParam: ''
         })
     },
     mcp: {
@@ -534,8 +526,7 @@ const formSchemas = {
             { prop: 'mcpConfig', label: '配置', type: 'textarea', required: true },
             { prop: 'mcpDesc', label: '描述', type: 'textarea' },
             { prop: 'mcpTimeout', label: '超时时间', type: 'number' },
-            { prop: 'mcpChat', label: '聊天可用', type: 'switch' },
-            { prop: 'mcpStatus', label: '状态', type: 'switch' }
+            { prop: 'mcpChat', label: '聊天可用', type: 'switch' }
         ],
         defaults: () => ({
             id: null,
@@ -545,8 +536,7 @@ const formSchemas = {
             mcpConfig: '',
             mcpDesc: '',
             mcpTimeout: 180,
-            mcpChat: 0,
-            mcpStatus: 1
+            mcpChat: 0
         })
     }
 };
@@ -615,31 +605,26 @@ const openNodeModal = (node) => {
         const payload = node.data || {};
         editingId.value = payload.id || null;
         Object.assign(currentForm, payload);
-        currentForm.modelStatus = payload.modelStatus ?? 1;
     }
     if (node.type === 'api') {
         const payload = node.data || {};
         editingId.value = payload.id || null;
         Object.assign(currentForm, payload);
-        currentForm.apiStatus = payload.apiStatus ?? 1;
     }
     if (node.type === 'prompt') {
         const payload = node.data || {};
         editingId.value = payload.id || null;
         Object.assign(currentForm, payload);
-        currentForm.promptStatus = payload.promptStatus ?? 1;
     }
     if (node.type === 'advisor') {
         const payload = node.data || {};
         editingId.value = payload.id || null;
         Object.assign(currentForm, payload);
-        currentForm.advisorStatus = payload.advisorStatus ?? 1;
     }
     if (node.type === 'mcp') {
         const payload = node.data || {};
         editingId.value = payload.id || null;
         Object.assign(currentForm, payload);
-        currentForm.mcpStatus = payload.mcpStatus ?? 1;
         currentForm.mcpChat = payload.mcpChat ?? 0;
     }
     modalVisible.value = true;
@@ -955,8 +940,7 @@ const handlePendingRelationAfterCreate = async () => {
                 modelId: modelDetail.modelId,
                 modelName: modelDetail.modelName,
                 modelType: modelDetail.modelType,
-                apiId: currentForm.apiId,
-                modelStatus: modelDetail.modelStatus ?? 1
+                apiId: currentForm.apiId
             }),
             '更新 Model 失败'
         );

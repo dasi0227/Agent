@@ -25,7 +25,5 @@ public interface IAiApiDao {
 
     void delete(@Param("id") Long id);
 
-    void toggle(AiApi aiApi);
-
     List<String> listApiId();
 }

@@ -29,6 +29,4 @@ public class AdvisorManageRequest {
 
     private String advisorParam;
 
-    @Builder.Default
-    private Integer advisorStatus = 1;
 }

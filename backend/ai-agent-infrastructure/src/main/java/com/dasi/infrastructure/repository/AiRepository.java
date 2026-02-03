@@ -83,7 +83,7 @@ public class AiRepository implements IAiRepository {
                 aiModel = aiModelDao.queryByModelId(modelId);
                 if (aiModel != null) redisService.setValue(modelKey, aiModel);
             }
-            if (aiModel == null || aiModel.getModelStatus() == 0) continue;
+            if (aiModel == null) continue;
 
             // 3. 获取 Api
             String apiId = aiModel.getApiId();
@@ -93,7 +93,7 @@ public class AiRepository implements IAiRepository {
                 aiApi = aiApiDao.queryByApiId(apiId);
                 if (aiApi != null) redisService.setValue(apiKey, aiApi);
             }
-            if (aiApi == null || aiApi.getApiStatus() == 0) continue;
+            if (aiApi == null) continue;
 
             // 4. 构造 VO
             AiApiVO aiApiVO = AiApiVO.builder()
@@ -137,7 +137,7 @@ public class AiRepository implements IAiRepository {
                 aiModel = aiModelDao.queryByModelId(modelId);
                 if (aiModel != null) redisService.setValue(modelKey, aiModel);
             }
-            if (aiModel == null || aiModel.getModelStatus() == 0) continue;
+            if (aiModel == null) continue;
 
             // 3. 构造 VO
             AiModelVO aiModelVO = AiModelVO.builder()
@@ -183,7 +183,7 @@ public class AiRepository implements IAiRepository {
                     aiAdvisor = aiAdvisorDao.queryByAdvisorId(advisorId);
                     if (aiAdvisor != null) redisService.setValue(advisorKey, aiAdvisor);
                 }
-                if (aiAdvisor == null || aiAdvisor.getAdvisorStatus() == 0) continue;
+                if (aiAdvisor == null) continue;
 
                 // 3. 解析参数配置
                 String advisorParam = aiAdvisor.getAdvisorParam();
@@ -250,7 +250,7 @@ public class AiRepository implements IAiRepository {
                     aiPrompt = aiPromptDao.queryByPromptId(promptId);
                     if (aiPrompt != null) redisService.setValue(promptKey, aiPrompt);
                 }
-                if (aiPrompt == null || aiPrompt.getPromptStatus() == 0) continue;
+                if (aiPrompt == null) continue;
 
                 // 3. 构造 VO
                 AiPromptVO aiPromptVO = AiPromptVO.builder()
@@ -297,7 +297,7 @@ public class AiRepository implements IAiRepository {
                     aiMcp = aiMcpDao.queryByMcpId(mcpId);
                     if (aiMcp != null) redisService.setValue(mcpKey, aiMcp);
                 }
-                if (aiMcp == null || aiMcp.getMcpStatus() == 0) continue;
+                if (aiMcp == null) continue;
 
                 // 3. 构造 VO
                 AiMcpVO aiMcpVO = AiMcpVO.builder()

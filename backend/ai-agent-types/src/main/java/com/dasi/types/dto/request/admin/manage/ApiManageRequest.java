@@ -27,7 +27,4 @@ public class ApiManageRequest {
 
     private String apiEmbeddingsPath;
 
-    @Builder.Default
-    private Integer apiStatus = 1;
-
 }

@@ -64,6 +64,7 @@ public class QueryRepository implements IQueryRepository {
         }
 
         queryChatClientResponseList = aiClientList.stream()
+                .filter(c -> c != null && Integer.valueOf(1).equals(c.getClientStatus()))
                 .map(aiClient -> QueryChatClientResponse.builder()
                         .clientId(aiClient.getClientId())
                         .modelName(aiClient.getModelName())
@@ -119,6 +120,7 @@ public class QueryRepository implements IQueryRepository {
         }
 
         queryWorkAgentResponseList = aiAgentList.stream()
+                .filter(a -> a != null && Integer.valueOf(1).equals(a.getAgentStatus()))
                 .map(aiAgent -> QueryWorkAgentResponse.builder()
                         .agentId(aiAgent.getAgentId())
                         .agentName(aiAgent.getAgentName())

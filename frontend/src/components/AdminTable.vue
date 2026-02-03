@@ -65,7 +65,7 @@ const moduleDefs = [
         label: 'API',
         group: 'base',
         title: 'API 管理',
-        statusField: 'apiStatus',
+        statusField: null,
         search: ['idKeyword'],
         query: { idKeyword: '', pageNum: 1, pageSize: 10 },
         formDefaults: () => ({
@@ -74,16 +74,14 @@ const moduleDefs = [
             apiBaseUrl: '',
             apiKey: '',
             apiCompletionsPath: '',
-            apiEmbeddingsPath: '',
-            apiStatus: 1
+            apiEmbeddingsPath: ''
         }),
         fields: [
             { prop: 'apiId', label: 'API ID', required: true },
             { prop: 'apiBaseUrl', label: 'Base URL', required: true },
             { prop: 'apiKey', label: 'Key', required: true },
             { prop: 'apiCompletionsPath', label: '对话路径', required: true },
-            { prop: 'apiEmbeddingsPath', label: 'Embedding 路径', required: true },
-            { prop: 'apiStatus', label: '状态', type: 'switch' }
+            { prop: 'apiEmbeddingsPath', label: 'Embedding 路径', required: true }
         ],
         columns: [
             { prop: 'apiId', label: 'ID' },
@@ -96,7 +94,7 @@ const moduleDefs = [
         label: 'MODEL',
         group: 'base',
         title: 'MODEL 管理',
-        statusField: 'modelStatus',
+        statusField: null,
         search: ['idKeyword', 'nameKeyword', 'apiId'],
         query: { idKeyword: '', nameKeyword: '', apiId: '', pageNum: 1, pageSize: 10 },
         formDefaults: () => ({
@@ -104,15 +102,13 @@ const moduleDefs = [
             modelId: '',
             apiId: '',
             modelName: '',
-            modelType: '',
-            modelStatus: 1
+            modelType: ''
         }),
         fields: [
             { prop: 'modelId', label: 'Model ID', required: true },
             { prop: 'modelName', label: '名称', required: true },
             { prop: 'modelType', label: '类型', placeholder: '如 GPT' },
-            { prop: 'apiId', label: 'API', type: 'select', optionsKey: 'apiIds', required: true },
-            { prop: 'modelStatus', label: '状态', type: 'switch' }
+            { prop: 'apiId', label: 'API', type: 'select', optionsKey: 'apiIds', required: true }
         ],
         columns: [
             { prop: 'modelId', label: 'ID' },
@@ -125,7 +121,7 @@ const moduleDefs = [
         label: 'MCP',
         group: 'base',
         title: 'MCP 管理',
-        statusField: 'mcpStatus',
+        statusField: null,
         search: ['idKeyword', 'nameKeyword'],
         query: { idKeyword: '', nameKeyword: '', pageNum: 1, pageSize: 10 },
         formDefaults: () => ({
@@ -136,8 +132,7 @@ const moduleDefs = [
             mcpConfig: '',
             mcpDesc: '',
             mcpTimeout: 180,
-            mcpChat: 0,
-            mcpStatus: 1
+            mcpChat: 0
         }),
         fields: [
             { prop: 'mcpId', label: 'MCP ID', required: true },
@@ -146,8 +141,7 @@ const moduleDefs = [
             { prop: 'mcpConfig', label: '配置', type: 'textarea', required: true },
             { prop: 'mcpDesc', label: '描述', type: 'textarea' },
             { prop: 'mcpTimeout', label: '超时时间', type: 'number' },
-            { prop: 'mcpChat', label: '聊天可用', type: 'switch' },
-            { prop: 'mcpStatus', label: '状态', type: 'switch' }
+            { prop: 'mcpChat', label: '聊天可用', type: 'switch' }
         ],
         columns: [
             { prop: 'mcpId', label: 'ID' },
@@ -160,7 +154,7 @@ const moduleDefs = [
         label: 'ADVISOR',
         group: 'base',
         title: 'ADVISOR 管理',
-        statusField: 'advisorStatus',
+        statusField: null,
         search: ['idKeyword', 'nameKeyword'],
         query: { idKeyword: '', nameKeyword: '', pageNum: 1, pageSize: 10 },
         formDefaults: () => ({
@@ -170,8 +164,7 @@ const moduleDefs = [
             advisorType: '',
             advisorDesc: '',
             advisorOrder: 0,
-            advisorParam: '',
-            advisorStatus: 1
+            advisorParam: ''
         }),
         fields: [
             { prop: 'advisorId', label: 'Advisor ID', required: true },
@@ -179,8 +172,7 @@ const moduleDefs = [
             { prop: 'advisorType', label: '类型', required: true },
             { prop: 'advisorOrder', label: '顺序', type: 'number' },
             { prop: 'advisorDesc', label: '描述', type: 'textarea' },
-            { prop: 'advisorParam', label: '参数', type: 'textarea' },
-            { prop: 'advisorStatus', label: '状态', type: 'switch' }
+            { prop: 'advisorParam', label: '参数', type: 'textarea' }
         ],
         columns: [
             { prop: 'advisorId', label: 'ID' },
@@ -193,7 +185,7 @@ const moduleDefs = [
         label: 'PROMPT',
         group: 'base',
         title: 'PROMPT 管理',
-        statusField: 'promptStatus',
+        statusField: null,
         search: ['idKeyword', 'nameKeyword'],
         query: { idKeyword: '', nameKeyword: '', pageNum: 1, pageSize: 10 },
         formDefaults: () => ({
@@ -201,15 +193,13 @@ const moduleDefs = [
             promptId: '',
             promptName: '',
             promptContent: '',
-            promptDesc: '',
-            promptStatus: 1
+            promptDesc: ''
         }),
         fields: [
             { prop: 'promptId', label: 'Prompt ID', required: true },
             { prop: 'promptName', label: '名称', required: true },
             { prop: 'promptContent', label: '内容', type: 'textarea', required: true },
-            { prop: 'promptDesc', label: '描述', type: 'textarea' },
-            { prop: 'promptStatus', label: '状态', type: 'switch' }
+            { prop: 'promptDesc', label: '描述', type: 'textarea' }
         ],
         columns: [
             { prop: 'promptId', label: 'ID' },

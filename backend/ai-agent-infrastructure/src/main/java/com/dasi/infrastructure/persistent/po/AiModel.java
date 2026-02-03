@@ -27,9 +27,6 @@ public class AiModel {
     /** 模型类型 */
     private String modelType;
 
-    /** 状态：0-禁用，1-启用 */
-    private Integer modelStatus;
-
     /** 创建时间 */
     private LocalDateTime createTime;
 
