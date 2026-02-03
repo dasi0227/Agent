@@ -584,7 +584,7 @@ onMounted(async () => {
         >
             <div class="w-[520px] max-w-[90vw] rounded-[14px] bg-white p-5 shadow-lg" @click.stop>
                 <div class="text-[16px] font-semibold text-[#0f172a]">{{ promptDialog.title || 'Prompt 详情' }}</div>
-                <div class="mt-3 max-h-[360px] overflow-auto rounded-[10px] border border-[#e2e8f0] bg-[#f8fafc] p-3 text-[13px] text-[#475569] whitespace-pre-wrap">
+                <div class="mt-3 max-h-[360px] overflow-auto rounded-[10px] border border-[#e2e8f0] bg-[#f8fafc] p-3 text-[13px] text-[#475569] whitespace-pre-wrap break-all [overflow-wrap:anywhere]">
                     {{ promptDialog.content }}
                 </div>
                 <div class="mt-4 flex justify-end">

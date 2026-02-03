@@ -1,10 +1,19 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, watchEffect } from 'vue';
 import { RouterView, useRoute } from 'vue-router';
 import Sidebar from './components/Sidebar.vue';
+import { useSettingsStore } from './router/pinia';
 
 const route = useRoute();
 const hideSidebar = computed(() => route.meta?.hideSidebar);
+
+const settingsStore = useSettingsStore();
+
+watchEffect(() => {
+    const theme = settingsStore.theme === 'dark' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.style.colorScheme = theme;
+});
 </script>
 
 <template>

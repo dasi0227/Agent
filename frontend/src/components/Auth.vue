@@ -75,7 +75,7 @@ const submit = async () => {
 </script>
 
 <template>
-    <div class="flex h-screen items-center justify-center bg-[radial-gradient(120%_120%_at_20%_20%,#dbeafe_0%,#e2e8f0_40%,#f8fafc_100%)] p-[16px]">
+    <div class="flex h-screen items-center justify-center bg-[var(--auth-bg)] p-[16px]">
         <div
             class="w-full max-w-[520px] rounded-[18px] border border-[rgba(15,23,42,0.08)] bg-white/90 p-[24px] shadow-[0_20px_60px_rgba(15,23,42,0.12)] backdrop-blur"
         >

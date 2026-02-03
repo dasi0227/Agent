@@ -206,7 +206,7 @@ const rangeStyle = (value) => {
     const clamped = Math.min(3, Math.max(1, Number(value) || 1));
     const percent = ((clamped - 1) / 2) * 100;
     return {
-        background: `linear-gradient(90deg, var(--accent-color) ${percent}%, #d7e3f6 ${percent}%)`
+        background: `linear-gradient(90deg, var(--accent-color) ${percent}%, var(--progress-track) ${percent}%)`
     };
 };
 
@@ -343,7 +343,7 @@ onBeforeUnmount(() => {
 <template>
     <section class="grid h-screen grid-rows-[var(--header-height)_1fr_auto_var(--footer-height)] bg-[var(--bg-page)]">
         <header
-            class="sticky top-0 z-10 h-[var(--header-height)] border-b border-[rgba(15,23,42,0.06)] bg-[#eef1f6] backdrop-blur-[6px]"
+            class="sticky top-0 z-10 h-[var(--header-height)] border-b border-[rgba(15,23,42,0.06)] bg-[var(--surface-3)] backdrop-blur-[6px]"
         >
             <div
                 class="flex h-full w-full items-center justify-between gap-[12px] pl-[24px] pr-[calc(24px+var(--scrollbar-w))] max-[720px]:pl-[8px] max-[720px]:pr-[calc(8px+var(--scrollbar-w))]"
@@ -426,7 +426,7 @@ onBeforeUnmount(() => {
                                     step: {{ card.step }}
                                 </span>
                             </div>
-                            <div class="whitespace-pre-wrap text-[14px] leading-[1.6] text-[var(--text-primary)]">
+                            <div class="whitespace-pre-wrap break-all [overflow-wrap:anywhere] text-[14px] leading-[1.6] text-[var(--text-primary)]">
                                 {{ getCardContent(card) }}
                             </div>
                         </div>
@@ -436,7 +436,7 @@ onBeforeUnmount(() => {
                     </div>
                 </div>
 
-                <div class="h-full w-[1px] border-l border-dashed border-[rgba(15,23,42,0.30)]"></div>
+                <div class="h-full w-[1px] border-l border-dashed border-[rgba(15,23,42,0.30)] dark-divider"></div>
 
                 <div
                     ref="rightScrollRef"
@@ -457,7 +457,7 @@ onBeforeUnmount(() => {
                                         message.error
                                             ? 'bg-[linear-gradient(135deg,#ffe4e4,#ffd6d6)] border-[#f3b6b6] text-[#b91c1c]'
                                             : message.role === 'user'
-                                                ? 'bg-[linear-gradient(135deg,#e5f4ff,#eaf4ff)] border-[#c5e2ff]'
+                                                ? 'bg-[var(--bubble-user-bg)] border-[var(--bubble-user-border)]'
                                                 : 'bg-white border-[var(--border-color)]',
                                         message.pending ? 'border-dashed' : 'border-solid'
                                     ]"
@@ -475,14 +475,14 @@ onBeforeUnmount(() => {
                                     </div>
                                     <div
                                         v-else-if="message.role === 'user' || message.pending"
-                                        class="whitespace-pre-wrap leading-[1.6]"
+                                        class="whitespace-pre-wrap break-all [overflow-wrap:anywhere] leading-[1.6]"
                                         :class="message.error ? 'text-[#d14343]' : ''"
                                     >
                                         {{ getContent(message) }}
                                     </div>
                                     <div
                                         v-else
-                                        class="markdown-body leading-[1.6] [&_pre]:overflow-auto [&_pre]:rounded-[10px] [&_pre]:bg-[#0f172a] [&_pre]:p-[12px] [&_pre]:text-[#e2e8f0] [&_code]:rounded-[6px] [&_code]:bg-[#f1f5f9] [&_code]:px-[6px] [&_code]:py-[2px] [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:rounded-none"
+                                        class="markdown-body break-words [overflow-wrap:anywhere] leading-[1.6] [&_pre]:overflow-auto [&_pre]:rounded-[10px] [&_pre]:bg-[#0f172a] [&_pre]:p-[12px] [&_pre]:text-[#e2e8f0] [&_code]:rounded-[6px] [&_code]:bg-[#f1f5f9] [&_code]:px-[6px] [&_code]:py-[2px] [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:rounded-none"
                                         :class="message.error ? 'text-[#d14343]' : ''"
                                         v-html="renderMarkdown(getContent(message))"
                                     ></div>
@@ -530,7 +530,7 @@ onBeforeUnmount(() => {
             </div>
         </div>
 
-        <footer class="h-[var(--footer-height)] border-t border-[rgba(15,23,42,0.06)] bg-[#eef1f6] backdrop-blur-[6px]">
+        <footer class="h-[var(--footer-height)] border-t border-[rgba(15,23,42,0.06)] bg-[var(--surface-3)] backdrop-blur-[6px]">
             <div
                 class="mx-auto flex h-full w-full max-w-[900px] items-center justify-between pl-[24px] pr-[calc(24px+var(--scrollbar-w))] text-[13px] text-[var(--text-secondary)] max-[720px]:pl-[8px] max-[720px]:pr-[calc(8px+var(--scrollbar-w))]"
             >
@@ -555,7 +555,7 @@ onBeforeUnmount(() => {
                                 min="1"
                                 max="3"
                                 step="1"
-                                class="h-[6px] w-full cursor-pointer appearance-none rounded-full bg-[#d7e3f6] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-[14px] [&::-webkit-slider-thumb]:w-[14px] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[var(--accent-color)] [&::-webkit-slider-thumb]:shadow-[0_6px_14px_rgba(47,124,246,0.35)] [&::-moz-range-thumb]:h-[14px] [&::-moz-range-thumb]:w-[14px] [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[var(--accent-color)]"
+                                class="h-[6px] w-full cursor-pointer appearance-none rounded-full bg-[var(--progress-track)] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-[14px] [&::-webkit-slider-thumb]:w-[14px] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[var(--accent-color)] [&::-webkit-slider-thumb]:shadow-[0_6px_14px_rgba(47,124,246,0.35)] [&::-moz-range-thumb]:h-[14px] [&::-moz-range-thumb]:w-[14px] [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[var(--accent-color)]"
                                 :style="rangeStyle(settingsForm.maxRetry)"
                             />
                             <div class="flex items-center justify-between px-[2px]">
@@ -583,7 +583,7 @@ onBeforeUnmount(() => {
                                 min="1"
                                 max="3"
                                 step="1"
-                                class="h-[6px] w-full cursor-pointer appearance-none rounded-full bg-[#d7e3f6] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-[14px] [&::-webkit-slider-thumb]:w-[14px] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[var(--accent-color)] [&::-webkit-slider-thumb]:shadow-[0_6px_14px_rgba(47,124,246,0.35)] [&::-moz-range-thumb]:h-[14px] [&::-moz-range-thumb]:w-[14px] [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[var(--accent-color)]"
+                                class="h-[6px] w-full cursor-pointer appearance-none rounded-full bg-[var(--progress-track)] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-[14px] [&::-webkit-slider-thumb]:w-[14px] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[var(--accent-color)] [&::-webkit-slider-thumb]:shadow-[0_6px_14px_rgba(47,124,246,0.35)] [&::-moz-range-thumb]:h-[14px] [&::-moz-range-thumb]:w-[14px] [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[var(--accent-color)]"
                                 :style="rangeStyle(settingsForm.maxRound)"
                             />
                             <div class="flex items-center justify-between px-[2px]">
