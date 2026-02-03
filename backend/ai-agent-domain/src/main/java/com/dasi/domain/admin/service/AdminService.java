@@ -389,6 +389,14 @@ public class AdminService implements IAdminService {
         adminRepository.userDelete(id);
     }
 
+    @Override
+    public void userToggle(Long id, Integer status) {
+        if (adminRepository.userQuery(id) == null) {
+            throw new AdminException("USER 不存在，请确认后重新切换");
+        }
+        adminRepository.userToggle(id, status);
+    }
+
     // -------------------- Config --------------------
     @Override
     public Map<String, List<ConfigVO>> configList(ConfigListRequest request) {
@@ -473,6 +481,54 @@ public class AdminService implements IAdminService {
             throw new AdminException("FLOW 不存在，请修改后重新删除");
         }
         adminRepository.flowDelete(id);
+    }
+
+    // -------------------- Task --------------------
+    @Override
+    public PageResult<TaskVO> taskPage(TaskPageRequest request) {
+        List<TaskVO> list = adminRepository.taskPage(request);
+        Integer total = adminRepository.taskCount(request);
+        Integer size = request.getPageSize();
+        Integer pageSum = (total + size - 1) / size;
+        return PageResult.<TaskVO>builder()
+                .list(list)
+                .total(total)
+                .pageSum(pageSum)
+                .pageNum(request.getPageNum())
+                .pageSize(size)
+                .build();
+    }
+
+    @Override
+    public void taskInsert(TaskManageRequest request) {
+        if (adminRepository.taskQuery(request.getTaskId()) != null) {
+            throw new AdminException("TASK 已存在，请修改后重新添加");
+        }
+        adminRepository.taskInsert(request);
+    }
+
+    @Override
+    public void taskUpdate(TaskManageRequest request) {
+        if (adminRepository.taskQuery(request.getId()) == null) {
+            throw new AdminException("TASK 不存在，请确认后重新更改");
+        }
+        adminRepository.taskUpdate(request);
+    }
+
+    @Override
+    public void taskDelete(Long id) {
+        if (adminRepository.taskQuery(id) == null) {
+            throw new AdminException("TASK 不存在，请确认后重新删除");
+        }
+        adminRepository.taskDelete(id);
+    }
+
+    @Override
+    public void taskToggle(Long id, Integer status) {
+        if (adminRepository.taskQuery(id) == null) {
+            throw new AdminException("TASK 不存在，请确认后重新切换");
+        }
+        adminRepository.taskToggle(id, status);
     }
 
     // -------------------- List --------------------

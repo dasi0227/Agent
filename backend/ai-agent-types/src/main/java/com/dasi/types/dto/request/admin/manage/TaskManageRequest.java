@@ -10,19 +10,24 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserManageRequest {
+public class TaskManageRequest {
 
     private Long id;
 
     @NotBlank
-    private String username;
+    private String taskId;
 
     @NotBlank
-    private String password;
+    private String agentId;
 
     @NotBlank
-    private String role;
+    private String taskCron;
+
+    private String taskDesc;
+
+    @NotBlank
+    private String taskParam;
 
     @Builder.Default
-    private Integer userStatus = 1;
+    private Integer taskStatus = 1;
 }

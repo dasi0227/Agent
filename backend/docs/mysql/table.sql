@@ -177,6 +177,7 @@ CREATE TABLE `user`
     `username`    VARCHAR(64)  NOT NULL UNIQUE COMMENT '用户名',
     `password`    VARCHAR(255) NOT NULL COMMENT '加密后的密码',
     `role`        VARCHAR(32)  NOT NULL DEFAULT 'account' COMMENT '角色：account / admin',
+    `user_status` TINYINT      NOT NULL DEFAULT '1' COMMENT '状态：0-禁用，1-启用',
     `create_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
 ) ENGINE = InnoDB

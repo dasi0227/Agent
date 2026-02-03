@@ -40,6 +40,7 @@ public class AuthService implements IAuthService {
         if (!passwordEncoder.matches(password, userVO.getPassword())) {
             throw new AuthException("用户名或密码错误");
         }
+        assertUserActive(userVO);
 
         return buildAuthResponse(userVO);
     }
@@ -69,6 +70,7 @@ public class AuthService implements IAuthService {
         if (userVO == null) {
             throw new AuthException("用户不存在或已被删除");
         }
+        assertUserActive(userVO);
 
         return buildAuthResponse(userVO);
     }
@@ -84,6 +86,7 @@ public class AuthService implements IAuthService {
         if (userVO == null) {
             throw new AuthException("用户不存在或已被删除");
         }
+        assertUserActive(userVO);
 
         String originalPassword = userVO.getPassword();
         if (!passwordEncoder.matches(oldPassword, originalPassword)) {
@@ -102,7 +105,14 @@ public class AuthService implements IAuthService {
                 .id(userVO.getId())
                 .username(userVO.getUsername())
                 .role(userVO.getRole())
+                .userStatus(userVO.getUserStatus())
                 .build();
+    }
+
+    private void assertUserActive(UserVO userVO) {
+        if (userVO != null && Integer.valueOf(0).equals(userVO.getUserStatus())) {
+            throw new AuthException("账号已被禁用");
+        }
     }
 
 }

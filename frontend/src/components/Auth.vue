@@ -53,11 +53,15 @@ const submit = async () => {
                 ? {
                       id: payload.id ?? payload.data?.id,
                       username: payload.username ?? payload.data?.username,
-                      role: payload.role ?? payload.data?.role
+                      role: payload.role ?? payload.data?.role,
+                      userStatus: payload.userStatus ?? payload.data?.userStatus
                   }
                 : null);
         if (!token || !user) {
             throw new Error('登录信息异常');
+        }
+        if (user.userStatus === 0) {
+            throw new Error('账号已被禁用');
         }
         authStore.setAuth({ token, user });
         settingsStore.updateSettings({ token });

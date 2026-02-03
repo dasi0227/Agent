@@ -70,9 +70,9 @@ export const useAuthStore = defineStore('auth', {
             this.user = user || null;
             this.persist();
         },
-        logout() {
+        logout(redirectPath = '/login') {
             this.clear();
-            window.location.href = '/login';
+            window.location.href = redirectPath;
         },
         setAuth({ token, user }) {
             this.token = token || '';

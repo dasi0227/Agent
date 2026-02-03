@@ -63,7 +63,7 @@ const routes = [
     },
     {
         path: '/admin',
-        redirect: '/admin/agent'
+        redirect: '/admin/flow'
     },
     {
         path: '/admin/config',

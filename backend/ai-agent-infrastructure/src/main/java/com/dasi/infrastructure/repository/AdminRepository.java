@@ -49,6 +49,9 @@ public class AdminRepository implements IAdminRepository {
     @Resource
     private IAiFlowDao aiFlowDao;
 
+    @Resource
+    private IAiTaskDao aiTaskDao;
+
     // -------------------- API --------------------
     @Override
     public List<ApiVO> apiPage(ApiPageRequest apiPageRequest) {
@@ -420,6 +423,11 @@ public class AdminRepository implements IAdminRepository {
         userDao.delete(id);
     }
 
+    @Override
+    public void userToggle(Long id, Integer status) {
+        userDao.toggle(id, status);
+    }
+
     // -------------------- Config --------------------
     @Override
     public List<ConfigVO> configList(ConfigListRequest request) {
@@ -551,6 +559,56 @@ public class AdminRepository implements IAdminRepository {
     @Override
     public void flowDelete(Long id) {
         aiFlowDao.delete(id);
+    }
+
+    // -------------------- Task --------------------
+    @Override
+    public List<TaskVO> taskPage(TaskPageRequest request) {
+        Integer offset = (request.getPageNum() - 1) * request.getPageSize();
+        List<AiTask> poList = aiTaskDao.page(request.getIdKeyword(), request.getAgentId(), offset, request.getPageSize());
+        if (CollectionUtils.isEmpty(poList)) {
+            return List.of();
+        }
+        return poList.stream().map(this::toTaskVO).toList();
+    }
+
+    @Override
+    public Integer taskCount(TaskPageRequest request) {
+        return aiTaskDao.count(request.getIdKeyword(), request.getAgentId());
+    }
+
+    @Override
+    public TaskVO taskQuery(Long id) {
+        return toTaskVO(aiTaskDao.queryById(id));
+    }
+
+    @Override
+    public TaskVO taskQuery(String taskId) {
+        return toTaskVO(aiTaskDao.queryByTaskId(taskId));
+    }
+
+    @Override
+    public void taskInsert(TaskManageRequest request) {
+        aiTaskDao.insert(toTaskPO(request));
+    }
+
+    @Override
+    public void taskUpdate(TaskManageRequest request) {
+        aiTaskDao.update(toTaskPO(request));
+    }
+
+    @Override
+    public void taskDelete(Long id) {
+        aiTaskDao.delete(id);
+    }
+
+    @Override
+    public void taskToggle(Long id, Integer status) {
+        AiTask po = AiTask.builder()
+                .id(id)
+                .taskStatus(status)
+                .build();
+        aiTaskDao.toggle(po);
     }
 
     // -------------------- Depend --------------------
@@ -793,6 +851,7 @@ public class AdminRepository implements IAdminRepository {
                 .id(po.getId())
                 .username(po.getUsername())
                 .role(po.getRole())
+                .userStatus(po.getUserStatus())
                 .updateTime(po.getUpdateTime())
                 .build();
     }
@@ -803,6 +862,7 @@ public class AdminRepository implements IAdminRepository {
                 .username(request.getUsername())
                 .password(request.getPassword())
                 .role(request.getRole())
+                .userStatus(request.getUserStatus())
                 .build();
     }
 
@@ -855,6 +915,34 @@ public class AdminRepository implements IAdminRepository {
                 .clientRole(request.getClientRole())
                 .flowPrompt(request.getFlowPrompt())
                 .flowSeq(request.getFlowSeq())
+                .build();
+    }
+
+    private TaskVO toTaskVO(AiTask po) {
+        if (po == null) {
+            return null;
+        }
+        return TaskVO.builder()
+                .id(po.getId())
+                .taskId(po.getTaskId())
+                .agentId(po.getAgentId())
+                .taskCron(po.getTaskCron())
+                .taskDesc(po.getTaskDesc())
+                .taskParam(po.getTaskParam())
+                .taskStatus(po.getTaskStatus())
+                .updateTime(po.getUpdateTime())
+                .build();
+    }
+
+    private AiTask toTaskPO(TaskManageRequest request) {
+        return AiTask.builder()
+                .id(request.getId())
+                .taskId(request.getTaskId())
+                .agentId(request.getAgentId())
+                .taskCron(request.getTaskCron())
+                .taskDesc(request.getTaskDesc())
+                .taskParam(request.getTaskParam())
+                .taskStatus(request.getTaskStatus())
                 .build();
     }
 

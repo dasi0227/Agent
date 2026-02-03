@@ -211,14 +211,15 @@ const moduleDefs = [
         label: 'USER',
         group: 'user',
         title: 'USER 管理',
-        statusField: null,
+        statusField: 'userStatus',
         search: ['usernameKeyWord', 'role'],
         query: { usernameKeyWord: '', role: '', pageNum: 1, pageSize: 10 },
         formDefaults: () => ({
             id: null,
             username: '',
             password: '',
-            role: 'account'
+            role: 'account',
+            userStatus: 1
         }),
         fields: [
             { prop: 'username', label: '用户名', required: true },
@@ -231,11 +232,43 @@ const moduleDefs = [
                     { label: 'admin', value: 'admin' },
                     { label: 'account', value: 'account' }
                 ]
-            }
+            },
+            { prop: 'userStatus', label: '状态', type: 'switch' }
         ],
         columns: [
             { prop: 'username', label: '用户名' },
             { prop: 'role', label: '角色' }
+        ]
+    },
+    {
+        key: 'task',
+        label: 'TASK',
+        group: 'workflow',
+        title: 'TASK 管理',
+        statusField: 'taskStatus',
+        search: ['idKeyword', 'agentId'],
+        query: { idKeyword: '', agentId: '', pageNum: 1, pageSize: 10 },
+        formDefaults: () => ({
+            id: null,
+            taskId: '',
+            agentId: '',
+            taskCron: '',
+            taskDesc: '',
+            taskParam: '',
+            taskStatus: 1
+        }),
+        fields: [
+            { prop: 'taskId', label: 'Task ID', required: true },
+            { prop: 'agentId', label: 'Agent ID', type: 'select', optionsKey: 'agents', required: true },
+            { prop: 'taskCron', label: 'Cron', required: true, placeholder: '如 0 */1 * * * ?' },
+            { prop: 'taskDesc', label: '描述', type: 'textarea' },
+            { prop: 'taskParam', label: '参数', type: 'textarea', required: true, placeholder: 'JSON' },
+            { prop: 'taskStatus', label: '状态', type: 'switch' }
+        ],
+        columns: [
+            { prop: 'taskId', label: 'ID' },
+            { prop: 'agentId', label: 'Agent' },
+            { prop: 'taskCron', label: 'Cron' }
         ]
     },
     {
@@ -339,6 +372,10 @@ const options = reactive({
 });
 
 const currentModule = computed(() => modulesMap[currentKey.value] || modulesMap['agent']);
+
+const isToggleDisabled = (row) => currentKey.value === 'user' && row?.role === 'admin';
+const isFormToggleDisabled = (field) =>
+    currentKey.value === 'user' && field?.prop === 'userStatus' && currentForm.role === 'admin';
 
 const pageCount = computed(() => {
     const st = stateMap[currentKey.value];
@@ -471,6 +508,9 @@ const saveForm = async () => {
 };
 
 const switchStatus = async (row, val) => {
+    if (isToggleDisabled(row)) {
+        return;
+    }
     const oldVal = row[currentModule.value.statusField];
     row[currentModule.value.statusField] = val;
     try {
@@ -512,8 +552,7 @@ onMounted(async () => {
 });
 
 const logout = () => {
-    authStore.clear();
-    window.location.href = '/login';
+    authStore.logout('/admin/login');
 };
 
 const handleSelectModule = (key) => {
@@ -532,22 +571,6 @@ const handleSelectModule = (key) => {
         <div class="flex min-w-0 flex-1 flex-col">
             <header class="flex items-center justify-between border-b border-[#e2e8f0] bg-white px-6 py-4 shadow-sm">
                 <div class="text-[18px] font-semibold text-[#0f172a]">{{ currentModule.title }}</div>
-                <div class="flex items-center gap-3">
-                    <div class="text-right">
-                        <div class="text-[14px] font-semibold text-[#0f172a]">{{ authStore.user?.username || '-' }}</div>
-                        <div class="text-[12px] text-[#94a3b8]">角色：{{ authStore.user?.role || '-' }}</div>
-                    </div>
-                    <div class="grid h-[36px] w-[36px] place-items-center rounded-full bg-[#e2e8f0] text-[14px] font-bold text-[#0f172a]">
-                        {{ (authStore.user?.username || '?').slice(0, 1).toUpperCase() }}
-                    </div>
-                    <button
-                        class="rounded-[10px] border border-[#e2e8f0] px-3 py-2 text-[13px] font-semibold text-[#0f172a] transition hover:bg-[#f8fafc]"
-                        type="button"
-                        @click="logout"
-                    >
-                        退出
-                    </button>
-                </div>
             </header>
             <div class="flex-1 overflow-auto p-5">
                 <div class="mb-4 grid grid-cols-[1fr_auto] items-center gap-3">
@@ -715,8 +738,12 @@ const handleSelectModule = (key) => {
                                         <template v-if="currentModule.statusField">
                                             <button
                                                 class="relative h-[22px] w-[50px] rounded-full text-[10px] font-semibold uppercase tracking-[0.5px] transition"
-                                                :class="row[currentModule.statusField] === 1 ? 'bg-[#1d4ed8] text-white' : 'bg-[#cbd5e1] text-[#0f172a]'"
+                                                :class="[
+                                                    row[currentModule.statusField] === 1 ? 'bg-[#1d4ed8] text-white' : 'bg-[#cbd5e1] text-[#0f172a]',
+                                                    isToggleDisabled(row) ? 'cursor-not-allowed opacity-50' : ''
+                                                ]"
                                                 type="button"
+                                                :disabled="isToggleDisabled(row)"
                                                 @click="switchStatus(row, row[currentModule.statusField] === 1 ? 0 : 1)"
                                             >
                                                 <span
@@ -835,8 +862,12 @@ const handleSelectModule = (key) => {
                         <template v-else-if="field.type === 'switch'">
                             <button
                                 class="relative h-[24px] w-[54px] rounded-full text-[10px] font-semibold uppercase tracking-[0.5px] transition"
-                                :class="currentForm[field.prop] === 1 ? 'bg-[#1d4ed8] text-white' : 'bg-[#cbd5e1] text-[#0f172a]'"
+                                :class="[
+                                    currentForm[field.prop] === 1 ? 'bg-[#1d4ed8] text-white' : 'bg-[#cbd5e1] text-[#0f172a]',
+                                    isFormToggleDisabled(field) ? 'cursor-not-allowed opacity-50' : ''
+                                ]"
                                 type="button"
+                                :disabled="isFormToggleDisabled(field)"
                                 @click="currentForm[field.prop] = currentForm[field.prop] === 1 ? 0 : 1"
                             >
                                 <span

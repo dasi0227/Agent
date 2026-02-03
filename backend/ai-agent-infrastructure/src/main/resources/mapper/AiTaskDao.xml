@@ -3,23 +3,140 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dasi.infrastructure.persistent.dao.IAiTaskDao">
     <resultMap id="dataMap" type="com.dasi.infrastructure.persistent.po.AiTask">
+        <id column="id" property="id"/>
         <result column="agent_id" property="agentId"/>
         <result column="task_id" property="taskId"/>
         <result column="task_cron" property="taskCron"/>
         <result column="task_desc" property="taskDesc"/>
         <result column="task_param" property="taskParam"/>
         <result column="task_status" property="taskStatus"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <select id="queryTaskList" resultMap="dataMap">
-        SELECT task_id, agent_id, task_cron, task_desc, task_param, task_status
+        SELECT id,
+               task_id,
+               agent_id,
+               task_cron,
+               task_desc,
+               task_param,
+               task_status,
+               create_time,
+               update_time
         FROM ai_task
         WHERE task_status = 1
     </select>
+
+    <select id="page" resultMap="dataMap">
+        SELECT id,
+               task_id,
+               agent_id,
+               task_cron,
+               task_desc,
+               task_param,
+               task_status,
+               create_time,
+               update_time
+        FROM ai_task
+        <where>
+            <if test="idKeyword != null and idKeyword != ''">
+                AND task_id LIKE CONCAT('%', #{idKeyword}, '%')
+            </if>
+            <if test="agentId != null and agentId != ''">
+                AND agent_id = #{agentId}
+            </if>
+        </where>
+        ORDER BY update_time DESC, id DESC
+        <if test="offset != null and size != null">
+            LIMIT #{offset}, #{size}
+        </if>
+    </select>
+
+    <select id="count" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM ai_task
+        <where>
+            <if test="idKeyword != null and idKeyword != ''">
+                AND task_id LIKE CONCAT('%', #{idKeyword}, '%')
+            </if>
+            <if test="agentId != null and agentId != ''">
+                AND agent_id = #{agentId}
+            </if>
+        </where>
+    </select>
+
+    <select id="queryById" resultMap="dataMap">
+        SELECT id,
+               task_id,
+               agent_id,
+               task_cron,
+               task_desc,
+               task_param,
+               task_status,
+               create_time,
+               update_time
+        FROM ai_task
+        WHERE id = #{id}
+    </select>
+
+    <select id="queryByTaskId" resultMap="dataMap">
+        SELECT id,
+               task_id,
+               agent_id,
+               task_cron,
+               task_desc,
+               task_param,
+               task_status,
+               create_time,
+               update_time
+        FROM ai_task
+        WHERE task_id = #{taskId}
+    </select>
+
+    <insert id="insert" parameterType="com.dasi.infrastructure.persistent.po.AiTask">
+        INSERT INTO ai_task (task_id,
+                             agent_id,
+                             task_cron,
+                             task_desc,
+                             task_param,
+                             task_status)
+        VALUES (#{taskId},
+                #{agentId},
+                #{taskCron},
+                #{taskDesc},
+                #{taskParam},
+                #{taskStatus})
+    </insert>
+
+    <update id="update" parameterType="com.dasi.infrastructure.persistent.po.AiTask">
+        UPDATE ai_task
+        <set>
+            <if test="taskId != null">task_id = #{taskId},</if>
+            <if test="agentId != null">agent_id = #{agentId},</if>
+            <if test="taskCron != null">task_cron = #{taskCron},</if>
+            <if test="taskDesc != null">task_desc = #{taskDesc},</if>
+            <if test="taskParam != null">task_param = #{taskParam},</if>
+            <if test="taskStatus != null">task_status = #{taskStatus},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="toggle" parameterType="com.dasi.infrastructure.persistent.po.AiTask">
+        UPDATE ai_task
+        SET task_status = #{taskStatus}
+        WHERE id = #{id}
+    </update>
 
     <update id="updateTaskStatus">
         UPDATE ai_task
         SET task_status = #{taskStatus}
         WHERE task_id = #{taskId}
     </update>
+
+    <delete id="delete">
+        DELETE
+        FROM ai_task
+        WHERE id = #{id}
+    </delete>
 </mapper>

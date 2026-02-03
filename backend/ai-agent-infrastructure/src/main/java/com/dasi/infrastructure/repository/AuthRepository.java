@@ -33,6 +33,7 @@ public class AuthRepository implements IAuthRepository {
                 .username(username)
                 .password(password)
                 .role(ACCOUNT.getType())
+                .userStatus(1)
                 .build();
         userDao.insert(user);
         return toUserVO(user);
@@ -58,6 +59,7 @@ public class AuthRepository implements IAuthRepository {
                 .username(user.getUsername())
                 .password(user.getPassword())
                 .role(user.getRole())
+                .userStatus(user.getUserStatus())
                 .build();
     }
 

@@ -82,6 +82,7 @@ public interface IAdminRepository {
     void userInsert(UserManageRequest request);
     void userUpdate(UserManageRequest request);
     void userDelete(Long id);
+    void userToggle(Long id, Integer status);
 
     // Config
     List<ConfigVO> configList(ConfigListRequest request);
@@ -100,6 +101,16 @@ public interface IAdminRepository {
     void flowInsert(FlowManageRequest request);
     void flowUpdate(FlowManageRequest request);
     void flowDelete(Long id);
+
+    // Task
+    List<TaskVO> taskPage(TaskPageRequest request);
+    Integer taskCount(TaskPageRequest request);
+    TaskVO taskQuery(Long id);
+    TaskVO taskQuery(String taskId);
+    void taskInsert(TaskManageRequest request);
+    void taskUpdate(TaskManageRequest request);
+    void taskDelete(Long id);
+    void taskToggle(Long id, Integer status);
 
     // Depend
     List<String> queryClientDependOnPrompt(String promptId);

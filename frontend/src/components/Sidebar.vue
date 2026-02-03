@@ -235,13 +235,13 @@ const handleLogout = () => {
         <div class="mb-[12px] flex items-center gap-[12px]">
             <div class="flex items-center gap-[12px]">
                 <div
-                    class="h-[44px] w-[44px] overflow-hidden rounded-[14px] border border-[rgba(255,255,255,0.2)] bg-[radial-gradient(120%_120%_at_0%_0%,rgba(111,125,255,0.2),rgba(83,197,255,0.1))] shadow-[0_10px_30px_rgba(83,197,255,0.35)]"
+                    class="h-[44px] w-[44px] overflow-hidden rounded-[14px] border border-[rgba(255,255,255,0.2)] bg-[radial-gradient(120%_120%_at_0%_0%,rgba(111,125,255,0.2),rgba(83,197,255,0.1))]"
                 >
                     <img :src="logoImg" alt="Logo" class="h-full w-full object-cover block" />
                 </div>
                 <div>
-                    <div class="text-[16px] font-bold">Dasi AI</div>
-                    <div class="text-[12px] text-[rgba(231,236,244,0.7)]">RAG · MCP · OPENAI</div>
+                    <div class="text-[20px] font-bold">Dasi AI</div>
+                    <div class="text-[14px] text-[rgba(231,236,244,0.7)]">RAG · MCP · OPENAI</div>
                 </div>
             </div>
         </div>
@@ -390,23 +390,26 @@ const handleLogout = () => {
             </div>
         </div>
 
-        <button
-            class="flex items-center gap-[10px] rounded-[14px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] p-[12px] text-left transition hover:border-[rgba(123,200,255,0.5)]"
-            type="button"
-            @click="openProfile"
-        >
-            <div
-                class="grid h-[40px] w-[40px] place-items-center rounded-[12px] bg-[linear-gradient(135deg,#e0f3ff,#c7e1ff)] font-bold text-[#0b1220]"
-            >
-                {{ avatarChar }}
-            </div>
-            <div>
-                <div class="font-bold text-white">{{ currentUser.username || '访客' }}</div>
-                <div class="text-[12px] text-[rgba(231,236,244,0.72)]">
-                    {{ isLogin ? (currentUser.role || 'account') : '未登录，点击登录/注册' }}
+        <div class="flex items-center justify-between gap-[12px] rounded-[14px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] p-[12px]">
+            <button class="flex items-center gap-[10px] text-left" type="button" @click="openProfile">
+                <div
+                    class="grid h-[40px] w-[40px] place-items-center rounded-[12px] bg-[linear-gradient(135deg,#e0f3ff,#c7e1ff)] font-bold text-[#0b1220]"
+                >
+                    {{ avatarChar }}
                 </div>
-            </div>
-        </button>
+                <div>
+                    <div class="font-bold text-white">{{ currentUser.username || '访客' }}</div>
+                </div>
+            </button>
+            <button
+                v-if="isLogin"
+                class="text-[14px] text-[rgba(231,236,244,0.8)] transition hover:text-white"
+                type="button"
+                @click="handleLogout"
+            >
+                退出登录
+            </button>
+        </div>
 
         <div v-if="showDeleteConfirm" class="fixed inset-0 z-[20] grid place-items-center bg-[rgba(0,0,0,0.35)] p-[20px]" @click.self="showDeleteConfirm = false">
             <div
@@ -477,67 +480,58 @@ const handleLogout = () => {
             @click.self="closeProfile"
         >
             <div
-                class="w-full max-w-[520px] rounded-[14px] border border-[rgba(255,255,255,0.08)] bg-[#0f172a] text-[#e7ecf4] shadow-[0_20px_50px_rgba(0,0,0,0.25)]"
+                class="w-full max-w-[520px] rounded-[14px] border border-[var(--border-color)] bg-white text-[var(--text-primary)] shadow-[0_20px_50px_rgba(15,23,42,0.2)]"
             >
-                <div class="flex items-center justify-between border-b border-[rgba(255,255,255,0.08)] px-[18px] py-[14px]">
+                <div class="flex items-center justify-between border-b border-[var(--border-color)] px-[18px] py-[14px]">
                     <div class="text-[16px] font-bold">个人资料</div>
-                    <button class="text-[20px]" type="button" @click="closeProfile">×</button>
+                    <button class="text-[20px] text-[var(--text-secondary)]" type="button" @click="closeProfile">×</button>
                 </div>
                 <div class="space-y-[14px] px-[18px] py-[16px]">
                     <div>
-                        <div class="mb-[6px] text-[13px] text-[rgba(231,236,244,0.72)]">用户名</div>
+                        <div class="mb-[6px] text-[13px] text-[var(--text-secondary)]">用户名</div>
                         <input
                             v-model="profileForm.username"
-                            class="w-full rounded-[10px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] px-[10px] py-[10px] text-[14px] text-white outline-none focus:border-[#7bc8ff]"
+                            class="w-full rounded-[10px] border border-[var(--border-color)] bg-white px-[10px] py-[10px] text-[14px] text-[var(--text-primary)] outline-none focus:border-[var(--accent-color)]"
                             placeholder="请输入用户名"
                         />
                     </div>
                     <div class="grid grid-cols-2 gap-[12px] max-[520px]:grid-cols-1">
                         <div>
-                            <div class="mb-[6px] text-[13px] text-[rgba(231,236,244,0.72)]">旧密码</div>
+                            <div class="mb-[6px] text-[13px] text-[var(--text-secondary)]">旧密码</div>
                             <input
                                 v-model="profileForm.oldPassword"
                                 type="password"
-                                class="w-full rounded-[10px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] px-[10px] py-[10px] text-[14px] text-white outline-none focus:border-[#7bc8ff]"
+                                class="w-full rounded-[10px] border border-[var(--border-color)] bg-white px-[10px] py-[10px] text-[14px] text-[var(--text-primary)] outline-none focus:border-[var(--accent-color)]"
                                 placeholder="修改密码时必填"
                             />
                         </div>
                         <div>
-                            <div class="mb-[6px] text-[13px] text-[rgba(231,236,244,0.72)]">新密码</div>
+                            <div class="mb-[6px] text-[13px] text-[var(--text-secondary)]">新密码</div>
                             <input
                                 v-model="profileForm.newPassword"
                                 type="password"
-                                class="w-full rounded-[10px] border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.04)] px-[10px] py-[10px] text-[14px] text-white outline-none focus:border-[#7bc8ff]"
+                                class="w-full rounded-[10px] border border-[var(--border-color)] bg-white px-[10px] py-[10px] text-[14px] text-[var(--text-primary)] outline-none focus:border-[var(--accent-color)]"
                                 placeholder="输入新密码"
                             />
                         </div>
                     </div>
                     <div class="text-[12px] text-[#f87171]" v-if="profileError">{{ profileError }}</div>
-                    <div class="flex items-center justify-between gap-[10px] border-t border-[rgba(255,255,255,0.08)] pt-[14px]">
+                    <div class="flex items-center justify-end gap-[10px] border-t border-[var(--border-color)] pt-[14px]">
                         <button
-                            class="rounded-[10px] border border-[rgba(255,255,255,0.15)] px-[14px] py-[10px] text-[14px] font-semibold text-[#e7ecf4] transition hover:bg-[rgba(255,255,255,0.08)]"
+                            class="rounded-[10px] border border-[var(--border-color)] bg-white px-[14px] py-[10px] text-[14px] font-semibold text-[var(--text-primary)] transition hover:bg-[#f7f9fc]"
                             type="button"
-                            @click="handleLogout"
+                            @click="closeProfile"
                         >
-                            退出登录
+                            取消
                         </button>
-                        <div class="flex gap-[10px]">
-                            <button
-                                class="rounded-[10px] border border-[rgba(255,255,255,0.15)] px-[14px] py-[10px] text-[14px] font-semibold text-[#e7ecf4] transition hover:bg-[rgba(255,255,255,0.08)]"
-                                type="button"
-                                @click="closeProfile"
-                            >
-                                取消
-                            </button>
-                            <button
-                                class="rounded-[10px] border border-[rgba(123,200,255,0.6)] bg-[rgba(123,200,255,0.14)] px-[14px] py-[10px] text-[14px] font-semibold text-[#7bc8ff] transition hover:bg-[rgba(123,200,255,0.22)]"
-                                type="button"
-                                :disabled="profileSaving"
-                                @click="saveProfile"
-                            >
-                                {{ profileSaving ? '保存中...' : '保存' }}
-                            </button>
-                        </div>
+                        <button
+                            class="rounded-[10px] border border-[var(--accent-color)] bg-[var(--accent-color)] px-[14px] py-[10px] text-[14px] font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-70"
+                            type="button"
+                            :disabled="profileSaving"
+                            @click="saveProfile"
+                        >
+                            {{ profileSaving ? '保存中...' : '保存' }}
+                        </button>
                     </div>
                 </div>
             </div>
