@@ -1042,9 +1042,9 @@ const handleUpload = async () => {
                             class="flex w-full"
                             :class="message.role === 'user' ? 'justify-end' : 'justify-start'"
                         >
-                            <div class="flex max-w-full flex-col gap-[6px]" :class="message.role === 'user' ? 'items-end' : 'items-start'">
+                            <div class="flex max-w-full min-w-0 flex-col gap-[6px]" :class="message.role === 'user' ? 'items-end' : 'items-start'">
                                 <div
-                                    class="relative w-fit max-w-[720px] rounded-[14px] px-[14px] py-[12px] shadow-[0_12px_30px_rgba(27,36,55,0.08)] border"
+                                    class="relative w-full max-w-[720px] overflow-hidden rounded-[14px] px-[14px] py-[12px] shadow-[0_12px_30px_rgba(27,36,55,0.08)] border"
                                     :class="[
                                         message.error
                                             ? 'bg-[linear-gradient(135deg,#ffe4e4,#ffd6d6)] border-[#f3b6b6] text-[#b91c1c]'
@@ -1067,14 +1067,14 @@ const handleUpload = async () => {
                                     </div>
                                     <div
                                         v-else-if="message.role === 'user' || message.pending"
-                                        class="whitespace-pre-wrap leading-[1.6]"
+                                        class="whitespace-pre-wrap break-all leading-[1.6] [overflow-wrap:anywhere]"
                                         :class="message.error ? 'text-[#d14343]' : ''"
                                     >
                                         {{ getContent(message) }}
                                     </div>
                                     <div
                                         v-else
-                                        class="markdown-body leading-[1.6] [&_pre]:overflow-auto [&_pre]:rounded-[10px] [&_pre]:bg-[#0f172a] [&_pre]:p-[12px] [&_pre]:text-[#e2e8f0] [&_code]:rounded-[6px] [&_code]:bg-[#f1f5f9] [&_code]:px-[6px] [&_code]:py-[2px] [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:rounded-none"
+                                        class="markdown-body break-words leading-[1.6] [overflow-wrap:anywhere] [&_pre]:overflow-auto [&_pre]:rounded-[10px] [&_pre]:bg-[#0f172a] [&_pre]:p-[12px] [&_pre]:text-[#e2e8f0] [&_code]:rounded-[6px] [&_code]:bg-[#f1f5f9] [&_code]:px-[6px] [&_code]:py-[2px] [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:rounded-none"
                                         :class="message.error ? 'text-[#d14343]' : ''"
                                         v-html="renderMarkdown(getContent(message))"
                                     ></div>
@@ -1252,16 +1252,18 @@ const handleUpload = async () => {
                 <div class="flex flex-col gap-[14px] px-[18px] py-[14px]">
                     <div class="flex gap-[10px]">
                         <button
-                            class="rounded-[10px] border border-[var(--border-color)] bg-[#f7f9fc] px-[12px] py-[8px] font-semibold text-[var(--text-secondary)]"
-                            :class="uploadForm.mode === 'file' ? 'border-[#4f8cff] bg-[#e8f1ff] text-[var(--accent-color)] shadow-[0_10px_24px_rgba(47,124,246,0.2)]' : ''"
+                            class="rounded-[10px] border border-[var(--border-color)] bg-[#f7f9fc] px-[12px] py-[8px] font-semibold text-[var(--text-secondary)] outline-none focus:outline-none focus:ring-0 focus-visible:ring-0"
+                            :class="uploadForm.mode === 'file' ? 'border-[#4f8cff] text-[var(--accent-color)]' : ''"
+                            :style="uploadForm.mode === 'file' ? { backgroundColor: '#dbeafe', boxShadow: 'none', outline: 'none' } : {}"
                             type="button"
                             @click="uploadForm.mode = 'file'"
                         >
                             上传文件
                         </button>
                         <button
-                            class="rounded-[10px] border border-[var(--border-color)] bg-[#f7f9fc] px-[12px] py-[8px] font-semibold text-[var(--text-secondary)]"
-                            :class="uploadForm.mode === 'git' ? 'border-[#4f8cff] bg-[#e8f1ff] text-[var(--accent-color)] shadow-[0_10px_24px_rgba(47,124,246,0.2)]' : ''"
+                            class="rounded-[10px] border border-[var(--border-color)] bg-[#f7f9fc] px-[12px] py-[8px] font-semibold text-[var(--text-secondary)] outline-none focus:outline-none focus:ring-0 focus-visible:ring-0"
+                            :class="uploadForm.mode === 'git' ? 'border-[#4f8cff] text-[var(--accent-color)]' : ''"
+                            :style="uploadForm.mode === 'git' ? { backgroundColor: '#dbeafe', boxShadow: 'none', outline: 'none' } : {}"
                             type="button"
                             @click="uploadForm.mode = 'git'"
                         >

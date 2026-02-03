@@ -19,4 +19,6 @@ public class AuthResponse {
 
     private String role;
 
+    private Integer userStatus;
+
 }

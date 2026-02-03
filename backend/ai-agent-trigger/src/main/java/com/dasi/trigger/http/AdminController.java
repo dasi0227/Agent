@@ -232,6 +232,12 @@ public class AdminController {
         return Result.success();
     }
 
+    @PostMapping("/user/toggle")
+    public Result<Void> userToggle(@RequestParam("id") Long id, @RequestParam("userStatus") Integer userStatus) {
+        adminService.userToggle(id, userStatus);
+        return Result.success();
+    }
+
     // -------------------- Config --------------------
     @PostMapping("/config/list")
     public Result<Map<String, List<ConfigVO>>> configList(@Valid @RequestBody ConfigListRequest request) {
@@ -288,6 +294,36 @@ public class AdminController {
     @PostMapping("/flow/delete")
     public Result<Void> flowDelete(@RequestParam("id") Long id) {
         adminService.flowDelete(id);
+        return Result.success();
+    }
+
+    // -------------------- Task --------------------
+    @PostMapping("/task/page")
+    public Result<PageResult<TaskVO>> taskPage(@Valid @RequestBody TaskPageRequest request) {
+        return Result.success(adminService.taskPage(request));
+    }
+
+    @PostMapping("/task/insert")
+    public Result<Void> taskInsert(@Valid @RequestBody TaskManageRequest request) {
+        adminService.taskInsert(request);
+        return Result.success();
+    }
+
+    @PostMapping("/task/update")
+    public Result<Void> taskUpdate(@Valid @RequestBody TaskManageRequest request) {
+        adminService.taskUpdate(request);
+        return Result.success();
+    }
+
+    @PostMapping("/task/delete")
+    public Result<Void> taskDelete(@RequestParam("id") Long id) {
+        adminService.taskDelete(id);
+        return Result.success();
+    }
+
+    @PostMapping("/task/toggle")
+    public Result<Void> taskToggle(@RequestParam("id") Long id, @RequestParam("taskStatus") Integer taskStatus) {
+        adminService.taskToggle(id, taskStatus);
         return Result.success();
     }
 

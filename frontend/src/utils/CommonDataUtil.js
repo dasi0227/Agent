@@ -4,6 +4,7 @@ export const adminMenuGroups = [
         label: '工作流管理',
         items: [
             { key: 'flow', label: 'FLOW', path: '/admin/flow' },
+            { key: 'task', label: 'TASK', path: '/admin/task' },
             { key: 'config', label: 'CONFIG', path: '/admin/config' }
         ]
     },
@@ -12,14 +13,14 @@ export const adminMenuGroups = [
         label: '模型管理',
         items: [
             { key: 'agent', label: 'AGENT', path: '/admin/agent' },
-            { key: 'client', label: 'CLIENT', path: '/admin/client' },
-            { key: 'model', label: 'MODEL', path: '/admin/model' }
+            { key: 'client', label: 'CLIENT', path: '/admin/client' }
         ]
     },
     {
         name: 'base',
         label: '服务管理',
         items: [
+            { key: 'model', label: 'MODEL', path: '/admin/model' },
             { key: 'api', label: 'API', path: '/admin/api' },
             { key: 'mcp', label: 'MCP', path: '/admin/mcp' },
             { key: 'prompt', label: 'PROMPT', path: '/admin/prompt' },

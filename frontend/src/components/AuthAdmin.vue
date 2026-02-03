@@ -34,11 +34,15 @@ const submit = async () => {
                 ? {
                       id: payload.id ?? payload.data?.id,
                       username: payload.username ?? payload.data?.username,
-                      role: payload.role ?? payload.data?.role
+                      role: payload.role ?? payload.data?.role,
+                      userStatus: payload.userStatus ?? payload.data?.userStatus
                   }
                 : null);
         if (!token || !user) {
             throw new Error('登录信息异常');
+        }
+        if (user.userStatus === 0) {
+            throw new Error('账号已被禁用');
         }
         if (user.role !== 'admin') {
             throw new Error('仅管理员可以进入后台');

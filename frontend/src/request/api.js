@@ -25,7 +25,9 @@ const ADMIN_BASE_PATH = '/api/v1/admin';
 const ADMIN_STATUS_PARAM = {
     client: 'clientStatus',
     agent: 'agentStatus',
-    config: 'configStatus'
+    config: 'configStatus',
+    user: 'userStatus',
+    task: 'taskStatus'
 };
 
 export const fetchComplete = async ({

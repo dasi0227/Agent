@@ -27,4 +27,6 @@ public interface IUserDao {
 
     void delete(@Param("id") Long id);
 
+    void toggle(@Param("id") Long id, @Param("status") Integer status);
+
 }

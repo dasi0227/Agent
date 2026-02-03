@@ -11,10 +11,21 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserVO {
+public class TaskVO {
+
     private Long id;
-    private String username;
-    private String role;
-    private Integer userStatus;
+
+    private String taskId;
+
+    private String agentId;
+
+    private String taskCron;
+
+    private String taskDesc;
+
+    private String taskParam;
+
+    private Integer taskStatus;
+
     private LocalDateTime updateTime;
 }

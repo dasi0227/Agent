@@ -60,6 +60,7 @@ public interface IAdminService {
     void userInsert(UserManageRequest request);
     void userUpdate(UserManageRequest request);
     void userDelete(Long id);
+    void userToggle(Long id, Integer status);
 
     // Config
     Map<String, List<ConfigVO>> configList(ConfigListRequest request);
@@ -74,6 +75,13 @@ public interface IAdminService {
     void flowInsert(FlowManageRequest request);
     void flowUpdate(FlowManageRequest request);
     void flowDelete(Long id);
+
+    // Task
+    PageResult<TaskVO> taskPage(TaskPageRequest request);
+    void taskInsert(TaskManageRequest request);
+    void taskUpdate(TaskManageRequest request);
+    void taskDelete(Long id);
+    void taskToggle(Long id, Integer status);
 
     // List
     List<String> listClientType();
