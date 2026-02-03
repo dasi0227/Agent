@@ -12,7 +12,7 @@ public interface IAiClientDao {
 
     List<AiClient> queryChatClientList();
 
-    List<AiClient> listWorkClient();
+    List<AiClient> queryWorkClientList();
 
     List<AiClient> page(@Param("idKeyword") String idKeyword,
                         @Param("nameKeyword") String nameKeyword,

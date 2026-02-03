@@ -3,8 +3,8 @@ export const adminMenuGroups = [
         name: 'workflow',
         label: '工作流管理',
         items: [
-            { key: 'config', label: 'CONFIG', path: '/admin/config' },
-            { key: 'flow', label: 'FLOW', path: '/admin/flow' }
+            { key: 'flow', label: 'FLOW', path: '/admin/flow' },
+            { key: 'config', label: 'CONFIG', path: '/admin/config' }
         ]
     },
     {

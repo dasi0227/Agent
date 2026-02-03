@@ -504,7 +504,7 @@ public class AdminRepository implements IAdminRepository {
     public List<ClientDetailVO> flowClient() {
         List<ClientDetailVO> clientDetailVOList = new ArrayList<>();
 
-        List<AiClient> aiClientList = aiClientDao.listWorkClient();
+        List<AiClient> aiClientList = aiClientDao.queryWorkClientList();
         if (aiClientList.isEmpty()) {
             return clientDetailVOList;
         }

@@ -202,6 +202,15 @@ export const adminToggle = async (moduleKey, id, status) => {
     return http.post(buildAdminPath(moduleKey, 'toggle'), null, { params: { id, [statusKey]: status } });
 };
 
+// flow 专用
+export const flowClients = async () => http.post(`${ADMIN_BASE_PATH}/flow/client`);
+export const flowAgent = async (agentId) => http.post(`${ADMIN_BASE_PATH}/flow/agent`, null, { params: { agentId } });
+export const flowInsert = async (payload = {}) => http.post(`${ADMIN_BASE_PATH}/flow/insert`, trimStrings(payload));
+export const flowUpdate = async (payload = {}) => http.post(`${ADMIN_BASE_PATH}/flow/update`, trimStrings(payload));
+export const flowDelete = async (id) => http.post(`${ADMIN_BASE_PATH}/flow/delete`, null, { params: { id } });
+
+export const adminAgentList = async (payload = {}) => http.post(`${ADMIN_BASE_PATH}/agent/list`, trimStrings(payload));
+
 // config 专用（非分页 Map）
 export const configList = async (payload = {}) => http.post(`${ADMIN_BASE_PATH}/config/list`, trimStrings(payload));
 export const configInsert = async (payload = {}) => http.post(`${ADMIN_BASE_PATH}/config/insert`, trimStrings(payload));
