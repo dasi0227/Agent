@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import SidebarAdmin from './SidebarAdmin.vue';
 import arrowIcon from '../assets/arrow.svg';
 import { adminMenuGroups } from '../utils/CommonDataUtil';
@@ -9,6 +9,7 @@ import { adminAgentList, flowAgent, flowClients, flowDelete, flowInsert } from '
 import { normalizeError } from '../request/request';
 
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
 const currentKey = ref('flow');
 const menuGroups = adminMenuGroups;
@@ -151,12 +152,33 @@ const enterDetail = async (agent) => {
     selectedAgent.value = agent;
     activeSlot.value = null;
     await loadFlows(agent.agentId);
+    router.replace({ path: '/admin/flow', query: { agentId: agent.agentId } });
+};
+
+const openAgentFromRoute = async () => {
+    const targetId = String(route.query.agentId || '').trim();
+    if (!targetId) return;
+    if (!selectedAgent.value) {
+        selectedAgent.value = {
+            agentId: targetId,
+            agentName: targetId,
+            agentType: 'step',
+            agentStatus: 1
+        };
+    }
+    const agent = agents.value.find((item) => item.agentId === targetId);
+    if (agent) {
+        await enterDetail(agent);
+        return;
+    }
+    await loadFlows(targetId);
 };
 
 const backToGrid = () => {
     selectedAgent.value = null;
     agentFlows.value = [];
     activeSlot.value = null;
+    router.replace({ path: '/admin/flow' });
 };
 
 const handleChooseSlot = (idx) => {
@@ -206,7 +228,9 @@ const openReplace = (slot, client) => {
 };
 
 onMounted(async () => {
+    await openAgentFromRoute();
     await Promise.all([loadClients(), loadAgents()]);
+    await openAgentFromRoute();
 });
 </script>
 

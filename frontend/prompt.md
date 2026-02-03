@@ -1,0 +1,31 @@
+现在请你专注于查看后端，重点放在这几个文件
+- backend/docs/mysql/data.sql
+- backend/docs/mysql/table.sql
+- backend/ai-agent-infrastructure/src/main/java/com/dasi/infrastructure/repository/AdminRepository.java
+- backend/ai-agent-infrastructure/src/main/java/com/dasi/infrastructure/repository/AiRepository.java
+- backend/ai-agent-infrastructure/src/main/java/com/dasi/infrastructure/repository/AuthRepository.java
+- backend/ai-agent-infrastructure/src/main/java/com/dasi/infrastructure/repository/QueryRepository.java
+- backend/ai-agent-infrastructure/src/main/java/com/dasi/infrastructure/persistent/dao/IAiAdvisorDao.java
+- backend/ai-agent-infrastructure/src/main/java/com/dasi/infrastructure/persistent/dao/IAiAgentDao.java
+- backend/ai-agent-infrastructure/src/main/java/com/dasi/infrastructure/persistent/dao/IAiApiDao.java
+- backend/ai-agent-infrastructure/src/main/java/com/dasi/infrastructure/persistent/dao/IAiClientDao.java
+- backend/ai-agent-infrastructure/src/main/java/com/dasi/infrastructure/persistent/dao/IAiConfigDao.java
+- backend/ai-agent-infrastructure/src/main/java/com/dasi/infrastructure/persistent/dao/IAiFlowDao.java
+- backend/ai-agent-infrastructure/src/main/java/com/dasi/infrastructure/persistent/dao/IAiMcpDao.java
+- backend/ai-agent-infrastructure/src/main/java/com/dasi/infrastructure/persistent/dao/IAiModelDao.java
+- backend/ai-agent-infrastructure/src/main/java/com/dasi/infrastructure/persistent/dao/IAiPromptDao.java
+- backend/ai-agent-infrastructure/src/main/java/com/dasi/infrastructure/persistent/dao/IAiTaskDao.java
+- backend/ai-agent-infrastructure/src/main/java/com/dasi/infrastructure/persistent/dao/IUserDao.java
+- backend/ai-agent-infrastructure/src/main/resources/mapper/AiAdvisorDao.xml
+- backend/ai-agent-infrastructure/src/main/resources/mapper/AiAgentDao.xml
+- backend/ai-agent-infrastructure/src/main/resources/mapper/AiApiDao.xml
+- backend/ai-agent-infrastructure/src/main/resources/mapper/AiClientDao.xml
+- backend/ai-agent-infrastructure/src/main/resources/mapper/AiConfigDao.xml
+- backend/ai-agent-infrastructure/src/main/resources/mapper/AiFlowDao.xml
+- backend/ai-agent-infrastructure/src/main/resources/mapper/AiMcpDao.xml
+- backend/ai-agent-infrastructure/src/main/resources/mapper/AiModelDao.xml
+- backend/ai-agent-infrastructure/src/main/resources/mapper/AiPromptDao.xml
+- backend/ai-agent-infrastructure/src/main/resources/mapper/AiTaskDao.xml
+- backend/ai-agent-infrastructure/src/main/resources/mapper/UserDao.xml
+
+我现在有个想法，就是除了 User、Agent、Client，其他的表都不应该有 xxx_status，你觉得合理吗

@@ -1110,7 +1110,7 @@ onMounted(async () => {
                     <button
                         class="rounded-[10px] border border-[#e2e8f0] px-3 py-2 text-[13px] font-semibold text-[#0f172a] transition hover:bg-[#f8fafc]"
                         type="button"
-                        @click="router.push('/admin/flow')"
+                        @click="router.push(`/admin/flow?agentId=${agentId}`)"
                     >
                         返回 FLOW
                     </button>
