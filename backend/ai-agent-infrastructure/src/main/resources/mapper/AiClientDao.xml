@@ -41,14 +41,14 @@
                model_name,
                client_name,
                client_desc,
-                client_status,
-                create_time,
-                update_time
+               client_status,
+               create_time,
+               update_time
         FROM ai_client
         WHERE client_type = 'chat'
     </select>
 
-    <select id="listWorkClient" resultType="com.dasi.infrastructure.persistent.po.AiClient">
+    <select id="queryWorkClientList" resultMap="dataMap">
         SELECT id,
                client_id,
                client_type,

@@ -171,7 +171,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="flex h-screen bg-[#f8fafc]">
+    <div class="admin-font flex h-screen bg-[#f8fafc]">
         <SidebarAdmin :groups="menuGroups" :current="currentKey" @select="handleSelectModule" />
         <div class="flex min-w-0 flex-1 flex-col">
             <header class="flex items-center justify-between border-b border-[#e2e8f0] bg-white px-6 py-4 shadow-sm">
@@ -421,3 +421,15 @@ onMounted(async () => {
         </div>
     </div>
 </template>
+
+<style scoped>
+.admin-font {
+    font-size: 15px;
+}
+.admin-font .text-\[12px\] {
+    font-size: 13px !important;
+}
+.admin-font .text-\[13px\] {
+    font-size: 14px !important;
+}
+</style>
