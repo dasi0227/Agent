@@ -2,32 +2,23 @@ package com.dasi.types.constant;
 
 public class RedisConstant {
 
-    public static final String LIST_CHAT_CLIENT_KEY = "list:chat-lient";
+    // query
+    public static final String QUERY_CHAT_CLIENT_KEY = "query:chat-lient";
+    public static final String QUERY_WORK_AGENT_KEY = "query:work-agent";
+    public static final String QUERY_CHAT_MCP_KEY = "query:chat-mcp";
+    public static final String QUERY_CHAT_RAG_KEY = "query:chat-rag";
 
-    public static final String LIST_CHAT_MCP_KEY = "list:chat-mcp";
-
-    public static final String LIST_CHAT_RAG_KEY = "list:chat-rag";
-
-    public static final String LIST_WORK_AGENT_KEY = "list:work-agent";
-
-    public static final String ARMORY_CACHE_PREFIX = "armory:";
-
-    public static final String PO_API_PREFIX = "po:api:";
-
-    public static final String PO_MODEL_PREFIX = "po:model:";
-
-    public static final String PO_CLIENT_PREFIX = "po:client:";
-
-    public static final String PO_AGENT_PREFIX = "po:agent:";
-
-    public static final String PO_ADVISOR_PREFIX = "po:advisor:";
-
-    public static final String PO_PROMPT_PREFIX = "po:prompt:";
-
-    public static final String PO_MCP_PREFIX = "po:mcp:";
-
-    public static final String PO_LIST_CONFIG_PREFIX = "po:config-list:";
-
-    public static final String PO_LIST_FLOW_PREFIX = "po:flow-list:";
+    // ai
+    public static final String AI_API_VO_PREFIX = "ai:api:vo:";
+    public static final String AI_MODEL_VO_PREFIX = "ai:model:vo:";
+    public static final String AI_ADVISOR_VO_PREFIX = "ai:advisor:vo:";
+    public static final String AI_PROMPT_VO_PREFIX = "ai:prompt:vo:";
+    public static final String AI_MCP_VO_PREFIX = "ai:mcp:vo:";
+    public static final String AI_CLIENT_VO_PREFIX = "ai:client:vo:";
+    public static final String AI_FLOW_VO_PREFIX = "ai:flow:vo:";
+    public static final String AI_AGENT_TYPE_PREFIX = "ai:agent:type:";
+    public static final String AI_CONFIG_VALUE_PREFIX = "ai:config:value:";
+    public static final String AI_TASK_VO_LIST_KEY = "ai:task:vo-list";
+    public static final String AI_ARMORY_PREFIX = "ai:armory:";
 
 }

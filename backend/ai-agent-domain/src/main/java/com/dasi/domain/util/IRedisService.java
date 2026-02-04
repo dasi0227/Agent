@@ -1,6 +1,7 @@
 package com.dasi.domain.util;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface IRedisService {
@@ -16,6 +17,10 @@ public interface IRedisService {
     void addSetMembers(String key, Set<?> values);
 
     <T> Set<T> getSetMembers(String key, Class<T> elementType);
+
+    void setMap(String key, Map<String, ?> values);
+
+    <T> Map<String, T> getMap(String key, Class<T> valueType);
 
     void delete(String key);
 
