@@ -7,6 +7,7 @@ import AdminTable from '../components/AdminTable.vue';
 import AdminConfig from '../components/AdminConfig.vue';
 import AdminFlow from '../components/AdminFlow.vue';
 import AdminCanvas from '../components/AdminCanvas.vue';
+import AdminSession from '../components/AdminSession.vue';
 import NotFound from '../components/NotFound.vue';
 import { getStoredAuth } from './pinia';
 
@@ -89,6 +90,16 @@ const routes = [
         path: '/admin/canvas',
         name: 'admin-canvas',
         component: AdminCanvas,
+        meta: {
+            requiresAuth: true,
+            requiresAdmin: true,
+            hideSidebar: true
+        }
+    },
+    {
+        path: '/admin/session',
+        name: 'admin-session',
+        component: AdminSession,
         meta: {
             requiresAuth: true,
             requiresAdmin: true,

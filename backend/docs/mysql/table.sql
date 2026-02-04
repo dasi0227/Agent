@@ -191,7 +191,7 @@ CREATE TABLE `session`
     `id`            BIGINT      NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT '自增 id',
     `session_id`    VARCHAR(64) NOT NULL UNIQUE COMMENT '会话 id',
     `session_user`  VARCHAR(32) NOT NULL COMMENT '用户名',
-    `session_title` VARCHAR(64) NOT NULL DEFAULT '新会话' COMMENT '会话标题',
+    `session_title` VARCHAR(64) NOT NULL DEFAULT '未命名会话' COMMENT '会话标题',
     `session_type`  VARCHAR(32) NOT NULL COMMENT '会话类型：chat/work',
     `created_at`    DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`    DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

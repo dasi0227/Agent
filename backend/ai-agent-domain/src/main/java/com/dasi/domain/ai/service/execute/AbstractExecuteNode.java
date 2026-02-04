@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.dasi.domain.ai.repository.IAiRepository;
 import com.dasi.domain.ai.model.entity.ExecuteResponseEntity;
 import com.dasi.domain.ai.model.entity.ExecuteRequestEntity;
+import com.dasi.domain.util.message.IMessageService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
@@ -20,6 +21,9 @@ public abstract class AbstractExecuteNode extends AbstractMultiThreadStrategyRou
 
     @Resource
     protected IAiRepository aiRepository;
+
+    @Resource
+    private IMessageService messageService;
 
     @Override
     protected void multiThread(ExecuteRequestEntity executeRequestEntity, ExecuteContext executeContext) {
@@ -45,7 +49,28 @@ public abstract class AbstractExecuteNode extends AbstractMultiThreadStrategyRou
         } catch (Exception e) {
             log.error("【Agent 执行】发送 SSE 消息失败：{}", e.getMessage(), e);
         }
+        persistWorkMessage(executeResponseEntity);
 
+    }
+
+    private void persistWorkMessage(ExecuteResponseEntity executeResponseEntity) {
+        if (executeResponseEntity == null || messageService == null) {
+            return;
+        }
+        String sessionId = executeResponseEntity.getSessionId();
+        String sectionType = executeResponseEntity.getSectionType();
+        if (sessionId == null || sessionId.isBlank() || sectionType == null || sectionType.isBlank()) {
+            return;
+        }
+        try {
+            String payload = JSON.toJSONString(executeResponseEntity);
+            messageService.saveWorkSseMessage(sessionId, payload);
+            if ("summarizer_overview".equals(sectionType) || "replier_overview".equals(sectionType)) {
+                messageService.saveWorkAnswerMessage(sessionId, "assistant", executeResponseEntity.getSectionContent());
+            }
+        } catch (Exception e) {
+            log.warn("【Agent 执行】保存消息失败：{}", e.getMessage());
+        }
     }
 
     protected String extractJson(String content, String schema) {

@@ -12,4 +12,44 @@
         <result column="created_at" property="createTime"/>
         <result column="updated_at" property="updateTime"/>
     </resultMap>
+
+    <select id="queryBySessionAndType" resultMap="dataMap">
+        SELECT id,
+               session_id,
+               message_content,
+               message_role,
+               message_type,
+               message_seq,
+               created_at,
+               updated_at
+        FROM message
+        WHERE session_id = #{sessionId}
+          AND message_type = #{messageType}
+        ORDER BY message_seq ASC, created_at ASC
+    </select>
+
+    <select id="countBySessionAndRoleAndType" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM message
+        WHERE session_id = #{sessionId}
+          AND message_role = #{messageRole}
+          AND message_type = #{messageType}
+    </select>
+
+    <select id="maxSeqBySessionAndType" resultType="java.lang.Integer">
+        SELECT MAX(message_seq)
+        FROM message
+        WHERE session_id = #{sessionId}
+          AND message_type = #{messageType}
+    </select>
+
+    <insert id="insert" parameterType="com.dasi.infrastructure.persistent.po.Message" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO message (session_id, message_content, message_role, message_type, message_seq, created_at, updated_at)
+        VALUES (#{sessionId}, #{messageContent}, #{messageRole}, #{messageType}, #{messageSeq}, #{createTime}, #{updateTime})
+    </insert>
+
+    <delete id="deleteBySessionId">
+        DELETE FROM message
+        WHERE session_id = #{sessionId}
+    </delete>
 </mapper>

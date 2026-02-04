@@ -67,7 +67,11 @@ public class AuthInterceptor implements HandlerInterceptor {
             return unauthorized(response, "登录状态无效，请重新登录");
         }
 
-        authContext.set(userVO);
+        authContext.set(AuthContext.UserInfo.builder()
+                .id(userVO.getId())
+                .username(userVO.getUsername())
+                .role(userVO.getRole())
+                .build());
 
         if (uri.startsWith("/api/v1/admin") && (userVO.getRole() == null || !ADMIN.getRole().equalsIgnoreCase(userVO.getRole()))) {
             return forbidden(response, "无权限访问该资源");
