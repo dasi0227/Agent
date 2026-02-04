@@ -6,6 +6,7 @@ import com.dasi.domain.ai.service.augment.IAugmentService;
 import com.dasi.domain.ai.service.dispatch.IDispatchService;
 import com.dasi.domain.ai.service.rag.IRagService;
 import com.dasi.domain.query.service.IQueryService;
+import com.dasi.domain.util.message.IMessageService;
 import com.dasi.types.dto.response.query.QueryChatClientResponse;
 import com.dasi.types.dto.response.query.QueryWorkAgentResponse;
 import com.dasi.types.dto.request.ai.AiChatRequest;
@@ -26,6 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 
 import java.util.HashSet;
@@ -55,6 +57,9 @@ public class AiController implements IAiApi {
     @Resource
     private IQueryService queryService;
 
+    @Resource
+    private IMessageService messageService;
+
     @Override
     @PostMapping(value = "/work/execute", produces = "text/event-stream")
     public SseEmitter execute(@Valid @RequestBody AiWorkRequest aiWorkRequest) {
@@ -82,6 +87,24 @@ public class AiController implements IAiApi {
                 .maxRetry(aiWorkRequest.getMaxRetry())
                 .build();
 
+        if (StringUtils.hasText(aiWorkRequest.getSessionId())) {
+            try {
+                messageService.saveWorkAnswerMessage(aiWorkRequest.getSessionId(), "user", aiWorkRequest.getUserMessage());
+            } catch (Exception e) {
+                log.warn("【Work 会话】保存用户消息失败：{}", e.getMessage());
+                try {
+                    sseEmitter.send(SseEmitter.event()
+                            .name("error")
+                            .data(e.getMessage()));
+                } catch (Exception ex) {
+                    log.error("【Work 会话】发送错误失败：{}", ex.getMessage());
+                } finally {
+                    sseEmitter.complete();
+                }
+                return sseEmitter;
+            }
+        }
+
         dispatchService.dispatchExecuteStrategy(executeRequestEntity, sseEmitter);
 
         return sseEmitter;
@@ -108,6 +131,14 @@ public class AiController implements IAiApi {
         log.info("【AI 对话】完整对话开始：aiChatRequest={}", aiChatRequest);
 
         try {
+            if (StringUtils.hasText(sessionId)) {
+                try {
+                    messageService.saveUserMessage(sessionId, userMessage);
+                } catch (Exception e) {
+                    log.warn("【AI 对话】保存用户消息失败：{}", e.getMessage());
+                    return e.getMessage();
+                }
+            }
             ChatClient chatClient = applicationContext.getBean(CLIENT.getBeanName(clientId), ChatClient.class);
             List<Message> messageList = augmentService.augmentRagMessage(userMessage, ragTag);
             SyncMcpToolCallbackProvider toolCallbackList = augmentService.augmentMcpTool(mcpIdList);
@@ -129,6 +160,13 @@ public class AiController implements IAiApi {
                     .content();
             if (response == null || response.isEmpty()) {
                 return CHAT_ERROR_RESPONSE;
+            }
+            if (StringUtils.hasText(sessionId)) {
+                try {
+                    messageService.saveAssistantMessage(sessionId, response);
+                } catch (Exception e) {
+                    log.warn("【AI 对话】保存助手消息失败：{}", e.getMessage());
+                }
             }
             return response;
         } catch (Exception e) {
@@ -158,6 +196,14 @@ public class AiController implements IAiApi {
         log.info("【AI 对话】流式对话开始：aiChatRequest={}", aiChatRequest);
 
         try {
+            if (StringUtils.hasText(sessionId)) {
+                try {
+                    messageService.saveUserMessage(sessionId, userMessage);
+                } catch (Exception e) {
+                    log.warn("【AI 对话】保存用户消息失败：{}", e.getMessage());
+                    return Flux.just(e.getMessage());
+                }
+            }
             ChatClient chatClient = applicationContext.getBean(CLIENT.getBeanName(clientId), ChatClient.class);
             List<Message> messageList = augmentService.augmentRagMessage(userMessage, ragTag);
             SyncMcpToolCallbackProvider toolCallbackList = augmentService.augmentMcpTool(mcpIdList);
@@ -166,6 +212,7 @@ public class AiController implements IAiApi {
                     .presencePenalty(presencePenalty)
                     .maxCompletionTokens(maxCompletionTokens)
                     .build();
+            StringBuilder answerBuffer = new StringBuilder();
             return chatClient
                     .prompt()
                     .advisors(a -> a
@@ -177,6 +224,17 @@ public class AiController implements IAiApi {
                     .toolCallbacks(toolCallbackList)
                     .stream()
                     .content()
+                    .doOnNext(answerBuffer::append)
+                    .doFinally(signalType -> {
+                        if (answerBuffer.isEmpty() || !StringUtils.hasText(sessionId)) {
+                            return;
+                        }
+                        try {
+                            messageService.saveAssistantMessage(sessionId, answerBuffer.toString());
+                        } catch (Exception e) {
+                            log.warn("【AI 对话】保存助手消息失败：{}", e.getMessage());
+                        }
+                    })
                     .doFinally(signalType -> log.info("【AI 对话】流式对话结束：clientId={}, signal={}", clientId, signalType))
                     .onErrorResume(e -> {
                         log.error("【AI 对话】流式对话失败：clientId={}", clientId, e);

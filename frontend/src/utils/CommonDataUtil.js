@@ -30,6 +30,9 @@ export const adminMenuGroups = [
     {
         name: 'user',
         label: '用户管理',
-        items: [{ key: 'user', label: 'USER', path: '/admin/user' }]
+        items: [
+            { key: 'user', label: 'USER', path: '/admin/user' },
+            { key: 'session', label: 'SESSION', path: '/admin/session' }
+        ]
     }
 ];

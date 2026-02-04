@@ -3,7 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } 
 import { marked } from 'marked';
 import hljs from 'highlight.js';
 import DOMPurify from 'dompurify';
-import { dispatchArmory, executeAgentStream, queryAgentList } from '../request/api';
+import { dispatchArmory, executeAgentStream, insertSession, listWorkAnswerMessages, listWorkSseMessages, queryAgentList, updateSession } from '../request/api';
 import { normalizeError } from '../request/request';
 import { formatMcpJson } from '../utils/StringUtil';
 import { useAgentSettingsStore, useAgentStore } from '../router/pinia';
@@ -22,11 +22,70 @@ const inputValue = ref('');
 const showSettings = ref(false);
 const isLeftAtBottom = ref(true);
 const isRightAtBottom = ref(true);
+const messageLoading = ref(false);
+const sendError = ref('');
 
 const settingsForm = reactive({
     maxRetry: settingsStore.maxRetry,
     maxRound: settingsStore.maxRound
 });
+
+const pickData = (resp, message = '操作失败') => {
+    if (resp && typeof resp === 'object' && Object.prototype.hasOwnProperty.call(resp, 'code')) {
+        if (resp.code !== 200) {
+            const err = new Error(resp.info || message);
+            err.status = 500;
+            throw err;
+        }
+        return resp.data;
+    }
+    return resp?.data ?? resp?.result ?? resp;
+};
+
+const normalizeSessionType = (value) => (value ? value.toString().toLowerCase() : '');
+
+const mapSession = (session) => {
+    if (!session) return null;
+    return {
+        id: session.id,
+        sessionId: session.sessionId,
+        sessionUser: session.sessionUser,
+        title: session.sessionTitle || '新会话',
+        sessionType: normalizeSessionType(session.sessionType || session.type),
+        createdAt: session.createTime ? Date.parse(session.createTime) : Date.now(),
+        messages: [],
+        cards: []
+    };
+};
+
+const mapMessage = (message) => ({
+    id: message.id || `msg_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`,
+    role: message.messageRole || message.role || 'assistant',
+    content: message.messageContent || message.content || '',
+    pending: false,
+    error: null,
+    createdAt: message.createTime ? Date.parse(message.createTime) : Date.now()
+});
+
+const mapCard = (message) => {
+    const raw = message?.messageContent || '';
+    let parsed = null;
+    try {
+        parsed = raw ? JSON.parse(raw) : null;
+    } catch (error) {
+        parsed = null;
+    }
+    const payload = parsed && typeof parsed === 'object' ? parsed : { sectionContent: raw };
+    return {
+        id: message.id || payload.id || `card_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`,
+        clientType: payload.clientType || '',
+        sectionType: payload.sectionType || '',
+        sectionContent: payload.sectionContent || '',
+        round: payload.round ?? null,
+        step: payload.step ?? null,
+        timestamp: payload.timestamp ?? null
+    };
+};
 
 const renderer = new marked.Renderer();
 renderer.code = (code, infostring) => {
@@ -93,6 +152,7 @@ const fetchAgents = async () => {
 const messages = computed(() => agentStore.currentMessages);
 const cards = computed(() => agentStore.currentCards);
 const sending = computed(() => agentStore.sending);
+const userMessageCount = computed(() => messages.value.filter((item) => item.role === 'user').length);
 
 const handleLeftScroll = () => {
     const el = leftScrollRef.value;
@@ -124,6 +184,72 @@ const scrollRightToBottom = (smooth = true) => {
     });
 };
 
+const loadWorkMessages = async (sessionId) => {
+    if (!sessionId) {
+        if (agentStore.currentSessionId) {
+            agentStore.setSessionMessages(agentStore.currentSessionId, []);
+            agentStore.setSessionCards(agentStore.currentSessionId, []);
+        }
+        return;
+    }
+    messageLoading.value = true;
+    try {
+        const [sseResp, answerResp] = await Promise.all([
+            listWorkSseMessages({ sessionId }),
+            listWorkAnswerMessages({ sessionId })
+        ]);
+        const sseList = pickData(sseResp, '获取会话卡片失败') || [];
+        const answerList = pickData(answerResp, '获取会话消息失败') || [];
+        const mappedCards = (Array.isArray(sseList) ? sseList : [])
+            .map(mapCard)
+            .filter(
+                (card) =>
+                    card.sectionType !== 'summarizer_overview' && card.sectionType !== 'replier_overview'
+            );
+        const mappedMessages = (Array.isArray(answerList) ? answerList : []).map(mapMessage);
+        if (agentStore.currentSessionId) {
+            agentStore.setSessionCards(agentStore.currentSessionId, mappedCards);
+            agentStore.setSessionMessages(agentStore.currentSessionId, mappedMessages);
+        }
+    } catch (error) {
+        sendError.value = normalizeError(error).message || '获取消息失败';
+    } finally {
+        messageLoading.value = false;
+    }
+};
+
+const ensureWorkSession = async () => {
+    if (agentStore.currentSession) {
+        if (!agentStore.currentSessionId && agentStore.currentSession?.id) {
+            agentStore.setCurrentSessionId(agentStore.currentSession.id);
+        }
+        return agentStore.currentSession;
+    }
+    try {
+        const resp = await insertSession({ sessionTitle: '新会话', sessionType: 'work' });
+        const session = mapSession(pickData(resp, '创建会话失败'));
+        if (!session) return null;
+        agentStore.upsertSession(session);
+        agentStore.setCurrentSessionId(session.id);
+        return session;
+    } catch (error) {
+        sendError.value = normalizeError(error).message || '创建会话失败';
+        return null;
+    }
+};
+
+const renameSessionIfNeeded = async (session, content) => {
+    if (!session) return;
+    if (session.title && session.title !== '新会话') return;
+    const nextTitle = content.slice(0, 20) || '新会话';
+    agentStore.updateSessionTitle(session.id, nextTitle);
+    try {
+        await updateSession({ id: session.id, sessionId: session.sessionId, sessionTitle: nextTitle });
+    } catch (error) {
+        sendError.value = normalizeError(error).message || '更新会话失败';
+    }
+};
+
 watch(
     cards,
     () => {
@@ -141,13 +267,38 @@ watch(
 );
 
 watch(
-    () => agentStore.currentSessionId,
+    () => inputValue.value,
     () => {
+        if (sendError.value && userMessageCount.value < 3) {
+            sendError.value = '';
+        }
+    }
+);
+
+watch(
+    userMessageCount,
+    (count) => {
+        if (count >= 3) {
+            sendError.value = '当前会话已达到 3 条用户消息上限，请新建会话';
+        }
+    },
+    { immediate: true }
+);
+
+watch(
+    () => agentStore.currentSessionId,
+    async () => {
+        sendError.value = '';
+        const session = agentStore.currentSession;
+        if (session?.sessionId) {
+            await loadWorkMessages(session.sessionId);
+        }
         nextTick(() => {
             scrollLeftToBottom(false);
             scrollRightToBottom(false);
         });
-    }
+    },
+    { immediate: true }
 );
 
 const toggleAgentDropdown = () => {
@@ -210,31 +361,36 @@ const rangeStyle = (value) => {
     };
 };
 
-const buildExecutePayload = (userMessage) => {
-    const session = agentStore.ensureSession();
-    return {
-        aiAgentId: currentAgentId.value,
-        userMessage,
-        sessionId: session.sessionId,
-        maxRound: settingsStore.maxRound,
-        maxRetry: settingsStore.maxRetry
-    };
-};
+const buildExecutePayload = (userMessage, sessionId) => ({
+    aiAgentId: currentAgentId.value,
+    userMessage,
+    sessionId,
+    maxRound: settingsStore.maxRound,
+    maxRetry: settingsStore.maxRetry
+});
 
 const sendMessage = async () => {
     const content = inputValue.value.trim();
     if (!content || sending.value || !currentAgentId.value) return;
+    sendError.value = '';
+    const session = await ensureWorkSession();
+    if (!session) return;
+    if (userMessageCount.value >= 3) {
+        sendError.value = '当前会话已达到 3 条用户消息上限，请新建会话';
+        return;
+    }
     agentStore.stopCurrentRequest();
     agentStore.setSending(true);
     const controller = new AbortController();
     agentStore.setAbortController(controller);
     agentStore.addUserMessage(content);
+    renameSessionIfNeeded(session, content);
     inputValue.value = '';
     scrollRightToBottom(true);
-    await runExecute(content, controller);
+    await runExecute(content, controller, session.sessionId);
 };
 
-const runExecute = async (content, controller) => {
+const runExecute = async (content, controller, sessionId) => {
     const assistantMessage = agentStore.addAssistantMessage({ pending: true, content: '' });
     const events = [];
     let closed = false;
@@ -272,7 +428,7 @@ const runExecute = async (content, controller) => {
 
     try {
         await executeAgentStream({
-            ...buildExecutePayload(content),
+            ...buildExecutePayload(content, sessionId),
             signal: controller.signal,
             onData: (payload) => {
                 if (!payload || typeof payload !== 'object') return;
@@ -401,6 +557,9 @@ onBeforeUnmount(() => {
                     @scroll="handleLeftScroll"
                 >
                     <div class="flex flex-1 flex-col gap-[12px]">
+                        <div v-if="messageLoading" class="text-[12px] text-[var(--text-secondary)]">
+                            加载会话消息中...
+                        </div>
                         <div
                             v-for="card in cards"
                             :key="card.id"
@@ -508,6 +667,9 @@ onBeforeUnmount(() => {
                         :disabled="sending"
                         @keydown="handleKeydown"
                     ></textarea>
+                    <div v-if="sendError" class="text-[12px] text-[var(--text-secondary)]">
+                        {{ sendError }}
+                    </div>
                     <div class="flex justify-end gap-[10px]">
                         <button
                             class="inline-flex h-[36px] items-center justify-center rounded-[12px] border border-[var(--border-color)] bg-white px-[14px] py-[9px] font-bold leading-[1.1] text-[var(--text-primary)] transition-all duration-200 hover:bg-[#f7f9fc] disabled:cursor-not-allowed disabled:opacity-70"
@@ -520,7 +682,7 @@ onBeforeUnmount(() => {
                         <button
                             class="inline-flex h-[36px] items-center justify-center rounded-[12px] border border-[var(--accent-color)] bg-[var(--accent-color)] px-[14px] py-[9px] font-bold leading-[1.1] text-white transition-all duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-70"
                             type="button"
-                            :disabled="sending || !inputValue.trim() || !currentAgentId"
+                            :disabled="sending || !inputValue.trim() || !currentAgentId || userMessageCount >= 3"
                             @click="sendMessage"
                         >
                             {{ sending ? '执行中…' : '发送' }}

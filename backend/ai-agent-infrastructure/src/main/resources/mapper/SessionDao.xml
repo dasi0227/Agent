@@ -11,4 +11,76 @@
         <result column="created_at" property="createTime"/>
         <result column="updated_at" property="updateTime"/>
     </resultMap>
+
+    <select id="queryByUser" resultMap="dataMap">
+        SELECT id,
+               session_id,
+               session_user,
+               session_title,
+               session_type,
+               created_at,
+               updated_at
+        FROM session
+        WHERE session_user = #{sessionUser}
+        ORDER BY updated_at DESC, id DESC
+    </select>
+
+    <select id="queryAll" resultMap="dataMap">
+        SELECT id,
+               session_id,
+               session_user,
+               session_title,
+               session_type,
+               created_at,
+               updated_at
+        FROM session
+        ORDER BY updated_at DESC, id DESC
+    </select>
+
+    <select id="queryById" parameterType="java.lang.String" resultMap="dataMap">
+        SELECT id,
+               session_id,
+               session_user,
+               session_title,
+               session_type,
+               created_at,
+               updated_at
+        FROM session
+        WHERE id = #{id}
+    </select>
+
+    <select id="queryBySessionId" resultMap="dataMap">
+        SELECT id,
+               session_id,
+               session_user,
+               session_title,
+               session_type,
+               created_at,
+               updated_at
+        FROM session
+        WHERE session_id = #{sessionId}
+    </select>
+
+    <select id="countByUserAndType" resultType="int">
+        SELECT COUNT(1)
+        FROM session
+        WHERE session_user = #{sessionUser}
+          AND session_type = #{sessionType}
+    </select>
+
+    <insert id="insert" parameterType="com.dasi.infrastructure.persistent.po.Session" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO session (session_id, session_user, session_title, session_type)
+        VALUES (#{sessionId}, #{sessionUser}, #{sessionTitle}, #{sessionType})
+    </insert>
+
+    <update id="updateTitle">
+        UPDATE session
+        SET session_title = #{sessionTitle}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM session
+        WHERE id = #{id}
+    </delete>
 </mapper>

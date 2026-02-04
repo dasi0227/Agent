@@ -21,6 +21,16 @@ const REGISTER_PATH = `${AUTH_BASE_PATH}/register`;
 const PROFILE_PATH = `${AUTH_BASE_PATH}/profile`;
 const PASSWORD_PATH = `${AUTH_BASE_PATH}/password`;
 
+const SESSION_BASE_PATH = '/api/v1/session';
+const SESSION_LIST_PATH = `${SESSION_BASE_PATH}/list`;
+const SESSION_ADMIN_LIST_PATH = `${SESSION_BASE_PATH}/admin/list`;
+const SESSION_INSERT_PATH = `${SESSION_BASE_PATH}/insert`;
+const SESSION_UPDATE_PATH = `${SESSION_BASE_PATH}/update`;
+const SESSION_DELETE_PATH = `${SESSION_BASE_PATH}/delete`;
+const SESSION_CHAT_MESSAGE_PATH = `${SESSION_BASE_PATH}/message/chat`;
+const SESSION_WORK_SSE_MESSAGE_PATH = `${SESSION_BASE_PATH}/message/work-sse`;
+const SESSION_WORK_ANSWER_MESSAGE_PATH = `${SESSION_BASE_PATH}/message/work-answer`;
+
 const ADMIN_BASE_PATH = '/api/v1/admin';
 const ADMIN_STATUS_PARAM = {
     client: 'clientStatus',
@@ -178,6 +188,29 @@ export const register = async ({ username, password }) =>
 export const fetchProfile = async () => http.post(PROFILE_PATH);
 export const updatePassword = async ({ id, username, oldPassword, newPassword }) =>
     http.post(PASSWORD_PATH, trimStrings({ id, username, oldPassword, newPassword }));
+
+// -------------------- Session --------------------
+export const listSessions = async () => http.get(SESSION_LIST_PATH);
+
+export const listAdminSessions = async () => http.get(SESSION_ADMIN_LIST_PATH);
+
+export const insertSession = async ({ sessionTitle, sessionType }) =>
+    http.post(SESSION_INSERT_PATH, trimStrings({ sessionTitle, sessionType }));
+
+export const updateSession = async ({ id, sessionId, sessionTitle }) =>
+    http.post(SESSION_UPDATE_PATH, trimStrings({ id, sessionId, sessionTitle }));
+
+export const deleteSession = async ({ id, sessionId }) =>
+    http.post(SESSION_DELETE_PATH, null, { params: { id, sessionId } });
+
+export const listChatMessages = async ({ sessionId }) =>
+    http.get(SESSION_CHAT_MESSAGE_PATH, { params: { sessionId } });
+
+export const listWorkSseMessages = async ({ sessionId }) =>
+    http.get(SESSION_WORK_SSE_MESSAGE_PATH, { params: { sessionId } });
+
+export const listWorkAnswerMessages = async ({ sessionId }) =>
+    http.get(SESSION_WORK_ANSWER_MESSAGE_PATH, { params: { sessionId } });
 
 // -------------------- Admin --------------------
 const buildAdminPath = (moduleKey, action) => `${ADMIN_BASE_PATH}/${moduleKey}/${action}`;

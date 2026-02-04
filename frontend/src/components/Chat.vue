@@ -6,11 +6,14 @@ import DOMPurify from 'dompurify';
 import {
     fetchComplete,
     fetchStream,
+    insertSession,
+    listChatMessages,
     pickContentFromResult,
     dispatchArmory,
     queryChatModels,
     queryChatMcps,
     queryRagTags,
+    updateSession,
     uploadRagFile,
     uploadRagGit
 } from '../request/api';
@@ -42,6 +45,8 @@ const ragDropdownOpen = ref(false);
 const uploadRagDropdownOpen = ref(false);
 const copiedMessageId = ref(null);
 const copyTimer = ref(null);
+const messageLoading = ref(false);
+const sendError = ref('');
 
 const typewriterState = reactive({
     lines: [],
@@ -61,6 +66,43 @@ const uploadForm = reactive({
     repoPassword: '',
     error: '',
     uploading: false
+});
+
+const pickData = (resp, message = '操作失败') => {
+    if (resp && typeof resp === 'object' && Object.prototype.hasOwnProperty.call(resp, 'code')) {
+        if (resp.code !== 200) {
+            const err = new Error(resp.info || message);
+            err.status = 500;
+            throw err;
+        }
+        return resp.data;
+    }
+    return resp?.data ?? resp?.result ?? resp;
+};
+
+const normalizeSessionType = (value) => (value ? value.toString().toLowerCase() : '');
+
+const mapSession = (session) => {
+    if (!session) return null;
+    return {
+        id: session.id,
+        sessionId: session.sessionId,
+        sessionUser: session.sessionUser,
+        title: session.sessionTitle || '新会话',
+        sessionType: normalizeSessionType(session.sessionType || session.type),
+        createdAt: session.createTime ? Date.parse(session.createTime) : Date.now(),
+        messages: []
+    };
+};
+
+const mapMessage = (message) => ({
+    id: message.id || `msg_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`,
+    role: message.messageRole || message.role || 'assistant',
+    content: message.messageContent || message.content || '',
+    think: '',
+    pending: false,
+    error: null,
+    createdAt: message.createTime ? Date.parse(message.createTime) : Date.now()
 });
 
 const normalizeSettingValue = (value) => {
@@ -136,6 +178,7 @@ const messages = computed(() => chatStore.currentMessages);
 const currentChatSessionId = computed(() => chatStore.currentChat?.sessionId || '');
 const sending = computed(() => chatStore.sending);
 const hasMessages = computed(() => messages.value.length > 0);
+const userMessageCount = computed(() => messages.value.filter((item) => item.role === 'user').length);
 
 const handleScroll = () => {
     const el = messageScrollRef.value;
@@ -152,6 +195,60 @@ const scrollToBottom = (smooth = true) => {
     });
 };
 
+const loadChatMessages = async (sessionId) => {
+    if (!sessionId) {
+        if (chatStore.currentChatId) {
+            chatStore.setChatMessages(chatStore.currentChatId, []);
+        }
+        return;
+    }
+    messageLoading.value = true;
+    try {
+        const resp = await listChatMessages({ sessionId });
+        const list = pickData(resp, '获取消息失败') || [];
+        const mapped = (Array.isArray(list) ? list : []).map(mapMessage);
+        if (chatStore.currentChatId) {
+            chatStore.setChatMessages(chatStore.currentChatId, mapped);
+        }
+    } catch (error) {
+        sendError.value = normalizeError(error).message || '获取消息失败';
+    } finally {
+        messageLoading.value = false;
+    }
+};
+
+const ensureChatSession = async () => {
+    if (chatStore.currentChat) {
+        if (!chatStore.currentChatId && chatStore.currentChat?.id) {
+            chatStore.setCurrentChatId(chatStore.currentChat.id);
+        }
+        return chatStore.currentChat;
+    }
+    try {
+        const resp = await insertSession({ sessionTitle: '新会话', sessionType: 'chat' });
+        const session = mapSession(pickData(resp, '创建会话失败'));
+        if (!session) return null;
+        chatStore.upsertChat(session);
+        chatStore.setCurrentChatId(session.id);
+        return session;
+    } catch (error) {
+        sendError.value = normalizeError(error).message || '创建会话失败';
+        return null;
+    }
+};
+
+const renameChatIfNeeded = async (chat, content) => {
+    if (!chat) return;
+    if (chat.title && chat.title !== '新会话') return;
+    const nextTitle = content.slice(0, 20) || '新会话';
+    chatStore.updateChatTitle(chat.id, nextTitle);
+    try {
+        await updateSession({ id: chat.id, sessionId: chat.sessionId, sessionTitle: nextTitle });
+    } catch (error) {
+        sendError.value = normalizeError(error).message || '更新会话失败';
+    }
+};
+
 watch(
     messages,
     () => {
@@ -162,7 +259,15 @@ watch(
 
 watch(
     () => chatStore.currentChatId,
-    () => nextTick(() => scrollToBottom(false))
+    async () => {
+        sendError.value = '';
+        const chat = chatStore.currentChat;
+        if (chat?.sessionId) {
+            await loadChatMessages(chat.sessionId);
+        }
+        nextTick(() => scrollToBottom(false));
+    },
+    { immediate: true }
 );
 
 const startTypewriter = () => {
@@ -184,6 +289,25 @@ watch(
             stopTypewriter();
         } else {
             startTypewriter();
+        }
+    },
+    { immediate: true }
+);
+
+watch(
+    () => inputValue.value,
+    () => {
+        if (sendError.value && userMessageCount.value < 20) {
+            sendError.value = '';
+        }
+    }
+);
+
+watch(
+    userMessageCount,
+    (count) => {
+        if (count >= 20) {
+            sendError.value = '当前会话已达到 20 条用户消息上限，请新建会话';
         }
     },
     { immediate: true }
@@ -429,6 +553,13 @@ const sendMessage = async () => {
     const content = inputValue.value.trim();
     if (!content || sending.value || !currentModel.value) return;
     if (!validateSettingsBeforeSend()) return;
+    sendError.value = '';
+    const chat = await ensureChatSession();
+    if (!chat) return;
+    if (userMessageCount.value >= 20) {
+        sendError.value = '当前会话已达到 20 条用户消息上限，请新建会话';
+        return;
+    }
     const mode = settingsStore.type || 'complete';
     chatStore.stopCurrentRequest();
     stopTypewriter();
@@ -436,6 +567,7 @@ const sendMessage = async () => {
     const controller = new AbortController();
     chatStore.setAbortController(controller);
     chatStore.addUserMessage(content);
+    renameChatIfNeeded(chat, content);
     inputValue.value = '';
     scrollToBottom(true);
     if (mode === 'stream') {
@@ -1024,6 +1156,7 @@ const handleUpload = async () => {
             >
                 <div class="mx-auto w-full max-w-[900px] pl-[24px] pr-[calc(24px+var(--scrollbar-w))]">
                     <div class="flex w-full flex-col gap-[14px]">
+                        <div v-if="messageLoading" class="text-[12px] text-[var(--text-secondary)]">加载会话消息中...</div>
                         <div v-if="messages.length === 0" class="flex flex-col items-start gap-[12px] py-[60px] text-[var(--text-primary)]">
                             <div
                                 v-for="(line, idx) in typewriterState.lines"
@@ -1122,6 +1255,9 @@ const handleUpload = async () => {
                         :disabled="sending"
                         @keydown="handleKeydown"
                     ></textarea>
+                    <div v-if="sendError" class="text-[12px] text-[var(--text-secondary)]">
+                        {{ sendError }}
+                    </div>
                     <div class="flex justify-end gap-[10px]">
                         <button
                             class="inline-flex h-[36px] items-center justify-center rounded-[12px] border border-[var(--border-color)] bg-white px-[14px] py-[9px] font-bold leading-[1.1] text-[var(--text-primary)] transition-all duration-200 hover:bg-[#f7f9fc] disabled:cursor-not-allowed disabled:opacity-70"
@@ -1134,7 +1270,7 @@ const handleUpload = async () => {
                         <button
                             class="inline-flex h-[36px] items-center justify-center rounded-[12px] border border-[var(--accent-color)] bg-[var(--accent-color)] px-[14px] py-[9px] font-bold leading-[1.1] text-white transition-all duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-70"
                             type="button"
-                            :disabled="sending || !inputValue.trim()"
+                            :disabled="sending || !inputValue.trim() || userMessageCount >= 20"
                             @click="sendMessage"
                         >
                             {{ sending ? '生成中…' : '发送' }}

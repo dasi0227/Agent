@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, ref } from 'vue';
+import { computed, reactive, ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import logoImg from '../assets/logo.jpg';
 import chatIconDark from '../assets/chat-white.svg';
@@ -7,7 +7,8 @@ import chatIconLight from '../assets/chat-black.svg';
 import workIconDark from '../assets/work-white.svg';
 import workIconLight from '../assets/work-black.svg';
 import { useAgentStore, useAuthStore, useChatStore, useSettingsStore } from '../router/pinia';
-import { updatePassword } from '../request/api';
+import { deleteSession, insertSession, listSessions, updatePassword, updateSession } from '../request/api';
+import { normalizeError } from '../request/request';
 
 const router = useRouter();
 const route = useRoute();
@@ -50,17 +51,86 @@ const profileForm = reactive({
     oldPassword: '',
     newPassword: ''
 });
+const sessionLoading = ref(false);
+const sessionError = ref('');
+const sessionLimitError = ref('');
+
+const pickData = (resp, message = '操作失败') => {
+    if (resp && typeof resp === 'object' && Object.prototype.hasOwnProperty.call(resp, 'code')) {
+        if (resp.code !== 200) {
+            const err = new Error(resp.info || message);
+            err.status = 500;
+            throw err;
+        }
+        return resp.data;
+    }
+    return resp?.data ?? resp?.result ?? resp;
+};
+
+const normalizeSessionType = (value) => (value ? value.toString().toLowerCase() : '');
+
+const mapSession = (session) => {
+    if (!session) return null;
+    return {
+        id: session.id,
+        sessionId: session.sessionId,
+        sessionUser: session.sessionUser,
+        title: session.sessionTitle || '新会话',
+        sessionType: normalizeSessionType(session.sessionType || session.type),
+        createdAt: session.createTime ? Date.parse(session.createTime) : Date.now(),
+        messages: [],
+        cards: []
+    };
+};
 
 const handleNewSession = () => {
     showNewSessionPicker.value = true;
+    sessionLimitError.value = '';
 };
+
+const loadSessions = async () => {
+    sessionLoading.value = true;
+    sessionError.value = '';
+    try {
+        const resp = await listSessions();
+        const list = pickData(resp, '获取会话失败') || [];
+        const normalized = (Array.isArray(list) ? list : [])
+            .map(mapSession)
+            .filter(Boolean);
+        const chatsList = normalized.filter((item) => item.sessionType === 'chat');
+        const agentList = normalized.filter((item) => item.sessionType === 'work');
+        chatStore.setChats(chatsList);
+        agentStore.setSessions(agentList);
+
+        const nextChatId =
+            chatStore.currentChatId && chatsList.some((item) => item.id === chatStore.currentChatId)
+                ? chatStore.currentChatId
+                : chatsList[0]?.id || null;
+        const nextAgentId =
+            agentStore.currentSessionId && agentList.some((item) => item.id === agentStore.currentSessionId)
+                ? agentStore.currentSessionId
+                : agentList[0]?.id || null;
+        chatStore.setCurrentChatId(nextChatId);
+        agentStore.setCurrentSessionId(nextAgentId);
+    } catch (error) {
+        sessionError.value = normalizeError(error).message || '获取会话失败';
+        chatStore.setChats([]);
+        agentStore.setSessions([]);
+    } finally {
+        sessionLoading.value = false;
+    }
+};
+
+onMounted(() => {
+    loadSessions();
+});
 
 const handleSelectChat = (chatId) => {
     if (route.path !== '/chat') {
         router.push('/chat');
     }
     if (chatId !== currentChatId.value) {
-        chatStore.switchChat(chatId);
+        chatStore.setCurrentChatId(chatId);
     }
 };
 
@@ -69,7 +139,7 @@ const handleSelectAgent = (sessionId) => {
         router.push('/work');
     }
     if (sessionId !== currentAgentSessionId.value) {
-        agentStore.switchSession(sessionId);
+        agentStore.setCurrentSessionId(sessionId);
     }
 };
 
@@ -98,12 +168,18 @@ const startRenameChat = (chat) => {
     editChatTitle.value = chat.title || '';
 };
 
-const saveRenameChat = (chat) => {
+const saveRenameChat = async (chat) => {
     if (!chat || editingChatId.value !== chat.id) {
         return;
     }
     const title = editChatTitle.value.trim() || '未命名会话';
-    chatStore.renameChat(chat.id, title);
+    try {
+        await updateSession({ id: chat.id, sessionId: chat.sessionId, sessionTitle: title });
+        chatStore.updateChatTitle(chat.id, title);
+        sessionError.value = '';
+    } catch (error) {
+        sessionError.value = normalizeError(error).message || '更新会话失败';
+    }
     editingChatId.value = null;
     editChatTitle.value = '';
 };
@@ -118,12 +194,18 @@ const startRenameAgent = (session) => {
     editAgentTitle.value = session.title || '';
 };
 
-const saveRenameAgent = (session) => {
+const saveRenameAgent = async (session) => {
     if (!session || editingAgentId.value !== session.id) {
         return;
     }
     const title = editAgentTitle.value.trim() || '未命名会话';
-    agentStore.renameSession(session.id, title);
+    try {
+        await updateSession({ id: session.id, sessionId: session.sessionId, sessionTitle: title });
+        agentStore.updateSessionTitle(session.id, title);
+        sessionError.value = '';
+    } catch (error) {
+        sessionError.value = normalizeError(error).message || '更新会话失败';
+    }
     editingAgentId.value = null;
     editAgentTitle.value = '';
 };
@@ -138,15 +220,28 @@ const openDeleteConfirm = (type, id) => {
     showDeleteConfirm.value = true;
 };
 
-const handleDelete = () => {
+const handleDelete = async () => {
     if (!deleteTarget.value?.id) {
         showDeleteConfirm.value = false;
         return;
     }
-    if (deleteTarget.value.type === 'agent') {
-        agentStore.deleteSession(deleteTarget.value.id);
-    } else {
-        chatStore.deleteChat(deleteTarget.value.id);
+    try {
+        const target =
+            deleteTarget.value.type === 'agent'
+                ? agentStore.sessions.find((item) => item.id === deleteTarget.value.id)
+                : chatStore.chats.find((item) => item.id === deleteTarget.value.id);
+        if (!target) {
+            throw new Error('会话不存在');
+        }
+        await deleteSession({ id: target.id, sessionId: target.sessionId });
+        if (deleteTarget.value.type === 'agent') {
+            agentStore.removeSession(deleteTarget.value.id);
+        } else {
+            chatStore.removeChat(deleteTarget.value.id);
+        }
+        sessionError.value = '';
+    } catch (error) {
+        sessionError.value = normalizeError(error).message || '删除会话失败';
     }
     showDeleteConfirm.value = false;
     deleteTarget.value = { type: 'chat', id: '' };
@@ -156,17 +251,41 @@ const handleDelete = () => {
 
 const closeNewSessionPicker = () => {
     showNewSessionPicker.value = false;
+    sessionLimitError.value = '';
 };
 
-const confirmNewSession = (type) => {
-    if (type === 'work') {
-        agentStore.createSession();
-        router.push('/work');
-    } else if (type === 'chat') {
-        chatStore.createChat();
-        router.push('/chat');
+const confirmNewSession = async (type) => {
+    sessionLimitError.value = '';
+    const chatCount = chats.value.length;
+    const workCount = agentSessions.value.length;
+    if (type === 'chat' && chatCount >= 3) {
+        sessionLimitError.value = 'Chat 会话已达到 3 个上限';
+        return;
     }
-    closeNewSessionPicker();
+    if (type === 'work' && workCount >= 3) {
+        sessionLimitError.value = 'Work 会话已达到 3 个上限';
+        return;
+    }
+    try {
+        const resp = await insertSession({ sessionTitle: '新会话', sessionType: type });
+        const session = mapSession(pickData(resp, '创建会话失败'));
+        if (!session) {
+            throw new Error('创建会话失败');
+        }
+        if (type === 'work') {
+            agentStore.upsertSession(session);
+            agentStore.setCurrentSessionId(session.id);
+            router.push('/work');
+        } else {
+            chatStore.upsertChat(session);
+            chatStore.setCurrentChatId(session.id);
+            router.push('/chat');
+        }
+        closeNewSessionPicker();
+        sessionError.value = '';
+    } catch (error) {
+        sessionError.value = normalizeError(error).message || '创建会话失败';
+    }
 };
 
 const openProfile = () => {
@@ -282,6 +401,8 @@ const toggleTheme = () => {
             >
                 ＋ 新建会话
             </button>
+            <div v-if="sessionLoading" class="text-[12px] text-[rgba(231,236,244,0.7)]">会话加载中...</div>
+            <div v-else-if="sessionError" class="text-[12px] text-[#fca5a5]">{{ sessionError }}</div>
 
             <div class="flex flex-col gap-[8px]">
                 <button
@@ -498,6 +619,9 @@ const toggleTheme = () => {
                         <img :src="workIcon" alt="Work" class="h-[200px] w-[200px]" />
                         <div class="text-[40px] font-semibold">Work Agent</div>
                     </button>
+                </div>
+                <div v-if="sessionLimitError" class="rounded-[10px] border border-[rgba(15,23,42,0.1)] bg-white px-[16px] py-[10px] text-[14px] text-[#dc2626] shadow-[0_12px_30px_rgba(15,23,42,0.12)]">
+                    {{ sessionLimitError }}
                 </div>
             </div>
         </div>

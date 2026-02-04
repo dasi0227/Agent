@@ -14,4 +14,6 @@ public class ChatConstant {
 
     public static final int CHAT_MEMORY_RETRIEVE_SIZE_NONE = 0;
 
+    public static final int CHAT_SESSION_LIMIT = 3;
+
 }

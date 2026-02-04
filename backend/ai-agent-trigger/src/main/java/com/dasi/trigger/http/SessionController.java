@@ -3,12 +3,8 @@ package com.dasi.trigger.http;
 import com.dasi.domain.session.model.vo.MessageVO;
 import com.dasi.domain.session.model.vo.SessionVO;
 import com.dasi.domain.session.service.ISessionService;
-import com.dasi.types.dto.request.session.InsertSessionRequest;
-import com.dasi.types.dto.request.session.UpdateSessionRequest;
 import com.dasi.types.dto.result.Result;
 import jakarta.annotation.Resource;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,49 +18,42 @@ public class SessionController {
     @Resource
     private ISessionService sessionSevice;
 
-    // 根据 userId 拿，userId 在 JWT
     @GetMapping("/list")
     public Result<List<SessionVO>> listSession() {
         return Result.success(sessionSevice.listSession());
     }
 
-    // 每个类型的上限是三个，需要抛出 SessionException 来在前端提示
     @PostMapping("/insert")
-    public Result<Void> insertSession(@Valid @RequestBody InsertSessionRequest request) {
-        sessionSevice.insertSession(request);
+    public Result<Void> insertSession(@RequestParam("sessionTitle") String sessionTitle, @RequestParam("sessionType") String sessionType) {
+        sessionSevice.insertSession(sessionTitle, sessionType);
         return Result.success();
     }
 
-    // 只允许更新标题
     @PostMapping("/update")
-    public Result<Void> updateSession(@Valid @RequestBody UpdateSessionRequest request) {
-        sessionSevice.updateSession(request);
+    public Result<Void> updateSession(@RequestParam("id") Long id, @RequestParam("sessionTitle") String sessionTitle) {
+        sessionSevice.updateSession(id, sessionTitle);
         return Result.success();
     }
 
-    // 需要同步删除 message 表的数据
     @PostMapping("/delete")
     public Result<Void> deleteSession(@RequestParam("id") Long id, @RequestParam("sessionId") String sessionId) {
-        sessionSevice.deleteSession(id);
+        sessionSevice.deleteSession(id, sessionId);
         return Result.success();
     }
 
-    // 获取 chat 类型的数据
     @GetMapping("/message/chat")
-    public Result<List<MessageVO>> listChatMessage(@RequestParam("id") Long id, @RequestParam("sessionId") String sessionId) {
-        return Result.success(sessionSevice.listChatMessage());
+    public Result<List<MessageVO>> listChatMessage(@RequestParam("sessionId") String sessionId) {
+        return Result.success(sessionSevice.listChatMessage(sessionId));
     }
 
-    // 获取 work-sse 类型的数据
     @GetMapping("/message/work-sse")
-    public Result<List<MessageVO>> listWorkSseMessage(@RequestParam("id") Long id, @RequestParam("sessionId") String sessionId) {
-        return Result.success(sessionSevice.listWorkSseMessage());
+    public Result<List<MessageVO>> listWorkSseMessage(@RequestParam("sessionId") String sessionId) {
+        return Result.success(sessionSevice.listWorkSseMessage(sessionId));
     }
 
-    // 获取 work-answer 类型的数据
     @GetMapping("/message/work-answer")
-    public Result<List<MessageVO>> listWorkAnswerSession(@RequestParam("id") Long id, @RequestParam("sessionId") String sessionId) {
-        return Result.success(sessionSevice.listWorkAnswerSession());
+    public Result<List<MessageVO>> listWorkAnswerSession(@RequestParam("sessionId") String sessionId) {
+        return Result.success(sessionSevice.listWorkAnswerMessage(sessionId));
     }
 
 }

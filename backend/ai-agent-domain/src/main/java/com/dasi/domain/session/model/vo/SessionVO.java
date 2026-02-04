@@ -1,6 +1,5 @@
 package com.dasi.domain.session.model.vo;
 
-import com.dasi.domain.session.model.enumeration.SessionType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +14,8 @@ import java.time.LocalDateTime;
 public class SessionVO {
     private Long id;
     private String sessionId;
+    private String sessionUser;
     private String sessionTitle;
-    private SessionType sessionType;
+    private String sessionType;
     private LocalDateTime createTime;
 }
