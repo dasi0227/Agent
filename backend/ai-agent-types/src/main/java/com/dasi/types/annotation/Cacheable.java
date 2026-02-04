@@ -1,5 +1,7 @@
 package com.dasi.types.annotation;
 
+import com.dasi.types.enumeration.CacheType;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

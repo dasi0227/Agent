@@ -1,7 +1,7 @@
 package com.dasi.aop;
 
 import com.dasi.domain.util.IRedisService;
-import com.dasi.types.annotation.CacheType;
+import com.dasi.types.enumeration.CacheType;
 import com.dasi.types.annotation.Cacheable;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
@@ -149,4 +149,6 @@ public class CacheableAspect {
         }
         return String.valueOf(arg);
     }
+
+
 }
