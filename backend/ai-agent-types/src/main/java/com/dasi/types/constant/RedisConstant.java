@@ -19,6 +19,22 @@ public class RedisConstant {
     public static final String AI_AGENT_TYPE_PREFIX = "ai:agent:type:";
     public static final String AI_CONFIG_VALUE_PREFIX = "ai:config:value:";
     public static final String AI_TASK_VO_LIST_KEY = "ai:task:vo-list";
+    public static final String AI_MCP_VO_LIST_PREFIX = "ai:mcp:vo-list:";
     public static final String AI_ARMORY_PREFIX = "ai:armory:";
+
+    // admin
+    public static final String ADMIN_API_PREFIX = "admin:api:";
+    public static final String ADMIN_MODEL_PREFIX = "admin:model:";
+    public static final String ADMIN_MCP_PREFIX = "admin:mcp:";
+    public static final String ADMIN_ADVISOR_PREFIX = "admin:advisor:";
+    public static final String ADMIN_PROMPT_PREFIX = "admin:prompt:";
+    public static final String ADMIN_CLIENT_PREFIX = "admin:client:";
+    public static final String ADMIN_AGENT_PREFIX = "admin:agent:";
+    public static final String ADMIN_USER_PREFIX = "admin:user:";
+    public static final String ADMIN_CONFIG_PREFIX = "admin:config:";
+    public static final String ADMIN_FLOW_PREFIX = "admin:flow:";
+    public static final String ADMIN_TASK_PREFIX = "admin:task:";
+    public static final String ADMIN_DEPEND_PREFIX = "admin:depend:";
+    public static final String ADMIN_LIST_PREFIX = "admin:list:";
 
 }

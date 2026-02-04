@@ -1,17 +1,18 @@
 package com.dasi.infrastructure.repository;
 
 import com.dasi.domain.query.repository.IQueryRepository;
-import com.dasi.domain.util.IRedisService;
 import com.dasi.infrastructure.persistent.dao.IAiAgentDao;
 import com.dasi.infrastructure.persistent.dao.IAiClientDao;
 import com.dasi.infrastructure.persistent.dao.IAiMcpDao;
 import com.dasi.infrastructure.persistent.po.AiAgent;
 import com.dasi.infrastructure.persistent.po.AiClient;
 import com.dasi.infrastructure.persistent.po.AiMcp;
+import com.dasi.types.annotation.Cacheable;
 import com.dasi.types.dto.response.query.QueryChatClientResponse;
 import com.dasi.types.dto.response.query.QueryChatMcpResponse;
 import com.dasi.types.dto.response.query.QueryChatRagResponse;
 import com.dasi.types.dto.response.query.QueryWorkAgentResponse;
+import com.dasi.types.enumeration.CacheType;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,9 +37,6 @@ public class QueryRepository implements IQueryRepository {
     @Resource
     private IAiAgentDao aiAgentDao;
 
-    @Resource
-    private IRedisService redisService;
-
     @Resource(name = "postgresqlTemplate")
     private JdbcTemplate jdbcTemplate;
 
@@ -49,21 +47,15 @@ public class QueryRepository implements IQueryRepository {
     private String embeddingTableName;
 
     @Override
+    @Cacheable(cacheKey = QUERY_CHAT_CLIENT_KEY, cacheClass = QueryChatClientResponse.class, cacheType = CacheType.LIST)
     public List<QueryChatClientResponse> queryChatClientResponseList() {
-
-        List<QueryChatClientResponse> queryChatClientResponseList = redisService.getList(QUERY_CHAT_CLIENT_KEY, QueryChatClientResponse.class);
-        if (queryChatClientResponseList != null) {
-            return queryChatClientResponseList;
-        }
 
         List<AiClient> aiClientList = aiClientDao.queryChatClientList();
         if (aiClientList == null || aiClientList.isEmpty()) {
-            queryChatClientResponseList = new ArrayList<>();
-            redisService.setList(QUERY_CHAT_CLIENT_KEY, queryChatClientResponseList);
-            return queryChatClientResponseList;
+            return new ArrayList<>();
         }
 
-        queryChatClientResponseList = aiClientList.stream()
+        return aiClientList.stream()
                 .filter(c -> c != null && Integer.valueOf(1).equals(c.getClientStatus()))
                 .map(aiClient -> QueryChatClientResponse.builder()
                         .clientId(aiClient.getClientId())
@@ -71,55 +63,37 @@ public class QueryRepository implements IQueryRepository {
                         .clientDesc(aiClient.getClientDesc())
                         .build())
                 .toList();
-
-        redisService.setList(QUERY_CHAT_CLIENT_KEY, queryChatClientResponseList);
-        return queryChatClientResponseList;
     }
 
 
     @Override
+    @Cacheable(cacheKey = QUERY_CHAT_MCP_KEY, cacheClass = QueryChatMcpResponse.class, cacheType = CacheType.LIST)
     public List<QueryChatMcpResponse> queryChatMcpResponseList() {
-
-        List<QueryChatMcpResponse> queryChatMcpResponseList = redisService.getList(QUERY_CHAT_MCP_KEY, QueryChatMcpResponse.class);
-        if (queryChatMcpResponseList != null) {
-            return queryChatMcpResponseList;
-        }
 
         List<AiMcp> aiMcpList = aiMcpDao.queryChatMcpList();
         if (aiMcpList == null || aiMcpList.isEmpty()) {
-            queryChatMcpResponseList = new ArrayList<>();
-            redisService.setList(QUERY_CHAT_MCP_KEY, queryChatMcpResponseList);
-            return queryChatMcpResponseList;
+            return new ArrayList<>();
         }
 
-        queryChatMcpResponseList = aiMcpList.stream()
+        return aiMcpList.stream()
                 .map(aiMcp -> QueryChatMcpResponse.builder()
                         .mcpId(aiMcp.getMcpId())
                         .mcpName(aiMcp.getMcpName())
                         .mcpDesc(aiMcp.getMcpDesc())
                         .build())
                 .toList();
-
-        redisService.setList(QUERY_CHAT_MCP_KEY, queryChatMcpResponseList);
-        return queryChatMcpResponseList;
     }
 
     @Override
+    @Cacheable(cacheKey = QUERY_WORK_AGENT_KEY, cacheClass = QueryWorkAgentResponse.class, cacheType = CacheType.LIST)
     public List<QueryWorkAgentResponse> queryWorkAgentResponseList() {
-
-        List<QueryWorkAgentResponse> queryWorkAgentResponseList = redisService.getList(QUERY_WORK_AGENT_KEY, QueryWorkAgentResponse.class);
-        if (queryWorkAgentResponseList != null) {
-            return queryWorkAgentResponseList;
-        }
 
         List<AiAgent> aiAgentList = aiAgentDao.queryAgentList();
         if (aiAgentList == null || aiAgentList.isEmpty()) {
-            queryWorkAgentResponseList = new ArrayList<>();
-            redisService.setList(QUERY_WORK_AGENT_KEY, queryWorkAgentResponseList);
-            return queryWorkAgentResponseList;
+            return new ArrayList<>();
         }
 
-        queryWorkAgentResponseList = aiAgentList.stream()
+        return aiAgentList.stream()
                 .filter(a -> a != null && Integer.valueOf(1).equals(a.getAgentStatus()))
                 .map(aiAgent -> QueryWorkAgentResponse.builder()
                         .agentId(aiAgent.getAgentId())
@@ -127,18 +101,11 @@ public class QueryRepository implements IQueryRepository {
                         .agentDesc(aiAgent.getAgentDesc())
                         .build())
                 .toList();
-
-        redisService.setList(QUERY_WORK_AGENT_KEY, queryWorkAgentResponseList);
-        return queryWorkAgentResponseList;
     }
 
     @Override
+    @Cacheable(cacheKey = QUERY_CHAT_RAG_KEY, cacheClass = QueryChatRagResponse.class, cacheType = CacheType.LIST)
     public List<QueryChatRagResponse> queryChatRagList() {
-
-        List<QueryChatRagResponse> queryChatRagResponseList = redisService.getList(QUERY_CHAT_RAG_KEY, QueryChatRagResponse.class);
-        if (queryChatRagResponseList != null) {
-            return queryChatRagResponseList;
-        }
 
         String tableRef = embeddingSchemaName + "." + embeddingTableName;
         String sql = """
@@ -148,12 +115,9 @@ public class QueryRepository implements IQueryRepository {
                 """
                 .formatted(tableRef);
         List<String> ragTagList = jdbcTemplate.queryForList(sql, String.class);
-        queryChatRagResponseList = ragTagList.stream()
+        return ragTagList.stream()
                 .map(ragTag -> QueryChatRagResponse.builder().ragTag(ragTag).build())
                 .toList();
-
-        redisService.setList(QUERY_CHAT_RAG_KEY, queryChatRagResponseList);
-        return queryChatRagResponseList;
     }
 
 }

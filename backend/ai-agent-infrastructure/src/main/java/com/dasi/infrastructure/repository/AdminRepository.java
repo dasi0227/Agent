@@ -6,8 +6,10 @@ import com.dasi.domain.admin.repository.IAdminRepository;
 import com.dasi.infrastructure.persistent.dao.*;
 import com.dasi.infrastructure.persistent.po.*;
 import com.dasi.types.annotation.CacheEvict;
+import com.dasi.types.annotation.Cacheable;
 import com.dasi.types.dto.request.admin.manage.*;
 import com.dasi.types.dto.request.admin.query.*;
+import com.dasi.types.enumeration.CacheType;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
@@ -16,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.dasi.domain.admin.model.enumeration.AiConfigType.*;
+import static com.dasi.types.constant.RedisConstant.*;
 
 @Repository
 public class AdminRepository implements IAdminRepository {
@@ -55,6 +58,7 @@ public class AdminRepository implements IAdminRepository {
 
     // -------------------- API --------------------
     @Override
+    @Cacheable(cachePrefix = ADMIN_API_PREFIX, cacheClass = ApiVO.class, cacheType = CacheType.LIST)
     public List<ApiVO> apiPage(ApiPageRequest apiPageRequest) {
 
         String idKeyword = apiPageRequest.getIdKeyword();
@@ -71,17 +75,20 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_API_PREFIX, cacheClass = Integer.class, cacheType = CacheType.VALUE)
     public Integer apiCount(ApiPageRequest apiPageRequest) {
         return aiApiDao.count(apiPageRequest.getIdKeyword());
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_API_PREFIX, cacheClass = ApiVO.class, cacheType = CacheType.VALUE)
     public ApiVO apiQuery(Long id) {
         AiApi aiApi = aiApiDao.queryById(id);
         return toApiVO(aiApi);
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_API_PREFIX, cacheClass = ApiVO.class, cacheType = CacheType.VALUE)
     public ApiVO apiQuery(String apiId) {
         return toApiVO(aiApiDao.queryByApiId(apiId));
     }
@@ -108,6 +115,7 @@ public class AdminRepository implements IAdminRepository {
 
     // -------------------- Model --------------------
     @Override
+    @Cacheable(cachePrefix = ADMIN_MODEL_PREFIX, cacheClass = ModelVO.class, cacheType = CacheType.LIST)
     public List<ModelVO> modelPage(ModelPageRequest request) {
 
         String idKeyword = request.getIdKeyword();
@@ -126,17 +134,20 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_MODEL_PREFIX, cacheClass = Integer.class, cacheType = CacheType.VALUE)
     public Integer modelCount(ModelPageRequest request) {
         return aiModelDao.count(request.getIdKeyword(), request.getNameKeyword());
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_MODEL_PREFIX, cacheClass = ModelVO.class, cacheType = CacheType.VALUE)
     public ModelVO modelQuery(Long id) {
         AiModel po = aiModelDao.queryById(id);
         return toModelVO(po);
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_MODEL_PREFIX, cacheClass = ModelVO.class, cacheType = CacheType.VALUE)
     public ModelVO modelQuery(String modelId) {
         return toModelVO(aiModelDao.queryByModelId(modelId));
     }
@@ -161,6 +172,7 @@ public class AdminRepository implements IAdminRepository {
 
     // -------------------- MCP --------------------
     @Override
+    @Cacheable(cachePrefix = ADMIN_MCP_PREFIX, cacheClass = McpVO.class, cacheType = CacheType.LIST)
     public List<McpVO> mcpPage(McpPageRequest request) {
         Integer offset = (request.getPageNum() - 1) * request.getPageSize();
         List<AiMcp> poList = aiMcpDao.page(request.getIdKeyword(), request.getNameKeyword(), offset, request.getPageSize());
@@ -171,16 +183,19 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_MCP_PREFIX, cacheClass = Integer.class, cacheType = CacheType.VALUE)
     public Integer mcpCount(McpPageRequest request) {
         return aiMcpDao.count(request.getIdKeyword(), request.getNameKeyword());
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_MCP_PREFIX, cacheClass = McpVO.class, cacheType = CacheType.VALUE)
     public McpVO mcpQuery(Long id) {
         return toMcpVO(aiMcpDao.queryById(id));
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_MCP_PREFIX, cacheClass = McpVO.class, cacheType = CacheType.VALUE)
     public McpVO mcpQuery(String mcpId) {
         return toMcpVO(aiMcpDao.queryByMcpId(mcpId));
     }
@@ -205,6 +220,7 @@ public class AdminRepository implements IAdminRepository {
 
     // -------------------- Advisor --------------------
     @Override
+    @Cacheable(cachePrefix = ADMIN_ADVISOR_PREFIX, cacheClass = AdvisorVO.class, cacheType = CacheType.LIST)
     public List<AdvisorVO> advisorPage(AdvisorPageRequest request) {
         Integer offset = (request.getPageNum() - 1) * request.getPageSize();
         List<AiAdvisor> poList = aiAdvisorDao.page(request.getIdKeyword(), request.getNameKeyword(), offset, request.getPageSize());
@@ -215,16 +231,19 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_ADVISOR_PREFIX, cacheClass = Integer.class, cacheType = CacheType.VALUE)
     public Integer advisorCount(AdvisorPageRequest request) {
         return aiAdvisorDao.count(request.getIdKeyword(), request.getNameKeyword());
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_ADVISOR_PREFIX, cacheClass = AdvisorVO.class, cacheType = CacheType.VALUE)
     public AdvisorVO advisorQuery(Long id) {
         return toAdvisorVO(aiAdvisorDao.queryById(id));
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_ADVISOR_PREFIX, cacheClass = AdvisorVO.class, cacheType = CacheType.VALUE)
     public AdvisorVO advisorQuery(String advisorId) {
         return toAdvisorVO(aiAdvisorDao.queryByAdvisorId(advisorId));
     }
@@ -249,6 +268,7 @@ public class AdminRepository implements IAdminRepository {
 
     // -------------------- Prompt --------------------
     @Override
+    @Cacheable(cachePrefix = ADMIN_PROMPT_PREFIX, cacheClass = PromptVO.class, cacheType = CacheType.LIST)
     public List<PromptVO> promptPage(PromptPageRequest request) {
         Integer offset = (request.getPageNum() - 1) * request.getPageSize();
         List<AiPrompt> poList = aiPromptDao.page(request.getIdKeyword(), request.getNameKeyword(), offset, request.getPageSize());
@@ -259,16 +279,19 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_PROMPT_PREFIX, cacheClass = Integer.class, cacheType = CacheType.VALUE)
     public Integer promptCount(PromptPageRequest request) {
         return aiPromptDao.count(request.getIdKeyword(), request.getNameKeyword());
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_PROMPT_PREFIX, cacheClass = PromptVO.class, cacheType = CacheType.VALUE)
     public PromptVO promptQuery(Long id) {
         return toPromptVO(aiPromptDao.queryById(id));
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_PROMPT_PREFIX, cacheClass = PromptVO.class, cacheType = CacheType.VALUE)
     public PromptVO promptQuery(String promptId) {
         return toPromptVO(aiPromptDao.queryByPromptId(promptId));
     }
@@ -293,6 +316,7 @@ public class AdminRepository implements IAdminRepository {
 
     // -------------------- Client --------------------
     @Override
+    @Cacheable(cachePrefix = ADMIN_CLIENT_PREFIX, cacheClass = ClientVO.class, cacheType = CacheType.LIST)
     public List<ClientVO> clientPage(ClientPageRequest request) {
         Integer offset = (request.getPageNum() - 1) * request.getPageSize();
         List<AiClient> poList = aiClientDao.page(request.getIdKeyword(), request.getNameKeyword(), request.getModelId(), request.getClientType(), request.getClientRole(), offset, request.getPageSize());
@@ -303,16 +327,19 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_CLIENT_PREFIX, cacheClass = Integer.class, cacheType = CacheType.VALUE)
     public Integer clientCount(ClientPageRequest request) {
         return aiClientDao.count(request.getIdKeyword(), request.getNameKeyword(), request.getModelId(), request.getClientType(), request.getClientRole());
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_CLIENT_PREFIX, cacheClass = ClientVO.class, cacheType = CacheType.VALUE)
     public ClientVO clientQuery(Long id) {
         return toClientVO(aiClientDao.queryById(id));
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_CLIENT_PREFIX, cacheClass = ClientVO.class, cacheType = CacheType.VALUE)
     public ClientVO clientQuery(String clientId) {
         return toClientVO(aiClientDao.queryByClientId(clientId));
     }
@@ -347,6 +374,7 @@ public class AdminRepository implements IAdminRepository {
 
     // -------------------- Agent --------------------
     @Override
+    @Cacheable(cachePrefix = ADMIN_AGENT_PREFIX, cacheClass = AgentVO.class, cacheType = CacheType.LIST)
     public List<AgentVO> agentPage(AgentPageRequest request) {
         Integer offset = (request.getPageNum() - 1) * request.getPageSize();
         List<AiAgent> poList = aiAgentDao.page(request.getIdKeyword(), request.getNameKeyword(), request.getAgentType(), offset, request.getPageSize());
@@ -357,22 +385,26 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_AGENT_PREFIX, cacheClass = AgentVO.class, cacheType = CacheType.LIST)
     public List<AgentVO> agentList(AgentListRequest request) {
         List<AiAgent> poList = aiAgentDao.list(request.getIdKeyword(), request.getNameKeyword(), request.getAgentType());
         return poList.stream().map(this::toAgentVO).toList();
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_AGENT_PREFIX, cacheClass = Integer.class, cacheType = CacheType.VALUE)
     public Integer agentCount(AgentPageRequest request) {
         return aiAgentDao.count(request.getIdKeyword(), request.getNameKeyword(), request.getAgentType());
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_AGENT_PREFIX, cacheClass = AgentVO.class, cacheType = CacheType.VALUE)
     public AgentVO agentQuery(Long id) {
         return toAgentVO(aiAgentDao.queryById(id));
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_AGENT_PREFIX, cacheClass = AgentVO.class, cacheType = CacheType.VALUE)
     public AgentVO agentQuery(String agentId) {
         return toAgentVO(aiAgentDao.queryAgentByAgentId(agentId));
     }
@@ -407,6 +439,7 @@ public class AdminRepository implements IAdminRepository {
 
     // -------------------- User --------------------
     @Override
+    @Cacheable(cachePrefix = ADMIN_USER_PREFIX, cacheClass = UserVO.class, cacheType = CacheType.LIST)
     public List<UserVO> userPage(UserPageRequest request) {
         Integer offset = (request.getPageNum() - 1) * request.getPageSize();
         List<User> poList = userDao.page(request.getUsernameKeyWord(), request.getRole(), offset, request.getPageSize());
@@ -417,17 +450,20 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_USER_PREFIX, cacheClass = Integer.class, cacheType = CacheType.VALUE)
     public Integer userCount(UserPageRequest request) {
         Long count = userDao.count(request.getUsernameKeyWord(), request.getRole());
         return count == null ? 0 : count.intValue();
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_USER_PREFIX, cacheClass = UserVO.class, cacheType = CacheType.VALUE)
     public UserVO userQuery(Long id) {
         return toUserVO(userDao.queryById(id));
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_USER_PREFIX, cacheClass = UserVO.class, cacheType = CacheType.VALUE)
     public UserVO userQuery(String username) {
         return toUserVO(userDao.queryByUsername(username));
     }
@@ -458,17 +494,20 @@ public class AdminRepository implements IAdminRepository {
 
     // -------------------- Config --------------------
     @Override
+    @Cacheable(cachePrefix = ADMIN_CONFIG_PREFIX, cacheType = CacheType.LIST, cacheClass = ConfigVO.class)
     public List<ConfigVO> configList(ConfigListRequest request) {
         List<AiConfig> poList = aiConfigDao.list(request.getIdKeyword(), request.getValueKeyword(), request.getConfigType());
         return poList.stream().map(this::toConfigVO).toList();
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_CONFIG_PREFIX, cacheType = CacheType.VALUE, cacheClass = ConfigVO.class)
     public ConfigVO configQuery(ConfigManageRequest request) {
         return toConfigVO(aiConfigDao.queryByUniqueKey(request.getClientId(), request.getConfigType(), request.getConfigValue()));
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_CONFIG_PREFIX, cacheType = CacheType.VALUE, cacheClass = ConfigVO.class)
     public ConfigVO configQuery(Long id) {
         return toConfigVO(aiConfigDao.queryById(id));
     }
@@ -499,6 +538,7 @@ public class AdminRepository implements IAdminRepository {
 
     // -------------------- Flow --------------------
     @Override
+    @Cacheable(cachePrefix = ADMIN_FLOW_PREFIX, cacheType = CacheType.LIST, cacheClass = ClientDetailVO.class)
     public List<ClientDetailVO> flowClient() {
         List<ClientDetailVO> clientDetailVOList = new ArrayList<>();
 
@@ -563,17 +603,20 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_FLOW_PREFIX, cacheType = CacheType.LIST, cacheClass = FlowVO.class)
     public List<FlowVO> flowAgent(String agentId) {
         List<AiFlow> poList = aiFlowDao.queryByAgentId(agentId);
         return poList.stream().map(this::toFlowVO).toList();
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_FLOW_PREFIX, cacheType = CacheType.VALUE, cacheClass = FlowVO.class)
     public FlowVO flowQuery(String agentId, String clientId) {
         return toFlowVO(aiFlowDao.queryByAgentIdAndClientId(agentId, clientId));
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_FLOW_PREFIX, cacheType = CacheType.VALUE, cacheClass = FlowVO.class)
     public FlowVO flowQuery(Long id) {
         return toFlowVO(aiFlowDao.queryById(id));
     }
@@ -598,6 +641,7 @@ public class AdminRepository implements IAdminRepository {
 
     // -------------------- Task --------------------
     @Override
+    @Cacheable(cachePrefix = ADMIN_TASK_PREFIX, cacheType = CacheType.LIST, cacheClass = TaskVO.class)
     public List<TaskVO> taskPage(TaskPageRequest request) {
         Integer offset = (request.getPageNum() - 1) * request.getPageSize();
         List<AiTask> poList = aiTaskDao.page(request.getIdKeyword(), request.getAgentId(), offset, request.getPageSize());
@@ -608,16 +652,19 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_TASK_PREFIX, cacheType = CacheType.VALUE, cacheClass = Integer.class)
     public Integer taskCount(TaskPageRequest request) {
         return aiTaskDao.count(request.getIdKeyword(), request.getAgentId());
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_TASK_PREFIX, cacheType = CacheType.VALUE, cacheClass = TaskVO.class)
     public TaskVO taskQuery(Long id) {
         return toTaskVO(aiTaskDao.queryById(id));
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_TASK_PREFIX, cacheType = CacheType.VALUE, cacheClass = TaskVO.class)
     public TaskVO taskQuery(String taskId) {
         return toTaskVO(aiTaskDao.queryByTaskId(taskId));
     }
@@ -652,41 +699,49 @@ public class AdminRepository implements IAdminRepository {
 
     // -------------------- Depend --------------------
     @Override
+    @Cacheable(cachePrefix = ADMIN_DEPEND_PREFIX, cacheType = CacheType.LIST, cacheClass = String.class)
     public List<String> queryClientDependOnPrompt(String promptId) {
         return aiConfigDao.queryClientIdListByConfigTypeAndValue(PROMPT.getType(), promptId);
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_DEPEND_PREFIX, cacheType = CacheType.LIST, cacheClass = String.class)
     public List<String> queryClientDependOnAdvisor(String advisorId) {
         return aiConfigDao.queryClientIdListByConfigTypeAndValue(ADVISOR.getType(), advisorId);
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_DEPEND_PREFIX, cacheType = CacheType.LIST, cacheClass = String.class)
     public List<String> queryClientDependOnMcp(String mcpId) {
         return aiConfigDao.queryClientIdListByConfigTypeAndValue(MCP.getType(), mcpId);
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_DEPEND_PREFIX, cacheType = CacheType.LIST, cacheClass = String.class)
     public List<String> queryModelDependOnApi(String apiId) {
         return aiModelDao.queryModelIdByApiId(apiId);
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_DEPEND_PREFIX, cacheType = CacheType.LIST, cacheClass = String.class)
     public List<String> queryClientDependOnModel(String modelId) {
         return aiClientDao.queryClientIdByModelId(modelId);
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_DEPEND_PREFIX, cacheType = CacheType.LIST, cacheClass = String.class)
     public List<String> queryAgentDependOnClient(String clientId) {
         return aiFlowDao.queryAgentIdByClientId(clientId);
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_LIST_PREFIX, cacheType = CacheType.LIST, cacheClass = String.class)
     public List<String> listApiId() {
         return aiApiDao.listApiId();
     }
 
     @Override
+    @Cacheable(cachePrefix = ADMIN_LIST_PREFIX, cacheType = CacheType.LIST, cacheClass = String.class)
     public List<String> listModelId() {
         return aiModelDao.listModelId();
     }
