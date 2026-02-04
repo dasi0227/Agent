@@ -62,37 +62,28 @@ public class AiRepository implements IAiRepository {
             return Set.of();
         }
 
+        String cacheKey = buildCacheKey(AI_API_VO_PREFIX, clientIdSet);
+        List<AiApiVO> cachedList = redisService.getList(cacheKey, AiApiVO.class);
+        if (cachedList != null) {
+            return new HashSet<>(cachedList);
+        }
+
         Set<AiApiVO> aiApiVOSet = new HashSet<>();
 
         for (String clientId : clientIdSet) {
 
             // 1. 获取 Client
-            String clientKey = PO_CLIENT_PREFIX + clientId;
-            AiClient aiClient = redisService.getValue(clientKey, AiClient.class);
-            if (aiClient == null) {
-                aiClient = aiClientDao.queryByClientId(clientId);
-                if (aiClient != null) redisService.setValue(clientKey, aiClient);
-            }
+            AiClient aiClient = aiClientDao.queryByClientId(clientId);
             if (aiClient == null || aiClient.getClientStatus() == 0) continue;
 
             // 2. 获取 Model
             String modelId = aiClient.getModelId();
-            String modelKey = PO_MODEL_PREFIX + modelId;
-            AiModel aiModel = redisService.getValue(modelKey, AiModel.class);
-            if (aiModel == null) {
-                aiModel = aiModelDao.queryByModelId(modelId);
-                if (aiModel != null) redisService.setValue(modelKey, aiModel);
-            }
+            AiModel aiModel = aiModelDao.queryByModelId(modelId);
             if (aiModel == null) continue;
 
             // 3. 获取 Api
             String apiId = aiModel.getApiId();
-            String apiKey = PO_API_PREFIX + apiId;
-            AiApi aiApi = redisService.getValue(apiKey, AiApi.class);
-            if (aiApi == null) {
-                aiApi = aiApiDao.queryByApiId(apiId);
-                if (aiApi != null) redisService.setValue(apiKey, aiApi);
-            }
+            AiApi aiApi = aiApiDao.queryByApiId(apiId);
             if (aiApi == null) continue;
 
             // 4. 构造 VO
@@ -107,6 +98,7 @@ public class AiRepository implements IAiRepository {
             aiApiVOSet.add(aiApiVO);
         }
 
+        redisService.setList(cacheKey, new ArrayList<>(aiApiVOSet));
         return aiApiVOSet;
     }
 
@@ -116,27 +108,23 @@ public class AiRepository implements IAiRepository {
             return Set.of();
         }
 
+        String cacheKey = buildCacheKey(AI_MODEL_VO_PREFIX, clientIdSet);
+        List<AiModelVO> cachedList = redisService.getList(cacheKey, AiModelVO.class);
+        if (cachedList != null) {
+            return new HashSet<>(cachedList);
+        }
+
         Set<AiModelVO> aiModelVOSet = new HashSet<>();
 
         for (String clientId : clientIdSet) {
 
             // 1. 获取 Client
-            String clientKey = PO_CLIENT_PREFIX + clientId;
-            AiClient aiClient = redisService.getValue(clientKey, AiClient.class);
-            if (aiClient == null) {
-                aiClient = aiClientDao.queryByClientId(clientId);
-                if (aiClient != null) redisService.setValue(clientKey, aiClient);
-            }
+            AiClient aiClient = aiClientDao.queryByClientId(clientId);
             if (aiClient == null || aiClient.getClientStatus() == 0) continue;
 
             // 2. 获取 Model
             String modelId = aiClient.getModelId();
-            String modelKey = PO_MODEL_PREFIX + modelId;
-            AiModel aiModel = redisService.getValue(modelKey, AiModel.class);
-            if (aiModel == null) {
-                aiModel = aiModelDao.queryByModelId(modelId);
-                if (aiModel != null) redisService.setValue(modelKey, aiModel);
-            }
+            AiModel aiModel = aiModelDao.queryByModelId(modelId);
             if (aiModel == null) continue;
 
             // 3. 构造 VO
@@ -150,6 +138,7 @@ public class AiRepository implements IAiRepository {
             aiModelVOSet.add(aiModelVO);
         }
 
+        redisService.setList(cacheKey, new ArrayList<>(aiModelVOSet));
         return aiModelVOSet;
     }
 
@@ -159,17 +148,18 @@ public class AiRepository implements IAiRepository {
             return Set.of();
         }
 
+        String cacheKey = buildCacheKey(AI_ADVISOR_VO_PREFIX, clientIdSet);
+        List<AiAdvisorVO> cachedList = redisService.getList(cacheKey, AiAdvisorVO.class);
+        if (cachedList != null) {
+            return new HashSet<>(cachedList);
+        }
+
         Set<AiAdvisorVO> aiAdvisorVOSet = new HashSet<>();
 
         for (String clientId : clientIdSet) {
 
             // 1. 获取 Config
-            String configKey = PO_LIST_CONFIG_PREFIX + clientId + ":" + ADVISOR.getType();
-            List<AiConfig> clientConfigList = redisService.getList(configKey, AiConfig.class);
-            if (clientConfigList == null) {
-                clientConfigList = aiConfigDao.queryByClientIdAndConfigType(clientId, ADVISOR.getType());
-                if (clientConfigList != null) redisService.setList(configKey, clientConfigList);
-            }
+            List<AiConfig> clientConfigList = aiConfigDao.queryByClientIdAndConfigType(clientId, ADVISOR.getType());
             if (clientConfigList == null || clientConfigList.isEmpty()) continue;
 
             for (AiConfig clientConfig : clientConfigList) {
@@ -177,12 +167,7 @@ public class AiRepository implements IAiRepository {
                 String advisorId = clientConfig.getConfigValue();
 
                 // 2. 获取 Advisor
-                String advisorKey = PO_ADVISOR_PREFIX + advisorId;
-                AiAdvisor aiAdvisor = redisService.getValue(advisorKey, AiAdvisor.class);
-                if (aiAdvisor == null) {
-                    aiAdvisor = aiAdvisorDao.queryByAdvisorId(advisorId);
-                    if (aiAdvisor != null) redisService.setValue(advisorKey, aiAdvisor);
-                }
+                AiAdvisor aiAdvisor = aiAdvisorDao.queryByAdvisorId(advisorId);
                 if (aiAdvisor == null) continue;
 
                 // 3. 解析参数配置
@@ -216,6 +201,7 @@ public class AiRepository implements IAiRepository {
             }
         }
 
+        redisService.setList(cacheKey, new ArrayList<>(aiAdvisorVOSet));
         return aiAdvisorVOSet;
     }
 
@@ -226,17 +212,18 @@ public class AiRepository implements IAiRepository {
             return Map.of();
         }
 
+        String cacheKey = buildCacheKey(AI_PROMPT_VO_PREFIX, clientIdSet);
+        Map<String, AiPromptVO> cachedMap = redisService.getMap(cacheKey, AiPromptVO.class);
+        if (cachedMap != null) {
+            return cachedMap;
+        }
+
         Map<String, AiPromptVO> aiPromptVOMap = new HashMap<>();
 
         for (String clientId : clientIdSet) {
 
             // 1. 获取 Config
-            String configKey = PO_LIST_CONFIG_PREFIX + clientId + ":" + PROMPT.getType();
-            List<AiConfig> clientConfigList = redisService.getList(configKey, AiConfig.class);
-            if (clientConfigList == null) {
-                clientConfigList = aiConfigDao.queryByClientIdAndConfigType(clientId, PROMPT.getType());
-                if (clientConfigList != null) redisService.setList(configKey, clientConfigList);
-            }
+            List<AiConfig> clientConfigList = aiConfigDao.queryByClientIdAndConfigType(clientId, PROMPT.getType());
             if (clientConfigList == null || clientConfigList.isEmpty()) continue;
 
             for (AiConfig clientConfig : clientConfigList) {
@@ -244,12 +231,7 @@ public class AiRepository implements IAiRepository {
                 String promptId = clientConfig.getConfigValue();
 
                 // 2. 获取 Prompt
-                String promptKey = PO_PROMPT_PREFIX + promptId;
-                AiPrompt aiPrompt = redisService.getValue(promptKey, AiPrompt.class);
-                if (aiPrompt == null) {
-                    aiPrompt = aiPromptDao.queryByPromptId(promptId);
-                    if (aiPrompt != null) redisService.setValue(promptKey, aiPrompt);
-                }
+                AiPrompt aiPrompt = aiPromptDao.queryByPromptId(promptId);
                 if (aiPrompt == null) continue;
 
                 // 3. 构造 VO
@@ -264,6 +246,7 @@ public class AiRepository implements IAiRepository {
             }
         }
 
+        redisService.setMap(cacheKey, aiPromptVOMap);
         return aiPromptVOMap;
     }
 
@@ -273,17 +256,18 @@ public class AiRepository implements IAiRepository {
             return Set.of();
         }
 
+        String cacheKey = buildCacheKey(AI_MCP_VO_PREFIX, clientIdSet);
+        List<AiMcpVO> cachedList = redisService.getList(cacheKey, AiMcpVO.class);
+        if (cachedList != null) {
+            return new HashSet<>(cachedList);
+        }
+
         Set<AiMcpVO> aiMcpVOSet = new HashSet<>();
 
         for (String clientId : clientIdSet) {
 
             // 1. 获取 Config
-            String configKey = PO_LIST_CONFIG_PREFIX + clientId + ":" + MCP.getType();
-            List<AiConfig> clientConfigList = redisService.getList(configKey, AiConfig.class);
-            if (clientConfigList == null) {
-                clientConfigList = aiConfigDao.queryByClientIdAndConfigType(clientId, MCP.getType());
-                if (clientConfigList != null) redisService.setList(configKey, clientConfigList);
-            }
+            List<AiConfig> clientConfigList = aiConfigDao.queryByClientIdAndConfigType(clientId, MCP.getType());
             if (clientConfigList == null || clientConfigList.isEmpty()) continue;
 
             for (AiConfig clientConfig : clientConfigList) {
@@ -291,12 +275,7 @@ public class AiRepository implements IAiRepository {
                 String mcpId = clientConfig.getConfigValue();
 
                 // 2. 获取 MCP
-                String mcpKey = PO_MCP_PREFIX + mcpId;
-                AiMcp aiMcp = redisService.getValue(mcpKey, AiMcp.class);
-                if (aiMcp == null) {
-                    aiMcp = aiMcpDao.queryByMcpId(mcpId);
-                    if (aiMcp != null) redisService.setValue(mcpKey, aiMcp);
-                }
+                AiMcp aiMcp = aiMcpDao.queryByMcpId(mcpId);
                 if (aiMcp == null) continue;
 
                 // 3. 构造 VO
@@ -332,6 +311,7 @@ public class AiRepository implements IAiRepository {
             }
         }
 
+        redisService.setList(cacheKey, new ArrayList<>(aiMcpVOSet));
         return aiMcpVOSet;
     }
 
@@ -341,17 +321,18 @@ public class AiRepository implements IAiRepository {
             return Set.of();
         }
 
+        String cacheKey = buildCacheKey(AI_CLIENT_VO_PREFIX, clientIdSet);
+        List<AiClientVO> cachedList = redisService.getList(cacheKey, AiClientVO.class);
+        if (cachedList != null) {
+            return new HashSet<>(cachedList);
+        }
+
         Set<AiClientVO> aiClientVOSet = new HashSet<>();
 
         for (String clientId : clientIdSet) {
 
             // 1. 获取 Client
-            String clientKey = PO_CLIENT_PREFIX + clientId;
-            AiClient aiClient = redisService.getValue(clientKey, AiClient.class);
-            if (aiClient == null) {
-                aiClient = aiClientDao.queryByClientId(clientId);
-                if (aiClient != null) redisService.setValue(clientKey, aiClient);
-            }
+            AiClient aiClient = aiClientDao.queryByClientId(clientId);
             if (aiClient == null || aiClient.getClientStatus() == 0) continue;
 
             // 2. 获取 Config
@@ -376,18 +357,23 @@ public class AiRepository implements IAiRepository {
             aiClientVOSet.add(aiClientVO);
         }
 
+        redisService.setList(cacheKey, new ArrayList<>(aiClientVOSet));
         return aiClientVOSet;
     }
 
     private List<String> extractConfigValueList(String clientId, String configType) {
 
-        String configKey = PO_LIST_CONFIG_PREFIX + clientId + ":" + configType;
-        List<AiConfig> clientConfigList = redisService.getList(configKey, AiConfig.class);
-        if (clientConfigList == null) {
-            clientConfigList = aiConfigDao.queryByClientIdAndConfigType(clientId, configType);
-            if (clientConfigList != null) redisService.setList(configKey, clientConfigList);
+        String configKey = AI_CONFIG_VALUE_PREFIX + clientId + ":" + configType;
+        List<String> cachedList = redisService.getList(configKey, String.class);
+        if (cachedList != null) {
+            return cachedList;
         }
-        if (clientConfigList == null || clientConfigList.isEmpty()) return List.of();
+
+        List<AiConfig> clientConfigList = aiConfigDao.queryByClientIdAndConfigType(clientId, configType);
+        if (clientConfigList == null || clientConfigList.isEmpty()) {
+            redisService.setList(configKey, List.of());
+            return List.of();
+        }
 
         List<String> configValueList = new ArrayList<>();
         for (AiConfig clientConfig : clientConfigList) {
@@ -395,6 +381,7 @@ public class AiRepository implements IAiRepository {
             configValueList.add(clientConfig.getConfigValue());
         }
 
+        redisService.setList(configKey, configValueList);
         return configValueList;
     }
 
@@ -405,14 +392,18 @@ public class AiRepository implements IAiRepository {
             return Map.of();
         }
 
-        // 获取 Flow
-        String flowKey = PO_LIST_FLOW_PREFIX + agentId;
-        List<AiFlow> aiFlowList = redisService.getList(flowKey, AiFlow.class);
-        if (aiFlowList == null) {
-            aiFlowList = aiFlowDao.queryByAgentId(agentId);
-            if (aiFlowList != null) redisService.setList(flowKey, aiFlowList);
+        String flowKey = AI_FLOW_VO_PREFIX + agentId;
+        Map<String, AiFlowVO> cachedMap = redisService.getMap(flowKey, AiFlowVO.class);
+        if (cachedMap != null) {
+            return cachedMap;
         }
-        if (aiFlowList == null || aiFlowList.isEmpty()) return Map.of();
+
+        // 获取 Flow
+        List<AiFlow> aiFlowList = aiFlowDao.queryByAgentId(agentId);
+        if (aiFlowList == null || aiFlowList.isEmpty()) {
+            redisService.setMap(flowKey, Map.of());
+            return Map.of();
+        }
 
         Map<String, AiFlowVO> aiFlowVOMap = new HashMap<>();
         for (AiFlow aiFlow : aiFlowList) {
@@ -427,19 +418,22 @@ public class AiRepository implements IAiRepository {
             aiFlowVOMap.put(aiFlow.getClientRole(), aiFlowVO);
         }
 
+        redisService.setMap(flowKey, aiFlowVOMap);
         return aiFlowVOMap;
     }
 
     @Override
     public String queryExecuteTypeByAgentId(String agentId) {
 
-        String agentKey = PO_AGENT_PREFIX + agentId;
-        AiAgent aiAgent = redisService.getValue(agentKey, AiAgent.class);
-        if (aiAgent == null) {
-            aiAgent = aiAgentDao.queryAgentByAgentId(agentId);
-            if (aiAgent != null) redisService.setValue(agentKey, aiAgent);
+        String agentKey = AI_AGENT_TYPE_PREFIX + agentId;
+        String cachedType = redisService.getValue(agentKey, String.class);
+        if (cachedType != null) {
+            return cachedType;
         }
+
+        AiAgent aiAgent = aiAgentDao.queryAgentByAgentId(agentId);
         if (aiAgent == null) return null;
+        redisService.setValue(agentKey, aiAgent.getAgentType());
         return aiAgent.getAgentType();
 
     }
@@ -447,10 +441,18 @@ public class AiRepository implements IAiRepository {
     @Override
     public List<AiTaskVO> queryTaskVOList() {
 
-        List<AiTask> aiTaskList = aiTaskDao.queryTaskList();
-        if (aiTaskList == null || aiTaskList.isEmpty()) return List.of();
+        List<AiTaskVO> cachedList = redisService.getList(AI_TASK_VO_LIST_KEY, AiTaskVO.class);
+        if (cachedList != null) {
+            return cachedList;
+        }
 
-        return aiTaskList
+        List<AiTask> aiTaskList = aiTaskDao.queryTaskList();
+        if (aiTaskList == null || aiTaskList.isEmpty()) {
+            redisService.setList(AI_TASK_VO_LIST_KEY, List.of());
+            return List.of();
+        }
+
+        List<AiTaskVO> aiTaskVOList = aiTaskList
                 .stream()
                 .map(aiTask -> AiTaskVO.builder()
                         .agentId(aiTask.getAgentId())
@@ -461,15 +463,28 @@ public class AiRepository implements IAiRepository {
                         .taskStatus(aiTask.getTaskStatus())
                         .build())
                 .toList();
+        redisService.setList(AI_TASK_VO_LIST_KEY, aiTaskVOList);
+        return aiTaskVOList;
     }
 
     @Override
     public List<AiMcpVO> queryAiMcpVOListByMcpIdList(List<String> mcpIdList) {
 
+        if (mcpIdList == null || mcpIdList.isEmpty()) {
+            return List.of();
+        }
+
+        String cacheKey = buildCacheKey(AI_MCP_VO_PREFIX, mcpIdList);
+        List<AiMcpVO> cachedList = redisService.getList(cacheKey, AiMcpVO.class);
+        if (cachedList != null) {
+            return cachedList;
+        }
+
         List<AiMcpVO> aiMcpVOList = new ArrayList<>();
 
         List<AiMcp> aiMcpList = aiMcpDao.queryByMcpIdList(mcpIdList);
         if (aiMcpList == null || aiMcpList.isEmpty()) {
+            redisService.setList(cacheKey, List.of());
             return aiMcpVOList;
         }
 
@@ -503,6 +518,7 @@ public class AiRepository implements IAiRepository {
             }
         }
 
+        redisService.setList(cacheKey, aiMcpVOList);
         return aiMcpVOList;
     }
 
@@ -514,6 +530,12 @@ public class AiRepository implements IAiRepository {
             log.error("【查询数据】失败：{}", e.getMessage());
             throw new IllegalStateException(e);
         }
+    }
+
+    private String buildCacheKey(String prefix, Collection<String> ids) {
+        List<String> sorted = new ArrayList<>(ids);
+        Collections.sort(sorted);
+        return prefix + String.join(",", sorted);
     }
 
 }

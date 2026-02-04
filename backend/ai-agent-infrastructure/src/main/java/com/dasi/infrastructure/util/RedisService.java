@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Slf4j
@@ -134,6 +135,38 @@ public class RedisService implements IRedisService {
             }
         }
         return result;
+    }
+
+    @Override
+    public void setMap(String key, Map<String, ?> values) {
+        if (key == null || key.isBlank()) return;
+        if (values == null) {
+            redisTemplate.delete(key);
+            return;
+        }
+        try {
+            String json = objectMapper.writeValueAsString(values);
+            redisTemplate.opsForValue().set(key, json);
+        } catch (JsonProcessingException e) {
+            log.error("【Redis】Map 序列化失败：key={}, error={}", key, e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public <T> Map<String, T> getMap(String key, Class<T> valueType) {
+        if (key == null || key.isBlank() || valueType == null) return Map.of();
+        String json = redisTemplate.opsForValue().get(key);
+        if (json == null) return null;
+        if (json.isBlank()) return Map.of();
+        try {
+            return objectMapper.readValue(
+                    json,
+                    objectMapper.getTypeFactory().constructMapType(Map.class, String.class, valueType)
+            );
+        } catch (Exception e) {
+            log.error("【Redis】Map 反序列化失败：key={}, error={}", key, e.getMessage(), e);
+            return null;
+        }
     }
 
     @Override
