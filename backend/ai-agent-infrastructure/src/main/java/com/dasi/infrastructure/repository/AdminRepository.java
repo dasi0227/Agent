@@ -5,6 +5,7 @@ import com.dasi.domain.admin.model.vo.*;
 import com.dasi.domain.admin.repository.IAdminRepository;
 import com.dasi.infrastructure.persistent.dao.*;
 import com.dasi.infrastructure.persistent.po.*;
+import com.dasi.types.annotation.CacheEvict;
 import com.dasi.types.dto.request.admin.manage.*;
 import com.dasi.types.dto.request.admin.query.*;
 import jakarta.annotation.Resource;
@@ -86,18 +87,21 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void apiInsert(ApiManageRequest apiManageRequest) {
         AiApi aiApi = toApiPO(apiManageRequest);
         aiApiDao.insert(aiApi);
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void apiUpdate(ApiManageRequest apiManageRequest) {
         AiApi aiApi = toApiPO(apiManageRequest);
         aiApiDao.update(aiApi);
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void apiDelete(Long id) {
         aiApiDao.delete(id);
     }
@@ -138,16 +142,19 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void modelInsert(ModelManageRequest request) {
         aiModelDao.insert(toModelPo(request));
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void modelUpdate(ModelManageRequest request) {
         aiModelDao.update(toModelPo(request));
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void modelDelete(Long id) {
         aiModelDao.delete(id);
     }
@@ -179,16 +186,19 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void mcpInsert(McpManageRequest request) {
         aiMcpDao.insert(toMcpPo(request));
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void mcpUpdate(McpManageRequest request) {
         aiMcpDao.update(toMcpPo(request));
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void mcpDelete(Long id) {
         aiMcpDao.delete(id);
     }
@@ -220,16 +230,19 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void advisorInsert(AdvisorManageRequest request) {
         aiAdvisorDao.insert(toAdvisorPo(request));
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void advisorUpdate(AdvisorManageRequest request) {
         aiAdvisorDao.update(toAdvisorPo(request));
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void advisorDelete(Long id) {
         aiAdvisorDao.delete(id);
     }
@@ -261,16 +274,19 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void promptInsert(PromptManageRequest request) {
         aiPromptDao.insert(toPromptPo(request));
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void promptUpdate(PromptManageRequest request) {
         aiPromptDao.update(toPromptPo(request));
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void promptDelete(Long id) {
         aiPromptDao.delete(id);
     }
@@ -302,21 +318,25 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void clientInsert(ClientManageRequest request) {
         aiClientDao.insert(toClientPo(request));
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void clientUpdate(ClientManageRequest request) {
         aiClientDao.update(toClientPo(request));
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void clientDelete(Long id) {
         aiClientDao.delete(id);
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void clientToggle(Long id, Integer status) {
         AiClient po = AiClient.builder()
                 .id(id)
@@ -358,21 +378,25 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void agentInsert(AgentManageRequest request) {
         aiAgentDao.insert(toAgentPo(request));
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void agentUpdate(AgentManageRequest request) {
         aiAgentDao.update(toAgentPo(request));
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void agentDelete(Long id) {
         aiAgentDao.delete(id);
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void agentToggle(Long id, Integer status) {
         AiAgent po = AiAgent.builder()
                 .id(id)
@@ -409,21 +433,25 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void userInsert(UserManageRequest request) {
         userDao.insert(toUserPo(request));
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void userUpdate(UserManageRequest request) {
         userDao.update(toUserPo(request));
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void userDelete(Long id) {
         userDao.delete(id);
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void userToggle(Long id, Integer status) {
         userDao.toggle(id, status);
     }
@@ -446,21 +474,25 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void configInsert(ConfigManageRequest request) {
         aiConfigDao.insert(toConfigPO(request));
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void configUpdate(ConfigManageRequest request) {
         aiConfigDao.update(toConfigPO(request));
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void configDelete(Long id) {
         aiConfigDao.delete(id);
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void configToggle(Long id, Integer status) {
         aiConfigDao.toggle(id, status);
     }
@@ -547,16 +579,19 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void flowInsert(FlowManageRequest request) {
         aiFlowDao.insert(toFlowPO(request));
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void flowUpdate(FlowManageRequest request) {
         aiFlowDao.update(toFlowPO(request));
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void flowDelete(Long id) {
         aiFlowDao.delete(id);
     }
@@ -588,21 +623,25 @@ public class AdminRepository implements IAdminRepository {
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void taskInsert(TaskManageRequest request) {
         aiTaskDao.insert(toTaskPO(request));
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void taskUpdate(TaskManageRequest request) {
         aiTaskDao.update(toTaskPO(request));
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void taskDelete(Long id) {
         aiTaskDao.delete(id);
     }
 
     @Override
+    @CacheEvict(keyPrefix = {"ai:", "query:"})
     public void taskToggle(Long id, Integer status) {
         AiTask po = AiTask.builder()
                 .id(id)
