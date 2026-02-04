@@ -49,7 +49,7 @@ public class DispatchService implements IDispatchService {
         }
 
         String armoryKey = AI_ARMORY_PREFIX + armoryType;
-        Set<String> cacheSet = redisService.getSetMembers(armoryKey, String.class);
+        Set<String> cacheSet = redisService.getSet(armoryKey, String.class);
 
         if (cacheSet != null && !cacheSet.isEmpty()) {
             armoryIdSet.removeAll(cacheSet);
@@ -74,7 +74,7 @@ public class DispatchService implements IDispatchService {
             throw new RuntimeException("装配数据失败：" + armoryType);
         }
 
-        redisService.addSetMembers(armoryKey, armoryIdSet);
+        redisService.addSet(armoryKey, armoryIdSet);
     }
 
     @Override

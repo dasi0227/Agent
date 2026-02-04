@@ -1028,7 +1028,7 @@ const handleUpload = async () => {
                             <div
                                 v-for="(line, idx) in typewriterState.lines"
                                 :key="idx"
-                                class="text-[20px] font-extrabold leading-[1.4] tracking-[0.3px] text-transparent opacity-[0.94] bg-clip-text"
+                                class="text-[24px] font-extrabold leading-[1.4] tracking-[0.3px] text-transparent opacity-[0.94] bg-clip-text"
                                 :style="{ backgroundImage: 'var(--typewriter-gradient)' }"
                             >
                                 {{ line }}

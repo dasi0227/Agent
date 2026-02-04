@@ -42,6 +42,25 @@ public class RedisService implements IRedisService {
     }
 
     @Override
+    public void setValue(String key, Object value, long ttlSeconds) {
+        if (ttlSeconds <= 0) {
+            setValue(key, value);
+            return;
+        }
+        if (key == null || key.isBlank()) return;
+        if (value == null) {
+            redisTemplate.delete(key);
+            return;
+        }
+        try {
+            String json = (value instanceof String) ? (String) value : objectMapper.writeValueAsString(value);
+            redisTemplate.opsForValue().set(key, json, java.time.Duration.ofSeconds(ttlSeconds));
+        } catch (JsonProcessingException e) {
+            log.error("【Redis】序列化失败：key={}, error={}", key, e.getMessage(), e);
+        }
+    }
+
+    @Override
     public <T> T getValue(String key, Class<T> type) {
         if (key == null || key.isBlank() || type == null) return null;
         String json = redisTemplate.opsForValue().get(key);
@@ -73,6 +92,25 @@ public class RedisService implements IRedisService {
     }
 
     @Override
+    public void setList(String key, List<?> values, long ttlSeconds) {
+        if (ttlSeconds <= 0) {
+            setList(key, values);
+            return;
+        }
+        if (key == null || key.isBlank()) return;
+        if (values == null) {
+            redisTemplate.delete(key);
+            return;
+        }
+        try {
+            String json = objectMapper.writeValueAsString(values);
+            redisTemplate.opsForValue().set(key, json, java.time.Duration.ofSeconds(ttlSeconds));
+        } catch (JsonProcessingException e) {
+            log.error("【Redis】List 序列化失败：key={}, error={}", key, e.getMessage(), e);
+        }
+    }
+
+    @Override
     public <T> List<T> getList(String key, Class<T> elementType) {
         if (key == null || key.isBlank() || elementType == null) return List.of();
         String json = redisTemplate.opsForValue().get(key);
@@ -89,7 +127,7 @@ public class RedisService implements IRedisService {
     }
 
     @Override
-    public void addSetMembers(String key, Set<?> values) {
+    public void addSet(String key, Set<?> values) {
         if (key == null || key.isBlank() || values == null || values.isEmpty()) return;
         Set<String> jsonSet = new HashSet<>();
         for (Object value : values) {
@@ -110,10 +148,36 @@ public class RedisService implements IRedisService {
     }
 
     @Override
-    public <T> Set<T> getSetMembers(String key, Class<T> elementType) {
-        if (key == null || key.isBlank() || elementType == null) return Set.of();
+    public void addSet(String key, Set<?> values, long ttlSeconds) {
+        if (ttlSeconds <= 0) {
+            addSet(key, values);
+            return;
+        }
+        if (key == null || key.isBlank() || values == null || values.isEmpty()) return;
+        Set<String> jsonSet = new HashSet<>();
+        for (Object value : values) {
+            if (value == null) continue;
+            if (value instanceof String stringValue) {
+                jsonSet.add(stringValue);
+                continue;
+            }
+            try {
+                jsonSet.add(objectMapper.writeValueAsString(value));
+            } catch (JsonProcessingException e) {
+                log.error("【Redis】Set 序列化失败：key={}, error={}", key, e.getMessage(), e);
+            }
+        }
+        if (!jsonSet.isEmpty()) {
+            redisTemplate.opsForSet().add(key, jsonSet.toArray(new String[0]));
+            redisTemplate.expire(key, java.time.Duration.ofSeconds(ttlSeconds));
+        }
+    }
+
+    @Override
+    public <T> Set<T> getSet(String key, Class<T> elementType) {
+        if (key == null || key.isBlank() || elementType == null) return null;
         Set<String> jsonSet = redisTemplate.opsForSet().members(key);
-        if (jsonSet == null || jsonSet.isEmpty()) return Set.of();
+        if (jsonSet == null || jsonSet.isEmpty()) return null;
 
         Set<T> result = new HashSet<>();
         for (String json : jsonSet) {
@@ -155,6 +219,25 @@ public class RedisService implements IRedisService {
     }
 
     @Override
+    public void setMap(String key, Map<String, ?> values, long ttlSeconds) {
+        if (ttlSeconds <= 0) {
+            setMap(key, values);
+            return;
+        }
+        if (key == null || key.isBlank()) return;
+        if (values == null) {
+            redisTemplate.delete(key);
+            return;
+        }
+        try {
+            String json = objectMapper.writeValueAsString(values);
+            redisTemplate.opsForValue().set(key, json, java.time.Duration.ofSeconds(ttlSeconds));
+        } catch (JsonProcessingException e) {
+            log.error("【Redis】Map 序列化失败：key={}, error={}", key, e.getMessage(), e);
+        }
+    }
+
+    @Override
     public <T> Map<String, T> getMap(String key, Class<T> valueType) {
         if (key == null || key.isBlank() || valueType == null) return Map.of();
         String json = redisTemplate.opsForValue().get(key);
@@ -178,11 +261,11 @@ public class RedisService implements IRedisService {
     }
 
     @Override
-    public void deleteByPrefix(String keyPrefix) {
-        if (keyPrefix == null || keyPrefix.isBlank()) return;
+    public void deleteByPrefix(String prefix) {
+        if (prefix == null || prefix.isBlank()) return;
         try {
             ScanOptions options = ScanOptions.scanOptions()
-                    .match(keyPrefix + "*")
+                    .match(prefix + "*")
                     .count(500)
                     .build();
             try (Cursor<byte[]> cursor = redisTemplate.getConnectionFactory().getConnection().scan(options)) {
@@ -194,7 +277,7 @@ public class RedisService implements IRedisService {
                 }
             }
         } catch (Exception e) {
-            log.error("【Redis】按前缀删除失败：prefix={}, error={}", keyPrefix, e.getMessage(), e);
+            log.error("【Redis】按前缀删除失败：prefix={}, error={}", prefix, e.getMessage(), e);
         }
     }
 
