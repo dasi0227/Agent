@@ -5,7 +5,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -170,9 +172,30 @@ public class RedisService implements IRedisService {
     }
 
     @Override
-    public void delete(String key) {
+    public void deleteByKey(String key) {
         if (key == null || key.isBlank()) return;
         redisTemplate.delete(key);
+    }
+
+    @Override
+    public void deleteByPrefix(String keyPrefix) {
+        if (keyPrefix == null || keyPrefix.isBlank()) return;
+        try {
+            ScanOptions options = ScanOptions.scanOptions()
+                    .match(keyPrefix + "*")
+                    .count(500)
+                    .build();
+            try (Cursor<byte[]> cursor = redisTemplate.getConnectionFactory().getConnection().scan(options)) {
+                while (cursor.hasNext()) {
+                    byte[] key = cursor.next();
+                    if (key != null && key.length > 0) {
+                        redisTemplate.getConnectionFactory().getConnection().del(key);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("【Redis】按前缀删除失败：prefix={}, error={}", keyPrefix, e.getMessage(), e);
+        }
     }
 
     @Override

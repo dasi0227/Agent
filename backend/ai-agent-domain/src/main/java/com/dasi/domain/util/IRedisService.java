@@ -22,7 +22,9 @@ public interface IRedisService {
 
     <T> Map<String, T> getMap(String key, Class<T> valueType);
 
-    void delete(String key);
+    void deleteByKey(String key);
+
+    void deleteByPrefix(String keyPrefix);
 
     void clear();
 
