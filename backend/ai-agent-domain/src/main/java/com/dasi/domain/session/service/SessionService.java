@@ -78,7 +78,7 @@ public class SessionService implements ISessionService {
     public List<MessageVO> listChatMessage(String sessionId) {
         SessionVO sessionVO = requireSession(sessionId);
         String sessionUser = requireUser();
-        if (!sessionUser.equals(sessionVO.getSessionUser())) {
+        if (notAdmin() && !sessionUser.equals(sessionVO.getSessionUser())) {
             throw new SessionException("无权限修改该会话");
         }
 
@@ -89,7 +89,7 @@ public class SessionService implements ISessionService {
     public List<MessageVO> listWorkSseMessage(String sessionId) {
         SessionVO sessionVO = requireSession(sessionId);
         String sessionUser = requireUser();
-        if (!sessionUser.equals(sessionVO.getSessionUser())) {
+        if (notAdmin() && !sessionUser.equals(sessionVO.getSessionUser())) {
             throw new SessionException("无权限修改该会话");
         }
 
@@ -112,7 +112,7 @@ public class SessionService implements ISessionService {
         if (!StringUtils.hasText(role)) {
             throw new SessionException("用户信息缺失");
         }
-        return role.equals(UserRoleType.ADMIN.getType());
+        return !role.equals(UserRoleType.ADMIN.getType());
     }
 
 
