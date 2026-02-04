@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dasi.infrastructure.persistent.dao.IMessageDao">
+    <resultMap id="dataMap" type="com.dasi.infrastructure.persistent.po.Message">
+        <id column="id" property="id"/>
+        <result column="session_id" property="sessionId"/>
+        <result column="message_content" property="messageContent"/>
+        <result column="message_role" property="messageRole"/>
+        <result column="message_type" property="messageType"/>
+        <result column="message_seq" property="messageSeq"/>
+        <result column="created_at" property="createTime"/>
+        <result column="updated_at" property="updateTime"/>
+    </resultMap>
+</mapper>

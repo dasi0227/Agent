@@ -1,4 +1,4 @@
-package com.dasi.domain.auth.model.jwt;
+package com.dasi.domain.util.jwt;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

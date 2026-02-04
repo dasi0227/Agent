@@ -1,9 +1,9 @@
 package com.dasi.domain.auth.service;
 
-import com.dasi.domain.auth.model.jwt.AuthContext;
+import com.dasi.domain.util.jwt.AuthContext;
 import com.dasi.domain.auth.model.vo.UserVO;
 import com.dasi.domain.auth.repository.IAuthRepository;
-import com.dasi.domain.util.IJwtService;
+import com.dasi.domain.util.jwt.IJwtService;
 import com.dasi.types.dto.request.auth.AuthRequest;
 import com.dasi.types.dto.request.auth.PasswordRequest;
 import com.dasi.types.dto.response.auth.AuthResponse;

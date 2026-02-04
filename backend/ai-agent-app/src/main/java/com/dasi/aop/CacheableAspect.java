@@ -1,6 +1,6 @@
 package com.dasi.aop;
 
-import com.dasi.domain.util.IRedisService;
+import com.dasi.domain.util.redis.IRedisService;
 import com.dasi.types.enumeration.CacheType;
 import com.dasi.types.annotation.Cacheable;
 import jakarta.annotation.Resource;

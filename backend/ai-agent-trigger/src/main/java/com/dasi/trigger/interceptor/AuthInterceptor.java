@@ -1,9 +1,9 @@
 package com.dasi.trigger.interceptor;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.dasi.domain.auth.model.jwt.AuthContext;
+import com.dasi.domain.util.jwt.AuthContext;
 import com.dasi.domain.auth.model.vo.UserVO;
-import com.dasi.domain.util.IJwtService;
+import com.dasi.domain.util.jwt.IJwtService;
 import com.dasi.types.dto.result.Result;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;

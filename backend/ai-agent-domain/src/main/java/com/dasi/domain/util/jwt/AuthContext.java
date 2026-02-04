@@ -1,4 +1,4 @@
-package com.dasi.domain.auth.model.jwt;
+package com.dasi.domain.util.jwt;
 
 import com.dasi.domain.auth.model.vo.UserVO;
 import org.springframework.stereotype.Component;

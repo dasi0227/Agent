@@ -22,13 +22,13 @@ CREATE TABLE `ai_api`
 DROP TABLE IF EXISTS `ai_model`;
 CREATE TABLE `ai_model`
 (
-    `id`           BIGINT      NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT '自增 id',
-    `model_id`     VARCHAR(32) NOT NULL UNIQUE COMMENT '模型 id',
-    `api_id`       VARCHAR(32) NOT NULL COMMENT '接口 id',
-    `model_name`   VARCHAR(32) NOT NULL COMMENT '模型名称',
-    `model_type`   VARCHAR(32) NOT NULL COMMENT '模型类型',
-    `create_time`  DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time`  DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+    `id`          BIGINT      NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT '自增 id',
+    `model_id`    VARCHAR(32) NOT NULL UNIQUE COMMENT '模型 id',
+    `api_id`      VARCHAR(32) NOT NULL COMMENT '接口 id',
+    `model_name`  VARCHAR(32) NOT NULL COMMENT '模型名称',
+    `model_type`  VARCHAR(32) NOT NULL COMMENT '模型类型',
+    `create_time` DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='模型配置表';
@@ -89,15 +89,15 @@ CREATE TABLE `ai_prompt`
 DROP TABLE IF EXISTS `ai_advisor`;
 CREATE TABLE `ai_advisor`
 (
-    `id`             BIGINT       NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT '自增 id',
-    `advisor_id`     VARCHAR(32)  NOT NULL UNIQUE COMMENT '顾问 id',
-    `advisor_name`   VARCHAR(32)  NOT NULL COMMENT '顾问名称',
-    `advisor_type`   VARCHAR(32)  NOT NULL COMMENT '顾问类型',
-    `advisor_desc`   VARCHAR(255) NOT NULL DEFAULT '暂无' COMMENT '顾问描述',
-    `advisor_order`  TINYINT      NOT NULL DEFAULT '0' COMMENT '顾问顺序号',
-    `advisor_param`  TEXT         NULL     DEFAULT NULL COMMENT '顾问参数配置',
-    `create_time`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+    `id`            BIGINT       NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT '自增 id',
+    `advisor_id`    VARCHAR(32)  NOT NULL UNIQUE COMMENT '顾问 id',
+    `advisor_name`  VARCHAR(32)  NOT NULL COMMENT '顾问名称',
+    `advisor_type`  VARCHAR(32)  NOT NULL COMMENT '顾问类型',
+    `advisor_desc`  VARCHAR(255) NOT NULL DEFAULT '暂无' COMMENT '顾问描述',
+    `advisor_order` TINYINT      NOT NULL DEFAULT '0' COMMENT '顾问顺序号',
+    `advisor_param` TEXT         NULL     DEFAULT NULL COMMENT '顾问参数配置',
+    `create_time`   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='顾问配置表';
@@ -174,7 +174,7 @@ DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user`
 (
     `id`          BIGINT       NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT '自增 id',
-    `username`    VARCHAR(64)  NOT NULL UNIQUE COMMENT '用户名',
+    `username`    VARCHAR(32)  NOT NULL UNIQUE COMMENT '用户名',
     `password`    VARCHAR(255) NOT NULL COMMENT '加密后的密码',
     `role`        VARCHAR(32)  NOT NULL DEFAULT 'account' COMMENT '角色：account / admin',
     `user_status` TINYINT      NOT NULL DEFAULT '1' COMMENT '状态：0-禁用，1-启用',
@@ -183,3 +183,34 @@ CREATE TABLE `user`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='系统用户表';
+
+# session：会话表
+DROP TABLE IF EXISTS `session`;
+CREATE TABLE `session`
+(
+    `id`            BIGINT      NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT '自增 id',
+    `session_id`    VARCHAR(64) NOT NULL UNIQUE COMMENT '会话 id',
+    `user_id`       BIGINT      NOT NULL COMMENT '用户 id',
+    `session_title` VARCHAR(64) NOT NULL DEFAULT '新会话' COMMENT '会话标题',
+    `session_type`  VARCHAR(32) NOT NULL COMMENT '会话类型：chat/work',
+    `created_at`    DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`    DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='会话记录表';
+
+# message：消息表
+DROP TABLE IF EXISTS `message`;
+CREATE TABLE `message`
+(
+    `id`              BIGINT      NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT '自增 id',
+    `session_id`      VARCHAR(64) NOT NULL COMMENT '会话 id',
+    `message_content` LONGTEXT    NOT NULL COMMENT '消息内容',
+    `message_role`    VARCHAR(32) NOT NULL COMMENT '消息角色：user/assistant',
+    `message_type`    VARCHAR(32) NOT NULL COMMENT '消息类型：chat/work-sse/work-answer',
+    `message_seq`     INT         NOT NULL COMMENT '消息序号',
+    `created_at`      DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`      DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='会话记录表';

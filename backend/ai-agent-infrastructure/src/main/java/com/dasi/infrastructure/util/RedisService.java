@@ -1,6 +1,6 @@
 package com.dasi.infrastructure.util;
 
-import com.dasi.domain.util.IRedisService;
+import com.dasi.domain.util.redis.IRedisService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;

@@ -8,7 +8,7 @@ import com.dasi.domain.ai.service.armory.ArmoryStrategyFactory;
 import com.dasi.domain.ai.service.armory.IArmoryStrategy;
 import com.dasi.domain.ai.service.execute.ExecuteStrategyFactory;
 import com.dasi.domain.ai.service.execute.IExecuteStrategy;
-import com.dasi.domain.util.IRedisService;
+import com.dasi.domain.util.redis.IRedisService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
