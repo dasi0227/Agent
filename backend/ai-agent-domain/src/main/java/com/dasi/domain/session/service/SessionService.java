@@ -1,5 +1,6 @@
 package com.dasi.domain.session.service;
 
+import com.dasi.domain.session.model.enumeration.UserRoleType;
 import com.dasi.domain.session.model.vo.MessageVO;
 import com.dasi.domain.session.model.vo.SessionVO;
 import com.dasi.domain.session.repository.ISessionRepository;
@@ -36,7 +37,7 @@ public class SessionService implements ISessionService {
     }
 
     @Override
-    public void insertSession(String sessionTitle, String sessionType) {
+    public SessionVO insertSession(String sessionTitle, String sessionType) {
         String sessionUser = authContext.getUsername();
 
         int count = sessionRepository.countSessionByType(sessionUser, sessionType);
@@ -44,7 +45,9 @@ public class SessionService implements ISessionService {
             throw new SessionException("每种类型最多 3 个会话");
         }
 
-        sessionRepository.insertSession(generateSessionId(sessionType), sessionUser, sessionTitle, sessionType);
+        String sessionId = generateSessionId(sessionType);
+        sessionRepository.insertSession(sessionId, sessionUser, sessionTitle, sessionType);
+        return sessionRepository.querySessionBySessionId(sessionId);
     }
 
     @Override
@@ -97,11 +100,19 @@ public class SessionService implements ISessionService {
     public List<MessageVO> listWorkAnswerMessage(String sessionId) {
         SessionVO sessionVO = requireSession(sessionId);
         String sessionUser = requireUser();
-        if (!sessionUser.equals(sessionVO.getSessionUser())) {
+        if (notAdmin() && !sessionUser.equals(sessionVO.getSessionUser())) {
             throw new SessionException("无权限修改该会话");
         }
 
         return sessionRepository.listMessageBySessionAndType(sessionId, WORK_ANSWER.getType());
+    }
+
+    private boolean notAdmin() {
+        String role = authContext.getRole();
+        if (!StringUtils.hasText(role)) {
+            throw new SessionException("用户信息缺失");
+        }
+        return role.equals(UserRoleType.ADMIN.getType());
     }
 
 

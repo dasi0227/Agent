@@ -24,9 +24,8 @@ public class SessionController {
     }
 
     @PostMapping("/insert")
-    public Result<Void> insertSession(@RequestParam("sessionTitle") String sessionTitle, @RequestParam("sessionType") String sessionType) {
-        sessionSevice.insertSession(sessionTitle, sessionType);
-        return Result.success();
+    public Result<SessionVO> insertSession(@RequestParam("sessionTitle") String sessionTitle, @RequestParam("sessionType") String sessionType) {
+        return Result.success(sessionSevice.insertSession(sessionTitle, sessionType));
     }
 
     @PostMapping("/update")

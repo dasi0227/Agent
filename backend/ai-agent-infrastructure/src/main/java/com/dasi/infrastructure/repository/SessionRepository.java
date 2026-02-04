@@ -35,7 +35,7 @@ public class SessionRepository implements ISessionRepository {
     }
 
     @Override
-    public void insertSession(String sessionId, String sessionTitle, String sessionUser, String sessionType) {
+    public void insertSession(String sessionId, String sessionUser, String sessionTitle, String sessionType) {
         Session session = Session.builder()
                 .sessionId(sessionId)
                 .sessionUser(sessionUser)

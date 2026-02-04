@@ -16,4 +16,8 @@ public class ChatConstant {
 
     public static final int CHAT_SESSION_LIMIT = 3;
 
+    public static final int CHAT_USER_LIMIT = 20;
+
+    public static final int WORK_USER_LIMIT = 3;
+
 }

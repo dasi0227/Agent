@@ -64,15 +64,16 @@ public class AiController implements IAiApi {
     @PostMapping(value = "/work/execute", produces = "text/event-stream")
     public SseEmitter execute(@Valid @RequestBody AiWorkRequest aiWorkRequest) {
 
+        String sessionId = aiWorkRequest.getSessionId();
         SseEmitter sseEmitter = new SseEmitter(0L);
         String agentId = aiWorkRequest.getAiAgentId();
         if (isInactiveWorkAgent(agentId)) {
             try {
                 sseEmitter.send(SseEmitter.event()
                         .name("error")
-                        .data("Agent 未启用或不存在"));
+                        .data("AI 未启用或不存在"));
             } catch (Exception e) {
-                log.error("【Agent 执行】状态校验失败：agentId={}", agentId, e);
+                log.error("【AI 执行】状态校验失败：agentId={}", agentId, e);
             } finally {
                 sseEmitter.complete();
             }
@@ -87,22 +88,10 @@ public class AiController implements IAiApi {
                 .maxRetry(aiWorkRequest.getMaxRetry())
                 .build();
 
-        if (StringUtils.hasText(aiWorkRequest.getSessionId())) {
-            try {
-                messageService.saveWorkAnswerMessage(aiWorkRequest.getSessionId(), "user", aiWorkRequest.getUserMessage());
-            } catch (Exception e) {
-                log.warn("【Work 会话】保存用户消息失败：{}", e.getMessage());
-                try {
-                    sseEmitter.send(SseEmitter.event()
-                            .name("error")
-                            .data(e.getMessage()));
-                } catch (Exception ex) {
-                    log.error("【Work 会话】发送错误失败：{}", ex.getMessage());
-                } finally {
-                    sseEmitter.complete();
-                }
-                return sseEmitter;
-            }
+        try {
+            messageService.saveWorkUserMessage(aiWorkRequest.getSessionId(), aiWorkRequest.getUserMessage());
+        } catch (Exception e) {
+            log.warn("【AI 执行】持久化消息失败：sessionId={}, error={}", sessionId, e.getMessage());
         }
 
         dispatchService.dispatchExecuteStrategy(executeRequestEntity, sseEmitter);
@@ -133,7 +122,7 @@ public class AiController implements IAiApi {
         try {
             if (StringUtils.hasText(sessionId)) {
                 try {
-                    messageService.saveUserMessage(sessionId, userMessage);
+                    messageService.saveChatUserMessage(sessionId, userMessage);
                 } catch (Exception e) {
                     log.warn("【AI 对话】保存用户消息失败：{}", e.getMessage());
                     return e.getMessage();
@@ -161,13 +150,14 @@ public class AiController implements IAiApi {
             if (response == null || response.isEmpty()) {
                 return CHAT_ERROR_RESPONSE;
             }
-            if (StringUtils.hasText(sessionId)) {
-                try {
-                    messageService.saveAssistantMessage(sessionId, response);
-                } catch (Exception e) {
-                    log.warn("【AI 对话】保存助手消息失败：{}", e.getMessage());
-                }
+
+
+            try {
+                messageService.saveChatAssistantMessage(sessionId, response);
+            } catch (Exception e) {
+                log.warn("【AI 对话】持久化消息失败：sessionId={}, error={}", sessionId, e.getMessage());
             }
+
             return response;
         } catch (Exception e) {
             log.error("【AI 对话】完整对话失败：clientId={}", clientId, e);
@@ -198,7 +188,7 @@ public class AiController implements IAiApi {
         try {
             if (StringUtils.hasText(sessionId)) {
                 try {
-                    messageService.saveUserMessage(sessionId, userMessage);
+                    messageService.saveChatUserMessage(sessionId, userMessage);
                 } catch (Exception e) {
                     log.warn("【AI 对话】保存用户消息失败：{}", e.getMessage());
                     return Flux.just(e.getMessage());
@@ -230,7 +220,7 @@ public class AiController implements IAiApi {
                             return;
                         }
                         try {
-                            messageService.saveAssistantMessage(sessionId, answerBuffer.toString());
+                            messageService.saveChatAssistantMessage(sessionId, answerBuffer.toString());
                         } catch (Exception e) {
                             log.warn("【AI 对话】保存助手消息失败：{}", e.getMessage());
                         }
@@ -274,7 +264,6 @@ public class AiController implements IAiApi {
         ragService.uploadGitRepo(aiUploadRequest);
         return Result.success();
     }
-
 
 
     private boolean isInactiveChatClient(String clientId) {

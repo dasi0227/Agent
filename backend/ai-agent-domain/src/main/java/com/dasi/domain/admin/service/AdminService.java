@@ -3,6 +3,7 @@ package com.dasi.domain.admin.service;
 import com.dasi.domain.admin.model.enumeration.*;
 import com.dasi.domain.admin.model.vo.*;
 import com.dasi.domain.admin.repository.IAdminRepository;
+import com.dasi.domain.session.model.vo.SessionVO;
 import com.dasi.types.dto.request.admin.manage.*;
 import com.dasi.types.dto.request.admin.query.*;
 import com.dasi.types.dto.result.PageResult;
@@ -529,6 +530,12 @@ public class AdminService implements IAdminService {
             throw new AdminException("TASK 不存在，请确认后重新切换");
         }
         adminRepository.taskToggle(id, status);
+    }
+
+    // -------------------- Session --------------------
+    @Override
+    public List<SessionVO> listSession() {
+        return adminRepository.listSession();
     }
 
     // -------------------- List --------------------

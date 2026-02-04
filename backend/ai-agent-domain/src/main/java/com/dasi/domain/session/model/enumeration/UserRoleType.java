@@ -7,13 +7,14 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public enum MessageType {
-    CHAT("chat", "Chat"),
-    WORK_SSE("work-sse", "Work SSE"),
-    WORK_ANSWER("work-answer", "Work Answer");
+public enum UserRoleType {
 
-    private String type;
+    ADMIN("管理员", "admin"),
+    ACCOUNT("用户", "account")
+    ;
 
     private String name;
+
+    private String type;
 
 }

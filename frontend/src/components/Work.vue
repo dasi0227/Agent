@@ -3,7 +3,16 @@ import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } 
 import { marked } from 'marked';
 import hljs from 'highlight.js';
 import DOMPurify from 'dompurify';
-import { dispatchArmory, executeAgentStream, insertSession, listWorkAnswerMessages, listWorkSseMessages, queryAgentList, updateSession } from '../request/api';
+import {
+    dispatchArmory,
+    executeAgentStream,
+    insertSession,
+    listSessions,
+    listWorkAnswerMessages,
+    listWorkSseMessages,
+    queryAgentList,
+    updateSession
+} from '../request/api';
 import { normalizeError } from '../request/request';
 import { formatMcpJson } from '../utils/StringUtil';
 import { useAgentSettingsStore, useAgentStore } from '../router/pinia';
@@ -56,6 +65,15 @@ const mapSession = (session) => {
         messages: [],
         cards: []
     };
+};
+
+const refreshWorkSessions = async () => {
+    const resp = await listSessions();
+    const list = pickData(resp, '获取会话失败') || [];
+    const mapped = (Array.isArray(list) ? list : []).map(mapSession).filter(Boolean);
+    const workList = mapped.filter((item) => item.sessionType === 'work');
+    agentStore.setSessions(workList);
+    return workList;
 };
 
 const mapMessage = (message) => ({
@@ -227,9 +245,15 @@ const ensureWorkSession = async () => {
     }
     try {
         const resp = await insertSession({ sessionTitle: '新会话', sessionType: 'work' });
-        const session = mapSession(pickData(resp, '创建会话失败'));
+        const created = mapSession(pickData(resp, '创建会话失败'));
+        if (created) {
+            agentStore.upsertSession(created);
+            agentStore.setCurrentSessionId(created.id);
+            return created;
+        }
+        const workList = await refreshWorkSessions();
+        const session = workList[0] || null;
         if (!session) return null;
-        agentStore.upsertSession(session);
         agentStore.setCurrentSessionId(session.id);
         return session;
     } catch (error) {
@@ -244,7 +268,7 @@ const renameSessionIfNeeded = async (session, content) => {
     const nextTitle = content.slice(0, 20) || '新会话';
     agentStore.updateSessionTitle(session.id, nextTitle);
     try {
-        await updateSession({ id: session.id, sessionId: session.sessionId, sessionTitle: nextTitle });
+        await updateSession({ id: session.id, sessionTitle: nextTitle });
     } catch (error) {
         sendError.value = normalizeError(error).message || '更新会话失败';
     }

@@ -3,6 +3,7 @@ package com.dasi.infrastructure.repository;
 import com.dasi.domain.admin.model.enumeration.AiConfigType;
 import com.dasi.domain.admin.model.vo.*;
 import com.dasi.domain.admin.repository.IAdminRepository;
+import com.dasi.domain.session.model.vo.SessionVO;
 import com.dasi.infrastructure.persistent.dao.*;
 import com.dasi.infrastructure.persistent.po.*;
 import com.dasi.types.annotation.CacheEvict;
@@ -55,6 +56,9 @@ public class AdminRepository implements IAdminRepository {
 
     @Resource
     private IAiTaskDao aiTaskDao;
+
+    @Resource
+    private ISessionDao sessionDao;
 
     // -------------------- API --------------------
     @Override
@@ -697,6 +701,13 @@ public class AdminRepository implements IAdminRepository {
         aiTaskDao.toggle(po);
     }
 
+    // -------------------- Session --------------------
+    @Override
+    public List<SessionVO> listSession() {
+        List<Session> list = sessionDao.queryAll();
+        return list.stream().map(this::toSessionVO).toList();
+    }
+
     // -------------------- Depend --------------------
     @Override
     @Cacheable(cachePrefix = ADMIN_DEPEND_PREFIX, cacheType = CacheType.LIST, cacheClass = String.class)
@@ -1037,6 +1048,20 @@ public class AdminRepository implements IAdminRepository {
                 .taskDesc(request.getTaskDesc())
                 .taskParam(request.getTaskParam())
                 .taskStatus(request.getTaskStatus())
+                .build();
+    }
+
+    private SessionVO toSessionVO(Session session) {
+        if (session == null) {
+            return null;
+        }
+        return SessionVO.builder()
+                .id(session.getId())
+                .sessionId(session.getSessionId())
+                .sessionUser(session.getSessionUser())
+                .sessionTitle(session.getSessionTitle())
+                .sessionType(session.getSessionType())
+                .createTime(session.getCreateTime())
                 .build();
     }
 

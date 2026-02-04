@@ -174,7 +174,7 @@ const saveRenameChat = async (chat) => {
     }
     const title = editChatTitle.value.trim() || '未命名会话';
     try {
-        await updateSession({ id: chat.id, sessionId: chat.sessionId, sessionTitle: title });
+        await updateSession({ id: chat.id, sessionTitle: title });
         chatStore.updateChatTitle(chat.id, title);
         sessionError.value = '';
     } catch (error) {
@@ -200,7 +200,7 @@ const saveRenameAgent = async (session) => {
     }
     const title = editAgentTitle.value.trim() || '未命名会话';
     try {
-        await updateSession({ id: session.id, sessionId: session.sessionId, sessionTitle: title });
+        await updateSession({ id: session.id, sessionTitle: title });
         agentStore.updateSessionTitle(session.id, title);
         sessionError.value = '';
     } catch (error) {
@@ -268,16 +268,30 @@ const confirmNewSession = async (type) => {
     }
     try {
         const resp = await insertSession({ sessionTitle: '新会话', sessionType: type });
-        const session = mapSession(pickData(resp, '创建会话失败'));
+        const created = mapSession(pickData(resp, '创建会话失败'));
+        if (created) {
+            if (type === 'work') {
+                agentStore.upsertSession(created);
+                agentStore.setCurrentSessionId(created.id);
+                router.push('/work');
+            } else {
+                chatStore.upsertChat(created);
+                chatStore.setCurrentChatId(created.id);
+                router.push('/chat');
+            }
+            closeNewSessionPicker();
+            sessionError.value = '';
+            return;
+        }
+        await loadSessions();
+        const session = type === 'work' ? agentStore.sessions[0] : chatStore.chats[0];
         if (!session) {
             throw new Error('创建会话失败');
         }
         if (type === 'work') {
-            agentStore.upsertSession(session);
             agentStore.setCurrentSessionId(session.id);
             router.push('/work');
         } else {
-            chatStore.upsertChat(session);
             chatStore.setCurrentChatId(session.id);
             router.push('/chat');
         }
@@ -316,6 +330,7 @@ const saveProfile = async () => {
     }
     try {
         const resp = await updatePassword({
+            id: currentUser.value.id,
             username: profileForm.username,
             oldPassword: profileForm.oldPassword,
             newPassword: profileForm.newPassword
