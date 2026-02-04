@@ -61,7 +61,7 @@ public class AiController implements IAiApi {
 
         SseEmitter sseEmitter = new SseEmitter(0L);
         String agentId = aiWorkRequest.getAiAgentId();
-        if (!isActiveWorkAgent(agentId)) {
+        if (isInactiveWorkAgent(agentId)) {
             try {
                 sseEmitter.send(SseEmitter.event()
                         .name("error")
@@ -92,7 +92,7 @@ public class AiController implements IAiApi {
     public String complete(@Valid @RequestBody AiChatRequest aiChatRequest) {
 
         String clientId = aiChatRequest.getClientId();
-        if (isActiveChatClient(clientId)) {
+        if (isInactiveChatClient(clientId)) {
             log.warn("【AI 对话】client 未启用或不存在：clientId={}", clientId);
             return CHAT_ERROR_RESPONSE;
         }
@@ -142,7 +142,7 @@ public class AiController implements IAiApi {
     public Flux<String> stream(@Valid @RequestBody AiChatRequest aiChatRequest) {
 
         String clientId = aiChatRequest.getClientId();
-        if (isActiveChatClient(clientId)) {
+        if (isInactiveChatClient(clientId)) {
             log.warn("【AI 对话】client 未启用或不存在：clientId={}", clientId);
             return Flux.just(CHAT_ERROR_RESPONSE);
         }
@@ -217,7 +217,9 @@ public class AiController implements IAiApi {
         return Result.success();
     }
 
-    private boolean isActiveChatClient(String clientId) {
+
+
+    private boolean isInactiveChatClient(String clientId) {
         if (clientId == null || clientId.isBlank()) {
             return true;
         }
@@ -228,15 +230,15 @@ public class AiController implements IAiApi {
         return list.stream().noneMatch(item -> clientId.equals(item.getClientId()));
     }
 
-    private boolean isActiveWorkAgent(String agentId) {
+    private boolean isInactiveWorkAgent(String agentId) {
         if (agentId == null || agentId.isBlank()) {
-            return false;
+            return true;
         }
         List<QueryWorkAgentResponse> list = queryService.queryWorkAgentResponseList();
         if (list == null || list.isEmpty()) {
-            return false;
+            return true;
         }
-        return list.stream().anyMatch(item -> agentId.equals(item.getAgentId()));
+        return list.stream().noneMatch(item -> agentId.equals(item.getAgentId()));
     }
 
 }

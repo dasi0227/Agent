@@ -1,4 +1,4 @@
-package com.dasi.domain.util;
+package com.dasi.domain.util.jwt;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.dasi.domain.auth.model.vo.UserVO;

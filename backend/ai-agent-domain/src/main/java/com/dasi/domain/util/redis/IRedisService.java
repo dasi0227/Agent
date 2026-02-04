@@ -1,4 +1,4 @@
-package com.dasi.domain.util;
+package com.dasi.domain.util.redis;
 
 import java.util.List;
 import java.util.Map;
