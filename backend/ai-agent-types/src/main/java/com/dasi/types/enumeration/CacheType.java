@@ -1,4 +1,4 @@
-package com.dasi.types.annotation;
+package com.dasi.types.enumeration;
 
 public enum CacheType {
     VALUE,
