@@ -2,7 +2,7 @@ package com.dasi.trigger.http;
 
 import com.dasi.domain.admin.model.vo.*;
 import com.dasi.domain.admin.service.IAdminService;
-import com.dasi.types.dto.request.admin.query.ConfigListRequest;
+import com.dasi.domain.session.model.vo.SessionVO;
 import com.dasi.types.dto.request.admin.manage.*;
 import com.dasi.types.dto.request.admin.query.*;
 import com.dasi.types.dto.result.PageResult;
@@ -325,6 +325,12 @@ public class AdminController {
     public Result<Void> taskToggle(@RequestParam("id") Long id, @RequestParam("taskStatus") Integer taskStatus) {
         adminService.taskToggle(id, taskStatus);
         return Result.success();
+    }
+
+    // -------------------- Session --------------------
+    @GetMapping("/session/list")
+    public Result<List<SessionVO>> listSession() {
+        return Result.success(adminService.listSession());
     }
 
     // -------------------- List --------------------

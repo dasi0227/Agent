@@ -1,6 +1,7 @@
 package com.dasi.domain.admin.service;
 
 import com.dasi.domain.admin.model.vo.*;
+import com.dasi.domain.session.model.vo.SessionVO;
 import com.dasi.types.dto.request.admin.manage.*;
 import com.dasi.types.dto.request.admin.query.*;
 import com.dasi.types.dto.result.PageResult;
@@ -82,6 +83,9 @@ public interface IAdminService {
     void taskUpdate(TaskManageRequest request);
     void taskDelete(Long id);
     void taskToggle(Long id, Integer status);
+
+    // Session
+    List<SessionVO> listSession();
 
     // List
     List<String> listClientType();

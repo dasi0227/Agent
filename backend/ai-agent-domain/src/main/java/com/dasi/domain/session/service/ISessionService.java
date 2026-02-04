@@ -9,7 +9,7 @@ public interface ISessionService {
 
     List<SessionVO> listSession();
 
-    void insertSession(String sessionTitle, String sessionType);
+    SessionVO insertSession(String sessionTitle, String sessionType);
 
     void updateSession(Long id, String sessionTitle);
 

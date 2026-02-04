@@ -32,6 +32,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public Result<Void> handleException(Exception e) {
         log.error(e.getMessage(), e);
-        return Result.error(e.getMessage());
+        return Result.error("服务出错，请联系管理员处理");
     }
 }

@@ -13,7 +13,7 @@ public interface ISessionRepository {
 
     SessionVO querySessionById(Long id);
 
-    void insertSession(String sessionId, String sessionTitle, String sessionUser, String sessionType);
+    void insertSession(String sessionId, String sessionUser, String sessionTitle, String sessionType);
 
     void updateSessionTitle(Long id, String sessionTitle);
 

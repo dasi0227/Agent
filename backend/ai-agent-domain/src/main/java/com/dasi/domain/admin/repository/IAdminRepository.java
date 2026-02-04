@@ -1,6 +1,7 @@
 package com.dasi.domain.admin.repository;
 
 import com.dasi.domain.admin.model.vo.*;
+import com.dasi.domain.session.model.vo.SessionVO;
 import com.dasi.types.dto.request.admin.manage.*;
 import com.dasi.types.dto.request.admin.query.*;
 
@@ -111,6 +112,9 @@ public interface IAdminRepository {
     void taskUpdate(TaskManageRequest request);
     void taskDelete(Long id);
     void taskToggle(Long id, Integer status);
+
+    // Session
+    List<SessionVO> listSession();
 
     // Depend
     List<String> queryClientDependOnPrompt(String promptId);

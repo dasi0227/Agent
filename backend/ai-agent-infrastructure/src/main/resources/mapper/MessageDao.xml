@@ -28,15 +28,15 @@
         ORDER BY message_seq ASC, created_at ASC
     </select>
 
-    <select id="countBySessionAndRoleAndType" resultType="java.lang.Integer">
+    <select id="countBySessionAndType" resultType="int">
         SELECT COUNT(1)
         FROM message
         WHERE session_id = #{sessionId}
-          AND message_role = #{messageRole}
           AND message_type = #{messageType}
+          AND message_role = 'user'
     </select>
 
-    <select id="maxSeqBySessionAndType" resultType="java.lang.Integer">
+    <select id="maxSeqBySessionAndType" resultType="int">
         SELECT MAX(message_seq)
         FROM message
         WHERE session_id = #{sessionId}
@@ -44,8 +44,8 @@
     </select>
 
     <insert id="insert" parameterType="com.dasi.infrastructure.persistent.po.Message" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO message (session_id, message_content, message_role, message_type, message_seq, created_at, updated_at)
-        VALUES (#{sessionId}, #{messageContent}, #{messageRole}, #{messageType}, #{messageSeq}, #{createTime}, #{updateTime})
+        INSERT INTO message (session_id, message_content, message_role, message_type, message_seq)
+        VALUES (#{sessionId}, #{messageContent}, #{messageRole}, #{messageType}, #{messageSeq})
     </insert>
 
     <delete id="deleteBySessionId">

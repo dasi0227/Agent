@@ -7,10 +7,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public enum UserRole {
+public enum MessageRole {
 
-    ADMIN("管理员", "admin"),
-    ACCOUNT("用户", "account")
+    USER("用户", "user"),
+    ASSISTANT("助手", "assistant")
     ;
 
     private String name;

@@ -7,6 +7,7 @@ import {
     fetchComplete,
     fetchStream,
     insertSession,
+    listSessions,
     listChatMessages,
     pickContentFromResult,
     dispatchArmory,
@@ -93,6 +94,15 @@ const mapSession = (session) => {
         createdAt: session.createTime ? Date.parse(session.createTime) : Date.now(),
         messages: []
     };
+};
+
+const refreshChatSessions = async () => {
+    const resp = await listSessions();
+    const list = pickData(resp, '获取会话失败') || [];
+    const mapped = (Array.isArray(list) ? list : []).map(mapSession).filter(Boolean);
+    const chatList = mapped.filter((item) => item.sessionType === 'chat');
+    chatStore.setChats(chatList);
+    return chatList;
 };
 
 const mapMessage = (message) => ({
@@ -226,9 +236,15 @@ const ensureChatSession = async () => {
     }
     try {
         const resp = await insertSession({ sessionTitle: '新会话', sessionType: 'chat' });
-        const session = mapSession(pickData(resp, '创建会话失败'));
+        const created = mapSession(pickData(resp, '创建会话失败'));
+        if (created) {
+            chatStore.upsertChat(created);
+            chatStore.setCurrentChatId(created.id);
+            return created;
+        }
+        const chatList = await refreshChatSessions();
+        const session = chatList[0] || null;
         if (!session) return null;
-        chatStore.upsertChat(session);
         chatStore.setCurrentChatId(session.id);
         return session;
     } catch (error) {
@@ -243,7 +259,7 @@ const renameChatIfNeeded = async (chat, content) => {
     const nextTitle = content.slice(0, 20) || '新会话';
     chatStore.updateChatTitle(chat.id, nextTitle);
     try {
-        await updateSession({ id: chat.id, sessionId: chat.sessionId, sessionTitle: nextTitle });
+        await updateSession({ id: chat.id, sessionTitle: nextTitle });
     } catch (error) {
         sendError.value = normalizeError(error).message || '更新会话失败';
     }
@@ -1002,7 +1018,7 @@ const handleUpload = async () => {
     }
     uploadForm.uploading = true;
     try {
-        await uploadRagGit({ repo, username, password });
+        await uploadRagGit({ repoUrl: repo, username, password });
         await fetchTags();
         const repoName = repo.split('/').pop()?.replace(/\.git$/i, '') || '';
         if (repoName) {

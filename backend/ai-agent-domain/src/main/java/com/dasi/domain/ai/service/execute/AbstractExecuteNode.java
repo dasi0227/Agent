@@ -4,14 +4,17 @@ import cn.bugstack.wrench.design.framework.tree.AbstractMultiThreadStrategyRoute
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
-import com.dasi.domain.ai.repository.IAiRepository;
-import com.dasi.domain.ai.model.entity.ExecuteResponseEntity;
 import com.dasi.domain.ai.model.entity.ExecuteRequestEntity;
+import com.dasi.domain.ai.model.entity.ExecuteResponseEntity;
+import com.dasi.domain.ai.repository.IAiRepository;
 import com.dasi.domain.util.message.IMessageService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import static com.dasi.domain.ai.model.enumeration.AiSectionType.REPLIER_OVERVIEW;
+import static com.dasi.domain.ai.model.enumeration.AiSectionType.SUMMARIZER_OVERVIEW;
 
 @Slf4j
 public abstract class AbstractExecuteNode extends AbstractMultiThreadStrategyRouter<ExecuteRequestEntity, ExecuteContext, String> {
@@ -46,27 +49,24 @@ public abstract class AbstractExecuteNode extends AbstractMultiThreadStrategyRou
                     .name("message")
                     .id(String.valueOf(executeResponseEntity.getTimestamp()))
                     .data(executeResponseEntity));
+
         } catch (Exception e) {
             log.error("【Agent 执行】发送 SSE 消息失败：{}", e.getMessage(), e);
         }
-        persistWorkMessage(executeResponseEntity);
 
+        persistWorkMessage(executeResponseEntity);
     }
 
     private void persistWorkMessage(ExecuteResponseEntity executeResponseEntity) {
-        if (executeResponseEntity == null || messageService == null) {
-            return;
-        }
+
         String sessionId = executeResponseEntity.getSessionId();
         String sectionType = executeResponseEntity.getSectionType();
-        if (sessionId == null || sessionId.isBlank() || sectionType == null || sectionType.isBlank()) {
-            return;
-        }
+
         try {
             String payload = JSON.toJSONString(executeResponseEntity);
             messageService.saveWorkSseMessage(sessionId, payload);
-            if ("summarizer_overview".equals(sectionType) || "replier_overview".equals(sectionType)) {
-                messageService.saveWorkAnswerMessage(sessionId, "assistant", executeResponseEntity.getSectionContent());
+            if (SUMMARIZER_OVERVIEW.getType().equals(sectionType) || REPLIER_OVERVIEW.getType().equals(sectionType)) {
+                messageService.saveWorkAssistantMessage(sessionId, executeResponseEntity.getSectionContent());
             }
         } catch (Exception e) {
             log.warn("【Agent 执行】保存消息失败：{}", e.getMessage());
