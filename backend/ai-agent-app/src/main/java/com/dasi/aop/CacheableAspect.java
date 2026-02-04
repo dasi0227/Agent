@@ -111,7 +111,7 @@ public class CacheableAspect {
         if (args == null || args.length == 0) {
             return cachePrefix + methodName;
         }
-        return cachePrefix + Arrays.stream(args)
+        return cachePrefix + methodName + ":" + Arrays.stream(args)
                 .map(this::safeToString)
                 .collect(Collectors.joining(","));
     }
