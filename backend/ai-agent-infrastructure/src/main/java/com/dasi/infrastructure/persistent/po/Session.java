@@ -20,7 +20,7 @@ public class Session {
     private String sessionId;
 
     /** 用户 id */
-    private Long userId;
+    private String sessionUser;
 
     /** 会话标题 */
     private String sessionTitle;

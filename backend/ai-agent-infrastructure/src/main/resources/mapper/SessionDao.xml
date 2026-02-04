@@ -5,7 +5,7 @@
     <resultMap id="dataMap" type="com.dasi.infrastructure.persistent.po.Session">
         <id column="id" property="id"/>
         <result column="session_id" property="sessionId"/>
-        <result column="user_id" property="userId"/>
+        <result column="session_user" property="sessionUser"/>
         <result column="session_title" property="sessionTitle"/>
         <result column="session_type" property="sessionType"/>
         <result column="created_at" property="createTime"/>
