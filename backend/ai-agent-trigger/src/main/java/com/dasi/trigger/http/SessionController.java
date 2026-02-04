@@ -44,26 +44,26 @@ public class SessionController {
 
     // 需要同步删除 message 表的数据
     @PostMapping("/delete")
-    public Result<Void> deleteSession(@RequestParam("id") Long id) {
+    public Result<Void> deleteSession(@RequestParam("id") Long id, @RequestParam("sessionId") String sessionId) {
         sessionSevice.deleteSession(id);
         return Result.success();
     }
 
     // 获取 chat 类型的数据
     @GetMapping("/message/chat")
-    public Result<List<MessageVO>> listChatMessage() {
+    public Result<List<MessageVO>> listChatMessage(@RequestParam("id") Long id, @RequestParam("sessionId") String sessionId) {
         return Result.success(sessionSevice.listChatMessage());
     }
 
     // 获取 work-sse 类型的数据
     @GetMapping("/message/work-sse")
-    public Result<List<MessageVO>> listWorkSseMessage() {
+    public Result<List<MessageVO>> listWorkSseMessage(@RequestParam("id") Long id, @RequestParam("sessionId") String sessionId) {
         return Result.success(sessionSevice.listWorkSseMessage());
     }
 
     // 获取 work-answer 类型的数据
     @GetMapping("/message/work-answer")
-    public Result<List<MessageVO>> listWorkAnswerSession() {
+    public Result<List<MessageVO>> listWorkAnswerSession(@RequestParam("id") Long id, @RequestParam("sessionId") String sessionId) {
         return Result.success(sessionSevice.listWorkAnswerSession());
     }
 
