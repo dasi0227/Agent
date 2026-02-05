@@ -217,6 +217,12 @@ export const useChatStore = defineStore('chat', {
                 chat.messages = Array.isArray(messages) ? messages : [];
             }
         },
+        setChatClient(chatId, clientId) {
+            const chat = this.chats.find((item) => item.id === chatId);
+            if (chat) {
+                chat.clientId = clientId || '';
+            }
+        },
         addUserMessage(content) {
             const chat = this.currentChat;
             if (!chat) return null;
@@ -331,6 +337,12 @@ export const useAgentStore = defineStore('agent', {
             const session = this.sessions.find((item) => item.id === sessionId);
             if (session) {
                 session.cards = Array.isArray(cards) ? cards : [];
+            }
+        },
+        setSessionAgent(sessionId, agentId) {
+            const session = this.sessions.find((item) => item.id === sessionId);
+            if (session) {
+                session.agentId = agentId || '';
             }
         },
         addUserMessage(content) {

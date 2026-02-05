@@ -21,7 +21,7 @@ const agentStore = useAgentStore();
 const settingsStore = useAgentSettingsStore();
 
 const agentOptions = ref([]);
-const currentAgentId = ref('');
+const pendingAgentId = ref('');
 const agentDropdownOpen = ref(false);
 const agentSelectRef = ref(null);
 
@@ -123,6 +123,24 @@ const renderMarkdown = (text) => {
     if (!text) return '';
     return DOMPurify.sanitize(marked.parse(text), { ADD_ATTR: ['class'] });
 };
+
+const currentAgentId = computed({
+    get: () => {
+        const session = agentStore.currentSession;
+        if (session) {
+            return session.agentId || '';
+        }
+        return pendingAgentId.value || '';
+    },
+    set: (value) => {
+        const session = agentStore.currentSession;
+        if (session?.id) {
+            agentStore.setSessionAgent(session.id, value || '');
+            return;
+        }
+        pendingAgentId.value = value || '';
+    }
+});
 
 const currentAgentLabel = computed(() => {
     if (!currentAgentId.value) {
@@ -249,6 +267,9 @@ const ensureWorkSession = async () => {
         if (created) {
             agentStore.upsertSession(created);
             agentStore.setCurrentSessionId(created.id);
+            if (pendingAgentId.value) {
+                agentStore.setSessionAgent(created.id, pendingAgentId.value);
+            }
             return created;
         }
         const workList = await refreshWorkSessions();

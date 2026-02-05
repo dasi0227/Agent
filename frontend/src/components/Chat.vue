@@ -30,6 +30,7 @@ const models = ref([]);
 const mcpTools = ref([]);
 const ragTags = ref([{ label: '不使用知识库', value: '' }]);
 const selectedMcpIds = ref([]);
+const pendingClientId = ref('');
 
 const messageScrollRef = ref(null);
 const modelSelectRef = ref(null);
@@ -160,11 +161,27 @@ renderer.code = (code, infostring) => {
 marked.setOptions({ breaks: true, gfm: true, renderer });
 
 const currentModel = computed({
-    get: () => settingsStore.model,
-    set: (value) => settingsStore.updateSettings({ model: value })
+    get: () => {
+        const chat = chatStore.currentChat;
+        if (chat) {
+            return chat.clientId || '';
+        }
+        return pendingClientId.value || '';
+    },
+    set: (value) => {
+        const chat = chatStore.currentChat;
+        if (chat?.id) {
+            chatStore.setChatClient(chat.id, value || '');
+            return;
+        }
+        pendingClientId.value = value || '';
+    }
 });
 
 const currentModelLabel = computed(() => {
+    if (!currentModel.value) {
+        return models.value.length ? '选择 CLIENT' : '暂无模型';
+    }
     const match = models.value.find((item) => item.value === currentModel.value);
     if (match?.label) return match.label;
     return models.value.length === 0 ? '暂无模型' : currentModel.value;
@@ -240,6 +257,9 @@ const ensureChatSession = async () => {
         if (created) {
             chatStore.upsertChat(created);
             chatStore.setCurrentChatId(created.id);
+            if (pendingClientId.value) {
+                chatStore.setChatClient(created.id, pendingClientId.value);
+            }
             return created;
         }
         const chatList = await refreshChatSessions();
@@ -384,9 +404,12 @@ const fetchModels = async () => {
         });
         if (unique.length > 0) {
             models.value = unique;
-            if (!unique.some((item) => item.value === currentModel.value)) {
-                currentModel.value = unique[0].value;
+            if (currentModel.value && !unique.some((item) => item.value === currentModel.value)) {
+                currentModel.value = '';
             }
+        } else {
+            models.value = [];
+            currentModel.value = '';
         }
     } catch (error) {
         console.warn('获取模型列表失败', error);

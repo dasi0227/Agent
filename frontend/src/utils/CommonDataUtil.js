@@ -4,8 +4,8 @@ export const adminMenuGroups = [
         label: '工作流管理',
         items: [
             { key: 'flow', label: 'FLOW', path: '/admin/flow' },
-            { key: 'task', label: 'TASK', path: '/admin/task' },
-            { key: 'config', label: 'CONFIG', path: '/admin/config' }
+            { key: 'config', label: 'CONFIG', path: '/admin/config' },
+            { key: 'task', label: 'TASK', path: '/admin/task' }
         ]
     },
     {
