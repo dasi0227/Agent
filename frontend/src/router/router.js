@@ -22,10 +22,6 @@ const routes = [
         component: Chat
     },
     {
-        path: '/agent',
-        redirect: '/work'
-    },
-    {
         path: '/work',
         name: 'work',
         component: Work
@@ -42,14 +38,6 @@ const routes = [
         path: '/register',
         name: 'register',
         component: Auth,
-        meta: {
-            hideSidebar: true
-        }
-    },
-    {
-        path: '/admin/login',
-        name: 'admin-login',
-        component: AuthAdmin,
         meta: {
             hideSidebar: true
         }
@@ -127,7 +115,7 @@ const routes = [
 ];
 
 const router = createRouter({
-    history: createWebHistory(),
+    history: createWebHistory('/agent/'),
     routes
 });
 
@@ -147,7 +135,6 @@ router.beforeEach((to, from, next) => {
         next({ path: '/login', replace: true });
         return;
     }
-    // 已登录时仍允许访问 /login /register /admin/login（不强制跳转）
     next();
 });
 
