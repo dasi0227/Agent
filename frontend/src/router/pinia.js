@@ -3,6 +3,15 @@ import { defineStore } from 'pinia';
 const SETTINGS_KEY = 'chat_settings';
 const AGENT_SETTINGS_KEY = 'agent_settings';
 const AUTH_KEY = 'auth_info';
+const APP_BASE = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+
+const withBasePath = (path) => {
+    if (!path) return APP_BASE || '/';
+    if (!path.startsWith('/')) {
+        return `${APP_BASE}/${path}`;
+    }
+    return `${APP_BASE}${path}`;
+};
 
 const defaultSettings = () => ({
     type: 'complete',
@@ -71,7 +80,7 @@ export const useAuthStore = defineStore('auth', {
         },
         logout(redirectPath = '/login') {
             this.clear();
-            window.location.href = redirectPath;
+            window.location.href = withBasePath(redirectPath);
         },
         setAuth({ token, user }) {
             this.token = token || '';

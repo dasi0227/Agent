@@ -6,6 +6,8 @@ const BASE_URL = 'http://localhost:8066';
 const REQUEST_TIMEOUT = 600000;
 const SETTINGS_KEY = 'chat_settings';
 const AUTH_KEY = 'auth_info';
+const APP_BASE = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+const LOGIN_PATH = `${APP_BASE}/login`;
 
 const http = axios.create({
     baseURL: BASE_URL,
@@ -137,8 +139,8 @@ export async function streamFetch(url, body, onData, onError, onDone, signal) {
         });
         if (response.status === 401) {
             localStorage.removeItem(AUTH_KEY);
-            if (window.location.pathname !== '/login') {
-                window.location.href = '/login';
+            if (window.location.pathname !== LOGIN_PATH) {
+                window.location.href = LOGIN_PATH;
             }
             throw new Error('未登录或登录已过期');
         }
