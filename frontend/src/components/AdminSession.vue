@@ -182,7 +182,6 @@ const backToGrid = () => {
     clearDetail();
 };
 
-const sessionCountLabel = computed(() => `共 ${sessions.value.length} 条会话`);
 
 onMounted(() => {
     loadSessions();
@@ -196,17 +195,8 @@ onMounted(() => {
             <header class="flex items-center justify-between border-b border-[var(--border-color)] bg-[var(--surface-1)] px-6 py-4 shadow-[var(--shadow-soft)]">
                 <div class="text-[18px] font-semibold">
                     SESSION 查看
-                    <span class="ml-2 text-[13px] font-normal text-[var(--text-secondary)]">{{ sessionCountLabel }}</span>
                 </div>
-                <div v-if="selectedSession" class="flex items-center gap-2">
-                    <button
-                        class="rounded-[10px] border border-[var(--border-color)] px-3 py-2 text-[13px] font-semibold text-[var(--text-primary)] transition hover:bg-[var(--surface-2)]"
-                        type="button"
-                        @click="backToGrid"
-                    >
-                        返回列表
-                    </button>
-                </div>
+                <div v-if="selectedSession" class="flex items-center gap-2"></div>
             </header>
 
             <div class="flex-1 overflow-auto p-6">
@@ -215,7 +205,7 @@ onMounted(() => {
                 </div>
 
                 <div v-if="!selectedSession">
-                    <div class="mb-4 text-[13px] text-[var(--text-secondary)]">点击卡片查看详情</div>
+                    <div class="mb-4 text-[13px] text-[var(--text-secondary)]">共 {{ sessions.length }} 个 Session</div>
                     <div v-if="loading.list" class="text-[13px] text-[var(--text-secondary)]">加载中...</div>
                     <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         <div
@@ -225,15 +215,20 @@ onMounted(() => {
                             @click="enterDetail(session)"
                         >
                             <div class="session-card-inner">
-                                <div class="session-card-face session-card-front flex h-full flex-col justify-between p-4">
-                                    <div class="inline-flex w-fit items-center rounded-full bg-[var(--surface-4)] px-3 py-1 text-[12px] font-semibold uppercase tracking-[0.08em] text-[var(--text-secondary)]">
-                                        {{ session.sessionType || '-' }}
+                                <div class="session-card-face session-card-front flex h-full flex-col gap-3 p-4">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <div
+                                            class="inline-flex w-fit items-center rounded-full px-3 py-1 text-[14px] font-semibold uppercase tracking-[0.08em]"
+                                            :class="session.sessionType === 'work' ? 'bg-[#ede9fe] text-[#7c3aed]' : 'bg-[#dbeafe] text-[#2563eb]'"
+                                        >
+                                            {{ session.sessionType || '-' }}
+                                        </div>
+                                        <div class="text-[12px] leading-none text-[var(--text-secondary)]">{{ formatTime(session.createTime) }}</div>
                                     </div>
-                                    <div class="space-y-[6px] text-left">
-                                        <div class="text-[16px] font-semibold break-all">{{ session.sessionId || '-' }}</div>
-                                        <div class="text-[13px] text-[var(--text-secondary)]">用户：{{ session.sessionUser || '-' }}</div>
+                                    <div class="flex flex-1 flex-col justify-center space-y-[6px] text-center">
+                                        <div class="text-[19px] font-semibold break-all">{{ session.sessionId || '-' }}</div>
+                                        <div class="text-[18px] text-[var(--text-secondary)]">{{ session.sessionUser || '-' }}</div>
                                     </div>
-                                    <div class="text-[12px] text-[var(--text-secondary)]">{{ formatTime(session.createTime) }}</div>
                                 </div>
                                 <div class="session-card-face session-card-back flex h-full flex-col items-center justify-center p-4 text-center">
                                     <div class="text-[15px] leading-6 text-[var(--text-secondary)]">
@@ -251,15 +246,24 @@ onMounted(() => {
                 <div v-else class="flex h-full flex-col gap-4">
                     <div class="flex flex-wrap items-center justify-between gap-3">
                         <div class="flex flex-wrap items-center gap-3">
-                            <div class="text-[16px] font-semibold">{{ selectedSession.sessionId }}</div>
-                            <span class="inline-flex items-center rounded-full bg-[var(--surface-4)] px-3 py-1 text-[12px] font-medium text-[var(--text-secondary)]">
+                            <div class="text-[18px] font-semibold text-[var(--text-primary)]">{{ selectedSession.sessionId }}</div>
+                            <span class="inline-flex items-center rounded-full bg-[var(--accent-soft)] px-3 py-1 text-[14px] font-medium text-[var(--accent-strong)]">
                                 类型：{{ selectedSession.sessionType }}
                             </span>
-                            <span class="inline-flex items-center rounded-full bg-[var(--surface-4)] px-3 py-1 text-[12px] font-medium text-[var(--text-secondary)]">
+                            <span class="inline-flex items-center rounded-full bg-[#ecfdf3] px-3 py-1 text-[14px] font-medium text-[#16a34a]">
                                 用户：{{ selectedSession.sessionUser || '-' }}
                             </span>
+                            <span class="inline-flex items-center rounded-full border border-[var(--border-color)] bg-[var(--surface-3)] px-3 py-1 text-[14px] font-medium text-[var(--text-primary)]">
+                                {{ formatTime(selectedSession.createTime) }}
+                            </span>
                         </div>
-                        <div class="text-[12px] text-[var(--text-secondary)]">{{ formatTime(selectedSession.createTime) }}</div>
+                        <button
+                            class="rounded-[10px] border border-[var(--border-color)] px-3 py-2 text-[14px] font-semibold text-[var(--text-primary)] transition hover:bg-[var(--surface-2)]"
+                            type="button"
+                            @click="backToGrid"
+                        >
+                            返回列表
+                        </button>
                     </div>
 
                     <div v-if="loading.detail" class="text-[13px] text-[var(--text-secondary)]">加载中...</div>
