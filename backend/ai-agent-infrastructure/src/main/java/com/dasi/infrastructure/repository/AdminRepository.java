@@ -10,6 +10,7 @@ import com.dasi.types.annotation.CacheEvict;
 import com.dasi.types.annotation.Cacheable;
 import com.dasi.types.dto.request.admin.manage.*;
 import com.dasi.types.dto.request.admin.query.*;
+import com.dasi.types.dto.response.admin.DashboardResponse;
 import com.dasi.types.enumeration.CacheType;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Repository;
@@ -59,6 +60,9 @@ public class AdminRepository implements IAdminRepository {
 
     @Resource
     private ISessionDao sessionDao;
+
+    // -------------------- Dashboard --------------------
+
 
     // -------------------- API --------------------
     @Override

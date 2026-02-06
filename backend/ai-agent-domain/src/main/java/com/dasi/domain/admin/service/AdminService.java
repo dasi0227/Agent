@@ -4,6 +4,7 @@ import com.dasi.domain.admin.model.enumeration.*;
 import com.dasi.domain.admin.model.vo.*;
 import com.dasi.domain.admin.repository.IAdminRepository;
 import com.dasi.domain.session.model.vo.SessionVO;
+import com.dasi.types.dto.response.admin.DashboardResponse;
 import com.dasi.types.dto.request.admin.manage.*;
 import com.dasi.types.dto.request.admin.query.*;
 import com.dasi.types.dto.result.PageResult;
@@ -28,6 +29,18 @@ public class AdminService implements IAdminService {
 
     @Resource
     private PasswordEncoder passwordEncoder;
+
+    // -------------------- Dashboard --------------------
+    @Override
+    public DashboardResponse dashboard() {
+        DashboardResponse.CountInfo countInfo = adminRepository.dashboardCount();
+        DashboardResponse.ChartInfo chartInfo = adminRepository.dashboardChart();
+        return DashboardResponse.builder()
+                .countInfo(countInfo)
+                .chartInfo(chartInfo)
+                .build();
+    }
+
 
     // -------------------- API --------------------
     @Override

@@ -4,10 +4,13 @@ import com.dasi.domain.admin.model.vo.*;
 import com.dasi.domain.session.model.vo.SessionVO;
 import com.dasi.types.dto.request.admin.manage.*;
 import com.dasi.types.dto.request.admin.query.*;
+import com.dasi.types.dto.response.admin.DashboardResponse;
 
 import java.util.List;
 
 public interface IAdminRepository {
+
+    // Dashboard
 
     // Api
     List<ApiVO> apiPage(ApiPageRequest apiPageRequest);
@@ -127,6 +130,5 @@ public interface IAdminRepository {
     // Option
     List<String> listApiId();
     List<String> listModelId();
-
 
 }
