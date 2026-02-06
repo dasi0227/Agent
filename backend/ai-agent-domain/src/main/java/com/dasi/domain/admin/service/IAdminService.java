@@ -2,6 +2,7 @@ package com.dasi.domain.admin.service;
 
 import com.dasi.domain.admin.model.vo.*;
 import com.dasi.domain.session.model.vo.SessionVO;
+import com.dasi.types.dto.response.admin.DashboardResponse;
 import com.dasi.types.dto.request.admin.manage.*;
 import com.dasi.types.dto.request.admin.query.*;
 import com.dasi.types.dto.result.PageResult;
@@ -96,4 +97,6 @@ public interface IAdminService {
     List<String> listModelId();
     List<String> listConfigType();
 
+    // Dashboard
+    DashboardResponse dashboard();
 }
