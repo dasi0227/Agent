@@ -21,6 +21,8 @@ public interface IUserDao {
     Long count(@Param("username") String username,
                @Param("role") String role);
 
+    Long countAll();
+
     void insert(User user);
 
     void update(User user);

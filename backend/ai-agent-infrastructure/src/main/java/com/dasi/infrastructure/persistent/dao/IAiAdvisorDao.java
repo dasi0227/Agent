@@ -19,6 +19,8 @@ public interface IAiAdvisorDao {
     Integer count(@Param("idKeyword") String idKeyword,
                   @Param("nameKeyword") String nameKeyword);
 
+    Integer countAll();
+
     AiAdvisor queryById(@Param("id") Long id);
 
     void insert(AiAdvisor aiAdvisor);

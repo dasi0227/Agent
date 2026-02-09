@@ -97,45 +97,12 @@ services:
     environment:
       - discovery.type=single-node
       - cluster.name=docker-cluster
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
       - xpack.security.enabled=false
     ports:
       - "9200:9200"
     volumes:
       - ${HOME}/docker/elasticsearch/data:/usr/share/elasticsearch/data
-    networks:
-      - ai-agent
-
-  logstash:
-    image: logstash:7.17.28
-    container_name: logstash
-    restart: always
-    environment:
-      LS_JAVA_OPTS: -Xms512m -Xmx512m
-      TZ: ${TZ}
-      pipeline.ecs_compatibility: disabled
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${PWD}/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
-    ports:
-      - '9600:9600'
-      - '50000:50000/tcp'
-    depends_on:
-      - elasticsearch
-    networks:
-      - ai-agent
-
-  kibana:
-    image: kibana:7.17.28
-    container_name: kibana
-    restart: always
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-      - I18N_LOCALE=zh-CN
-    ports:
-      - '5601:5601'
-    depends_on:
-      - elasticsearch
     networks:
       - ai-agent
 

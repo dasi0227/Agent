@@ -66,6 +66,11 @@
         </where>
     </select>
 
+    <select id="countAll" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM ai_prompt
+    </select>
+
     <select id="queryById" resultMap="dataMap">
         SELECT id,
                prompt_id,

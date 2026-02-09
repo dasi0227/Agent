@@ -78,6 +78,27 @@
         ORDER BY update_time DESC, id DESC
     </select>
 
+    <select id="count" resultType="int">
+        SELECT COUNT(1)
+        FROM ai_config
+        <where>
+            <if test="idKeyword != null and idKeyword != ''">
+                AND client_id LIKE CONCAT('%', #{idKeyword}, '%')
+            </if>
+            <if test="valueKeyword != null and valueKeyword != ''">
+                AND config_value LIKE CONCAT('%', #{valueKeyword}, '%')
+            </if>
+            <if test="configType != null and configType != ''">
+                AND config_type = #{configType}
+            </if>
+        </where>
+    </select>
+
+    <select id="countAll" resultType="int">
+        SELECT COUNT(1)
+        FROM ai_config
+    </select>
+
     <select id="queryByUniqueKey" resultMap="dataMap">
         SELECT id,
                client_id,

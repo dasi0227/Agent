@@ -63,6 +63,11 @@
         </where>
     </select>
 
+    <select id="countAll" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM ai_model
+    </select>
+
     <select id="queryById" resultMap="dataMap">
         SELECT id,
                model_id,

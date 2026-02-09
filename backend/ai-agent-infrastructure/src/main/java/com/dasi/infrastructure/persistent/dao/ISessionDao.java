@@ -19,6 +19,10 @@ public interface ISessionDao {
 
     int countByUserAndType(@Param("sessionUser") String sessionUser, @Param("sessionType") String sessionType);
 
+    int countAll();
+
+    int countByType(@Param("sessionType") String sessionType);
+
     void insert(Session session);
 
     void updateTitle(@Param("id") Long id, @Param("sessionTitle") String sessionTitle);

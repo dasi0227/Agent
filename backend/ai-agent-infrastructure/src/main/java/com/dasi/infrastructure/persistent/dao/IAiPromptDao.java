@@ -21,6 +21,8 @@ public interface IAiPromptDao {
     Integer count(@Param("idKeyword") String idKeyword,
                   @Param("nameKeyword") String nameKeyword);
 
+    Integer countAll();
+
     AiPrompt queryById(@Param("id") Long id);
 
     void insert(AiPrompt aiPrompt);

@@ -23,6 +23,12 @@ public interface IAiConfigDao {
                         @Param("valueKeyword") String valueKeyword,
                         @Param("configType") String configType);
 
+    Integer count(@Param("idKeyword") String idKeyword,
+                  @Param("valueKeyword") String valueKeyword,
+                  @Param("configType") String configType);
+
+    Integer countAll();
+
     AiConfig queryByUniqueKey(@Param("clientId") String clientId,
                               @Param("configType") String configType,
                               @Param("configValue") String configValue);

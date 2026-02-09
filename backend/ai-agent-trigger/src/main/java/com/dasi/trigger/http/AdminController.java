@@ -3,6 +3,7 @@ package com.dasi.trigger.http;
 import com.dasi.domain.admin.model.vo.*;
 import com.dasi.domain.admin.service.IAdminService;
 import com.dasi.domain.session.model.vo.SessionVO;
+import com.dasi.domain.util.stat.IStatService;
 import com.dasi.types.dto.response.admin.DashboardResponse;
 import com.dasi.types.dto.request.admin.manage.*;
 import com.dasi.types.dto.request.admin.query.*;
@@ -24,11 +25,15 @@ public class AdminController {
     @Resource
     private IAdminService adminService;
 
-    // -------------------- API --------------------
-    @GetMapping("/api/dashboard")
+    @Resource
+    private IStatService statService;
+
+    // -------------------- Dashboard --------------------
+    @GetMapping("/dashboard")
     public Result<DashboardResponse> dashboard() {
         return Result.success(adminService.dashboard());
     }
+
 
     // -------------------- API --------------------
     @PostMapping("/api/page")

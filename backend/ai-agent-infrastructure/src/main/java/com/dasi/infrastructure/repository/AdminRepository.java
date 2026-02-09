@@ -6,6 +6,7 @@ import com.dasi.domain.admin.repository.IAdminRepository;
 import com.dasi.domain.session.model.vo.SessionVO;
 import com.dasi.infrastructure.persistent.dao.*;
 import com.dasi.infrastructure.persistent.po.*;
+import com.dasi.infrastructure.persistent.vo.MessageDailyCount;
 import com.dasi.types.annotation.CacheEvict;
 import com.dasi.types.annotation.Cacheable;
 import com.dasi.types.dto.request.admin.manage.*;
@@ -16,14 +17,23 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.dasi.domain.admin.model.enumeration.AiConfigType.*;
 import static com.dasi.types.constant.RedisConstant.*;
+import static com.dasi.types.constant.StatConstant.*;
 
 @Repository
 public class AdminRepository implements IAdminRepository {
+
+    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Resource
     private IAiApiDao aiApiDao;
@@ -61,7 +71,98 @@ public class AdminRepository implements IAdminRepository {
     @Resource
     private ISessionDao sessionDao;
 
+    @Resource
+    private IMessageDao messageDao;
+
+    @Resource
+    private IAiStatDao aiStatDao;
+
     // -------------------- Dashboard --------------------
+    @Override
+    public DashboardResponse.CountInfo dashboardCount() {
+        return DashboardResponse.CountInfo.builder()
+                .apiCount(safeInt(aiApiDao.countAll()))
+                .modelCount(safeInt(aiModelDao.countAll()))
+                .clientCount(safeInt(aiClientDao.countAll()))
+                .agentCount(safeInt(aiAgentDao.countAll()))
+                .promptCount(safeInt(aiPromptDao.countAll()))
+                .advisorCount(safeInt(aiAdvisorDao.countAll()))
+                .mcpCount(safeInt(aiMcpDao.countAll()))
+                .configCount(safeInt(aiConfigDao.countAll()))
+                .flowCount(safeInt(aiFlowDao.countAll()))
+                .userCount(safeInt(userDao.countAll()))
+                .sessionCount(safeInt(sessionDao.countAll()))
+                .messageCount(safeInt(messageDao.countAll()))
+                .taskCount(safeInt(aiTaskDao.countAll()))
+                .build();
+    }
+
+    private Integer safeInt(Number value) {
+        return value == null ? 0 : value.intValue();
+    }
+
+    @Override
+    public DashboardResponse.GraphInfo dashboardChart() {
+        List<DashboardResponse.ChartValue> messageLastWeek = buildMessageChart(7);
+        List<DashboardResponse.ChartValue> messageLastMonth = buildMessageChart(30);
+
+        Map<String, List<DashboardResponse.BarValue>> workUsage = buildUsageMap(STAT_WORK);
+        Map<String, List<DashboardResponse.BarValue>> chatUsage = buildUsageMap(STAT_CHAT);
+
+        DashboardResponse.PieValue sessionWorkVsChat = DashboardResponse.PieValue.builder()
+                .workCount(safeInt(sessionDao.countByType(STAT_WORK)))
+                .chatCount(safeInt(sessionDao.countByType(STAT_CHAT)))
+                .build();
+
+        return DashboardResponse.GraphInfo.builder()
+                .messageLastWeek(messageLastWeek)
+                .messageLastMonth(messageLastMonth)
+                .workUsage(workUsage)
+                .chatUsage(chatUsage)
+                .sessionWorkVsChat(sessionWorkVsChat)
+                .build();
+    }
+
+    private Map<String, List<DashboardResponse.BarValue>> buildUsageMap(String statCategory) {
+        Map<String, List<DashboardResponse.BarValue>> result = new LinkedHashMap<>();
+
+        for (String key : STAT_USAGE_LIST) {
+            List<DashboardResponse.BarValue> list = aiStatDao.sumByCategoryAndKey(statCategory, key, STAT_TOP_N)
+                    .stream()
+                    .map(it -> DashboardResponse.BarValue.builder()
+                            .id(it.getStatValue())
+                            .value(safeInt(it.getTotalCount()))
+                            .build())
+                    .toList();
+            result.put(key, list);
+        }
+
+        return result;
+    }
+
+    private List<DashboardResponse.ChartValue> buildMessageChart(int days) {
+        LocalDate today = LocalDate.now();
+        LocalDate startDate = today.minusDays(days - 1L);
+        LocalDateTime start = startDate.atStartOfDay();
+        LocalDateTime end = today.plusDays(1).atStartOfDay();
+
+        Map<String, Integer> countMap = messageDao.countByDateRange(start, end)
+                .stream()
+                .collect(Collectors.toMap(
+                        MessageDailyCount::getDay,
+                        item -> safeInt(item.getCount())
+                ));
+
+        return startDate.datesUntil(today.plusDays(1))
+                .map(d -> {
+                    String key = d.format(dateTimeFormatter);
+                    return DashboardResponse.ChartValue.builder()
+                            .date(key)
+                            .count(countMap.getOrDefault(key, 0))
+                            .build();
+                })
+                .toList();
+    }
 
 
     // -------------------- API --------------------

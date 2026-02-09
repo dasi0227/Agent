@@ -66,6 +66,11 @@
         WHERE id = #{id}
     </select>
 
+    <select id="countAll" resultType="int">
+        SELECT COUNT(1)
+        FROM ai_flow
+    </select>
+
     <insert id="insert" parameterType="com.dasi.infrastructure.persistent.po.AiFlow">
         INSERT INTO ai_flow (agent_id, client_id, client_role, flow_prompt, flow_seq)
         VALUES (#{agentId}, #{clientId}, #{clientRole}, #{flowPrompt}, #{flowSeq})

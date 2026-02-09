@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useAuthStore, useSettingsStore } from '../router/pinia';
 
 const props = defineProps({
@@ -10,6 +11,7 @@ const props = defineProps({
 const emit = defineEmits(['select']);
 
 const openGroups = ref(new Set(props.groups.map((g) => g.name)));
+const router = useRouter();
 const authStore = useAuthStore();
 const settingsStore = useSettingsStore();
 const currentUser = computed(() => authStore.user || { username: '访客' });
@@ -36,6 +38,7 @@ const toggle = (name) => {
 };
 
 const handleSelect = (key) => emit('select', key);
+const goDashboard = () => router.push('/admin/dashboard');
 const handleLogout = () => authStore.logout('/admin/login');
 const toggleTheme = () => settingsStore.updateSettings({ theme: isDarkTheme.value ? 'light' : 'dark' });
 </script>
@@ -43,7 +46,7 @@ const toggleTheme = () => settingsStore.updateSettings({ theme: isDarkTheme.valu
 <template>
     <aside class="admin-font flex h-full w-[240px] shrink-0 flex-col border-r border-[#e2e8f0] bg-[#f4f6fb] shadow-sm">
         <div class="flex items-center justify-between px-4 py-4 text-[24px] font-semibold text-[#0f172a]">
-            <span>管理菜单</span>
+            <button class="text-left bg-transparent" type="button" @click="goDashboard">管理菜单</button>
             <button
                 class="grid h-[30px] w-[30px] place-items-center rounded-[10px] border border-[#e2e8f0] bg-white text-[#64748b] transition hover:border-[#c7d2fe] hover:text-[#1d4ed8]"
                 type="button"
@@ -95,7 +98,9 @@ const toggleTheme = () => settingsStore.updateSettings({ theme: isDarkTheme.valu
         <div class="p-4">
             <div class="flex items-center justify-between rounded-[14px] border border-[#e2e8f0] bg-[#f8fafc] px-4 py-3 text-[#0f172a]">
                 <div class="flex items-center gap-3">
-                    <div class="grid h-[40px] w-[40px] place-items-center rounded-[12px] border border-[#dbeafe] bg-[#e8f1ff] text-[14px] font-bold text-[#1d4ed8]">
+                    <div
+                        class="grid h-[40px] w-[40px] place-items-center rounded-[12px] border border-[rgba(15,23,42,0.18)] bg-[var(--avatar-bg)] text-[14px] font-bold text-[var(--avatar-text)] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.16)]"
+                    >
                         {{ avatarChar }}
                     </div>
                     <div class="font-semibold">{{ currentUser.username || '访客' }}</div>

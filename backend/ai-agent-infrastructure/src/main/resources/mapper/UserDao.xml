@@ -56,6 +56,11 @@
         </where>
     </select>
 
+    <select id="countAll" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM `user`
+    </select>
+
     <select id="queryById" resultMap="dataMap">
         SELECT id,
                username,

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, ref, onMounted } from 'vue';
+import { computed, reactive, ref, onMounted, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import logoImg from '../assets/logo.jpg';
 import chatIconDark from '../assets/chat-white.svg';
@@ -39,6 +39,8 @@ const editingChatId = ref(null);
 const editChatTitle = ref('');
 const editingAgentId = ref(null);
 const editAgentTitle = ref('');
+const chatTitleInputRefs = ref({});
+const agentTitleInputRefs = ref({});
 
 const showDeleteConfirm = ref(false);
 const deleteTarget = ref({ type: 'chat', id: '' });
@@ -166,6 +168,9 @@ const formatTitle = (title) => {
 const startRenameChat = (chat) => {
     editingChatId.value = chat.id;
     editChatTitle.value = chat.title || '';
+    nextTick(() => {
+        chatTitleInputRefs.value?.[chat.id]?.focus?.();
+    });
 };
 
 const saveRenameChat = async (chat) => {
@@ -192,6 +197,27 @@ const cancelRenameChat = () => {
 const startRenameAgent = (session) => {
     editingAgentId.value = session.id;
     editAgentTitle.value = session.title || '';
+    nextTick(() => {
+        agentTitleInputRefs.value?.[session.id]?.focus?.();
+    });
+};
+
+const setChatTitleInputRef = (id, el) => {
+    if (!id) return;
+    if (el) {
+        chatTitleInputRefs.value[id] = el;
+    } else {
+        delete chatTitleInputRefs.value[id];
+    }
+};
+
+const setAgentTitleInputRef = (id, el) => {
+    if (!id) return;
+    if (el) {
+        agentTitleInputRefs.value[id] = el;
+    } else {
+        delete agentTitleInputRefs.value[id];
+    }
 };
 
 const saveRenameAgent = async (session) => {
@@ -439,13 +465,18 @@ const toggleTheme = () => {
                                 : ''
                         ]"
                     >
-                        <div class="flex items-center justify-between gap-[10px]" @click="handleSelectChat(chat.id)">
+                        <div
+                            class="flex items-center justify-between gap-[10px]"
+                            @click="editingChatId === chat.id ? null : handleSelectChat(chat.id)"
+                        >
                             <div class="min-w-0 flex flex-col">
                                 <template v-if="editingChatId === chat.id">
                                     <input
                                         v-model="editChatTitle"
+                                        :ref="(el) => setChatTitleInputRef(chat.id, el)"
                                         class="w-full rounded-[8px] border border-[rgba(255,255,255,0.2)] bg-[rgba(255,255,255,0.08)] px-[8px] py-[6px] font-semibold text-[#e7ecf4]"
                                         :placeholder="chat.title || '未命名会话'"
+                                        maxlength="30"
                                         @keydown.enter.prevent="saveRenameChat(chat)"
                                         @keydown.esc.prevent="cancelRenameChat"
                                         @blur="saveRenameChat(chat)"
@@ -505,13 +536,18 @@ const toggleTheme = () => {
                                 : ''
                         ]"
                     >
-                        <div class="flex items-center justify-between gap-[10px]" @click="handleSelectAgent(session.id)">
+                        <div
+                            class="flex items-center justify-between gap-[10px]"
+                            @click="editingAgentId === session.id ? null : handleSelectAgent(session.id)"
+                        >
                             <div class="min-w-0 flex flex-col">
                                 <template v-if="editingAgentId === session.id">
                                     <input
                                         v-model="editAgentTitle"
+                                        :ref="(el) => setAgentTitleInputRef(session.id, el)"
                                         class="w-full rounded-[8px] border border-[rgba(255,255,255,0.2)] bg-[rgba(255,255,255,0.08)] px-[8px] py-[6px] font-semibold text-[#e7ecf4]"
                                         :placeholder="session.title || '未命名会话'"
+                                        maxlength="30"
                                         @keydown.enter.prevent="saveRenameAgent(session)"
                                         @keydown.esc.prevent="cancelRenameAgent"
                                         @blur="saveRenameAgent(session)"
@@ -555,7 +591,7 @@ const toggleTheme = () => {
         <div class="flex items-center justify-between gap-[12px] rounded-[14px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] p-[12px]">
             <button class="flex items-center gap-[10px] text-left" type="button" @click="openProfile">
                 <div
-                    class="grid h-[40px] w-[40px] place-items-center rounded-[12px] bg-[var(--avatar-bg)] font-bold text-[var(--avatar-text)]"
+                    class="grid h-[40px] w-[40px] place-items-center rounded-[12px] border border-[rgba(15,23,42,0.18)] bg-[var(--avatar-bg)] font-bold text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.16)]"
                 >
                     {{ avatarChar }}
                 </div>

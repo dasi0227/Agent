@@ -11,6 +11,8 @@ import java.util.List;
 public interface IAdminRepository {
 
     // Dashboard
+    DashboardResponse.CountInfo dashboardCount();
+    DashboardResponse.GraphInfo dashboardChart();
 
     // Api
     List<ApiVO> apiPage(ApiPageRequest apiPageRequest);

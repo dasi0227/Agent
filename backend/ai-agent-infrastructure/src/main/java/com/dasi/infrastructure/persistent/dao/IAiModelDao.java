@@ -20,6 +20,8 @@ public interface IAiModelDao {
     Integer count(@Param("idKeyword") String idKeyword,
                   @Param("nameKeyword") String nameKeyword);
 
+    Integer countAll();
+
     AiModel queryById(@Param("id") Long id);
 
     void insert(AiModel aiModel);

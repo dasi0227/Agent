@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dasi.infrastructure.persistent.dao.IAiStatDao">
+    <resultMap id="dataMap" type="com.dasi.infrastructure.persistent.po.AiStat">
+        <id column="id" property="id"/>
+        <result column="stat_date" property="statDate"/>
+        <result column="stat_category" property="statCategory"/>
+        <result column="stat_key" property="statKey"/>
+        <result column="stat_value" property="statValue"/>
+        <result column="stat_count" property="statCount"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="upsert">
+        INSERT INTO ai_stat (stat_date, stat_category, stat_key, stat_value, stat_count)
+        VALUES (#{statDate}, #{statCategory}, #{statKey}, #{statValue}, #{delta})
+        ON DUPLICATE KEY UPDATE stat_count  = stat_count + VALUES(stat_count),
+                                update_time = CURRENT_TIMESTAMP
+    </insert>
+
+    <select id="sumByCategoryAndKey" resultType="com.dasi.infrastructure.persistent.vo.AiStatValueCount">
+        SELECT stat_value AS statValue, COALESCE(SUM(stat_count), 0) AS totalCount
+        FROM ai_stat
+        WHERE stat_category = #{statCategory}
+        AND stat_key = #{statKey}
+        GROUP BY stat_value
+        ORDER BY totalCount DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="queryByUnique" resultMap="dataMap">
+        SELECT id,
+               stat_date,
+               stat_category,
+               stat_key,
+               stat_value,
+               stat_count,
+               create_time,
+               update_time
+        FROM ai_stat
+        WHERE stat_date = #{statDate}
+          AND stat_category = #{statCategory}
+          AND stat_key = #{statKey}
+          AND stat_value = #{statValue}
+    </select>
+</mapper>

@@ -28,6 +28,8 @@ public interface IAiClientDao {
                   @Param("clientType") String clientType,
                   @Param("clientRole") String clientRole);
 
+    Integer countAll();
+
     AiClient queryById(@Param("id") Long id);
 
     void insert(AiClient aiClient);

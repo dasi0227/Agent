@@ -31,6 +31,7 @@ const SESSION_WORK_SSE_MESSAGE_PATH = `${SESSION_BASE_PATH}/message/work-sse`;
 const SESSION_WORK_ANSWER_MESSAGE_PATH = `${SESSION_BASE_PATH}/message/work-answer`;
 
 const ADMIN_BASE_PATH = '/api/v1/admin';
+const ADMIN_DASHBOARD_PATH = `${ADMIN_BASE_PATH}/dashboard`;
 const SESSION_ADMIN_LIST_PATH = `${ADMIN_BASE_PATH}/session/list`;
 const ADMIN_STATUS_PARAM = {
     client: 'clientStatus',
@@ -213,6 +214,8 @@ export const listWorkAnswerMessages = async ({ sessionId }) =>
     http.get(SESSION_WORK_ANSWER_MESSAGE_PATH, { params: { sessionId } });
 
 // -------------------- Admin --------------------
+export const fetchAdminDashboard = async () => http.get(ADMIN_DASHBOARD_PATH);
+
 const buildAdminPath = (moduleKey, action) => `${ADMIN_BASE_PATH}/${moduleKey}/${action}`;
 
 export const adminPage = async (moduleKey, payload = {}) =>

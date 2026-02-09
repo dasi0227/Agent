@@ -19,6 +19,8 @@ public interface IAiFlowDao {
 
     AiFlow queryById(@Param("id") Long id);
 
+    Integer countAll();
+
     void insert(AiFlow aiFlow);
 
     void update(AiFlow aiFlow);

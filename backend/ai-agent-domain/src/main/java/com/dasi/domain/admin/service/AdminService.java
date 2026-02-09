@@ -34,10 +34,10 @@ public class AdminService implements IAdminService {
     @Override
     public DashboardResponse dashboard() {
         DashboardResponse.CountInfo countInfo = adminRepository.dashboardCount();
-        DashboardResponse.ChartInfo chartInfo = adminRepository.dashboardChart();
+        DashboardResponse.GraphInfo graphInfo = adminRepository.dashboardChart();
         return DashboardResponse.builder()
                 .countInfo(countInfo)
-                .chartInfo(chartInfo)
+                .graphInfo(graphInfo)
                 .build();
     }
 

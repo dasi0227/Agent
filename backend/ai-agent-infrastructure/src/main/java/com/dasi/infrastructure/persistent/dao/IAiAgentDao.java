@@ -27,6 +27,8 @@ public interface IAiAgentDao {
                   @Param("nameKeyword") String nameKeyword,
                   @Param("agentType") String agentType);
 
+    Integer countAll();
+
     AiAgent queryById(@Param("id") Long id);
 
     void insert(AiAgent aiAgent);

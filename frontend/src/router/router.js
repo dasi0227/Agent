@@ -8,6 +8,7 @@ import AdminConfig from '../components/AdminConfig.vue';
 import AdminFlow from '../components/AdminFlow.vue';
 import AdminCanvas from '../components/AdminCanvas.vue';
 import AdminSession from '../components/AdminSession.vue';
+import AdminDashboard from '../components/AdminDashboard.vue';
 import NotFound from '../components/NotFound.vue';
 import { getStoredAuth } from './pinia';
 
@@ -52,7 +53,17 @@ const routes = [
     },
     {
         path: '/admin',
-        redirect: '/admin/flow'
+        redirect: '/admin/dashboard'
+    },
+    {
+        path: '/admin/dashboard',
+        name: 'admin-dashboard',
+        component: AdminDashboard,
+        meta: {
+            requiresAuth: true,
+            requiresAdmin: true,
+            hideSidebar: true
+        }
     },
     {
         path: '/admin/config',

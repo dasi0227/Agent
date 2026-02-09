@@ -21,6 +21,8 @@ public interface IAiTaskDao {
     Integer count(@Param("idKeyword") String idKeyword,
                   @Param("agentId") String agentId);
 
+    Integer countAll();
+
     AiTask queryById(@Param("id") Long id);
 
     AiTask queryByTaskId(@Param("taskId") String taskId);

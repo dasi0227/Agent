@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dasi.infrastructure.persistent.dao.IMessageDao">
     <resultMap id="dataMap" type="com.dasi.infrastructure.persistent.po.Message">
         <id column="id" property="id"/>
@@ -25,7 +25,7 @@
         FROM message
         WHERE session_id = #{sessionId}
           AND message_type = #{messageType}
-        ORDER BY message_seq ASC, created_at ASC
+        ORDER BY message_seq, created_at
     </select>
 
     <select id="countBySessionAndType" resultType="int">
@@ -43,13 +43,29 @@
           AND message_type = #{messageType}
     </select>
 
-    <insert id="insert" parameterType="com.dasi.infrastructure.persistent.po.Message" useGeneratedKeys="true" keyProperty="id">
+    <select id="countByDateRange" resultType="com.dasi.infrastructure.persistent.vo.MessageDailyCount">
+        SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS day, COUNT(1) AS count
+        FROM message
+        WHERE created_at <![CDATA[>=]]> #{start}
+          AND created_at <![CDATA[<]]> #{end}
+        GROUP BY DATE_FORMAT(created_at, '%Y-%m-%d')
+        ORDER BY day
+    </select>
+
+    <select id="countAll" resultType="int">
+        SELECT COUNT(1)
+        FROM message
+    </select>
+
+    <insert id="insert" parameterType="com.dasi.infrastructure.persistent.po.Message" useGeneratedKeys="true"
+            keyProperty="id">
         INSERT INTO message (session_id, message_content, message_role, message_type, message_seq)
         VALUES (#{sessionId}, #{messageContent}, #{messageRole}, #{messageType}, #{messageSeq})
     </insert>
 
     <delete id="deleteBySessionId">
-        DELETE FROM message
+        DELETE
+        FROM message
         WHERE session_id = #{sessionId}
     </delete>
 </mapper>
