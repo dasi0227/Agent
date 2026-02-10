@@ -155,66 +155,12 @@ services:
     networks:
       - ai-agent
 
-  prometheus:
-    image: prom/prometheus:v2.47.2
-    container_name: prometheus
-    restart: unless-stopped
-    ports:
-      - "9090:9090"
-    volumes:
-      - prometheus_data:/prometheus
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    networks:
-      - ai-agent
-
-  grafana:
-    image: grafana/grafana:10.2.0
-    container_name: grafana
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    volumes:
-      - grafana_data:/var/lib/grafana
-    depends_on:
-      - prometheus
-    networks:
-      - ai-agent
-
-  grafana-mcp:
-    image: mcp/grafana
-    container_name: grafana-mcp
-    restart: unless-stopped
-    ports:
-      - "8000:8000"
-    environment:
-      - GRAFANA_URL=http://grafana:3000
-      - GRAFANA_API_KEY=${GRAFANA_API_KEY}
-    depends_on:
-      - grafana
-    networks:
-      - ai-agent
-
-  node-exporter:
-    image: prom/node-exporter:v1.9.1
-    container_name: node-exporter
-    restart: unless-stopped
-    ports:
-      - "9100:9100"
-    command:
-      - "--collector.textfile.directory=/host/tmp"
-    volumes:
-      - ./node-exporter:/host/tmp:ro
-    networks:
-      - ai-agent
-
 volumes:
   pgvector_data:
   mysql_data:
   redis_data:
   oneapi_data:
   elasticsearch_data:
-  prometheus_data:
-  grafana_data:
 
 networks:
   ai-agent:
