@@ -80,7 +80,7 @@ services:
 #    platform: linux/amd64
     restart: unless-stopped
     ports:
-      - "3001:3000"
+      - "3000:3000"
     environment:
       SQL_DSN: ${USERNAME}:${PASSWORD}@tcp(mysql:3306)/oneapi?charset=utf8mb4&parseTime=True&loc=Local
       TZ: ${TZ}
