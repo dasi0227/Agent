@@ -36,9 +36,9 @@ const routes = [
         }
     },
     {
+        // Disable public registration; unauthenticated users must login.
         path: '/register',
-        name: 'register',
-        component: Auth,
+        redirect: '/login',
         meta: {
             hideSidebar: true
         }
@@ -134,14 +134,16 @@ router.beforeEach((to, from, next) => {
     const auth = getStoredAuth();
     const isAdminRoute = to.path.startsWith('/admin');
     document.title = isAdminRoute ? 'Dasi AI 后台管理' : 'Dasi AI';
-    if (!auth.token && to.meta?.requiresAdmin) {
-        next({ path: '/admin/login', replace: true });
-        return;
+
+    // Global auth gate: if not logged in, allow only the login pages.
+    if (!auth.token) {
+        const allow = to.path === '/login' || to.path === '/admin/login';
+        if (!allow) {
+            next({ path: '/login', replace: true });
+            return;
+        }
     }
-    if (to.meta?.requiresAuth && !auth.token) {
-        next({ path: '/login', replace: true });
-        return;
-    }
+
     if (to.meta?.requiresAdmin && auth?.user?.role !== 'admin') {
         next({ path: '/login', replace: true });
         return;
