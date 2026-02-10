@@ -8,7 +8,7 @@ services:
   pgvector:
     image: pgvector/pgvector:pg16
     container_name: pgvector
-    restart: always
+    restart: unless-stopped
     ports:
       - "5432:5432"
     environment:
@@ -32,7 +32,7 @@ services:
   mysql:
     image: mysql:8.0.40
     container_name: mysql
-    restart: always
+    restart: unless-stopped
     ports:
       - "3306:3306"
     environment:
@@ -55,7 +55,7 @@ services:
   redis:
     image: redis:8.0.1
     container_name: redis
-    restart: always
+    restart: unless-stopped
     ports:
       - "6379:6379"
     command:
@@ -79,7 +79,7 @@ services:
     image: justsong/one-api:latest
     container_name: one-api
     platform: linux/amd64
-    restart: always
+    restart: unless-stopped
     ports:
       - "3001:3000"
     environment:
@@ -87,74 +87,6 @@ services:
       SQL_DSN: ${ONEAPI_DB_USER}:${ONEAPI_DB_PASS}@tcp(mysql:3306)/${ONEAPI_DB_NAME}?charset=utf8mb4&parseTime=True&loc=Local
     depends_on:
       - mysql
-    networks:
-      - ai-agent
-
-  elasticsearch:
-    image: elasticsearch:7.17.28
-    container_name: elasticsearch
-    restart: always
-    environment:
-      - discovery.type=single-node
-      - cluster.name=docker-cluster
-      - ES_JAVA_OPTS=-Xms256m -Xmx256m
-      - xpack.security.enabled=false
-    ports:
-      - "9200:9200"
-    volumes:
-      - ${HOME}/docker/elasticsearch/data:/usr/share/elasticsearch/data
-    networks:
-      - ai-agent
-
-  prometheus:
-    image: prom/prometheus:v2.47.2
-    container_name: prometheus
-    restart: always
-    ports:
-      - "9090:9090"
-    volumes:
-      - ${HOME}/docker/prometheus/data:/prometheus
-      - ${PWD}/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    networks:
-      - ai-agent
-
-  grafana:
-    image: grafana/grafana:10.2.0
-    container_name: grafana
-    restart: always
-    ports:
-      - "3000:3000"
-    volumes:
-      - ${HOME}/docker/grafana/data:/var/lib/grafana
-    depends_on:
-      - prometheus
-    networks:
-      - ai-agent
-
-  grafana-mcp:
-    image: mcp/grafana
-    container_name: grafana-mcp
-    restart: unless-stopped
-    ports:
-      - "8000:8000"
-    environment:
-      - GRAFANA_URL=http://grafana:3000
-      - GRAFANA_API_KEY=${GRAFANA_API_KEY}
-    depends_on:
-      - grafana
-    networks:
-      - ai-agent
-
-  node-exporter:
-    image: prom/node-exporter:v1.9.1
-    container_name: node-exporter
-    restart: always
-    ports:
-      - "9100:9100"
-    volumes:
-      - ${PWD}/node-exporter:/host/tmp:ro
-    command:
-      - "--collector.textfile.directory=/host/tmp"
     networks:
       - ai-agent
 
