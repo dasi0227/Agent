@@ -2,7 +2,9 @@ import axios from 'axios';
 import router from '../router/router';
 import { useAuthStore } from '../router/pinia';
 
-const BASE_URL = 'http://localhost:8066';
+// Dev: VITE_API_BASE=http://localhost:8066
+// Prod behind nginx under /agent: VITE_API_BASE=/agent
+const BASE_URL = import.meta.env.VITE_API_BASE || 'http://localhost:8066';
 const REQUEST_TIMEOUT = 600000;
 const SETTINGS_KEY = 'chat_settings';
 const AUTH_KEY = 'auth_info';
@@ -130,8 +132,16 @@ export async function streamFetch(url, body, onData, onError, onDone, signal) {
         // ignore
     }
     try {
-        console.log(`[stream] POST ${url}`);
-        const response = await fetch(url, {
+        const buildUrl = (rawUrl) => {
+            if (!rawUrl) return rawUrl;
+            if (/^https?:\/\//i.test(rawUrl)) return rawUrl;
+            const base = (BASE_URL || '').replace(/\/$/, '');
+            const path = rawUrl.startsWith('/') ? rawUrl : `/${rawUrl}`;
+            return `${base}${path}`;
+        };
+        const requestUrl = buildUrl(url);
+        console.log(`[stream] POST ${requestUrl}`);
+        const response = await fetch(requestUrl, {
             method: 'POST',
             headers,
             body: JSON.stringify(body || {}),

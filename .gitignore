@@ -59,6 +59,7 @@ nbproject/
 **/.env
 **/.env.*
 !**/.env.example
+!frontend/**/.env.*
 
 # ==================== Frontend (Node / Vite) ====================
 **/node_modules/

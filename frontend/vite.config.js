@@ -3,6 +3,7 @@ import vue from '@vitejs/plugin-vue';
 
 // https://vite.dev/config/
 export default defineConfig({
-    base: '/',
+    // Serve the frontend under /agent/ on nginx.
+    base: '/agent/',
     plugins: [vue()]
 });
