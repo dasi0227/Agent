@@ -10,8 +10,8 @@ public interface ITaskService {
 
     void refreshTaskRegistry();
 
-    boolean cancelTask(String taskId);
+    void cancelTask(String taskId);
 
-    boolean registerTask(ScheduleVO scheduleVO);
+    void registerTask(ScheduleVO scheduleVO);
 
 }

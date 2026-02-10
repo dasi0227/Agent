@@ -104,7 +104,7 @@ public class TaskService implements ITaskService {
     }
 
     @Override
-    public boolean registerTask(ScheduleVO scheduleVO) {
+    public void registerTask(ScheduleVO scheduleVO) {
         try {
             ScheduledFuture<?> scheduledFuture = taskScheduler.schedule(
                     scheduleVO.getScheduleExecutor(),
@@ -112,30 +112,27 @@ public class TaskService implements ITaskService {
             );
 
             if (scheduledFuture == null) {
-                return false;
+                return;
             }
 
             scheduleMap.put(scheduleVO.getScheduleId(), scheduledFuture);
             signatureMap.put(scheduleVO.getScheduleId(), scheduleVO.getScheduleSignature());
-            return true;
         } catch (Exception e) {
             log.error("【定时任务】注册失败：error={}", e.getMessage(), e);
-            return false;
         }
     }
 
     @Override
-    public boolean cancelTask(String scheduleId) {
+    public void cancelTask(String scheduleId) {
         try {
             ScheduledFuture<?> future = scheduleMap.remove(scheduleId);
             signatureMap.remove(scheduleId);
             if (future == null) {
-                return false;
+                return;
             }
-            return future.cancel(false);
+            future.cancel(false);
         } catch (Exception e) {
             log.error("【定时任务】取消失败：error={}", e.getMessage(), e);
-            return false;
         }
     }
 
