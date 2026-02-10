@@ -4,7 +4,7 @@
     <contextName>logback</contextName>
 
     <!-- 日志输出路径 -->
-    <property name="LOG_PATH" value="${aiUser.dir}/logs"/>
+    <property name="LOG_PATH" value="${user.dir}/logs"/>
 
     <!-- ========= 开发环境降噪 ========= -->
     <springProfile name="dev">
