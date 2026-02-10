@@ -82,7 +82,8 @@ export const fetchStream = async ({
     onDone,
     signal
 }) => {
-    const url = `${http.defaults.baseURL}${CHAT_STREAM_PATH}`;
+    // streamFetch will prepend the configured base (dev/prod) itself.
+    const url = CHAT_STREAM_PATH;
     return streamFetch(
         url,
         {
@@ -149,7 +150,8 @@ export const executeAgentStream = async ({
     onDone,
     signal
 }) => {
-    const url = `${http.defaults.baseURL}${AGENT_EXECUTE_PATH}`;
+    // streamFetch will prepend the configured base (dev/prod) itself.
+    const url = AGENT_EXECUTE_PATH;
     return streamFetch(
         url,
         {
