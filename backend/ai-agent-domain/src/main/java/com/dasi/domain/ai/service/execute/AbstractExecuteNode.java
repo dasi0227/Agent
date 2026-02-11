@@ -104,27 +104,17 @@ public abstract class AbstractExecuteNode extends AbstractMultiThreadStrategyRou
             cleaned = cleaned.replace("\r\n", "\n").replace("\r", "\n");
             return cleaned;
         } catch (Exception e) {
-            log.warn("【Agent 执行】JSON 提取失败：{}", e.getMessage(), e);
+            log.warn("【Agent 执行】JSON 提取失败：{}", e.getMessage());
             throw e;
         }
     }
 
     protected JSONObject parseJsonObject(String json) {
-        try {
-            return JSON.parseObject(json);
-        } catch (Exception e) {
-            log.warn("【Agent 执行】JSON 解析失败：{}", e.getMessage(), e);
-            throw e;
-        }
+        return JSON.parseObject(json);
     }
 
     protected JSONArray parseJsonArray(String json) {
-        try {
-            return JSON.parseArray(json);
-        } catch (Exception e) {
-            log.warn("【Agent 执行】JSON 解析失败：{}", e.getMessage(), e);
-            throw e;
-        }
+        return JSON.parseArray(json);
     }
 
     protected JSONObject buildExceptionObject(String key, String message) {

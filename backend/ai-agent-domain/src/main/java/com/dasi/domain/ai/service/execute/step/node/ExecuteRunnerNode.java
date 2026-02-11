@@ -95,7 +95,7 @@ public class ExecuteRunnerNode extends AbstractExecuteNode {
                         break;
 
                     } catch (Exception e) {
-                        log.error("【执行节点】ExecuteRunnerNode：step={}, try={}/{}, error={}", step + 1, count++, maxRetry, e.getMessage(), e);
+                        log.error("【执行节点】ExecuteRunnerNode：step={}, try={}/{}, error={}", step + 1, count++, maxRetry, e.getMessage());
                         if (count > maxRetry) {
                             throw new IllegalStateException("超过最大重试次数 " + maxRetry + "，客户端仍然无法执行步骤 " + (step + 1));
                         }

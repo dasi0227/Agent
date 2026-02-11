@@ -236,10 +236,7 @@ public class AiController implements IAiApi {
                         }
                     })
                     .doFinally(signalType -> log.info("【AI 对话】流式对话结束：clientId={}, signal={}", clientId, signalType))
-                    .onErrorResume(e -> {
-                        log.error("【AI 对话】流式对话失败：clientId={}", clientId, e);
-                        return Flux.just(CHAT_ERROR_RESPONSE);
-                    });
+                    .onErrorResume(e -> Flux.just(CHAT_ERROR_RESPONSE));
         } catch (Exception e) {
             log.error("【AI 对话】流式对话失败：clientId={}", clientId, e);
             return Flux.just(CHAT_ERROR_RESPONSE);
