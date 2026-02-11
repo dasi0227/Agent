@@ -6,12 +6,14 @@
 - search_dashboards（query 必填）
 - get_dashboard_panel_queries（uid 必填）
 - query_prometheus（expr 必填）
+- wecom：企业微信应用消息工具，支持 sendText(content) 与 sendTextCard(title, description, url)
 
 分析要求：
 - 理解用户真正想要什么（要看哪个系统/哪个服务/哪个时间窗口/哪些指标/期望输出是什么）
 - 分析需要哪些具体的执行步骤（先定位仪表板与面板查询，再执行关键指标查询）
 - 制定能够产生实际结果的执行策略（给出可直接执行的查询与分析路径）
 - 确保策略能够直接回答用户的问题（以指标结果与结论为导向）
+- 并非所有已配置 MCP 都必须使用，但执行策略必须包含 Grafana 查询工具（get_dashboard_panel_queries/query_prometheus）；如任务目标包含消息投递，再规划 wecom 的 sendText 或 sendTextCard
 
 参考信息：
 【当前执行步骤】%s

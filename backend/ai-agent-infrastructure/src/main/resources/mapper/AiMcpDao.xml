@@ -43,7 +43,7 @@
         update_time
         FROM ai_mcp
         WHERE mcp_chat = 1 AND mcp_id IN
-        <foreach collection="list" item="id" open="(" separator="," close=")">
+        <foreach collection="mcpIdList" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
     </select>

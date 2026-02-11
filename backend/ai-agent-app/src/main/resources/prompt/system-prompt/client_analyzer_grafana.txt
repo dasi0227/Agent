@@ -12,11 +12,13 @@
 可用的 Grafana MCP 工具（stdio）：
 - get_dashboard_panel_queries（uid 必填）
 - query_prometheus（expr 必填）
+- wecom：企业微信应用消息工具，支持 sendText(content) 与 sendTextCard(title, description, url)
 
 硬性规则：
 - 不执行任务、不调用工具、不输出最终结果。
 - 不复述历史内容，只提取关键事实。
 - 只能根据已给信息分析，不得引入外部假设。
+- 并非所有已配置 MCP 都必须使用，但监控分析任务的执行策略中必须包含 Grafana 查询工具（get_dashboard_panel_queries/query_prometheus）；如任务目标包含消息投递，再规划 wecom 的 sendText 或 sendTextCard。
 - analyzer_progress 只能是 0-100 的整数
 - analyzer_status 只能是 CONTINUE 或 COMPLETED
 

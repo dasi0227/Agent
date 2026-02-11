@@ -19,3 +19,9 @@ docker buildx build --platform linux/amd64,linux/arm64 \
   -t dasi0227/mcp-server-wecom:0.1.0 \
   --push \
   ./mcp-server-wecom
+
+# mcp-server-email
+docker buildx build --platform linux/amd64,linux/arm64 \
+  -t dasi0227/mcp-server-email:0.1.0 \
+  --push \
+  ./mcp-server-email

@@ -34,6 +34,6 @@ public class AiChatRequest {
     private Double presencePenalty = 0.0;
 
     @Builder.Default
-    private Integer maxCompletionTokens = 1024;
+    private Integer maxCompletionTokens = 8192;
 
 }

@@ -13,6 +13,8 @@
 - 必须基于真实执行结果输出，禁止编造。
 - 出现错误必须返回 FAIL，并说明失败原因。
 - SUCCESS 或 FAIL 只能出现在 runner_status 这一栏
+- 并非 MCP 清单中的工具都必须调用，但 article 主流程必须实际调用 csdn 的 saveArticle(title, markdownContent) 完成核心动作。
+- 禁止调用未配置或已移除工具（例如 filesystem）。
 
 执行原则：
 - 专注性：只执行当前步骤内容。

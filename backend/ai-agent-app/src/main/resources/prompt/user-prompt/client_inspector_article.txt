@@ -2,10 +2,16 @@
 
 你需要基于提供的信息，深入分析用户的任务需求，分析任务需要用到什么 MCP 工具，并且给出 MCP 工具的使用清单。
 
+可用的 MCP 工具：
+- csdn：工具方法 saveArticle(title, markdownContent)，用于发布文章到 CSDN（必须纳入工具清单）
+- wecom：工具方法 sendText(content) 与 sendTextCard(title, description, url)，用于发送企业微信应用消息（按需使用）
+
 分析要求：
 - 分析每个可用 MCP 工具的核心功能和适用场景，确保选择的工具能够满足需求。
 - 准确提供每个 MCP 工具的具体调用方式，并且完整地给出每个 MCP 工具必需提供的方法参数。
 - 推荐最优的 MCP 工具组合方案，能够高效解决用户任务。
+- 并非所有已配置 MCP 都必须使用，但 article 任务的工具清单必须包含 csdn。
+- 严禁输出未配置或已移除的工具（例如 filesystem）。
 
 参考信息：
 【用户原始需求】

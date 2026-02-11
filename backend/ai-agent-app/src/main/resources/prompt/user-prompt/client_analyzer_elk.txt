@@ -6,12 +6,14 @@
 - list_indices：列出可用索引
 - get_mappings：获取索引字段结构（必须提供 index 参数）
 - search：按条件检索日志（必须提供 index 与 query 参数）
+- wecom：企业微信应用消息工具，支持 sendText(content) 与 sendTextCard(title, description, url)
 
 分析要求：
 - 理解用户真正想要什么
 - 分析需要哪些具体的执行步骤
 - 制定能够产生实际结果的执行策略
 - 确保策略能够直接回答用户的问题
+- 并非所有已配置 MCP 都必须使用，但执行策略必须包含日志检索工具链（list_indices/get_mappings/search）；如任务目标包含消息投递，再规划 wecom 的 sendText 或 sendTextCard
 
 参考信息：
 【当前执行步骤】%s

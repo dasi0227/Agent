@@ -3,9 +3,6 @@
 
     <contextName>logback</contextName>
 
-    <!-- Disable verbose logback internal status output on console. -->
-    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
-
     <!-- 日志输出路径 -->
     <property name="LOG_PATH" value="${user.dir}/logs"/>
 
@@ -22,13 +19,6 @@
         <logger name="org.apache.coyote.http11" level="ERROR"/>
         <logger name="org.apache.catalina" level="ERROR"/>
         <logger name="org.apache.tomcat" level="ERROR"/>
-        <logger name="org.springframework.ai.retry.RetryUtils" level="ERROR"/>
-        <logger name="org.hibernate" level="ERROR"/>
-        <logger name="io.modelcontextprotocol.client" level="DEBUG"/>
-        <logger name="org.springframework.web.servlet" level="ERROR"/>
-        <logger name="org.springframework.data.repository.config" level="ERROR"/>
-        <logger name="io.modelcontextprotocol.spec" level="DEBUG"/>
-        <logger name="org.springframework.ai.mcp" level="DEBUG"/>
     </springProfile>
 
     <!-- ========= 转换规则 ========= -->
