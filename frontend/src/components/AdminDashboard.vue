@@ -459,7 +459,7 @@ onBeforeUnmount(() => {
                     <div class="rounded-[16px] border border-[var(--border-color)] bg-[var(--surface-1)] p-4 shadow-[var(--shadow-soft)]">
                         <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
                             <div class="text-[14px] font-semibold text-[var(--text-primary)]">
-                                TOP 10 ({{ usageModeTop.toUpperCase() }}) - {{ usageKey.toUpperCase() }}
+                                TOP 10 - {{ usageKey.toUpperCase() }}
                             </div>
                             <div class="flex flex-wrap items-center gap-2">
                                 <button

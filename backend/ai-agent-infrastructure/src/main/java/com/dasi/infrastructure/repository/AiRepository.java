@@ -371,11 +371,9 @@ public class AiRepository implements IAiRepository {
     @Override
     @Cacheable(cachePrefix = AI_AGENT_TYPE_PREFIX, cacheClass = String.class, cacheType = CacheType.VALUE)
     public String queryExecuteTypeByAgentId(String agentId) {
-
         AiAgent aiAgent = aiAgentDao.queryAgentByAgentId(agentId);
         if (aiAgent == null) return null;
         return aiAgent.getAgentType();
-
     }
 
     @Override
@@ -427,7 +425,8 @@ public class AiRepository implements IAiRepository {
                         aiMcpVO.setSseConfig(sseConfig);
                     }
                     case STDIO -> {
-                        Map<String, AiMcpVO.StdioConfig.Stdio> stdio = JSON.parseObject(aiMcp.getMcpConfig(), new TypeReference<>() {});
+                        Map<String, AiMcpVO.StdioConfig.Stdio> stdio = JSON.parseObject(aiMcp.getMcpConfig(), new TypeReference<>() {
+                        });
                         AiMcpVO.StdioConfig stdioConfig = new AiMcpVO.StdioConfig();
                         stdioConfig.setStdio(stdio);
                         aiMcpVO.setStdioConfig(stdioConfig);
@@ -445,7 +444,8 @@ public class AiRepository implements IAiRepository {
 
     private AiTaskVO.TaskParam parseTaskParam(String taskParam, String taskId) {
         try {
-            if (taskParam == null || taskParam.isBlank()) throw new IllegalStateException("taskParam 为空，taskId=" + taskId);
+            if (taskParam == null || taskParam.isBlank())
+                throw new IllegalStateException("taskParam 为空，taskId=" + taskId);
             return JSON.parseObject(taskParam, AiTaskVO.TaskParam.class);
         } catch (Exception e) {
             log.error("【查询数据】失败：{}", e.getMessage());

@@ -45,6 +45,7 @@ public class ExecuteContext {
     private Map<String, AiFlowVO> aiFlowVOMap;
 
     // ================== 上下文存储 ==================
+    @Builder.Default
     private Map<String, Object> dataObjects = new HashMap<>();
 
     public <T> void setValue(String key, T value) {

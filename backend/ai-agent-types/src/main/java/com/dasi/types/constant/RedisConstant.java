@@ -17,7 +17,6 @@ public class RedisConstant {
     public static final String AI_CLIENT_VO_PREFIX = "ai:client:vo:";
     public static final String AI_FLOW_VO_PREFIX = "ai:flow:vo:";
     public static final String AI_AGENT_TYPE_PREFIX = "ai:agent:type:";
-    public static final String AI_CONFIG_VALUE_PREFIX = "ai:config:value:";
     public static final String AI_TASK_VO_LIST_KEY = "ai:task:vo-list";
     public static final String AI_MCP_VO_LIST_PREFIX = "ai:mcp:vo-list:";
     public static final String AI_ARMORY_PREFIX = "ai:armory:";

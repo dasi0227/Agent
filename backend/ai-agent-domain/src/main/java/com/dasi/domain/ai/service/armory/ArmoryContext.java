@@ -14,6 +14,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class ArmoryContext {
 
+    @Builder.Default
     private Map<String, Object> dataObjects = new HashMap<>();
 
     public <T> void setValue(String key, T value) {

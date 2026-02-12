@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore, useSettingsStore } from '../router/pinia';
 
@@ -10,7 +10,58 @@ const props = defineProps({
 
 const emit = defineEmits(['select']);
 
-const openGroups = ref(new Set(props.groups.map((g) => g.name)));
+const SIDEBAR_SCROLL_KEY = 'admin_sidebar_scroll_top';
+const SIDEBAR_GROUPS_KEY = 'admin_sidebar_open_groups';
+
+const getStoredScrollTop = () => {
+    try {
+        const raw = sessionStorage.getItem(SIDEBAR_SCROLL_KEY);
+        const parsed = Number(raw);
+        return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+    } catch {
+        return 0;
+    }
+};
+
+const setStoredScrollTop = (value) => {
+    try {
+        sessionStorage.setItem(SIDEBAR_SCROLL_KEY, String(Math.max(0, Math.floor(value || 0))));
+    } catch {
+        // ignore storage errors
+    }
+};
+
+const getStoredOpenGroups = () => {
+    try {
+        const raw = sessionStorage.getItem(SIDEBAR_GROUPS_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return null;
+        return new Set(parsed.map((item) => String(item)));
+    } catch {
+        return null;
+    }
+};
+
+const setStoredOpenGroups = (groups) => {
+    try {
+        sessionStorage.setItem(SIDEBAR_GROUPS_KEY, JSON.stringify([...groups]));
+    } catch {
+        // ignore storage errors
+    }
+};
+
+const initOpenGroups = (groups) => {
+    const names = new Set((groups || []).map((group) => group.name));
+    const stored = getStoredOpenGroups();
+    if (!stored) {
+        return new Set();
+    }
+    return new Set([...stored].filter((name) => names.has(name)));
+};
+
+const scrollContainerRef = ref(null);
+const openGroups = ref(initOpenGroups(props.groups));
 const router = useRouter();
 const authStore = useAuthStore();
 const settingsStore = useSettingsStore();
@@ -21,9 +72,9 @@ const isDarkTheme = computed(() => settingsStore.theme === 'dark');
 watch(
     () => props.groups,
     (val) => {
-        if (val && val.length) {
-            openGroups.value = new Set(val.map((g) => g.name));
-        }
+        const names = new Set((val || []).map((group) => group.name));
+        openGroups.value = new Set([...openGroups.value].filter((name) => names.has(name)));
+        setStoredOpenGroups(openGroups.value);
     }
 );
 
@@ -35,12 +86,28 @@ const toggle = (name) => {
         next.add(name);
     }
     openGroups.value = next;
+    setStoredOpenGroups(next);
 };
 
 const handleSelect = (key) => emit('select', key);
 const goDashboard = () => router.push('/admin/dashboard');
 const handleLogout = () => authStore.logout('/admin/login');
 const toggleTheme = () => settingsStore.updateSettings({ theme: isDarkTheme.value ? 'light' : 'dark' });
+const handleSidebarScroll = () => {
+    setStoredScrollTop(scrollContainerRef.value?.scrollTop || 0);
+};
+
+onMounted(() => {
+    nextTick(() => {
+        if (!scrollContainerRef.value) return;
+        scrollContainerRef.value.scrollTop = getStoredScrollTop();
+    });
+});
+
+onBeforeUnmount(() => {
+    setStoredOpenGroups(openGroups.value);
+    setStoredScrollTop(scrollContainerRef.value?.scrollTop || 0);
+});
 </script>
 
 <template>
@@ -65,7 +132,18 @@ const toggleTheme = () => settingsStore.updateSettings({ theme: isDarkTheme.valu
                 </svg>
             </button>
         </div>
-        <div class="flex-1 overflow-auto">
+        <div ref="scrollContainerRef" class="flex-1 overflow-auto" @scroll="handleSidebarScroll">
+            <div class="border-t border-[#e2e8f0] pt-2">
+                <button
+                    class="mx-3 mb-2 flex w-[calc(100%-24px)] items-center gap-2 rounded-[10px] px-3 py-2 text-left text-[13px] transition"
+                    :class="current === 'dashboard' ? 'bg-[#e0e7ff] text-[#1d4ed8]' : 'text-[#0f172a] hover:bg-white/70'"
+                    type="button"
+                    @click="goDashboard"
+                >
+                    <span class="h-[6px] w-[6px] rounded-full" :class="current === 'dashboard' ? 'bg-[#1d4ed8]' : 'bg-[#cbd5e1]'" />
+                    <span>DASHBOARD</span>
+                </button>
+            </div>
             <div v-for="group in groups" :key="group.name" class="border-t border-[#e2e8f0]">
                 <button
                     class="flex w-full items-center justify-between px-4 py-3 text-left text-[14px] font-semibold text-[#0f172a]"
