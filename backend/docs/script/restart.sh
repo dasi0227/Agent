@@ -13,7 +13,8 @@ npm run build
 sync && sleep 5
 
 cd ~/Agent/backend/docs/docker
-docker compose -f docker-compose.yml up -d --force-recreate
+docker compose -f docker-compose.yml down
+docker compose -f docker-compose.yml up -d
 sync && sleep 5
 
 cd ~/Agent/backend/docs/mysql
