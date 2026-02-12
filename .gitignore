@@ -99,3 +99,4 @@ lerna-debug.log*
 **/test.prom
 **/oneapi.sql
 **/ai-agent.sql
+AGENTS.md
