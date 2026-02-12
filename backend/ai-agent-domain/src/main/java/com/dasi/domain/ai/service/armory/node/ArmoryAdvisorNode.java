@@ -35,7 +35,6 @@ public class ArmoryAdvisorNode extends AbstractArmoryNode {
         Set<AiAdvisorVO> aiAdvisorVOList = armoryContext.getValue(ADVISOR.getType());
 
         if (aiAdvisorVOList == null || aiAdvisorVOList.isEmpty()) {
-            log.warn("【装配节点】ArmoryAdvisorNode：null");
             return router(armoryRequestEntity, armoryContext);
         }
 

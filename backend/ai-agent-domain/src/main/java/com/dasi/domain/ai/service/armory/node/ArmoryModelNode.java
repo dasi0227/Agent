@@ -29,7 +29,6 @@ public class ArmoryModelNode extends AbstractArmoryNode {
         Set<AiModelVO> aiModelVOList = armoryContext.getValue(MODEL.getType());
 
         if (aiModelVOList == null || aiModelVOList.isEmpty()) {
-            log.warn("【装配节点】ArmoryModelNode：null");
             return router(armoryRequestEntity, armoryContext);
         }
 
@@ -38,9 +37,6 @@ public class ArmoryModelNode extends AbstractArmoryNode {
             // 获取当前 Model 关联的 API
             String apiBeanName = API.getBeanName(aiModelVO.getApiId());
             OpenAiApi openAiApi = getBean(apiBeanName);
-            if (openAiApi == null) {
-                log.error("【装配节点】ArmoryModelNode：不存在 API");
-            }
 
             // 实例化
             OpenAiChatOptions openAiChatOptions = OpenAiChatOptions.builder()
