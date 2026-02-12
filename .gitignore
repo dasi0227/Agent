@@ -94,9 +94,4 @@ lerna-debug.log*
 **/.DS_Store
 
 # ==================== Personal ====================
-**/*data.sql
-**/.mock_state
-**/test.prom
-**/oneapi.sql
-**/ai-agent.sql
 AGENTS.md

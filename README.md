@@ -114,6 +114,34 @@ Dasi Agent 是一个集成了 AI 对话、多角色 Agent 工作流、RAG 知识
 
 ![image-20260212170152042](./assets/image-20260212170152042.png)
 
+![image-20260212182609418](./assets/image-20260212182609418.png)
+
+### MCP 对话
+
+![image-20260212182749683](./assets/image-20260212182749683.png)
+
+![image-20260212182922052](./assets/image-20260212182922052.png)
+
+
+
+```sh
+cd ~/Agent
+git pull
+sync && sleep 3
+
+cd ~/Agent/frontend
+npm ci
+sync && sleep 5
+npm run build
+sync && sleep 10
+
+cd ~/Agent/backend
+mvn -DskipTests clean package
+sync && sleep 15
+
+java -jar ai-agent-app/target/*.jar --server.address=127.0.0.1 --server.port=8066
+```
+
 
 
 
