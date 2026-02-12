@@ -137,6 +137,23 @@ services:
     networks:
       - ai-agent
 
+  mcp-server-email:
+    image: dasi0227/mcp-server-email:0.1.0
+    container_name: mcp-server-email
+    restart: unless-stopped
+    ports:
+      - "9004:9004"
+    environment:
+      EMAIL_SMTP_HOST: ${EMAIL_SMTP_HOST}
+      EMAIL_SMTP_PORT: ${EMAIL_SMTP_PORT}
+      EMAIL_SMTP_USERNAME: ${EMAIL_SMTP_USERNAME}
+      EMAIL_SMTP_PASSWORD: ${EMAIL_SMTP_PASSWORD}
+      EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME}
+      TZ: ${TZ}
+    networks:
+      - ai-agent
+
   # ===================== Tools =====================
   elasticsearch:
     image: elasticsearch:7.17.28
