@@ -641,17 +641,49 @@ const validateSettingsBeforeSend = () => {
 
 const normalizeMarkdownSpacing = (text) => {
     if (!text) return '';
+
+    const startsWithMarkdownSyntax = (line) => {
+        const trimmed = (line || '').trimStart();
+        if (!trimmed) return false;
+        return /^(#{1,6}(?:\s|$)|[-*+](?:\s|$)|\d+\.(?:\s|$)|>\s?|```|~~~|\|)/.test(trimmed);
+    };
+
+    const normalizeNonCodeSegment = (segment) => {
+        const lines = segment.split(/\r?\n/);
+        const normalized = [];
+
+        for (let i = 0; i < lines.length; i += 1) {
+            const current = lines[i];
+            const next = lines[i + 1];
+
+            // Merge only when current line is a marker-only line AND next line is plain text.
+            if (
+                /^\s*(#{1,6}|[-*+]|\d+\.)\s*$/.test(current) &&
+                next != null &&
+                next.trim() &&
+                !startsWithMarkdownSyntax(next)
+            ) {
+                normalized.push(`${current.replace(/\s+$/, '')} ${next.trimStart()}`);
+                i += 1;
+                continue;
+            }
+
+            normalized.push(
+                current
+                    .replace(/^(\s*)(#{1,6})(\S)/, '$1$2 $3')
+                    .replace(/^(\s*)([-*+])(\S)/, '$1$2 $3')
+                    .replace(/^(\s*)(\d+\.)(\S)/, '$1$2 $3')
+            );
+        }
+
+        return normalized.join('\n');
+    };
+
     return text
         .split('```')
         .map((segment, index) => {
             if (index % 2 === 1) return segment;
-            return segment
-                .replace(/(^|\n)(\s*)(#{1,6})(\r?\n)(\S)/g, '$1$2$3 $5')
-                .replace(/(^|\n)(\s*)([-*+])(\r?\n)(\S)/g, '$1$2$3 $5')
-                .replace(/(^|\n)(\s*)(\d+\.)(\r?\n)(\S)/g, '$1$2$3 $5')
-                .replace(/(^|\n)(\s*)(#{1,6})(\S)/g, '$1$2$3 $4')
-                .replace(/(^|\n)(\s*)([-*+])(\S)/g, '$1$2$3 $4')
-                .replace(/(^|\n)(\s*)(\d+\.)(\S)/g, '$1$2$3 $4');
+            return normalizeNonCodeSegment(segment);
         })
         .join('```');
 };

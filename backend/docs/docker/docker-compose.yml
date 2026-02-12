@@ -107,7 +107,7 @@ services:
     environment:
       TZ: ${TZ}
       CSDN_COOKIE: ${CSDN_COOKIE}
-      ARTICLE_COVER_URL: ${CSDN_COVER_URL}
+      CSDN_COVER_URL: ${CSDN_COVER_URL}
     networks:
       - ai-agent
 
@@ -119,9 +119,9 @@ services:
       - "9002:9002"
     environment:
       TZ: ${TZ}
-      AGENT_ID: ${WECOM_AGENT_ID}
-      CORP_ID: ${WECOM_CORP_ID}
-      CORP_SECRET: ${WECOM_CORP_SECRET}
+      WECOM_AGENT_ID: ${WECOM_AGENT_ID}
+      WECOM_CORP_ID: ${WECOM_CORP_ID}
+      WECOM_CORP_SECRET: ${WECOM_CORP_SECRET}
     networks:
       - ai-agent
 
@@ -133,7 +133,7 @@ services:
       - "9003:9003"
     environment:
       TZ: ${TZ}
-      API_KEY: ${AMAP_API_KEY}
+      AMAP_API_KEY: ${AMAP_API_KEY}
     networks:
       - ai-agent
 
@@ -150,6 +150,18 @@ services:
       EMAIL_SMTP_PASSWORD: ${EMAIL_SMTP_PASSWORD}
       EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS}
       EMAIL_FROM_NAME: ${EMAIL_FROM_NAME}
+      TZ: ${TZ}
+    networks:
+      - ai-agent
+      
+  mcp-server-bocha:
+    image: dasi0227/mcp-server-bocha:0.1.0
+    container_name: mcp-server-bocha
+    restart: unless-stopped
+    ports:
+      - "9005:9005"
+    environment:
+      BOCHA_API_KEY: ${BOCHA_API_KEY}
       TZ: ${TZ}
     networks:
       - ai-agent

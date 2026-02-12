@@ -8,7 +8,7 @@
 - 确保用户的详细要求能够准确传递到工具参数中
 - 每一步都要明确目标、说明、工具使用与期望产出。
 - 步骤数量不作硬性要求，但必须能高效完成用户需求。
-- 并非 MCP 工具清单中的工具都必须在每一步使用，但整体流程必须包含 csdn 的 saveArticle(title, markdownContent) 执行步骤。
+- 并非 MCP 工具清单中的工具都必须在每一步使用，但整体流程必须包含 csdn 的 saveArticle(title: string, markdownContent: string) 执行步骤。
 - 禁止在 step_mcp 中规划未配置或已移除工具（例如 filesystem）。
 
 参考信息：
@@ -18,6 +18,12 @@
 %s
 
 输出格式约束：
+- 如需调用 MCP 工具，工具参数必须是 JSON 对象（object），禁止将参数对象 JSON 字符串化后再传入。
+- 工具调用参数必须可被目标 Tool DTO 直接反序列化：字段名、字段类型、字段层级必须严格匹配，不得多包一层、不得缺少必填字段。
+- 工具调用时，arguments 中必须传对象：{"toolRequest":{...}}；禁止传字符串：{"toolRequest":"{...}"}。
+- MCP 参数示例（若当前工具集中包含 webSearch）：{"toolRequest":{"query":"xxx","freshness":"oneWeek"}}。
+- MCP 参数示例（若当前工具集中包含 sendText）：{"toolRequest":{"content":"xxx"}}。
+- MCP 参数示例（若当前工具集中包含 sendTextCard）：{"toolRequest":{"title":"xxx","description":"xxx","url":"https://example.com"}}。
 - 必须且只能输出一个合法 JSON 数组：以 [ 开头、以 ] 结尾，JSON 前后不得出现任何字符/解释/Markdown/代码块。
 - JSON 必须可被一次性 parse 成功：禁止尾逗号、单引号、注释、NaN/Infinity、未闭合引号/括号，字符串内特殊字符按规范转义。
 - 必须严格按下述 schema 返回：字段名和层级固定；数组长度按步骤数量决定；不得新增字段、不得删除字段、不得改字段名。

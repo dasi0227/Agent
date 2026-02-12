@@ -19,6 +19,8 @@
         <logger name="org.apache.coyote.http11" level="ERROR"/>
         <logger name="org.apache.catalina" level="ERROR"/>
         <logger name="org.apache.tomcat" level="ERROR"/>
+        <logger name="org.springframework.ai.mcp" level="DEBUG"/>
+        <logger name="io.modelcontextprotocol" level="DEBUG"/>
     </springProfile>
 
     <!-- ========= 转换规则 ========= -->
