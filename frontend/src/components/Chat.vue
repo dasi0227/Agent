@@ -98,13 +98,53 @@ const mapSession = (session) => {
     };
 };
 
-const refreshChatSessions = async () => {
+const SESSION_INVALID_HINT = '会话已失效，请新建会话';
+
+const isInvalidSessionErrorMessage = (message) => {
+    if (!message) return false;
+    return (
+        message.includes('会话不存在') ||
+        message.includes('会话已失效') ||
+        message.includes('会话类型不匹配') ||
+        message.includes('无权限访问该会话') ||
+        message.includes('无权限修改该会话')
+    );
+};
+
+const listRemoteChatSessions = async () => {
     const resp = await listSessions();
     const list = pickData(resp, '获取会话失败') || [];
     const mapped = (Array.isArray(list) ? list : []).map(mapSession).filter(Boolean);
-    const chatList = mapped.filter((item) => item.sessionType === 'chat');
+    return mapped.filter((item) => item.sessionType === 'chat');
+};
+
+const refreshChatSessions = async () => {
+    const chatList = await listRemoteChatSessions();
     chatStore.setChats(chatList);
     return chatList;
+};
+
+const dropInvalidChatSession = (chatId = chatStore.currentChatId) => {
+    if (chatId) {
+        chatStore.removeChat(chatId);
+    }
+    sendError.value = SESSION_INVALID_HINT;
+};
+
+const ensureChatSessionValid = async (chat) => {
+    if (!chat?.sessionId) return null;
+    try {
+        const chatList = await listRemoteChatSessions();
+        const matched = chatList.find((item) => item.sessionId === chat.sessionId || item.id === chat.id);
+        if (!matched) {
+            dropInvalidChatSession(chat.id);
+            return null;
+        }
+        return matched;
+    } catch (error) {
+        sendError.value = normalizeError(error).message || '获取会话失败';
+        return null;
+    }
 };
 
 const mapMessage = (message) => ({
@@ -239,7 +279,12 @@ const loadChatMessages = async (sessionId, chatId = chatStore.currentChatId) => 
             chatStore.setChatMessages(chatId, mapped);
         }
     } catch (error) {
-        sendError.value = normalizeError(error).message || '获取消息失败';
+        const message = normalizeError(error).message || '获取消息失败';
+        if (isInvalidSessionErrorMessage(message)) {
+            dropInvalidChatSession(chatId);
+            return;
+        }
+        sendError.value = message;
     } finally {
         messageLoading.value = false;
     }
@@ -478,6 +523,9 @@ onMounted(() => {
     fetchTags();
     fetchModels();
     fetchMcpTools();
+    if (chatStore.currentChat) {
+        ensureChatSessionValid(chatStore.currentChat);
+    }
 });
 
 watch(currentModel, () => {
@@ -615,11 +663,13 @@ const sendMessage = async () => {
     sendError.value = '';
     const chat = await ensureChatSession({ skipInitialLoad: !chatStore.currentChat });
     if (!chat) return;
+    const validChat = await ensureChatSessionValid(chat);
+    if (!validChat) return;
     if (userMessageCount.value >= 20) {
         sendError.value = '当前会话已达到 20 条用户消息上限，请新建会话';
         return;
     }
-    const sessionId = chat.sessionId || currentChatSessionId.value;
+    const sessionId = validChat.sessionId || currentChatSessionId.value;
     if (!sessionId) {
         sendError.value = '会话初始化中，请稍后重试';
         return;
@@ -631,7 +681,7 @@ const sendMessage = async () => {
     const controller = new AbortController();
     chatStore.setAbortController(controller);
     chatStore.addUserMessage(content);
-    renameChatIfNeeded(chat, content);
+    renameChatIfNeeded(validChat, content);
     inputValue.value = '';
     scrollToBottom(true);
     if (mode === 'stream') {

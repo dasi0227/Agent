@@ -20,4 +20,7 @@ public interface ISessionService {
     List<MessageVO> listWorkSseMessage(String sessionId);
 
     List<MessageVO> listWorkAnswerMessage(String sessionId);
+
+    String validateSessionAccess(String sessionId, String expectedSessionType);
+
 }

@@ -2,6 +2,7 @@ package com.dasi.trigger.handler;
 
 import com.dasi.types.dto.result.Result;
 import com.dasi.types.exception.DependencyConflictException;
+import com.dasi.types.exception.SessionException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -32,6 +33,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DependencyConflictException.class)
     public Result<Void> handleConflict(DependencyConflictException e) {
         log.warn("依赖冲突: {}", e.getMessage());
+        return Result.error(e.getMessage());
+    }
+
+    @ExceptionHandler(SessionException.class)
+    public Result<Void> handleSession(SessionException e) {
+        log.warn("会话异常: {}", e.getMessage());
         return Result.error(e.getMessage());
     }
 

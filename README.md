@@ -122,7 +122,21 @@ Dasi Agent 是一个集成了 AI 对话、多角色 Agent 工作流、RAG 知识
 
 ![image-20260212182922052](./assets/image-20260212182922052.png)
 
+### AGENT 对话（AMAP + EMAIL）
 
+![image-20260212184929850](./assets/image-20260212184929850.png)
+
+<img src="./assets/IMG_0093.PNG" alt="IMG_0093" style="zoom: 33%;" />
+
+### AGENT 对话（CSDN + WECOM）
+
+![image-20260212185834327](./assets/image-20260212185834327.png)
+
+![image-20260212185944249](./assets/image-20260212185944249.png)
+
+<img src="./assets/IMG_0094.PNG" alt="IMG_0094" style="zoom: 33%;" />
+
+### AGENT 对话（
 
 ```sh
 cd ~/Agent
@@ -134,6 +148,9 @@ npm ci
 sync && sleep 5
 npm run build
 sync && sleep 10
+
+cd ~/Agent/backend/docs/mysql
+docker exec -i mysql mysql -u root -pjason2004 ai-agent < data.sql
 
 cd ~/Agent/backend
 mvn -DskipTests clean package

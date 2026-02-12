@@ -67,13 +67,53 @@ const mapSession = (session) => {
     };
 };
 
-const refreshWorkSessions = async () => {
+const SESSION_INVALID_HINT = '会话已失效，请新建会话';
+
+const isInvalidSessionErrorMessage = (message) => {
+    if (!message) return false;
+    return (
+        message.includes('会话不存在') ||
+        message.includes('会话已失效') ||
+        message.includes('会话类型不匹配') ||
+        message.includes('无权限访问该会话') ||
+        message.includes('无权限修改该会话')
+    );
+};
+
+const listRemoteWorkSessions = async () => {
     const resp = await listSessions();
     const list = pickData(resp, '获取会话失败') || [];
     const mapped = (Array.isArray(list) ? list : []).map(mapSession).filter(Boolean);
-    const workList = mapped.filter((item) => item.sessionType === 'work');
+    return mapped.filter((item) => item.sessionType === 'work');
+};
+
+const refreshWorkSessions = async () => {
+    const workList = await listRemoteWorkSessions();
     agentStore.setSessions(workList);
     return workList;
+};
+
+const dropInvalidWorkSession = (sessionId = agentStore.currentSessionId) => {
+    if (sessionId) {
+        agentStore.removeSession(sessionId);
+    }
+    sendError.value = SESSION_INVALID_HINT;
+};
+
+const ensureWorkSessionValid = async (session) => {
+    if (!session?.sessionId) return null;
+    try {
+        const workList = await listRemoteWorkSessions();
+        const matched = workList.find((item) => item.sessionId === session.sessionId || item.id === session.id);
+        if (!matched) {
+            dropInvalidWorkSession(session.id);
+            return null;
+        }
+        return matched;
+    } catch (error) {
+        sendError.value = normalizeError(error).message || '获取会话失败';
+        return null;
+    }
 };
 
 const mapMessage = (message) => ({
@@ -248,7 +288,12 @@ const loadWorkMessages = async (sessionId) => {
             agentStore.setSessionMessages(agentStore.currentSessionId, mappedMessages);
         }
     } catch (error) {
-        sendError.value = normalizeError(error).message || '获取消息失败';
+        const message = normalizeError(error).message || '获取消息失败';
+        if (isInvalidSessionErrorMessage(message)) {
+            dropInvalidWorkSession(agentStore.currentSessionId);
+            return;
+        }
+        sendError.value = message;
     } finally {
         messageLoading.value = false;
     }
@@ -420,6 +465,8 @@ const sendMessage = async () => {
     sendError.value = '';
     const session = await ensureWorkSession();
     if (!session) return;
+    const validSession = await ensureWorkSessionValid(session);
+    if (!validSession) return;
     if (userMessageCount.value >= 3) {
         sendError.value = '当前会话已达到 3 条用户消息上限，请新建会话';
         return;
@@ -429,10 +476,10 @@ const sendMessage = async () => {
     const controller = new AbortController();
     agentStore.setAbortController(controller);
     agentStore.addUserMessage(content);
-    renameSessionIfNeeded(session, content);
+    renameSessionIfNeeded(validSession, content);
     inputValue.value = '';
     scrollRightToBottom(true);
-    await runExecute(content, controller, session.sessionId);
+    await runExecute(content, controller, validSession.sessionId);
 };
 
 const runExecute = async (content, controller, sessionId) => {
@@ -476,6 +523,10 @@ const runExecute = async (content, controller, sessionId) => {
             ...buildExecutePayload(content, sessionId),
             signal: controller.signal,
             onData: (payload) => {
+                if (typeof payload === 'string') {
+                    handleError(new Error(payload));
+                    return;
+                }
                 if (!payload || typeof payload !== 'object') return;
                 const event = {
                     clientType: payload.clientType || '',
@@ -533,6 +584,9 @@ onMounted(() => {
     scrollLeftToBottom(false);
     scrollRightToBottom(false);
     fetchAgents();
+    if (agentStore.currentSession) {
+        ensureWorkSessionValid(agentStore.currentSession);
+    }
 });
 
 onBeforeUnmount(() => {

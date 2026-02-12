@@ -6,6 +6,8 @@ import com.dasi.domain.ai.service.augment.IAugmentService;
 import com.dasi.domain.ai.service.dispatch.IDispatchService;
 import com.dasi.domain.ai.service.rag.IRagService;
 import com.dasi.domain.query.service.IQueryService;
+import com.dasi.domain.session.model.enumeration.SessionType;
+import com.dasi.domain.session.service.ISessionService;
 import com.dasi.domain.util.message.IMessageService;
 import com.dasi.domain.util.stat.IStatService;
 import com.dasi.types.dto.response.query.QueryChatClientResponse;
@@ -59,6 +61,9 @@ public class AiController implements IAiApi {
     private IQueryService queryService;
 
     @Resource
+    private ISessionService sessionService;
+
+    @Resource
     private IMessageService messageService;
 
     @Resource
@@ -80,6 +85,21 @@ public class AiController implements IAiApi {
                             .data("AI 未启用或不存在"));
                 } catch (Exception e) {
                     log.error("【AI 执行】状态校验失败：agentId={}", agentId, e);
+                } finally {
+                    sseEmitter.complete();
+                }
+                return sseEmitter;
+            }
+
+            String invalidSessionReason = sessionService.validateSessionAccess(sessionId, SessionType.WORK.getType());
+            if (StringUtils.hasText(invalidSessionReason)) {
+                log.warn("【AI 执行】会话校验失败：sessionId={}, expectedType={}, error={}", sessionId, SessionType.WORK.getType(), invalidSessionReason);
+                try {
+                    sseEmitter.send(SseEmitter.event()
+                            .name("error")
+                            .data(invalidSessionReason));
+                } catch (Exception e) {
+                    log.error("【AI 执行】会话校验失败：sessionId={}", sessionId, e);
                 } finally {
                     sseEmitter.complete();
                 }
@@ -125,6 +145,11 @@ public class AiController implements IAiApi {
         String userMessage = aiChatRequest.getUserMessage();
         String ragTag = aiChatRequest.getRagTag();
         String sessionId = aiChatRequest.getSessionId();
+        String invalidSessionReason = sessionService.validateSessionAccess(sessionId, SessionType.CHAT.getType());
+        if (StringUtils.hasText(invalidSessionReason)) {
+            log.warn("【AI 对话】会话校验失败：sessionId={}, expectedType={}, error={}", sessionId, SessionType.CHAT.getType(), invalidSessionReason);
+            return invalidSessionReason;
+        }
         List<String> mcpIdList = aiChatRequest.getMcpIdList();
         Double temperature = aiChatRequest.getTemperature();
         Double presencePenalty = aiChatRequest.getPresencePenalty();
@@ -189,6 +214,11 @@ public class AiController implements IAiApi {
         String userMessage = aiChatRequest.getUserMessage();
         String ragTag = aiChatRequest.getRagTag();
         String sessionId = aiChatRequest.getSessionId();
+        String invalidSessionReason = sessionService.validateSessionAccess(sessionId, SessionType.CHAT.getType());
+        if (StringUtils.hasText(invalidSessionReason)) {
+            log.warn("【AI 对话】会话校验失败：sessionId={}, expectedType={}, error={}", sessionId, SessionType.CHAT.getType(), invalidSessionReason);
+            return Flux.just(invalidSessionReason);
+        }
         List<String> mcpIdList = aiChatRequest.getMcpIdList();
         Double temperature = aiChatRequest.getTemperature();
         Double presencePenalty = aiChatRequest.getPresencePenalty();

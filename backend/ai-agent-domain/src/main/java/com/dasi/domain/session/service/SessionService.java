@@ -107,6 +107,39 @@ public class SessionService implements ISessionService {
         return sessionRepository.listMessageBySessionAndType(sessionId, WORK_ANSWER.getType());
     }
 
+    @Override
+    public String validateSessionAccess(String sessionId, String expectedSessionType) {
+        if (!StringUtils.hasText(sessionId)) {
+            return "会话不存在";
+        }
+
+        SessionVO sessionVO = sessionRepository.querySessionBySessionId(sessionId);
+        if (sessionVO == null) {
+            return "会话不存在";
+        }
+
+        if (StringUtils.hasText(expectedSessionType) && !expectedSessionType.equalsIgnoreCase(sessionVO.getSessionType())) {
+            return "会话类型不匹配";
+        }
+
+        String role = authContext.getRole();
+        if (!StringUtils.hasText(role)) {
+            return "用户信息缺失";
+        }
+
+        if (!UserRoleType.ADMIN.getType().equals(role)) {
+            String sessionUser = authContext.getUsername();
+            if (!StringUtils.hasText(sessionUser)) {
+                return "用户信息缺失";
+            }
+            if (!sessionUser.equals(sessionVO.getSessionUser())) {
+                return "无权限访问该会话";
+            }
+        }
+
+        return null;
+    }
+
     private boolean notAdmin() {
         String role = authContext.getRole();
         if (!StringUtils.hasText(role)) {
