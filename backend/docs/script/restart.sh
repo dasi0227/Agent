@@ -12,12 +12,12 @@ sync && sleep 5
 npm run build
 sync && sleep 5
 
-cd ~/Agent/backend/docs/mysql
-docker exec -i mysql mysql -u root -pjason2004 ai-agent < data.sql
-sync && sleep 5
-
 cd ~/Agent/backend/docs/docker
 docker compose -f docker-compose.yml up -d
+sync && sleep 5
+
+cd ~/Agent/backend/docs/mysql
+docker exec -i mysql mysql -u root -pjason2004 ai-agent < data.sql
 sync && sleep 5
 
 cd ~/Agent/backend

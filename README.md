@@ -140,31 +140,3 @@ Dasi Agent 是一个集成了 AI 对话、多角色 Agent 工作流、RAG 知识
 
 
 
-
-
-```sh
-cd ~/Agent
-git pull
-sync && sleep 5
-
-cd ~/Agent/frontend
-npm ci
-sync && sleep 5
-npm run build
-sync && sleep 5
-
-cd ~/Agent/backend/docs/mysql
-docker exec -i mysql mysql -u root -pjason2004 ai-agent < data.sql
-sync && sleep 5
-
-cd ~/Agent/backend/docs/docker
-docker compose -f docker-compose.yml up -d
-sync && sleep 5
-
-cd ~/Agent/backend
-mvn -DskipTests clean package
-sync && sleep 5
-
-java -jar ai-agent-app/target/*.jar --server.address=127.0.0.1 --server.port=8066
-```
-
