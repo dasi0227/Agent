@@ -1,5 +1,6 @@
 package com.dasi.domain.ai.service.rag;
 
+import com.dasi.types.annotation.CacheEvict;
 import com.dasi.types.dto.request.ai.AiUploadRequest;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,8 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 
+import static com.dasi.types.constant.RedisConstant.QUERY_CHAT_RAG_KEY;
+
 @Slf4j
 @Service
 public class RagService implements IRagService {
@@ -35,6 +38,7 @@ public class RagService implements IRagService {
     private PgVectorStore pgVectorStore;
 
     @Override
+    @CacheEvict(keyPrefix = { QUERY_CHAT_RAG_KEY })
     public void uploadTextFile(String ragTag, List<MultipartFile> fileList) {
 
         if (fileList == null || fileList.isEmpty()) {
@@ -53,6 +57,7 @@ public class RagService implements IRagService {
     }
 
     @Override
+    @CacheEvict(keyPrefix = { QUERY_CHAT_RAG_KEY })
     public void uploadGitRepo(AiUploadRequest aiUploadRequest) {
 
         String repoUrl = aiUploadRequest.getRepoUrl();
