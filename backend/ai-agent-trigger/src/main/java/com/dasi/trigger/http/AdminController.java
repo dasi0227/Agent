@@ -1,12 +1,12 @@
 package com.dasi.trigger.http;
 
+import com.dasi.api.IAdminApi;
 import com.dasi.domain.admin.model.vo.*;
 import com.dasi.domain.admin.service.IAdminService;
 import com.dasi.domain.session.model.vo.SessionVO;
-import com.dasi.domain.util.stat.IStatService;
-import com.dasi.types.dto.response.admin.DashboardResponse;
 import com.dasi.types.dto.request.admin.manage.*;
 import com.dasi.types.dto.request.admin.query.*;
+import com.dasi.types.dto.response.admin.DashboardResponse;
 import com.dasi.types.dto.result.PageResult;
 import com.dasi.types.dto.result.Result;
 import jakarta.annotation.Resource;
@@ -20,13 +20,10 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/admin")
-public class AdminController {
+public class AdminController implements IAdminApi {
 
     @Resource
     private IAdminService adminService;
-
-    @Resource
-    private IStatService statService;
 
     // -------------------- Dashboard --------------------
     @GetMapping("/dashboard")

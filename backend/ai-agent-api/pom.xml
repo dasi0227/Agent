@@ -58,6 +58,10 @@
             <groupId>com.dasi</groupId>
             <artifactId>ai-agent-types</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.dasi</groupId>
+            <artifactId>ai-agent-domain</artifactId>
+        </dependency>
 
     </dependencies>
 
