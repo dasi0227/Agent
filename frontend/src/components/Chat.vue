@@ -369,14 +369,17 @@ watch(
 const fetchTags = async () => {
     try {
         const resp = await queryRagTags();
-        const list = Array.isArray(resp?.result)
-            ? resp.result
-            : Array.isArray(resp)
-              ? resp
-              : Array.isArray(resp?.data)
-                ? resp.data
-                : [];
-        const unique = Array.from(new Set(['', ...list.filter((t) => typeof t === 'string')]));
+        const list = pickData(resp, '获取知识库标签失败') || [];
+        const normalized = (Array.isArray(list) ? list : [])
+            .map((item) => {
+                if (typeof item === 'string') return item.trim();
+                if (item && typeof item === 'object') {
+                    return (item.ragTag || item.tag || item.value || '').toString().trim();
+                }
+                return '';
+            })
+            .filter(Boolean);
+        const unique = Array.from(new Set(['', ...normalized]));
         ragTags.value = unique.map((item) => ({
             label: item || '不使用知识库',
             value: item || ''
@@ -1032,7 +1035,8 @@ const handleUpload = async () => {
         }
         uploadForm.uploading = true;
         try {
-            await uploadRagFile({ ragTag: tag, file: uploadForm.file });
+            const resp = await uploadRagFile({ ragTag: tag, file: uploadForm.file });
+            pickData(resp, '上传失败');
             await fetchTags();
             currentRagTag.value = tag;
             selectRag(tag);
@@ -1063,7 +1067,8 @@ const handleUpload = async () => {
     }
     uploadForm.uploading = true;
     try {
-        await uploadRagGit({ repoUrl: repo, username, password });
+        const resp = await uploadRagGit({ repoUrl: repo, username, password });
+        pickData(resp, '上传失败');
         await fetchTags();
         const repoName = repo.split('/').pop()?.replace(/\.git$/i, '') || '';
         if (repoName) {

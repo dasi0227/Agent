@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.dasi.types.constant.RedisConstant.QUERY_CHAT_RAG_KEY;
 
@@ -46,12 +47,19 @@ public class RagService implements IRagService {
             return;
         }
 
-        try {
-            for (MultipartFile file : fileList) {
-                addPgVectorStore(ragTag, file);
+        int successCount = 0;
+        for (MultipartFile file : fileList) {
+            if (addPgVectorStore(ragTag, file)) {
+                successCount++;
             }
-        } catch (Exception e) {
-            log.error("【上传知识库】上传文件失败：error={}", e.getMessage(), e);
+        }
+
+        if (successCount == 0) {
+            throw new IllegalStateException("知识库入库失败，请检查 Embedding 服务配置后重试");
+        }
+
+        if (successCount < fileList.size()) {
+            log.warn("【上传知识库】部分文件入库失败：ragTag={}, total={}, success={}", ragTag, fileList.size(), successCount);
         }
 
     }
@@ -80,6 +88,8 @@ public class RagService implements IRagService {
 
             UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(username, password);
             try {
+                AtomicInteger totalCount = new AtomicInteger(0);
+                AtomicInteger successCount = new AtomicInteger(0);
                 Git git = Git.cloneRepository()
                         .setURI(repoUrl)
                         .setDirectory(directory)
@@ -112,7 +122,10 @@ public class RagService implements IRagService {
 
                     String fileName = file.getFileName().toString().toLowerCase();
                     if (fileName.endsWith(".java") || fileName.endsWith(".html") || fileName.endsWith(".md") || fileName.endsWith(".txt")) {
-                        addPgVectorStore(ragTag, file);
+                        totalCount.incrementAndGet();
+                        if (addPgVectorStore(ragTag, file)) {
+                            successCount.incrementAndGet();
+                        }
                     }
 
                     return FileVisitResult.CONTINUE;
@@ -126,6 +139,18 @@ public class RagService implements IRagService {
                 }
                 });
 
+                if (totalCount.get() == 0) {
+                    throw new IllegalStateException("未找到可入库文件，请检查仓库内容");
+                }
+
+                if (successCount.get() == 0) {
+                    throw new IllegalStateException("知识库入库失败，请检查 Embedding 服务配置后重试");
+                }
+
+                if (successCount.get() < totalCount.get()) {
+                    log.warn("【上传知识库】部分文件入库失败：ragTag={}, total={}, success={}", ragTag, totalCount.get(), successCount.get());
+                }
+
                 git.close();
             } finally {
                 if (directory.exists()) {
@@ -134,36 +159,40 @@ public class RagService implements IRagService {
             }
         } catch (Exception e) {
             log.error("【上传知识库】上传 Git 仓库失败：error={}", e.getMessage(), e);
+            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 
-    private void addPgVectorStore(String ragTag, org.springframework.core.io.Resource resource, String fileName) {
+    private boolean addPgVectorStore(String ragTag, org.springframework.core.io.Resource resource, String fileName) {
         try {
             TikaDocumentReader reader = new TikaDocumentReader(resource);
 
             List<Document> documentList = reader.get();
             List<Document> documentSplitList = tokenTextSplitter.apply(documentList);
             if (documentSplitList == null || documentSplitList.isEmpty()) {
-                return;
+                log.warn("【上传知识库】文档切分后为空：ragTag={}, fileName={}", ragTag, fileName);
+                return false;
             }
 
             documentSplitList.forEach(doc -> doc.getMetadata().put(PGVECTOR_KNOWLEDGE_KEY, ragTag));
             pgVectorStore.add(documentSplitList);
 
             log.info("【上传知识库】入库成功：ragTag={}, fileName={}", ragTag, fileName);
+            return true;
         } catch (Exception e) {
             log.error("【上传知识库】入库失败：ragTag={}, fileName={}, error={}", ragTag, fileName, e.getMessage(), e);
+            return false;
         }
     }
 
-    private void addPgVectorStore(String ragTag, Path file) {
+    private boolean addPgVectorStore(String ragTag, Path file) {
         String fileName = file.getFileName().toString().toLowerCase();
-        addPgVectorStore(ragTag, new PathResource(file), fileName);
+        return addPgVectorStore(ragTag, new PathResource(file), fileName);
     }
 
-    private void addPgVectorStore(String ragTag, MultipartFile file) {
+    private boolean addPgVectorStore(String ragTag, MultipartFile file) {
         String fileName = (file.getOriginalFilename() == null ? "unknown" : file.getOriginalFilename().toLowerCase());
-        addPgVectorStore(ragTag, file.getResource(), fileName);
+        return addPgVectorStore(ragTag, file.getResource(), fileName);
     }
 
 }

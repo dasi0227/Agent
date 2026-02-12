@@ -267,15 +267,25 @@ public class AiController implements IAiApi {
     @PostMapping(value = "/rag/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Override
     public Result<Void> uploadFile(@RequestPart("ragTag") String ragTag, @RequestPart("fileList") List<MultipartFile> fileList) {
-        ragService.uploadTextFile(ragTag, fileList);
-        return Result.success();
+        try {
+            ragService.uploadTextFile(ragTag, fileList);
+            return Result.success();
+        } catch (Exception e) {
+            log.error("【上传知识库】文件上传失败：ragTag={}, error={}", ragTag, e.getMessage(), e);
+            return Result.error(e.getMessage());
+        }
     }
 
     @PostMapping("/rag/git")
     @Override
     public Result<Void> uploadGitRepo(@RequestBody AiUploadRequest aiUploadRequest) {
-        ragService.uploadGitRepo(aiUploadRequest);
-        return Result.success();
+        try {
+            ragService.uploadGitRepo(aiUploadRequest);
+            return Result.success();
+        } catch (Exception e) {
+            log.error("【上传知识库】Git 上传失败：repoUrl={}, error={}", aiUploadRequest.getRepoUrl(), e.getMessage(), e);
+            return Result.error(e.getMessage());
+        }
     }
 
     private boolean isInactiveChatClient(String clientId) {
