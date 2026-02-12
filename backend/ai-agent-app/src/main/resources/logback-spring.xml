@@ -24,11 +24,11 @@
         <logger name="org.apache.tomcat" level="ERROR"/>
         <logger name="org.springframework.ai.retry.RetryUtils" level="ERROR"/>
         <logger name="org.hibernate" level="ERROR"/>
-        <logger name="io.modelcontextprotocol.client" level="DEBUG"/>
+        <logger name="io.modelcontextprotocol.client" level="ERROR"/>
         <logger name="org.springframework.web.servlet" level="ERROR"/>
         <logger name="org.springframework.data.repository.config" level="ERROR"/>
-        <logger name="io.modelcontextprotocol.spec" level="DEBUG"/>
-        <logger name="org.springframework.ai.mcp" level="DEBUG"/>
+        <logger name="io.modelcontextprotocol.spec" level="ERROR"/>
+        <logger name="org.springframework.ai.mcp" level="ERROR"/>
     </springProfile>
 
     <!-- ========= 转换规则 ========= -->
