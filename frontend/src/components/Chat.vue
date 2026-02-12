@@ -49,6 +49,7 @@ const copiedMessageId = ref(null);
 const copyTimer = ref(null);
 const messageLoading = ref(false);
 const sendError = ref('');
+const skipNextLoadChatId = ref(null);
 
 const typewriterState = reactive({
     lines: [],
@@ -222,10 +223,10 @@ const scrollToBottom = (smooth = true) => {
     });
 };
 
-const loadChatMessages = async (sessionId) => {
+const loadChatMessages = async (sessionId, chatId = chatStore.currentChatId) => {
     if (!sessionId) {
-        if (chatStore.currentChatId) {
-            chatStore.setChatMessages(chatStore.currentChatId, []);
+        if (chatId) {
+            chatStore.setChatMessages(chatId, []);
         }
         return;
     }
@@ -234,8 +235,8 @@ const loadChatMessages = async (sessionId) => {
         const resp = await listChatMessages({ sessionId });
         const list = pickData(resp, '获取消息失败') || [];
         const mapped = (Array.isArray(list) ? list : []).map(mapMessage);
-        if (chatStore.currentChatId) {
-            chatStore.setChatMessages(chatStore.currentChatId, mapped);
+        if (chatId) {
+            chatStore.setChatMessages(chatId, mapped);
         }
     } catch (error) {
         sendError.value = normalizeError(error).message || '获取消息失败';
@@ -244,7 +245,7 @@ const loadChatMessages = async (sessionId) => {
     }
 };
 
-const ensureChatSession = async () => {
+const ensureChatSession = async ({ skipInitialLoad = false } = {}) => {
     if (chatStore.currentChat) {
         if (!chatStore.currentChatId && chatStore.currentChat?.id) {
             chatStore.setCurrentChatId(chatStore.currentChat.id);
@@ -255,16 +256,27 @@ const ensureChatSession = async () => {
         const resp = await insertSession({ sessionTitle: '新会话', sessionType: 'chat' });
         const created = mapSession(pickData(resp, '创建会话失败'));
         if (created) {
+            let resolvedChat = created;
             chatStore.upsertChat(created);
-            chatStore.setCurrentChatId(created.id);
-            if (pendingClientId.value) {
-                chatStore.setChatClient(created.id, pendingClientId.value);
+            if (!resolvedChat.sessionId) {
+                const chatList = await refreshChatSessions();
+                resolvedChat = chatList.find((item) => item.id === created.id) || resolvedChat;
             }
-            return created;
+            if (skipInitialLoad) {
+                skipNextLoadChatId.value = resolvedChat.id;
+            }
+            chatStore.setCurrentChatId(resolvedChat.id);
+            if (pendingClientId.value) {
+                chatStore.setChatClient(resolvedChat.id, pendingClientId.value);
+            }
+            return resolvedChat;
         }
         const chatList = await refreshChatSessions();
         const session = chatList[0] || null;
         if (!session) return null;
+        if (skipInitialLoad) {
+            skipNextLoadChatId.value = session.id;
+        }
         chatStore.setCurrentChatId(session.id);
         return session;
     } catch (error) {
@@ -295,11 +307,16 @@ watch(
 
 watch(
     () => chatStore.currentChatId,
-    async () => {
+    async (chatId) => {
         sendError.value = '';
         const chat = chatStore.currentChat;
+        if (chatId && skipNextLoadChatId.value === chatId) {
+            skipNextLoadChatId.value = null;
+            nextTick(() => scrollToBottom(false));
+            return;
+        }
         if (chat?.sessionId) {
-            await loadChatMessages(chat.sessionId);
+            await loadChatMessages(chat.sessionId, chatId);
         }
         nextTick(() => scrollToBottom(false));
     },
@@ -593,10 +610,15 @@ const sendMessage = async () => {
     if (!content || sending.value || !currentModel.value) return;
     if (!validateSettingsBeforeSend()) return;
     sendError.value = '';
-    const chat = await ensureChatSession();
+    const chat = await ensureChatSession({ skipInitialLoad: !chatStore.currentChat });
     if (!chat) return;
     if (userMessageCount.value >= 20) {
         sendError.value = '当前会话已达到 20 条用户消息上限，请新建会话';
+        return;
+    }
+    const sessionId = chat.sessionId || currentChatSessionId.value;
+    if (!sessionId) {
+        sendError.value = '会话初始化中，请稍后重试';
         return;
     }
     const mode = settingsStore.type || 'complete';
@@ -610,28 +632,28 @@ const sendMessage = async () => {
     inputValue.value = '';
     scrollToBottom(true);
     if (mode === 'stream') {
-        await runStream(content, controller);
+        await runStream(content, controller, sessionId);
     } else {
-        await runComplete(content, controller);
+        await runComplete(content, controller, sessionId);
     }
 };
 
-const buildChatRequestPayload = (userMessage) => ({
+const buildChatRequestPayload = (userMessage, sessionId) => ({
     clientId: currentModel.value,
     userMessage,
     temperature: settingsStore.temperature ?? undefined,
     presencePenalty: settingsStore.presencePenalty ?? undefined,
     maxCompletionTokens: settingsStore.maxCompletionTokens ?? undefined,
     mcpIdList: selectedMcpIds.value.length ? [...selectedMcpIds.value] : [],
-    sessionId: currentChatSessionId.value,
+    sessionId,
     ragTag: currentRagTag.value
 });
 
-const runComplete = async (content, controller) => {
+const runComplete = async (content, controller, sessionId) => {
     const assistantMessage = chatStore.addAssistantMessage({ pending: true, content: '', think: '' });
     try {
         const response = await fetchComplete({
-            ...buildChatRequestPayload(content),
+            ...buildChatRequestPayload(content, sessionId),
             signal: controller.signal
         });
         const text = pickContentFromResult(response);
@@ -659,7 +681,7 @@ const runComplete = async (content, controller) => {
     }
 };
 
-const runStream = async (content, controller) => {
+const runStream = async (content, controller, sessionId) => {
     const accumulator = createStreamAccumulator();
     const assistantMessage = chatStore.addAssistantMessage({ pending: true, content: '', think: '' });
     let closed = false;
@@ -707,7 +729,7 @@ const runStream = async (content, controller) => {
 
     try {
         await fetchStream({
-            ...buildChatRequestPayload(content),
+            ...buildChatRequestPayload(content, sessionId),
             signal: controller.signal,
             onData: (payload) => {
                 const { token, answer, direct, finishReason } = extractStreamParts(payload);
