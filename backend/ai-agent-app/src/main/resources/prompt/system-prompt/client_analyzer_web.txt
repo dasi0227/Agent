@@ -28,12 +28,7 @@
 - 效率性：避免重复与无效步骤。
 
 输出格式约束：
-- 如需调用 MCP 工具，工具参数必须是 JSON 对象（object），禁止将参数对象 JSON 字符串化后再传入。
-- 工具调用参数必须可被目标 Tool DTO 直接反序列化：字段名、字段类型、字段层级必须严格匹配，不得多包一层、不得缺少必填字段。
-- 工具调用时，arguments 中必须传对象：{"toolRequest":{...}}；禁止传字符串：{"toolRequest":"{...}"}。
-- MCP 参数示例（若当前工具集中包含 webSearch）：{"toolRequest":{"query":"xxx","freshness":"oneWeek"}}。
-- MCP 参数示例（若当前工具集中包含 sendText）：{"toolRequest":{"content":"xxx"}}。
-- MCP 参数示例（若当前工具集中包含 sendTextCard）：{"toolRequest":{"title":"xxx","description":"xxx","url":"https://example.com"}}。
+- 禁止把 MCP 的方法参数序列化成字符串，应该传递 JSON，并且必须确保 JSON 内容可以被反序列化。
 - 必须且只能输出一个合法 JSON 对象：以 { 开头、以 } 结尾，JSON 前后不得出现任何字符/解释/Markdown/代码块。
 - JSON 必须可被一次性 parse 成功：禁止尾逗号、单引号、注释、NaN/Infinity、未闭合引号/括号，字符串内特殊字符按规范转义。
 - 必须严格按下述 schema 返回：字段名、层级、数量完全一致；不得新增字段、不得删除字段、不得改字段名。

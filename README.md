@@ -136,7 +136,8 @@ Dasi Agent 是一个集成了 AI 对话、多角色 Agent 工作流、RAG 知识
 
 <img src="./assets/IMG_0094.PNG" alt="IMG_0094" style="zoom: 33%;" />
 
-### AGENT 对话（
+### AGENT 对话（BOCHA + WECOM）
 
+![image-20260213034054539](./assets/image-20260213034054539.png)
 
-
+<img src="./assets/IMG_0095.PNG" alt="IMG_0095" style="zoom: 33%;" />

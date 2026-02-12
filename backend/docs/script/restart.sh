@@ -25,10 +25,5 @@ cd ~/Agent/backend
 mvn -DskipTests clean package
 sync && sleep 5
 
-JAR="$(ls -1 ai-agent-app/target/*.jar | grep -v '\.original$' | head -n 1)"
-if [[ -z "${JAR:-}" ]]; then
-  echo "No runnable jar found in ai-agent-app/target" >&2
-  exit 1
-fi
-
-exec java -jar "$JAR" --server.address=127.0.0.1 --server.port=8066
+cd ~/Agent/backend
+java -jar ai-agent-app/target/*.jar --server.address=127.0.0.1 --server.port=8066
