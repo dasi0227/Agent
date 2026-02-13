@@ -1,0 +1,28 @@
+server:
+  port: 9002
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+
+spring:
+  application:
+    name: mcp-server-wecom
+
+  ai:
+    mcp:
+      server:
+        name: mcp-server-wecom
+        version: 1.0.0
+
+logging:
+  level:
+    root: info
+  config: classpath:logback-spring.xml
+
+wecom:
+  base-url: https://qyapi.weixin.qq.com/
+  agentid: ${WECOM_AGENT_ID}
+  corpid: ${WECOM_CORP_ID}
+  corpsecret: ${WECOM_CORP_SECRET}

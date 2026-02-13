@@ -1,0 +1,48 @@
+server:
+  port: 9004
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+
+logging:
+  level:
+    root: info
+    org.springframework.ai.mcp: debug
+    io.modelcontextprotocol: debug
+  config: classpath:logback-spring.xml
+
+spring:
+  application:
+    name: mcp-server-email
+
+  ai:
+    mcp:
+      server:
+        name: mcp-server-email
+        version: 1.0.0
+
+  mail:
+    host: ${EMAIL_SMTP_HOST}
+    port: ${EMAIL_SMTP_PORT}
+    username: ${EMAIL_SMTP_USERNAME}
+    password: ${EMAIL_SMTP_PASSWORD}
+    protocol: smtp
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: false
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 15000
+          timeout: 15000
+          writetimeout: 15000
+
+email:
+  from_address: ${EMAIL_FROM_ADDRESS}
+  from_name: ${EMAIL_FROM_NAME}

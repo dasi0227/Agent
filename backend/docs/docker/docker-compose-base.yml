@@ -1,0 +1,106 @@
+services:
+  # ===================== PostgreSQL =====================
+  pgvector:
+    image: pgvector/pgvector:0.7.4-pg16
+    container_name: pgvector
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ai-agent
+      POSTGRES_USER: ${USERNAME}
+      POSTGRES_PASSWORD: ${PASSWORD}
+      TZ: ${TZ}
+    volumes:
+      - pgvector_data:/var/lib/postgresql/data
+      - ./pgvector/table.sql:/docker-entrypoint-initdb.d/table.sql:ro
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -h localhost -U ${USERNAME} -d ai-agent" ]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    networks:
+      - ai-agent
+
+  # ===================== MySQL =====================
+  mysql:
+    image: mysql:8.0.40
+    container_name: mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_USER: ${USERNAME}
+      MYSQL_PASSWORD: ${PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${PASSWORD}
+      TZ: ${TZ}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -p${PASSWORD} --silent"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    networks:
+      - ai-agent
+
+  # ===================== Redis =====================
+  redis:
+    image: redis:8.0.1
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command:
+      - redis-server
+      - /usr/local/etc/redis/redis.conf
+      - --appendonly
+      - "yes"
+      - --requirepass
+      - ${PASSWORD}
+    volumes:
+      - redis_data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "${PASSWORD}", "ping" ]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    networks:
+      - ai-agent
+
+  # ===================== One-API =====================
+  one-api:
+    image: justsong/one-api:v0.6.11-preview.7
+    container_name: one-api
+    platform: linux/amd64
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      SQL_DSN: ${USERNAME}:${PASSWORD}@tcp(mysql:3306)/oneapi?charset=utf8mb4&parseTime=True&loc=Local
+      TZ: ${TZ}
+    volumes:
+      - oneapi_data:/data
+    depends_on:
+      - mysql
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/status || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - ai-agent
+
+volumes:
+  pgvector_data:
+  mysql_data:
+  redis_data:
+  oneapi_data:
+
+networks:
+  ai-agent:
+    external: true

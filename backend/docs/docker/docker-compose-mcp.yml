@@ -1,0 +1,72 @@
+services:
+  mcp-server-csdn:
+    image: dasi0227/mcp-server-csdn:0.1.0
+    container_name: mcp-server-csdn
+    restart: unless-stopped
+    ports:
+      - "9001:9001"
+    environment:
+      TZ: ${TZ}
+      CSDN_COOKIE: ${CSDN_COOKIE}
+      CSDN_COVER_URL: ${CSDN_COVER_URL}
+    networks:
+      - ai-agent
+
+  mcp-server-wecom:
+    image: dasi0227/mcp-server-wecom:0.1.0
+    container_name: mcp-server-wecom
+    restart: unless-stopped
+    ports:
+      - "9002:9002"
+    environment:
+      TZ: ${TZ}
+      WECOM_AGENT_ID: ${WECOM_AGENT_ID}
+      WECOM_CORP_ID: ${WECOM_CORP_ID}
+      WECOM_CORP_SECRET: ${WECOM_CORP_SECRET}
+    networks:
+      - ai-agent
+
+  mcp-server-amap:
+    image: dasi0227/mcp-server-amap:0.1.0
+    container_name: mcp-server-amap
+    restart: unless-stopped
+    ports:
+      - "9003:9003"
+    environment:
+      TZ: ${TZ}
+      AMAP_API_KEY: ${AMAP_API_KEY}
+    networks:
+      - ai-agent
+
+  mcp-server-email:
+    image: dasi0227/mcp-server-email:0.1.0
+    container_name: mcp-server-email
+    restart: unless-stopped
+    ports:
+      - "9004:9004"
+    environment:
+      EMAIL_SMTP_HOST: ${EMAIL_SMTP_HOST}
+      EMAIL_SMTP_PORT: ${EMAIL_SMTP_PORT}
+      EMAIL_SMTP_USERNAME: ${EMAIL_SMTP_USERNAME}
+      EMAIL_SMTP_PASSWORD: ${EMAIL_SMTP_PASSWORD}
+      EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME}
+      TZ: ${TZ}
+    networks:
+      - ai-agent
+
+  mcp-server-bocha:
+    image: dasi0227/mcp-server-bocha:0.1.0
+    container_name: mcp-server-bocha
+    restart: unless-stopped
+    ports:
+      - "9005:9005"
+    environment:
+      BOCHA_API_KEY: ${BOCHA_API_KEY}
+      TZ: ${TZ}
+    networks:
+      - ai-agent
+
+networks:
+  ai-agent:
+    external: true

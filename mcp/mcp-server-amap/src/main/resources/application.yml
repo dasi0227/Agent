@@ -1,0 +1,26 @@
+server:
+  port: 9003
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+
+spring:
+  application:
+    name: mcp-server-amap
+
+  ai:
+    mcp:
+      server:
+        name: mcp-server-amap
+        version: 1.0.0
+
+logging:
+  level:
+    root: info
+  config: classpath:logback-spring.xml
+
+amap:
+  base-url: "https://restapi.amap.com/v3/"
+  api-key: ${AMAP_API_KEY}

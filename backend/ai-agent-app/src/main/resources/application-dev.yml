@@ -1,0 +1,93 @@
+# 端口
+server:
+  address: 127.0.0.1
+  port: 8066
+
+# 线程池
+thread:
+  pool:
+    executor:
+      core-pool-size: 20
+      max-pool-size: 50
+      keep-alive-time: 5000
+      block-queue-size: 5000
+      policy: CallerRunsPolicy
+
+# 日志
+logging:
+  level:
+    root: info
+  config: classpath:logback-spring.xml
+
+# Spring
+spring:
+  main:
+    banner-mode: off
+    log-startup-info: false
+  ai:
+    openai:
+      base-url: ${OPENAI_BASE_URL}
+      api-key: ${OPENAI_API_KEY}
+  data:
+    redis:
+      database: ${REDIS_DATABASE}
+      password: ${REDIS_PASSWORD}
+      host: localhost
+      port: 6379
+
+# 数据库
+datasource:
+  hikari:
+    minimum-idle: 15
+    maximum-pool-size: 25
+    idle-timeout: 180000
+    max-lifetime: 1800000
+    connection-timeout: 30000
+    connection-test-query: SELECT 1
+    initialization-fail-timeout: 1
+
+  mysql:
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    jdbc-url: jdbc:mysql://127.0.0.1:3306/${MYSQL_DB_NAME}?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&useSSL=false
+    pool-name: MYSQL_HIKARI
+
+  postgresql:
+    username: ${POSTGRESQL_USERNAME}
+    password: ${POSTGRESQL_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    jdbc-url: jdbc:postgresql://127.0.0.1:5432/${POSTGRESQL_DB_NAME}
+    pool-name: POSTGRESQL_HIKARI
+
+# OpenAi
+openai:
+  base-url: ${OPENAI_BASE_URL}
+  api-key: ${OPENAI_API_KEY}
+  embedding:
+    model: ${EMBEDDING_MODEL}
+    dimensions: ${EMBEDDING_DIMENSIONS}
+    schema-name: ${EMBEDDING_SCHEMA_NAME}
+    table-name: ${EMBEDDING_TABLE_NAME}
+    encoding-format: float
+
+# Armory
+armory:
+  enable: false
+  agent-id-list:
+    - agent_weather
+  client-id-list:
+    - client_chat_glm
+    - client_chat_deepseek
+    - client_chat_qwen
+    - client_chat_doubao
+
+# Schedule
+schedule:
+  refresh-cron: "0 */1 * * * ?"
+
+# JWT
+jwt:
+  secret: dasi-jwt-secret
+  expire-seconds: 72000000000
+  issuer: ai-agent

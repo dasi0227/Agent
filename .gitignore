@@ -1,97 +1,59 @@
-# ==================== OS / Editor ====================
-.DS_Store
-.DS_Store?
+# ==================== OS  ====================
 ._*
-.Spotlight-V100
+.DS_Store
 .Trashes
+.Spotlight-V100
 Thumbs.db
 
+# ==================== Editor ====================
 .idea/
 .vscode/
+.history/
+.tmp/
+tmp/
+*~
 *.iml
 *.ipr
 *.iws
 *.swp
 *.swo
-*~
 
-# ==================== Logs / Runtime ====================
-log/
-logs/
-**/log/
-**/logs/
+# ==================== Logs ====================
 *.log
 *.pid
 *.pid.lock
 
-# ==================== Java / Maven / Gradle ====================
-**/target/
-**/out/
-**/build/
+# ==================== Backend ====================
+target/
+out/
+build/
+.settings/
+.metadata/
+.recommenders/
+.mvn/
 *.class
-.mvn/wrapper/maven-wrapper.jar
-**/.classpath
-**/.project
-**/.settings/
-**/.factorypath
-**/.metadata/
-**/.recommenders/
-.nb-gradle/
-nbproject/
 
-# ==================== Spring Boot / Config ====================
-**/application-*.yml
-**/application-*.yaml
-**/application-*.properties
-!**/application.yml
-!**/application-dev.yml
-!**/application.yaml
-!**/application.properties
+# ==================== Frontend ====================
+node_modules/
+dist/
+.vite/
+.cache/
 
-**/*.jks
-**/*.p12
-**/*.pfx
-**/*.pem
-**/*.key
-**/*keystore*
-**/*secret*
-
-**/.env
-**/.env.*
-!**/.env.example
-!frontend/**/.env.*
-
-# ==================== Frontend (Node / Vite) ====================
-**/node_modules/
-**/dist/
-**/.vite/
-**/.cache/
-**/.turbo/
-**/.parcel-cache/
-**/.eslintcache
-
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-# ==================== Test / Coverage ====================
-**/coverage/
-**/.nyc_output/
-
-# ==================== Docker / Local data ====================
-**/.docker/
-**/docker-data/
-**/*.db
-**/*.sqlite
-**/*.sqlite3
-
-# ==================== Misc ====================
-**/.history/
-**/.tmp/
-**/tmp/
-**/.DS_Store
+# ==================== Docker ====================
+.docker/
+*.db
+*.sqlite
+*.sqlite3
 
 # ==================== Personal ====================
 AGENTS.md
+PROMPT.md
+application-*.yml
+!application-dev.yml
+.env
+.env.*
+!.env.example
+*.sql
+*.sh
+mapper/
+prompt/

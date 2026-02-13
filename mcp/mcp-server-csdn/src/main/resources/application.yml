@@ -1,0 +1,30 @@
+server:
+  port: 9001
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+
+
+spring:
+  application:
+    name: mcp-server-csdn
+
+  ai:
+    mcp:
+      server:
+        name: mcp-server-csdn
+        version: 1.0.0
+
+logging:
+  level:
+    root: info
+  config: classpath:logback-spring.xml
+
+csdn:
+  base-url: https://bizapi.csdn.net/
+  categories: AI文章放送
+  tags: java
+  cookie: ${CSDN_COOKIE}
+  cover-url: ${CSDN_COVER_URL}

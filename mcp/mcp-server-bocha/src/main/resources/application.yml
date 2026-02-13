@@ -1,0 +1,28 @@
+server:
+  port: 9005
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+
+logging:
+  level:
+    root: info
+    org.springframework.ai.mcp: debug
+    io.modelcontextprotocol: debug
+  config: classpath:logback-spring.xml
+
+spring:
+  application:
+    name: mcp-server-bocha
+
+  ai:
+    mcp:
+      server:
+        name: mcp-server-bocha
+        version: 1.0.0
+
+bocha:
+  base-url: https://api.bocha.cn/
+  api-key: ${BOCHA_API_KEY}
