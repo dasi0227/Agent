@@ -54,7 +54,7 @@ Dasi Agent 是一个集成了 AI 对话、多角色 Agent 工作流、RAG 知识
 - 对话前增强：通过 `AugmentService` 注入 RAG 检索上下文与 MCP 工具回调。
 - 会话记忆：基于 `sessionId` 透传到 `ChatMemory Advisor`，实现多轮上下文。
 - 参数可控：`temperature`、`presencePenalty`、`maxCompletionTokens`、MCP 列表、RAG 标签均可由前端传入。
-- 数据持久化：用户消息与助手消息分别写入会话消息表，便于追溯和后台审计。
+- 数据持久化：Controller 侧统一做用户消息兜底持久化，助手消息按有效输出持久化，便于追溯和后台审计。
 
 ### AI 工作
 
@@ -87,14 +87,14 @@ Dasi Agent 是一个集成了 AI 对话、多角色 Agent 工作流、RAG 知识
 - `mcp-server-wecom`（默认端口 `9002`）：工具 `sendText`、`sendTextCard`，发送企业微信应用消息；关键入参 `content` 或 `title/description/url`。
 - `mcp-server-amap`（默认端口 `9003`）：工具 `checkWeather`，根据地址查询天气；关键入参 `address`
 - `mcp-server-email`（默认端口 `9004`）：工具 `sendEmail`，发送邮件通知；关键入参 `to`、`subject`、`content`、`html`。
-- `mcp-server-email`（默认端口 `9005`）：工具 `webSearch`，联网搜索；关键入参 `query`、`freshness`。
+- `mcp-server-bocha`（默认端口 `9005`）：工具 `webSearch`，联网搜索；关键入参 `query`、`freshness`。
 
 
 ### ADMIN 管理后台
 
 - 支持管理员在线对核心配置做 CRUD 与状态切换（启用/禁用）。
 - 通用管理页面：`api`、`model`、`mcp`、`advisor`、`prompt`、`client`、`agent`、`task`、`user`。
-- 特殊页面 `Dashboard`：总量统计、消息趋势（7d/30d）、chat/work 使用分布、Top 使用排行。
+- 特殊页面 `Dashboard`：总量统计、消息趋势（7d/30d）、chat/work 使用分布、Top 使用排行；支持自动刷新，同时支持右上角手动刷新按钮。
 - 特殊页面 `Config`：按 `clientId` 分组管理配置项（`prompt/advisor/mcp` 等）。
 - 特殊页面 `Flow`：按 Agent 类型（loop/step）维护角色链路与顺序。
 - 特殊页面 `Canvas`：基于 `vue-flow` 的可视化流程画布，展示 Agent 与 Client 的连接关系。
