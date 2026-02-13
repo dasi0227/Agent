@@ -14,7 +14,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
       - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
-      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+#      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     depends_on:
       - pgvector
     healthcheck:

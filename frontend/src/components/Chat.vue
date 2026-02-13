@@ -1,5 +1,6 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { marked } from 'marked';
 import hljs from 'highlight.js';
 import DOMPurify from 'dompurify';
@@ -20,11 +21,13 @@ import {
 } from '../request/api';
 import { normalizeError } from '../request/request';
 import { applyStreamToken, createStreamAccumulator, parseThinkText } from '../utils/StringUtil';
-import { createTypewriter, DEFAULT_TYPEWRITER_SEGMENTS } from '../utils/TypeWriter';
-import { useChatStore, useSettingsStore } from '../router/pinia';
+import { useAgentStore, useChatStore, useSettingsStore, useWelcomeLaunchStore } from '../router/pinia';
 
+const router = useRouter();
 const chatStore = useChatStore();
+const agentStore = useAgentStore();
 const settingsStore = useSettingsStore();
+const welcomeLaunchStore = useWelcomeLaunchStore();
 
 const models = ref([]);
 const mcpTools = ref([]);
@@ -50,12 +53,7 @@ const copyTimer = ref(null);
 const messageLoading = ref(false);
 const sendError = ref('');
 const skipNextLoadChatId = ref(null);
-
-const typewriterState = reactive({
-    lines: [],
-    lineIndex: 0,
-    playing: false
-});
+let autoRefreshTimer = null;
 
 const uploadForm = reactive({
     mode: 'file',
@@ -128,6 +126,9 @@ const dropInvalidChatSession = (chatId = chatStore.currentChatId) => {
     if (chatId) {
         chatStore.removeChat(chatId);
     }
+    if (chatStore.chats.length === 0 && agentStore.sessions.length === 0) {
+        router.replace('/welcome');
+    }
     sendError.value = SESSION_INVALID_HINT;
 };
 
@@ -173,18 +174,6 @@ const settingsErrors = reactive({
     temperature: '',
     presencePenalty: '',
     maxCompletionTokens: ''
-});
-
-const typewriterController = createTypewriter({
-    segments: DEFAULT_TYPEWRITER_SEGMENTS,
-    charDelay: 45,
-    segmentPause: 3000,
-    loop: true,
-    onUpdate: ({ lines, lineIndex, playing }) => {
-        typewriterState.lines = [...lines];
-        typewriterState.lineIndex = lineIndex;
-        typewriterState.playing = playing;
-    }
 });
 
 const renderer = new marked.Renderer();
@@ -245,7 +234,6 @@ const currentRagTag = computed({
 const messages = computed(() => chatStore.currentMessages);
 const currentChatSessionId = computed(() => chatStore.currentChat?.sessionId || '');
 const sending = computed(() => chatStore.sending);
-const hasMessages = computed(() => messages.value.length > 0);
 const userMessageCount = computed(() => messages.value.filter((item) => item.role === 'user').length);
 
 const handleScroll = () => {
@@ -290,15 +278,15 @@ const loadChatMessages = async (sessionId, chatId = chatStore.currentChatId) => 
     }
 };
 
-const ensureChatSession = async ({ skipInitialLoad = false } = {}) => {
-    if (chatStore.currentChat) {
+const ensureChatSession = async ({ skipInitialLoad = false, forceNew = false, sessionTitle = '新会话' } = {}) => {
+    if (!forceNew && chatStore.currentChat) {
         if (!chatStore.currentChatId && chatStore.currentChat?.id) {
             chatStore.setCurrentChatId(chatStore.currentChat.id);
         }
         return chatStore.currentChat;
     }
     try {
-        const resp = await insertSession({ sessionTitle: '新会话', sessionType: 'chat' });
+        const resp = await insertSession({ sessionTitle: sessionTitle || '新会话', sessionType: 'chat' });
         const created = mapSession(pickData(resp, '创建会话失败'));
         if (created) {
             let resolvedChat = created;
@@ -364,30 +352,6 @@ watch(
             await loadChatMessages(chat.sessionId, chatId);
         }
         nextTick(() => scrollToBottom(false));
-    },
-    { immediate: true }
-);
-
-const startTypewriter = () => {
-    if (hasMessages.value) return;
-    typewriterController.start();
-};
-
-const stopTypewriter = () => {
-    typewriterController.stop();
-    typewriterState.lines = [];
-    typewriterState.lineIndex = 0;
-    typewriterState.playing = false;
-};
-
-watch(
-    hasMessages,
-    (val) => {
-        if (val) {
-            stopTypewriter();
-        } else {
-            startTypewriter();
-        }
     },
     { immediate: true }
 );
@@ -517,15 +481,69 @@ const fetchMcpTools = async () => {
     }
 };
 
+const consumeWelcomeLaunchTask = async () => {
+    const task = welcomeLaunchStore.takeTask('chat');
+    if (!task?.prompt) return;
+
+    if (!models.value.length) {
+        await fetchModels();
+    }
+    if (task.clientId) {
+        currentModel.value = task.clientId;
+        try {
+            await dispatchArmory({ armoryType: 'chat', armoryId: task.clientId });
+        } catch (error) {
+            console.warn('绑定 Chat armory 失败', error);
+        }
+    } else if (!currentModel.value && models.value.length > 0) {
+        currentModel.value = models.value[0].value;
+    }
+
+    if (Array.isArray(task.mcpIdList) && task.mcpIdList.length) {
+        if (!mcpTools.value.length) {
+            await fetchMcpTools();
+        }
+        const validSet = new Set(mcpTools.value.map((item) => item.value));
+        selectedMcpIds.value = task.mcpIdList.filter((id) => validSet.has(id));
+    } else {
+        selectedMcpIds.value = [];
+    }
+
+    if (typeof task.ragTag === 'string') {
+        currentRagTag.value = task.ragTag;
+    } else {
+        currentRagTag.value = '';
+    }
+
+    if (!currentModel.value) {
+        sendError.value = '暂无可用 CLIENT，请先在后台配置 client';
+        return;
+    }
+
+    await sendMessage({
+        content: task.prompt,
+        forceNew: true,
+        sessionTitle: task.sessionTitle || '新会话',
+        clientId: task.clientId || currentModel.value
+    });
+};
+
 onMounted(() => {
     scrollToBottom(false);
     attachListeners();
-    fetchTags();
-    fetchModels();
-    fetchMcpTools();
-    if (chatStore.currentChat) {
-        ensureChatSessionValid(chatStore.currentChat);
-    }
+    Promise.all([fetchTags(), fetchModels(), fetchMcpTools()]).then(async () => {
+        if (chatStore.currentChat) {
+            await ensureChatSessionValid(chatStore.currentChat);
+        }
+        await consumeWelcomeLaunchTask();
+    });
+    autoRefreshTimer = window.setInterval(async () => {
+        if (sending.value || messageLoading.value) return;
+        const session = chatStore.currentChat;
+        const sessionId = session?.sessionId || '';
+        if (!sessionId) return;
+        await loadChatMessages(sessionId, session?.id);
+    }, 5000);
 });
 
 watch(currentModel, () => {
@@ -535,7 +553,10 @@ watch(currentModel, () => {
 onBeforeUnmount(() => {
     chatStore.stopCurrentRequest();
     detachListeners();
-    stopTypewriter();
+    if (autoRefreshTimer) {
+        window.clearInterval(autoRefreshTimer);
+        autoRefreshTimer = null;
+    }
     if (copyTimer.value) {
         clearTimeout(copyTimer.value);
     }
@@ -688,15 +709,25 @@ const normalizeMarkdownSpacing = (text) => {
         .join('```');
 };
 
-const sendMessage = async () => {
-    const content = inputValue.value.trim();
-    if (!content || sending.value || !currentModel.value) return;
+const sendMessage = async (options = {}) => {
+    const content = (options.content ?? inputValue.value).trim();
+    const requestedClientId = (options.clientId || '').trim();
+    const resolvedClientId = requestedClientId || currentModel.value;
+    if (!content || sending.value || !resolvedClientId) return;
     if (!validateSettingsBeforeSend()) return;
     sendError.value = '';
-    const chat = await ensureChatSession({ skipInitialLoad: !chatStore.currentChat });
+    const forceNew = Boolean(options.forceNew);
+    const chat = await ensureChatSession({
+        skipInitialLoad: forceNew || !chatStore.currentChat,
+        forceNew,
+        sessionTitle: options.sessionTitle || '新会话'
+    });
     if (!chat) return;
     const validChat = await ensureChatSessionValid(chat);
     if (!validChat) return;
+    if (validChat?.id) {
+        chatStore.setChatClient(validChat.id, resolvedClientId);
+    }
     if (userMessageCount.value >= 20) {
         sendError.value = '当前会话已达到 20 条用户消息上限，请新建会话';
         return;
@@ -708,23 +739,24 @@ const sendMessage = async () => {
     }
     const mode = settingsStore.type || 'complete';
     chatStore.stopCurrentRequest();
-    stopTypewriter();
     chatStore.setSending(true);
     const controller = new AbortController();
     chatStore.setAbortController(controller);
     chatStore.addUserMessage(content);
     renameChatIfNeeded(validChat, content);
-    inputValue.value = '';
+    if (!Object.prototype.hasOwnProperty.call(options, 'content')) {
+        inputValue.value = '';
+    }
     scrollToBottom(true);
     if (mode === 'stream') {
-        await runStream(content, controller, sessionId);
+        await runStream(content, controller, sessionId, resolvedClientId);
     } else {
-        await runComplete(content, controller, sessionId);
+        await runComplete(content, controller, sessionId, resolvedClientId);
     }
 };
 
-const buildChatRequestPayload = (userMessage, sessionId) => ({
-    clientId: currentModel.value,
+const buildChatRequestPayload = (userMessage, sessionId, clientId) => ({
+    clientId: clientId || currentModel.value,
     userMessage,
     temperature: settingsStore.temperature ?? undefined,
     presencePenalty: settingsStore.presencePenalty ?? undefined,
@@ -734,11 +766,11 @@ const buildChatRequestPayload = (userMessage, sessionId) => ({
     ragTag: currentRagTag.value
 });
 
-const runComplete = async (content, controller, sessionId) => {
+const runComplete = async (content, controller, sessionId, clientId) => {
     const assistantMessage = chatStore.addAssistantMessage({ pending: true, content: '', think: '' });
     try {
         const response = await fetchComplete({
-            ...buildChatRequestPayload(content, sessionId),
+            ...buildChatRequestPayload(content, sessionId, clientId),
             signal: controller.signal
         });
         const text = pickContentFromResult(response);
@@ -766,7 +798,7 @@ const runComplete = async (content, controller, sessionId) => {
     }
 };
 
-const runStream = async (content, controller, sessionId) => {
+const runStream = async (content, controller, sessionId, clientId) => {
     const accumulator = createStreamAccumulator();
     const assistantMessage = chatStore.addAssistantMessage({ pending: true, content: '', think: '' });
     let closed = false;
@@ -814,7 +846,7 @@ const runStream = async (content, controller, sessionId) => {
 
     try {
         await fetchStream({
-            ...buildChatRequestPayload(content, sessionId),
+            ...buildChatRequestPayload(content, sessionId, clientId),
             signal: controller.signal,
             onData: (payload) => {
                 const { token, answer, direct, finishReason } = extractStreamParts(payload);
@@ -1303,20 +1335,13 @@ const handleUpload = async () => {
                 @scroll="handleScroll"
             >
                 <div class="mx-auto w-full max-w-[900px] pl-[24px] pr-[calc(24px+var(--scrollbar-w))]">
-                    <div class="flex w-full flex-col gap-[14px]">
+                    <div class="flex min-h-full w-full flex-col gap-[14px]">
                         <div v-if="messageLoading" class="text-[12px] text-[var(--text-secondary)]">加载会话消息中...</div>
-                        <div v-if="messages.length === 0" class="flex flex-col items-start gap-[12px] py-[60px] text-[var(--text-primary)]">
-                            <div
-                                v-for="(line, idx) in typewriterState.lines"
-                                :key="idx"
-                                class="text-[24px] font-extrabold leading-[1.4] tracking-[0.3px] text-transparent opacity-[0.94] bg-clip-text"
-                                :style="{ backgroundImage: 'var(--typewriter-gradient)' }"
-                            >
-                                {{ line }}
-                                <span v-if="typewriterState.playing && idx === typewriterState.lineIndex" class="text-[var(--accent-color)] animate-caret">
-                                    ▍
-                                </span>
-                            </div>
+                        <div
+                            v-if="!messageLoading && messages.length === 0"
+                            class="flex flex-1 items-center justify-center py-[60px] text-[15px] text-[var(--text-secondary)]"
+                        >
+                            当前会话暂无消息
                         </div>
                         <div
                             v-for="message in messages"

@@ -40,6 +40,7 @@ Dasi Agent 是一个集成了 AI 对话、多角色 Agent 工作流、RAG 知识
 └── mcp                         # MCP 自建服务集合
     ├── docker-build.sh         # MCP 镜像构建脚本
     ├── mcp-server-amap         # 高德地图 MCP 服务
+    ├── mcp-server-bocha        # 博查搜索 MCP 服务
     ├── mcp-server-csdn         # CSDN MCP 服务
     ├── mcp-server-email        # 邮件发送 MCP 服务
     └── mcp-server-wecom        # 企业微信 MCP 服务
@@ -86,6 +87,7 @@ Dasi Agent 是一个集成了 AI 对话、多角色 Agent 工作流、RAG 知识
 - `mcp-server-wecom`（默认端口 `9002`）：工具 `sendText`、`sendTextCard`，发送企业微信应用消息；关键入参 `content` 或 `title/description/url`。
 - `mcp-server-amap`（默认端口 `9003`）：工具 `checkWeather`，根据地址查询天气；关键入参 `address`
 - `mcp-server-email`（默认端口 `9004`）：工具 `sendEmail`，发送邮件通知；关键入参 `to`、`subject`、`content`、`html`。
+- `mcp-server-email`（默认端口 `9005`）：工具 `webSearch`，联网搜索；关键入参 `query`、`freshness`。
 
 
 ### ADMIN 管理后台
@@ -104,31 +106,37 @@ Dasi Agent 是一个集成了 AI 对话、多角色 Agent 工作流、RAG 知识
 
 ### 首页
 
+![image-20260213114200034](./assets/image-20260213114200034.png)
 
+![image-20260213120205084](./assets/image-20260213120205084.png)
 
-### 普通对话
+### Chat 对话
+
+#### 普通对话
 
 ![image-20260212165822929](./assets/image-20260212165822929.png)
 
-### RAG 对话
+#### RAG 对话
 
 ![image-20260212170152042](./assets/image-20260212170152042.png)
 
 ![image-20260212182609418](./assets/image-20260212182609418.png)
 
-### MCP 对话
+#### MCP 对话
 
 ![image-20260212182749683](./assets/image-20260212182749683.png)
 
 ![image-20260212182922052](./assets/image-20260212182922052.png)
 
-### AGENT 对话（AMAP + EMAIL）
+### AGENT 对话
+
+#### AMAP + EMAIL
 
 ![image-20260212184929850](./assets/image-20260212184929850.png)
 
 <img src="./assets/IMG_0093.PNG" alt="IMG_0093" style="zoom: 33%;" />
 
-### AGENT 对话（CSDN + WECOM）
+#### CSDN + WECOM
 
 ![image-20260212185834327](./assets/image-20260212185834327.png)
 
@@ -136,8 +144,44 @@ Dasi Agent 是一个集成了 AI 对话、多角色 Agent 工作流、RAG 知识
 
 <img src="./assets/IMG_0094.PNG" alt="IMG_0094" style="zoom: 33%;" />
 
-### AGENT 对话（BOCHA + WECOM）
+#### BOCHA + WECOM
 
 ![image-20260213034054539](./assets/image-20260213034054539.png)
 
 <img src="./assets/IMG_0095.PNG" alt="IMG_0095" style="zoom: 33%;" />
+
+### ADMIN 后台
+
+#### 仪表盘
+
+![image-20260213124223004](./assets/image-20260213124223004.png)
+
+![image-20260213124401589](./assets/image-20260213124401589.png)
+
+#### 工作流管理
+
+![image-20260213124714732](./assets/image-20260213124714732.png)
+
+![image-20260213124759820](./assets/image-20260213124759820.png)
+
+![image-20260213124831899](./assets/image-20260213124831899.png)
+
+![image-20260213124728232](./assets/image-20260213124728232.png)
+
+#### 服务管理
+
+![image-20260213124443407](./assets/image-20260213124443407.png)
+
+![image-20260213124512567](./assets/image-20260213124512567.png)
+
+#### 模型管理
+
+![image-20260213124536607](./assets/image-20260213124536607.png)
+
+![image-20260213124547530](./assets/image-20260213124547530.png)
+
+#### 会话管理
+
+![image-20260213124640237](./assets/image-20260213124640237.png)
+
+![image-20260213124648168](./assets/image-20260213124648168.png)

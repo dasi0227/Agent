@@ -74,6 +74,7 @@ public class AiController implements IAiApi {
     public SseEmitter execute(@Valid @RequestBody AiWorkRequest aiWorkRequest) {
 
         String sessionId = aiWorkRequest.getSessionId();
+        String userMessage = aiWorkRequest.getUserMessage();
         SseEmitter sseEmitter = new SseEmitter(0L);
         String agentId = aiWorkRequest.getAiAgentId();
 
@@ -108,21 +109,20 @@ public class AiController implements IAiApi {
 
             ExecuteRequestEntity executeRequestEntity = ExecuteRequestEntity.builder()
                     .agentId(agentId)
-                    .userMessage(aiWorkRequest.getUserMessage())
+                    .userMessage(userMessage)
                     .sessionId(aiWorkRequest.getSessionId())
                     .maxRound(aiWorkRequest.getMaxRound())
                     .maxRetry(aiWorkRequest.getMaxRetry())
                     .build();
 
-            try {
-                messageService.saveWorkUserMessage(aiWorkRequest.getSessionId(), aiWorkRequest.getUserMessage());
-            } catch (Exception e) {
-                log.warn("【AI 执行】持久化消息失败：sessionId={}, error={}", sessionId, e.getMessage());
-            }
-
             dispatchService.dispatchExecuteStrategy(executeRequestEntity, sseEmitter);
             return sseEmitter;
         } finally {
+            try {
+                messageService.saveWorkUserMessage(sessionId, userMessage);
+            } catch (Exception e) {
+                log.warn("【AI 执行】持久化消息失败：sessionId={}, error={}", sessionId, e.getMessage());
+            }
             try {
                 statService.recordWorkUsage(agentId);
             } catch (Exception e) {
@@ -156,6 +156,7 @@ public class AiController implements IAiApi {
         Integer maxCompletionTokens = aiChatRequest.getMaxCompletionTokens();
 
         log.info("【AI 对话】完整对话开始：aiChatRequest={}", aiChatRequest);
+        String response = null;
 
         try {
             ChatClient chatClient = applicationContext.getBean(CLIENT.getBeanName(clientId), ChatClient.class);
@@ -167,7 +168,7 @@ public class AiController implements IAiApi {
                     .maxCompletionTokens(maxCompletionTokens)
                     .build();
 
-            String response = chatClient.prompt()
+            response = chatClient.prompt()
                     .advisors(a -> a
                             .param(CHAT_MEMORY_CONVERSATION_ID_KEY, sessionId)
                             .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, CHAT_MEMORY_RETRIEVE_SIZE_CHAT)
@@ -181,18 +182,23 @@ public class AiController implements IAiApi {
                 return CHAT_ERROR_RESPONSE;
             }
 
-            try {
-                messageService.saveChatUserMessage(sessionId, userMessage);
-                messageService.saveChatAssistantMessage(sessionId, response);
-            } catch (Exception e) {
-                log.warn("【AI 对话】持久化消息失败：sessionId={}, error={}", sessionId, e.getMessage());
-            }
-
             return response;
         } catch (Exception e) {
             log.error("【AI 对话】完整对话失败：clientId={}", clientId, e);
             return CHAT_ERROR_RESPONSE;
         } finally {
+            try {
+                messageService.saveChatUserMessage(sessionId, userMessage);
+            } catch (Exception e) {
+                log.warn("【AI 对话】持久化用户消息失败：sessionId={}, error={}", sessionId, e.getMessage());
+            }
+            if (StringUtils.hasText(response) && !CHAT_ERROR_RESPONSE.equals(response)) {
+                try {
+                    messageService.saveChatAssistantMessage(sessionId, response);
+                } catch (Exception e) {
+                    log.warn("【AI 对话】持久化助手消息失败：sessionId={}, error={}", sessionId, e.getMessage());
+                }
+            }
             try {
                 statService.recordChatUsage(clientId, mcpIdList);
             } catch (Exception e) {
@@ -227,13 +233,6 @@ public class AiController implements IAiApi {
         log.info("【AI 对话】流式对话开始：aiChatRequest={}", aiChatRequest);
 
         try {
-
-            try {
-                messageService.saveChatUserMessage(sessionId, userMessage);
-            } catch (Exception e) {
-                log.warn("【AI 对话】持久化消息失败：{}", e.getMessage());
-            }
-
             ChatClient chatClient = applicationContext.getBean(CLIENT.getBeanName(clientId), ChatClient.class);
             List<Message> messageList = augmentService.augmentRagMessage(userMessage, ragTag);
             SyncMcpToolCallbackProvider toolCallbackList = augmentService.augmentMcpTool(mcpIdList);
@@ -256,7 +255,7 @@ public class AiController implements IAiApi {
                     .content()
                     .doOnNext(answerBuffer::append)
                     .doFinally(signalType -> {
-                        if (answerBuffer.isEmpty() || !StringUtils.hasText(sessionId)) {
+                        if (answerBuffer.isEmpty()) {
                             return;
                         }
                         try {
@@ -271,6 +270,11 @@ public class AiController implements IAiApi {
             log.error("【AI 对话】流式对话失败：clientId={}", clientId, e);
             return Flux.just(CHAT_ERROR_RESPONSE);
         } finally {
+            try {
+                messageService.saveChatUserMessage(sessionId, userMessage);
+            } catch (Exception e) {
+                log.warn("【AI 对话】持久化用户消息失败：sessionId={}, error={}", sessionId, e.getMessage());
+            }
             try {
                 statService.recordChatUsage(clientId, mcpIdList);
             } catch (Exception e) {

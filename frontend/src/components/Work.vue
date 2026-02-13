@@ -1,5 +1,6 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { marked } from 'marked';
 import hljs from 'highlight.js';
 import DOMPurify from 'dompurify';
@@ -15,10 +16,13 @@ import {
 } from '../request/api';
 import { normalizeError } from '../request/request';
 import { formatMcpJson } from '../utils/StringUtil';
-import { useAgentSettingsStore, useAgentStore } from '../router/pinia';
+import { useAgentSettingsStore, useAgentStore, useChatStore, useWelcomeLaunchStore } from '../router/pinia';
 
+const router = useRouter();
 const agentStore = useAgentStore();
+const chatStore = useChatStore();
 const settingsStore = useAgentSettingsStore();
+const welcomeLaunchStore = useWelcomeLaunchStore();
 
 const agentOptions = ref([]);
 const pendingAgentId = ref('');
@@ -33,6 +37,8 @@ const isLeftAtBottom = ref(true);
 const isRightAtBottom = ref(true);
 const messageLoading = ref(false);
 const sendError = ref('');
+const skipNextLoadSessionId = ref(null);
+let autoRefreshTimer = null;
 
 const settingsForm = reactive({
     maxRetry: settingsStore.maxRetry,
@@ -96,6 +102,9 @@ const refreshWorkSessions = async () => {
 const dropInvalidWorkSession = (sessionId = agentStore.currentSessionId) => {
     if (sessionId) {
         agentStore.removeSession(sessionId);
+    }
+    if (agentStore.sessions.length === 0 && chatStore.chats.length === 0) {
+        router.replace('/welcome');
     }
     sendError.value = SESSION_INVALID_HINT;
 };
@@ -220,8 +229,10 @@ const fetchAgents = async () => {
         if (currentAgentId.value && !unique.some((item) => item.value === currentAgentId.value)) {
             currentAgentId.value = '';
         }
+        return unique;
     } catch (error) {
         console.warn('获取 AGENT 列表失败', error);
+        return [];
     }
 };
 
@@ -299,18 +310,21 @@ const loadWorkMessages = async (sessionId) => {
     }
 };
 
-const ensureWorkSession = async () => {
-    if (agentStore.currentSession) {
+const ensureWorkSession = async ({ forceNew = false, sessionTitle = '新会话' } = {}) => {
+    if (!forceNew && agentStore.currentSession) {
         if (!agentStore.currentSessionId && agentStore.currentSession?.id) {
             agentStore.setCurrentSessionId(agentStore.currentSession.id);
         }
         return agentStore.currentSession;
     }
     try {
-        const resp = await insertSession({ sessionTitle: '新会话', sessionType: 'work' });
+        const resp = await insertSession({ sessionTitle: sessionTitle || '新会话', sessionType: 'work' });
         const created = mapSession(pickData(resp, '创建会话失败'));
         if (created) {
             agentStore.upsertSession(created);
+            if (forceNew) {
+                skipNextLoadSessionId.value = created.id;
+            }
             agentStore.setCurrentSessionId(created.id);
             if (pendingAgentId.value) {
                 agentStore.setSessionAgent(created.id, pendingAgentId.value);
@@ -377,8 +391,16 @@ watch(
 
 watch(
     () => agentStore.currentSessionId,
-    async () => {
+    async (sessionId) => {
         sendError.value = '';
+        if (sessionId && skipNextLoadSessionId.value === sessionId) {
+            skipNextLoadSessionId.value = null;
+            nextTick(() => {
+                scrollLeftToBottom(false);
+                scrollRightToBottom(false);
+            });
+            return;
+        }
         const session = agentStore.currentSession;
         if (session?.sessionId) {
             await loadWorkMessages(session.sessionId);
@@ -451,19 +473,24 @@ const rangeStyle = (value) => {
     };
 };
 
-const buildExecutePayload = (userMessage, sessionId) => ({
-    aiAgentId: currentAgentId.value,
+const buildExecutePayload = (userMessage, sessionId, aiAgentId) => ({
+    aiAgentId: aiAgentId || currentAgentId.value,
     userMessage,
     sessionId,
     maxRound: settingsStore.maxRound,
     maxRetry: settingsStore.maxRetry
 });
 
-const sendMessage = async () => {
-    const content = inputValue.value.trim();
-    if (!content || sending.value || !currentAgentId.value) return;
+const sendMessage = async (options = {}) => {
+    const content = (options.content ?? inputValue.value).trim();
+    const requestedAgentId = (options.agentId || '').trim();
+    const resolvedAgentId = requestedAgentId || currentAgentId.value;
+    if (!content || sending.value || !resolvedAgentId) return;
     sendError.value = '';
-    const session = await ensureWorkSession();
+    const session = await ensureWorkSession({
+        forceNew: Boolean(options.forceNew),
+        sessionTitle: options.sessionTitle || '新会话'
+    });
     if (!session) return;
     const validSession = await ensureWorkSessionValid(session);
     if (!validSession) return;
@@ -471,18 +498,23 @@ const sendMessage = async () => {
         sendError.value = '当前会话已达到 3 条用户消息上限，请新建会话';
         return;
     }
+    if (validSession?.id) {
+        agentStore.setSessionAgent(validSession.id, resolvedAgentId);
+    }
     agentStore.stopCurrentRequest();
     agentStore.setSending(true);
     const controller = new AbortController();
     agentStore.setAbortController(controller);
     agentStore.addUserMessage(content);
     renameSessionIfNeeded(validSession, content);
-    inputValue.value = '';
+    if (!Object.prototype.hasOwnProperty.call(options, 'content')) {
+        inputValue.value = '';
+    }
     scrollRightToBottom(true);
-    await runExecute(content, controller, validSession.sessionId);
+    await runExecute(content, controller, validSession.sessionId, resolvedAgentId);
 };
 
-const runExecute = async (content, controller, sessionId) => {
+const runExecute = async (content, controller, sessionId, aiAgentId) => {
     const assistantMessage = agentStore.addAssistantMessage({ pending: true, content: '' });
     const events = [];
     let closed = false;
@@ -520,7 +552,7 @@ const runExecute = async (content, controller, sessionId) => {
 
     try {
         await executeAgentStream({
-            ...buildExecutePayload(content, sessionId),
+            ...buildExecutePayload(content, sessionId, aiAgentId),
             signal: controller.signal,
             onData: (payload) => {
                 if (typeof payload === 'string') {
@@ -578,20 +610,80 @@ const getCardContent = (card) => {
     return formatMcpJson(card.sectionContent);
 };
 
+const consumeWelcomeLaunchTask = async () => {
+    const task = welcomeLaunchStore.takeTask('work');
+    const prompt = (task?.prompt || '').trim();
+    if (!prompt) return;
+
+    if (!agentOptions.value.length) {
+        await fetchAgents();
+    }
+
+    if (task.agentId) {
+        pendingAgentId.value = task.agentId;
+        currentAgentId.value = task.agentId;
+        try {
+            await dispatchArmory({ armoryType: 'work', armoryId: task.agentId });
+        } catch (error) {
+            console.warn('绑定 Work armory 失败', error);
+        }
+    } else if (!currentAgentId.value && agentOptions.value.length > 0) {
+        currentAgentId.value = agentOptions.value[0].value;
+    }
+
+    if (!currentAgentId.value) {
+        sendError.value = '暂无可用 AGENT，请先在后台配置 agent';
+        return;
+    }
+
+    const session = await ensureWorkSession({
+        forceNew: true,
+        sessionTitle: task.sessionTitle || '新会话'
+    });
+    if (!session) return;
+    const validSession = await ensureWorkSessionValid(session);
+    if (!validSession) return;
+
+    const resolvedAgentId = (task.agentId || currentAgentId.value || '').trim();
+    if (!resolvedAgentId) {
+        sendError.value = '暂无可用 AGENT，请先在后台配置 agent';
+        return;
+    }
+    agentStore.setSessionAgent(validSession.id, resolvedAgentId);
+    currentAgentId.value = resolvedAgentId;
+
+    inputValue.value = prompt;
+    await nextTick();
+    await sendMessage({ agentId: resolvedAgentId });
+};
+
 onMounted(() => {
     document.addEventListener('click', handleClickOutside);
     window.addEventListener('keydown', handleEscClose);
     scrollLeftToBottom(false);
     scrollRightToBottom(false);
-    fetchAgents();
-    if (agentStore.currentSession) {
-        ensureWorkSessionValid(agentStore.currentSession);
-    }
+    fetchAgents().then(async () => {
+        if (agentStore.currentSession) {
+            await ensureWorkSessionValid(agentStore.currentSession);
+        }
+        await consumeWelcomeLaunchTask();
+    });
+    autoRefreshTimer = window.setInterval(async () => {
+        if (sending.value || messageLoading.value) return;
+        const session = agentStore.currentSession;
+        const sessionId = session?.sessionId || '';
+        if (!sessionId) return;
+        await loadWorkMessages(sessionId);
+    }, 5000);
 });
 
 onBeforeUnmount(() => {
     document.removeEventListener('click', handleClickOutside);
     window.removeEventListener('keydown', handleEscClose);
+    if (autoRefreshTimer) {
+        window.clearInterval(autoRefreshTimer);
+        autoRefreshTimer = null;
+    }
 });
 </script>
 

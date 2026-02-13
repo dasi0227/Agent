@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Chat from '../components/Chat.vue';
 import Work from '../components/Work.vue';
+import Welcome from '../components/Welcome.vue';
 import Auth from '../components/Auth.vue';
 import AuthAdmin from '../components/AuthAdmin.vue';
 import AdminTable from '../components/AdminTable.vue';
@@ -21,6 +22,11 @@ const routes = [
         path: '/chat',
         name: 'chat',
         component: Chat
+    },
+    {
+        path: '/welcome',
+        name: 'welcome',
+        component: Welcome
     },
     {
         path: '/work',
@@ -53,7 +59,12 @@ const routes = [
     },
     {
         path: '/admin',
-        redirect: '/admin/dashboard'
+        redirect: '/admin/dashboard',
+        meta: {
+            requiresAuth: true,
+            requiresAdmin: true,
+            hideSidebar: true
+        }
     },
     {
         path: '/admin/dashboard',

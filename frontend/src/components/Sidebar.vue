@@ -31,6 +31,7 @@ const agentSessions = computed(() => agentStore.sessions);
 const currentAgentSessionId = computed(() => agentStore.currentSessionId);
 const isAgentRoute = computed(() => route.path.startsWith('/work'));
 const isChatRoute = computed(() => route.path.startsWith('/chat'));
+const isWelcomeRoute = computed(() => route.path.startsWith('/welcome'));
 
 const showChatList = ref(true);
 const showAgentList = ref(true);
@@ -90,6 +91,21 @@ const handleNewSession = () => {
     sessionLimitError.value = '';
 };
 
+const redirectWelcomeIfNoSession = () => {
+    const isMainRoute =
+        route.path.startsWith('/chat') || route.path.startsWith('/work') || route.path.startsWith('/welcome');
+    if (!isMainRoute) return;
+    if (chatStore.chats.length > 0 || agentStore.sessions.length > 0) return;
+    if (route.path.startsWith('/welcome')) return;
+    router.replace('/welcome');
+};
+
+const goWelcome = () => {
+    if (!isWelcomeRoute.value) {
+        router.push('/welcome');
+    }
+};
+
 const loadSessions = async () => {
     sessionLoading.value = true;
     sessionError.value = '';
@@ -114,6 +130,7 @@ const loadSessions = async () => {
                 : agentList[0]?.id || null;
         chatStore.setCurrentChatId(nextChatId);
         agentStore.setCurrentSessionId(nextAgentId);
+        redirectWelcomeIfNoSession();
     } catch (error) {
         sessionError.value = normalizeError(error).message || '获取会话失败';
         chatStore.setChats([]);
@@ -265,6 +282,7 @@ const handleDelete = async () => {
         } else {
             chatStore.removeChat(deleteTarget.value.id);
         }
+        redirectWelcomeIfNoSession();
         sessionError.value = '';
     } catch (error) {
         sessionError.value = normalizeError(error).message || '删除会话失败';
@@ -402,17 +420,23 @@ const toggleTheme = () => {
         class="flex h-screen flex-col bg-[radial-gradient(120%_120%_at_0%_0%,#122544_0%,#0f172a_60%,#0b1220_100%)] p-[20px] text-[#e7ecf4] shadow-[10px_0_30px_rgba(0,0,0,0.08)] border-r border-[rgba(255,255,255,0.06)] max-[720px]:hidden"
     >
         <div class="mb-[12px] flex items-center justify-between gap-[12px]">
-            <div class="flex items-center gap-[12px]">
+            <button
+                class="group flex items-center gap-[12px] rounded-[12px] border border-transparent px-[6px] py-[6px] text-left transition-all duration-200 hover:border-[rgba(123,200,255,0.35)] hover:bg-[rgba(123,200,255,0.08)]"
+                type="button"
+                @click="goWelcome"
+            >
                 <div
-                    class="h-[44px] w-[44px] overflow-hidden rounded-[14px] border border-[rgba(255,255,255,0.2)] bg-[radial-gradient(120%_120%_at_0%_0%,rgba(111,125,255,0.2),rgba(83,197,255,0.1))]"
+                    class="h-[44px] w-[44px] overflow-hidden rounded-[14px] border border-[rgba(255,255,255,0.2)] bg-[radial-gradient(120%_120%_at_0%_0%,rgba(111,125,255,0.2),rgba(83,197,255,0.1))] transition-transform duration-200 group-hover:scale-[1.04]"
                 >
                     <img :src="logoImg" alt="Logo" class="h-full w-full object-cover block" />
                 </div>
                 <div>
-                    <div class="text-[20px] font-bold">Dasi AI</div>
-                    <div class="text-[14px] text-[rgba(231,236,244,0.7)]">RAG · MCP · OPENAI</div>
+                    <div class="text-[20px] font-bold transition-colors duration-200 group-hover:text-[#9ed7ff]">
+                        Dasi AI
+                    </div>
+                    <div class="text-[12px] text-[rgba(231,236,244,0.7)]">RAG · MCP · OPENAI</div>
                 </div>
-            </div>
+            </button>
             <button
                 class="grid h-[34px] w-[34px] place-items-center rounded-[10px] border border-[rgba(255,255,255,0.18)] bg-[rgba(255,255,255,0.08)] text-[rgba(231,236,244,0.9)] transition hover:bg-[rgba(255,255,255,0.14)] hover:text-white"
                 type="button"
@@ -588,15 +612,17 @@ const toggleTheme = () => {
             </div>
         </div>
 
-        <div class="flex items-center justify-between gap-[12px] rounded-[14px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] p-[12px]">
+        <div
+            class="group flex items-center justify-between gap-[12px] rounded-[14px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.05)] p-[12px] transition-all duration-200 hover:border-[rgba(123,200,255,0.35)] hover:bg-[rgba(123,200,255,0.08)]"
+        >
             <button class="flex items-center gap-[10px] text-left" type="button" @click="openProfile">
                 <div
-                    class="grid h-[40px] w-[40px] place-items-center rounded-[12px] border border-[rgba(15,23,42,0.18)] bg-[var(--avatar-bg)] font-bold text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.16)]"
+                    class="grid h-[40px] w-[40px] place-items-center rounded-[12px] border border-[rgba(15,23,42,0.18)] bg-[var(--avatar-bg)] font-bold text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.16)] transition-transform duration-200 group-hover:scale-[1.04]"
                 >
                     {{ avatarChar }}
                 </div>
                 <div>
-                    <div class="font-bold text-white">{{ currentUser.username || '访客' }}</div>
+                    <div class="font-bold text-white transition-colors duration-200 group-hover:text-[#9ed7ff]">{{ currentUser.username || '访客' }}</div>
                 </div>
             </button>
             <div class="flex items-center gap-[8px]">
@@ -649,7 +675,7 @@ const toggleTheme = () => {
 
         <div
             v-if="showNewSessionPicker"
-            class="fixed inset-0 z-[30] grid place-items-center bg-[rgba(0,0,0,0.35)] p-[20px]"
+            class="fixed inset-0 z-[30] grid place-items-center bg-[rgba(0,0,0,0.35)] backdrop-blur-[6px] p-[20px]"
             @click.self="closeNewSessionPicker"
         >
             <div class="flex flex-col items-center gap-[32px] -translate-y-[18px]">
@@ -679,7 +705,7 @@ const toggleTheme = () => {
 
         <div
             v-if="showProfile"
-            class="fixed inset-0 z-[25] grid place-items-center bg-[rgba(0,0,0,0.35)] p-[20px]"
+            class="fixed inset-0 z-[25] grid place-items-center bg-[rgba(0,0,0,0.35)] backdrop-blur-[6px] p-[20px]"
             @click.self="closeProfile"
         >
             <div

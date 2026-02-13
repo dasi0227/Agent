@@ -30,6 +30,7 @@ let lineChart;
 let barChart;
 let topBarChart;
 let pieChart;
+let refreshTimer = null;
 
 const pickData = (resp, message = '获取数据失败') => {
     if (resp && typeof resp === 'object' && Object.prototype.hasOwnProperty.call(resp, 'code')) {
@@ -54,6 +55,10 @@ const fetchDashboard = async () => {
     } finally {
         loading.value = false;
     }
+};
+
+const handleRefresh = async () => {
+    await fetchDashboard();
 };
 
 const statCardRows = computed(() => {
@@ -322,6 +327,9 @@ onMounted(async () => {
     await nextTick();
     initCharts();
     window.addEventListener('resize', handleResize);
+    refreshTimer = window.setInterval(() => {
+        fetchDashboard();
+    }, 30000);
 });
 
 watch(
@@ -342,6 +350,10 @@ watch(
 
 onBeforeUnmount(() => {
     window.removeEventListener('resize', handleResize);
+    if (refreshTimer) {
+        window.clearInterval(refreshTimer);
+        refreshTimer = null;
+    }
     lineChart?.dispose();
     barChart?.dispose();
     topBarChart?.dispose();
@@ -359,6 +371,19 @@ onBeforeUnmount(() => {
         <div class="flex min-w-0 flex-1 flex-col">
             <header class="flex items-center justify-between border-b border-[var(--border-color)] bg-[var(--surface-1)] px-6 py-4 shadow-[var(--shadow-soft)]">
                 <div class="text-[18px] font-semibold">DASHBOARD</div>
+                <button
+                    class="inline-flex h-[34px] w-[34px] items-center justify-center rounded-[10px] border border-[var(--border-color)] bg-white text-[var(--text-primary)] transition hover:bg-[var(--surface-2)] disabled:cursor-not-allowed disabled:opacity-70"
+                    type="button"
+                    title="刷新"
+                    aria-label="刷新"
+                    :disabled="loading"
+                    @click="handleRefresh"
+                >
+                    <svg viewBox="0 0 24 24" class="h-[16px] w-[16px]" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <path d="M20 12a8 8 0 1 1-2.34-5.66" />
+                        <path d="M20 4v6h-6" />
+                    </svg>
+                </button>
             </header>
 
             <div class="flex-1 overflow-auto p-6">

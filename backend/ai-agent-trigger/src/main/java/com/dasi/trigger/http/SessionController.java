@@ -17,50 +17,50 @@ import java.util.List;
 public class SessionController implements ISessionApi {
 
     @Resource
-    private ISessionService sessionSevice;
+    private ISessionService sessionService;
 
     @GetMapping("/list")
     @Override
     public Result<List<SessionVO>> listSession() {
-        return Result.success(sessionSevice.listSession());
+        return Result.success(sessionService.listSession());
     }
 
     @PostMapping("/insert")
     @Override
     public Result<SessionVO> insertSession(@RequestParam("sessionTitle") String sessionTitle, @RequestParam("sessionType") String sessionType) {
-        return Result.success(sessionSevice.insertSession(sessionTitle, sessionType));
+        return Result.success(sessionService.insertSession(sessionTitle, sessionType));
     }
 
     @PostMapping("/update")
     @Override
     public Result<Void> updateSession(@RequestParam("id") Long id, @RequestParam("sessionTitle") String sessionTitle) {
-        sessionSevice.updateSession(id, sessionTitle);
+        sessionService.updateSession(id, sessionTitle);
         return Result.success();
     }
 
     @PostMapping("/delete")
     @Override
     public Result<Void> deleteSession(@RequestParam("id") Long id, @RequestParam("sessionId") String sessionId) {
-        sessionSevice.deleteSession(id, sessionId);
+        sessionService.deleteSession(id, sessionId);
         return Result.success();
     }
 
     @GetMapping("/message/chat")
     @Override
     public Result<List<MessageVO>> listChatMessage(@RequestParam("sessionId") String sessionId) {
-        return Result.success(sessionSevice.listChatMessage(sessionId));
+        return Result.success(sessionService.listChatMessage(sessionId));
     }
 
     @GetMapping("/message/work-sse")
     @Override
     public Result<List<MessageVO>> listWorkSseMessage(@RequestParam("sessionId") String sessionId) {
-        return Result.success(sessionSevice.listWorkSseMessage(sessionId));
+        return Result.success(sessionService.listWorkSseMessage(sessionId));
     }
 
     @GetMapping("/message/work-answer")
     @Override
     public Result<List<MessageVO>> listWorkAnswerSession(@RequestParam("sessionId") String sessionId) {
-        return Result.success(sessionSevice.listWorkAnswerMessage(sessionId));
+        return Result.success(sessionService.listWorkAnswerMessage(sessionId));
     }
 
 }
