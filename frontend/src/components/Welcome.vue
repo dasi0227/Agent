@@ -266,9 +266,9 @@ onBeforeUnmount(() => {
 
 <template>
     <section class="grid h-screen grid-rows-[1fr_var(--footer-height)] bg-[var(--bg-page)]">
-        <div class="overflow-y-auto bg-[var(--bg-page)] py-[18px]">
-            <div class="mx-auto flex w-full max-w-[1060px] flex-col gap-[20px] pt-[52px] pl-[24px] pr-[calc(24px+var(--scrollbar-w))] max-[720px]:pt-[34px]">
-                <div class="flex h-[292px] flex-col items-start gap-[14px] overflow-hidden pt-[16px] text-[var(--text-primary)] max-[720px]:h-[220px] max-[720px]:pt-[10px]">
+        <div class="overflow-y-auto bg-[var(--bg-page)] py-[10px]">
+            <div class="mx-auto flex w-full max-w-[1060px] flex-col gap-[8px] pt-[24px] pl-[24px] pr-[calc(24px+var(--scrollbar-w))] max-[720px]:pt-[14px]">
+                <div class="flex h-[210px] flex-col items-start gap-[10px] overflow-hidden pt-[8px] text-[var(--text-primary)] max-[720px]:h-[166px] max-[720px]:pt-[4px]">
                     <div
                         v-for="(line, idx) in typewriterState.lines"
                         :key="idx"
