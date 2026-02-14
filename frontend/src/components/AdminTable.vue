@@ -2,6 +2,7 @@
 import { computed, reactive, ref, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import SidebarAdmin from './SidebarAdmin.vue';
+import AppFooter from './AppFooter.vue';
 import { adminMenuGroups } from '../utils/CommonDataUtil';
 import {
     adminPage,
@@ -17,7 +18,7 @@ import {
     listModelId
 } from '../request/api';
 import { formatDateTime } from '../utils/DatetimeUtil';
-import { normalizeError } from '../request/request';
+import { normalizeError, notifyAdminError } from '../request/request';
 import { useAuthStore } from '../router/pinia';
 
 const authStore = useAuthStore();
@@ -327,11 +328,6 @@ const editingId = ref(null);
 const modalError = ref('');
 const currentForm = reactive({});
 
-const errorDialog = reactive({
-    visible: false,
-    message: ''
-});
-
 const unwrapResult = (resp, defaultMsg = '操作失败') => {
     if (resp && typeof resp === 'object' && Object.prototype.hasOwnProperty.call(resp, 'code')) {
         if (resp.code !== 200) {
@@ -383,9 +379,9 @@ const pageCount = computed(() => {
     return st.pageSum || 1;
 });
 
-const showErrorDialog = (msg) => {
-    errorDialog.visible = true;
-    errorDialog.message = msg || '操作失败';
+const showErrorToast = (error, defaultMsg = '操作失败') => {
+    const msg = normalizeError(error).message || defaultMsg;
+    notifyAdminError(error, msg);
 };
 
 const loadRefs = async () => {
@@ -447,6 +443,7 @@ const fetchList = async (key = currentKey.value) => {
         state.query.pageNum = payload?.pageNum || state.query.pageNum;
     } catch (err) {
         state.error = normalizeError(err).message;
+        notifyAdminError(err, state.error || '查询失败');
     } finally {
         state.loading = false;
     }
@@ -473,8 +470,7 @@ const handleDelete = async (row) => {
         unwrapResult(res, '删除失败');
         await fetchList();
     } catch (err) {
-        const e = normalizeError(err);
-        showErrorDialog(e.message || '删除失败');
+        showErrorToast(err, '删除失败');
     }
 };
 
@@ -502,8 +498,7 @@ const saveForm = async () => {
         modalVisible.value = false;
         await Promise.all([fetchList(), loadRefs()]);
     } catch (err) {
-        const e = normalizeError(err);
-        showErrorDialog(e.message || '保存失败');
+        showErrorToast(err, '保存失败');
     }
 };
 
@@ -517,9 +512,8 @@ const switchStatus = async (row, val) => {
         const res = await adminToggle(currentKey.value, row.id, val);
         unwrapResult(res, '更新状态失败');
     } catch (err) {
-        const e = normalizeError(err);
         row[currentModule.value.statusField] = oldVal;
-        showErrorDialog(e.message || '更新状态失败');
+        showErrorToast(err, '更新状态失败');
     }
 };
 
@@ -801,6 +795,7 @@ const handleSelectModule = (key) => {
                     </div>
                 </div>
             </div>
+            <AppFooter wrapper-class="bg-white border-[#e2e8f0] backdrop-blur-0" inner-class="px-6 text-[#64748b]" />
         </div>
 
         <div
@@ -913,25 +908,6 @@ const handleSelectModule = (key) => {
             </div>
         </div>
 
-        <div
-            v-if="errorDialog.visible"
-            class="fixed inset-0 z-50 grid place-items-center bg-[rgba(15,23,42,0.45)] px-4"
-        >
-            <div class="absolute inset-0 bg-[rgba(220,38,38,0.08)]"></div>
-            <div class="relative w-full max-w-[420px] rounded-[14px] bg-white p-6 shadow-lg shadow-[0_20px_60px_rgba(220,38,38,0.25)] border border-[#fecdd3]">
-                <div class="mb-3 text-[16px] font-semibold text-[#0f172a]">操作失败</div>
-                <div class="text-[13px] text-[#475569]">{{ errorDialog.message }}</div>
-                <div class="mt-5 flex justify-end gap-2">
-                    <button
-                        class="rounded-[10px] border border-[#e2e8f0] px-4 py-2 text-[13px] font-semibold text-[#0f172a]"
-                        type="button"
-                        @click="errorDialog.visible = false"
-                    >
-                        知道了
-                    </button>
-                </div>
-            </div>
-        </div>
     </div>
 </template>
 

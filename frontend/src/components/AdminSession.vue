@@ -5,9 +5,10 @@ import { marked } from 'marked';
 import hljs from 'highlight.js';
 import DOMPurify from 'dompurify';
 import SidebarAdmin from './SidebarAdmin.vue';
+import AppFooter from './AppFooter.vue';
 import { adminMenuGroups } from '../utils/CommonDataUtil';
 import { listAdminSessions, listChatMessages, listWorkAnswerMessages, listWorkSseMessages } from '../request/api';
-import { normalizeError } from '../request/request';
+import { normalizeError, notifyAdminError } from '../request/request';
 import { formatMcpJson } from '../utils/StringUtil';
 
 const router = useRouter();
@@ -25,7 +26,6 @@ const loading = reactive({
     list: false,
     detail: false
 });
-const errorMessage = ref('');
 
 const renderer = new marked.Renderer();
 renderer.code = (code, infostring) => {
@@ -121,13 +121,13 @@ const handleSelectModule = (key) => {
 
 const loadSessions = async () => {
     loading.list = true;
-    errorMessage.value = '';
     try {
         const resp = await listAdminSessions();
         const list = pickData(resp, '获取会话失败') || [];
         sessions.value = (Array.isArray(list) ? list : []).map(mapSession);
     } catch (error) {
-        errorMessage.value = normalizeError(error).message || '获取会话失败';
+        const msg = normalizeError(error).message || '获取会话失败';
+        notifyAdminError(error, msg);
         sessions.value = [];
     } finally {
         loading.list = false;
@@ -143,7 +143,6 @@ const clearDetail = () => {
 const loadDetail = async (session) => {
     if (!session?.sessionId) return;
     loading.detail = true;
-    errorMessage.value = '';
     clearDetail();
     try {
         if (session.sessionType === 'chat') {
@@ -166,7 +165,8 @@ const loadDetail = async (session) => {
             detail.workMessages = (Array.isArray(answerList) ? answerList : []).map(mapWorkMessage);
         }
     } catch (error) {
-        errorMessage.value = normalizeError(error).message || '获取会话详情失败';
+        const msg = normalizeError(error).message || '获取会话详情失败';
+        notifyAdminError(error, msg);
     } finally {
         loading.detail = false;
     }
@@ -200,10 +200,6 @@ onMounted(() => {
             </header>
 
             <div class="flex-1 overflow-auto p-6">
-                <div v-if="errorMessage" class="mb-4 rounded-[12px] border border-[var(--border-color)] bg-[var(--surface-2)] px-4 py-3 text-[13px] text-[var(--text-secondary)]">
-                    {{ errorMessage }}
-                </div>
-
                 <div v-if="!selectedSession">
                     <div class="mb-4 text-[13px] text-[var(--text-secondary)]">共 {{ sessions.length }} 个 Session</div>
                     <div v-if="loading.list" class="text-[13px] text-[var(--text-secondary)]">加载中...</div>
@@ -355,6 +351,7 @@ onMounted(() => {
                     </div>
                 </div>
             </div>
+            <AppFooter inner-class="px-6" />
         </div>
     </div>
 </template>

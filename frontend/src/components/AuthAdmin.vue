@@ -3,6 +3,7 @@ import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { login } from '../request/api';
 import { useAuthStore, useSettingsStore } from '../router/pinia';
+import AppFooter from './AppFooter.vue';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -59,45 +60,48 @@ const submit = async () => {
 </script>
 
 <template>
-    <div class="flex h-screen items-center justify-center bg-[var(--auth-bg)] p-[16px]">
-        <div
-            class="w-full max-w-[520px] rounded-[18px] border border-[rgba(15,23,42,0.08)] bg-white/90 p-[24px] shadow-[0_20px_60px_rgba(15,23,42,0.12)] backdrop-blur"
-        >
-            <div class="mb-[16px] flex items-center justify-between">
-                <div class="text-[22px] font-semibold text-[#0f172a]">后台管理</div>
-            </div>
+    <div class="grid h-screen grid-rows-[1fr_var(--footer-height)] bg-[var(--auth-bg)]">
+        <div class="flex items-center justify-center p-[16px]">
+            <div
+                class="w-full max-w-[520px] rounded-[18px] border border-[rgba(15,23,42,0.08)] bg-white/90 p-[24px] shadow-[0_20px_60px_rgba(15,23,42,0.12)] backdrop-blur"
+            >
+                <div class="mb-[16px] flex items-center justify-between">
+                    <div class="text-[22px] font-semibold text-[#0f172a]">后台管理</div>
+                </div>
 
-            <div class="space-y-[14px]">
-                <div>
-                    <div class="mb-[6px] text-[13px] text-[#475569]">用户名</div>
-                    <input
-                        v-model="form.username"
-                        class="w-full rounded-[12px] border border-[#e2e8f0] px-[12px] py-[12px] text-[14px] text-[#0f172a] outline-none transition focus:border-[#1d4ed8] focus:ring-2 focus:ring-[#bfdbfe]"
-                        placeholder="请输入用户名"
-                        @keydown.enter.prevent="submit"
-                    />
+                <div class="space-y-[14px]">
+                    <div>
+                        <div class="mb-[6px] text-[13px] text-[#475569]">用户名</div>
+                        <input
+                            v-model="form.username"
+                            class="w-full rounded-[12px] border border-[#e2e8f0] px-[12px] py-[12px] text-[14px] text-[#0f172a] outline-none transition focus:border-[#1d4ed8] focus:ring-2 focus:ring-[#bfdbfe]"
+                            placeholder="请输入用户名"
+                            @keydown.enter.prevent="submit"
+                        />
+                    </div>
+                    <div>
+                        <div class="mb-[6px] text-[13px] text-[#475569]">密码</div>
+                        <input
+                            v-model="form.password"
+                            type="password"
+                            class="w-full rounded-[12px] border border-[#e2e8f0] px-[12px] py-[12px] text-[14px] text-[#0f172a] outline-none transition focus:border-[#1d4ed8] focus:ring-2 focus:ring-[#bfdbfe]"
+                            placeholder="请输入密码"
+                            @keydown.enter.prevent="submit"
+                        />
+                    </div>
+                    <div v-if="error" class="text-[13px] text-[#dc2626]">{{ error }}</div>
+                    <button
+                        class="mt-[4px] flex w-full items-center justify-center rounded-[12px] bg-[#1d4ed8] px-[14px] py-[12px] text-[15px] font-semibold text-white shadow-[0_10px_30px_rgba(37,99,235,0.35)] transition hover:bg-[#1e40af] disabled:cursor-not-allowed disabled:bg-[#94a3b8]"
+                        type="button"
+                        :disabled="loading"
+                        @click="submit"
+                    >
+                        {{ loading ? '提交中...' : '登录' }}
+                    </button>
+                    <div class="text-center text-[12px] text-[#64748b]">注册管理员请联系开发者</div>
                 </div>
-                <div>
-                    <div class="mb-[6px] text-[13px] text-[#475569]">密码</div>
-                    <input
-                        v-model="form.password"
-                        type="password"
-                        class="w-full rounded-[12px] border border-[#e2e8f0] px-[12px] py-[12px] text-[14px] text-[#0f172a] outline-none transition focus:border-[#1d4ed8] focus:ring-2 focus:ring-[#bfdbfe]"
-                        placeholder="请输入密码"
-                        @keydown.enter.prevent="submit"
-                    />
-                </div>
-                <div v-if="error" class="text-[13px] text-[#dc2626]">{{ error }}</div>
-                <button
-                    class="mt-[4px] flex w-full items-center justify-center rounded-[12px] bg-[#1d4ed8] px-[14px] py-[12px] text-[15px] font-semibold text-white shadow-[0_10px_30px_rgba(37,99,235,0.35)] transition hover:bg-[#1e40af] disabled:cursor-not-allowed disabled:bg-[#94a3b8]"
-                    type="button"
-                    :disabled="loading"
-                    @click="submit"
-                >
-                    {{ loading ? '提交中...' : '登录' }}
-                </button>
-                <div class="text-center text-[12px] text-[#64748b]">注册管理员请联系开发者</div>
             </div>
         </div>
+        <AppFooter inner-class="px-[16px]" />
     </div>
 </template>

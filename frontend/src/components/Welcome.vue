@@ -5,6 +5,7 @@ import { queryAgentList, queryChatMcps, queryChatModels } from '../request/api';
 import { normalizeError } from '../request/request';
 import { useWelcomeLaunchStore } from '../router/pinia';
 import { createTypewriter, DEFAULT_TYPEWRITER_SEGMENTS } from '../utils/TypeWriter';
+import AppFooter from './AppFooter.vue';
 
 const router = useRouter();
 const welcomeLaunchStore = useWelcomeLaunchStore();
@@ -319,13 +320,8 @@ onBeforeUnmount(() => {
             </div>
         </div>
 
-        <footer class="h-[var(--footer-height)] border-t border-[rgba(15,23,42,0.06)] bg-[var(--surface-3)] backdrop-blur-[6px]">
-            <div
-                class="mx-auto flex h-full w-full max-w-[1060px] items-center justify-between pl-[24px] pr-[calc(24px+var(--scrollbar-w))] text-[13px] text-[var(--text-secondary)] max-[720px]:pl-[8px] max-[720px]:pr-[calc(8px+var(--scrollbar-w))]"
-            >
-                <span>© 2025 Dasi</span>
-                <span>内容为 AI 生成，仅供参考，请注意甄别</span>
-            </div>
-        </footer>
+        <AppFooter
+            inner-class="max-w-[1060px] pl-[24px] pr-[calc(24px+var(--scrollbar-w))] max-[720px]:pl-[8px] max-[720px]:pr-[calc(8px+var(--scrollbar-w))]"
+        />
     </section>
 </template>

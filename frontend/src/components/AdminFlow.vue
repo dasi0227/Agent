@@ -2,11 +2,12 @@
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import SidebarAdmin from './SidebarAdmin.vue';
+import AppFooter from './AppFooter.vue';
 import arrowIcon from '../assets/arrow.svg';
 import { adminMenuGroups } from '../utils/CommonDataUtil';
 import { useAuthStore } from '../router/pinia';
 import { adminAgentList, flowAgent, flowClients, flowDelete, flowInsert } from '../request/api';
-import { normalizeError } from '../request/request';
+import { normalizeError, notifyAdminError } from '../request/request';
 
 const router = useRouter();
 const route = useRoute();
@@ -38,7 +39,6 @@ const clientDetailMap = computed(() => {
     return map;
 });
 
-const errorDialog = reactive({ visible: false, message: '' });
 const confirmDialog = reactive({ visible: false, roleLabel: '', fromClient: '', toClient: '', onConfirm: null });
 const promptDialog = reactive({ visible: false, title: '', content: '' });
 
@@ -62,12 +62,7 @@ const handleSelectModule = (key) => {
 };
 
 const showError = (msg) => {
-    errorDialog.visible = true;
-    errorDialog.message = msg || '操作失败';
-};
-const closeError = () => {
-    errorDialog.visible = false;
-    errorDialog.message = '';
+    notifyAdminError(new Error(msg), msg || '操作失败');
 };
 
 const openConfirm = (payload) => Object.assign(confirmDialog, { ...payload, visible: true });
@@ -94,7 +89,8 @@ const loadClients = async () => {
         const res = await flowClients();
         allClients.value = pickData(res, '获取 Client 失败') || [];
     } catch (err) {
-        showError(normalizeError(err).message);
+        const msg = normalizeError(err).message || '获取 Client 失败';
+        notifyAdminError(err, msg);
         allClients.value = [];
     } finally {
         loading.clients = false;
@@ -107,7 +103,8 @@ const loadAgents = async () => {
         const res = await adminAgentList({});
         agents.value = pickData(res, '获取 Agent 失败') || [];
     } catch (err) {
-        showError(normalizeError(err).message);
+        const msg = normalizeError(err).message || '获取 Agent 失败';
+        notifyAdminError(err, msg);
         agents.value = [];
     } finally {
         loading.agents = false;
@@ -120,7 +117,8 @@ const loadFlows = async (agentId) => {
         const res = await flowAgent(agentId);
         agentFlows.value = pickData(res, '获取 Flow 失败') || [];
     } catch (err) {
-        showError(normalizeError(err).message);
+        const msg = normalizeError(err).message || '获取 Flow 失败';
+        notifyAdminError(err, msg);
         agentFlows.value = [];
     } finally {
         loading.flows = false;
@@ -211,7 +209,8 @@ const performReplace = async (slot, newClient) => {
         await loadFlows(selectedAgent.value.agentId);
         activeSlot.value = null;
     } catch (err) {
-        showError(normalizeError(err).message);
+        const msg = normalizeError(err).message || '替换失败';
+        notifyAdminError(err, msg);
     } finally {
         loading.replacing = false;
         closeConfirm();
@@ -520,27 +519,7 @@ onMounted(async () => {
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- 错误弹窗 -->
-        <div
-            v-if="errorDialog.visible"
-            class="fixed inset-0 z-40 flex items-center justify-center bg-[#0f172a]/30 backdrop-blur-[2px]"
-            @click="closeError"
-        >
-            <div class="w-[360px] rounded-[14px] bg-white p-5 shadow-lg" @click.stop>
-                <div class="mb-2 text-[16px] font-semibold text-[#0f172a]">操作失败</div>
-                <div class="text-[13px] text-[#475569]">{{ errorDialog.message }}</div>
-                <div class="mt-4 flex justify-end">
-                    <button
-                        class="rounded-[10px] bg-[#0ea5e9] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#0284c7]"
-                        type="button"
-                        @click="closeError"
-                    >
-                        确认
-                    </button>
-                </div>
-            </div>
+            <AppFooter wrapper-class="bg-white border-[#e2e8f0] backdrop-blur-0" inner-class="px-6 text-[#64748b]" />
         </div>
 
         <!-- 确认弹窗 -->

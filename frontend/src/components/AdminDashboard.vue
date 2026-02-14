@@ -3,9 +3,10 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router';
 import * as echarts from 'echarts';
 import SidebarAdmin from './SidebarAdmin.vue';
+import AppFooter from './AppFooter.vue';
 import { adminMenuGroups } from '../utils/CommonDataUtil';
 import { fetchAdminDashboard } from '../request/api';
-import { normalizeError } from '../request/request';
+import { normalizeError, notifyAdminError } from '../request/request';
 import { useSettingsStore } from '../router/pinia';
 
 const router = useRouter();
@@ -15,7 +16,6 @@ const currentKey = ref('dashboard');
 const menuGroups = adminMenuGroups;
 
 const loading = ref(false);
-const errorMessage = ref('');
 const dashboard = ref({ countInfo: {}, graphInfo: {} });
 const rangeMode = ref('7d');
 const usageModeSummary = ref('work'); // work | chat (for summary bar chart)
@@ -46,12 +46,13 @@ const pickData = (resp, message = '获取数据失败') => {
 
 const fetchDashboard = async () => {
     loading.value = true;
-    errorMessage.value = '';
     try {
         const resp = await fetchAdminDashboard();
         dashboard.value = pickData(resp, '获取 Dashboard 失败') || { countInfo: {}, graphInfo: {} };
     } catch (error) {
-        errorMessage.value = normalizeError(error).message || '获取 Dashboard 失败';
+        const msg = normalizeError(error).message || '获取 Dashboard 失败';
+        notifyAdminError(error, msg);
+        dashboard.value = { countInfo: {}, graphInfo: {} };
     } finally {
         loading.value = false;
     }
@@ -387,10 +388,6 @@ onBeforeUnmount(() => {
             </header>
 
             <div class="flex-1 overflow-auto p-6">
-                <div v-if="errorMessage" class="mb-4 rounded-[12px] border border-[var(--border-color)] bg-[var(--surface-2)] px-4 py-3 text-[13px] text-[var(--text-secondary)]">
-                    {{ errorMessage }}
-                </div>
-
                 <div class="mb-6 flex items-center justify-center text-center">
                     <div class="text-[26px] font-extrabold tracking-[0.02em] text-[var(--text-primary)]">
                         Dasi AI 目前已经处理了
@@ -526,6 +523,7 @@ onBeforeUnmount(() => {
                     </div>
                 </div>
             </div>
+            <AppFooter inner-class="px-6" />
         </div>
     </div>
 </template>

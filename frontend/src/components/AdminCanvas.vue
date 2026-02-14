@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import SidebarAdmin from './SidebarAdmin.vue';
+import AppFooter from './AppFooter.vue';
 import { adminMenuGroups } from '../utils/CommonDataUtil';
 import { useAuthStore } from '../router/pinia';
 import {
@@ -25,7 +26,7 @@ import {
     listConfigType,
     listModelId
 } from '../request/api';
-import { normalizeError } from '../request/request';
+import { normalizeError, notifyAdminError } from '../request/request';
 import { VueFlow, useVueFlow, MarkerType, Handle, Position } from '@vue-flow/core';
 import { Background } from '@vue-flow/background';
 import { Controls } from '@vue-flow/controls';
@@ -64,14 +65,8 @@ const options = reactive({
     agentTypes: []
 });
 
-const errorDialog = reactive({ visible: false, message: '' });
 const showError = (msg) => {
-    errorDialog.visible = true;
-    errorDialog.message = msg || '操作失败';
-};
-const closeError = () => {
-    errorDialog.visible = false;
-    errorDialog.message = '';
+    notifyAdminError(new Error(msg), msg || '操作失败');
 };
 
 const unwrapResult = (resp, msg = '操作失败') => {
@@ -113,7 +108,8 @@ const refreshOptions = async () => {
         options.modelIds = [];
         options.apiIds = [];
         options.agentTypes = [];
-        showError(normalizeError(err).message || '加载选项失败');
+        const msg = normalizeError(err).message || '加载选项失败';
+        notifyAdminError(err, msg);
     }
 };
 
@@ -141,7 +137,8 @@ const fetchData = async () => {
         await nextTick();
         fitView({ padding: 0.2 });
     } catch (err) {
-        showError(normalizeError(err).message || '加载画布失败');
+        const msg = normalizeError(err).message || '加载画布失败';
+        notifyAdminError(err, msg);
     } finally {
         loading.page = false;
     }
@@ -658,7 +655,9 @@ const saveEntity = async () => {
         modalVisible.value = false;
         await fetchData();
     } catch (err) {
-        modalError.value = normalizeError(err).message || '保存失败';
+        const msg = normalizeError(err).message || '保存失败';
+        modalError.value = msg;
+        notifyAdminError(err, msg);
     } finally {
         loading.save = false;
     }
@@ -699,7 +698,9 @@ const saveFlow = async () => {
         modalVisible.value = false;
         await fetchData();
     } catch (err) {
-        modalError.value = normalizeError(err).message || '保存 Flow 失败';
+        const msg = normalizeError(err).message || '保存 Flow 失败';
+        modalError.value = msg;
+        notifyAdminError(err, msg);
     } finally {
         loading.save = false;
     }
@@ -713,7 +714,9 @@ const deleteFlow = async () => {
         modalVisible.value = false;
         await fetchData();
     } catch (err) {
-        modalError.value = normalizeError(err).message || '删除 Flow 失败';
+        const msg = normalizeError(err).message || '删除 Flow 失败';
+        modalError.value = msg;
+        notifyAdminError(err, msg);
     } finally {
         loading.save = false;
     }
@@ -777,7 +780,9 @@ const saveConfigItem = async (item) => {
         modalVisible.value = false;
         await fetchData();
     } catch (err) {
-        modalError.value = normalizeError(err).message || '更新配置失败';
+        const msg = normalizeError(err).message || '更新配置失败';
+        modalError.value = msg;
+        notifyAdminError(err, msg);
     } finally {
         loading.save = false;
     }
@@ -791,7 +796,9 @@ const deleteConfigItem = async (item) => {
         modalVisible.value = false;
         await fetchData();
     } catch (err) {
-        modalError.value = normalizeError(err).message || '删除配置失败';
+        const msg = normalizeError(err).message || '删除配置失败';
+        modalError.value = msg;
+        notifyAdminError(err, msg);
     } finally {
         loading.save = false;
     }
@@ -827,7 +834,9 @@ const addConfigItem = async (groupKey) => {
         modalVisible.value = false;
         await fetchData();
     } catch (err) {
-        modalError.value = normalizeError(err).message || '新增配置失败';
+        const msg = normalizeError(err).message || '新增配置失败';
+        modalError.value = msg;
+        notifyAdminError(err, msg);
     } finally {
         loading.save = false;
     }
@@ -842,7 +851,9 @@ const toggleConfigStatus = async (item) => {
         await unwrapResult(configToggle(item.id, next), '更新配置状态失败');
     } catch (err) {
         draft.configStatus = next === 1 ? 0 : 1;
-        modalError.value = normalizeError(err).message || '更新配置状态失败';
+        const msg = normalizeError(err).message || '更新配置状态失败';
+        modalError.value = msg;
+        notifyAdminError(err, msg);
     }
 };
 
@@ -1178,6 +1189,7 @@ onMounted(async () => {
                     </VueFlow>
                 </div>
             </div>
+            <AppFooter wrapper-class="bg-white border-[#e2e8f0] backdrop-blur-0" inner-class="px-6 text-[#64748b]" />
         </div>
 
         <!-- 新增节点选择弹窗 -->
@@ -1438,19 +1450,6 @@ onMounted(async () => {
             </div>
         </div>
 
-        <!-- 错误弹窗 -->
-        <div v-if="errorDialog.visible" class="fixed inset-0 z-50 grid place-items-center bg-[rgba(15,23,42,0.45)] px-4" @click="closeError">
-            <div class="absolute inset-0 bg-[rgba(220,38,38,0.08)]"></div>
-            <div class="relative w-full max-w-[420px] rounded-[14px] bg-white p-6 shadow-lg shadow-[0_20px_60px_rgba(220,38,38,0.25)] border border-[#fecdd3]" @click.stop>
-                <div class="mb-2 text-[16px] font-semibold text-[#0f172a]">操作失败</div>
-                <div class="text-[13px] text-[#475569]">{{ errorDialog.message }}</div>
-                <div class="mt-4 flex justify-end">
-                    <button class="rounded-[10px] bg-[#ef4444] px-4 py-2 text-[13px] font-semibold text-white" type="button" @click="closeError">
-                        确认
-                    </button>
-                </div>
-            </div>
-        </div>
     </div>
 </template>
 

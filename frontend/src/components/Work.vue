@@ -17,6 +17,7 @@ import {
 import { normalizeError } from '../request/request';
 import { formatMcpJson } from '../utils/StringUtil';
 import { useAgentSettingsStore, useAgentStore, useChatStore, useWelcomeLaunchStore } from '../router/pinia';
+import AppFooter from './AppFooter.vue';
 
 const router = useRouter();
 const agentStore = useAgentStore();
@@ -883,14 +884,9 @@ onBeforeUnmount(() => {
             </div>
         </div>
 
-        <footer class="h-[var(--footer-height)] border-t border-[rgba(15,23,42,0.06)] bg-[var(--surface-3)] backdrop-blur-[6px]">
-            <div
-                class="mx-auto flex h-full w-full max-w-[900px] items-center justify-between pl-[24px] pr-[calc(24px+var(--scrollbar-w))] text-[13px] text-[var(--text-secondary)] max-[720px]:pl-[8px] max-[720px]:pr-[calc(8px+var(--scrollbar-w))]"
-            >
-                <span>© 2025 Dasi</span>
-                <span>内容为 AI 生成，仅供参考，请注意甄别</span>
-            </div>
-        </footer>
+        <AppFooter
+            inner-class="max-w-[900px] pl-[24px] pr-[calc(24px+var(--scrollbar-w))] max-[720px]:pl-[8px] max-[720px]:pr-[calc(8px+var(--scrollbar-w))]"
+        />
 
         <div v-if="showSettings" class="fixed inset-0 z-[20] grid place-items-center bg-[rgba(0,0,0,0.35)] p-[20px]" @click.self="showSettings = false">
             <div class="w-full max-w-[520px] rounded-[16px] border border-[var(--border-color)] bg-white shadow-[0_20px_50px_rgba(15,23,42,0.2)]">

@@ -2,9 +2,10 @@
 import { reactive, ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import SidebarAdmin from './SidebarAdmin.vue';
+import AppFooter from './AppFooter.vue';
 import { adminMenuGroups } from '../utils/CommonDataUtil';
 import { configList, configInsert, configUpdate, configDelete, configToggle, listConfigType } from '../request/api';
-import { normalizeError } from '../request/request';
+import { normalizeError, notifyAdminError } from '../request/request';
 import { useAuthStore } from '../router/pinia';
 
 const authStore = useAuthStore();
@@ -37,16 +38,6 @@ const currentForm = reactive({
     configStatus: 1
 });
 
-const errorDialog = reactive({
-    visible: false,
-    message: ''
-});
-
-const showErrorDialog = (msg) => {
-    errorDialog.visible = true;
-    errorDialog.message = msg || '操作失败';
-};
-
 const unwrapResult = (resp, defaultMsg = '操作失败') => {
     if (resp && typeof resp === 'object' && Object.prototype.hasOwnProperty.call(resp, 'code')) {
         if (resp.code !== 200) {
@@ -64,8 +55,9 @@ const loadConfigTypes = async () => {
         const res = await listConfigType();
         const payload = res?.data ?? res?.result ?? res;
         options.configTypes = payload || [];
-    } catch {
+    } catch (err) {
         options.configTypes = [];
+        notifyAdminError(err, '获取配置类型失败');
     }
 };
 
@@ -79,7 +71,8 @@ const fetchList = async () => {
             list: Array.isArray(list) ? list : []
         }));
     } catch (err) {
-        showErrorDialog(normalizeError(err).message || '查询失败');
+        const msg = normalizeError(err).message || '查询失败';
+        notifyAdminError(err, msg);
         cards.value = [];
     } finally {
         loading.value = false;
@@ -130,7 +123,9 @@ const saveForm = async () => {
         modalVisible.value = false;
         await fetchList();
     } catch (err) {
-        modalError.value = normalizeError(err).message || '保存失败';
+        const msg = normalizeError(err).message || '保存失败';
+        modalError.value = msg;
+        notifyAdminError(err, msg);
     }
 };
 
@@ -141,7 +136,8 @@ const handleDelete = async (row) => {
         unwrapResult(res, '删除失败');
         await fetchList();
     } catch (err) {
-        showErrorDialog(normalizeError(err).message || '删除失败');
+        const msg = normalizeError(err).message || '删除失败';
+        notifyAdminError(err, msg);
     }
 };
 
@@ -153,7 +149,8 @@ const switchStatus = async (row, val) => {
         unwrapResult(res, '更新状态失败');
     } catch (err) {
         row.configStatus = old;
-        showErrorDialog(normalizeError(err).message || '更新状态失败');
+        const msg = normalizeError(err).message || '更新状态失败';
+        notifyAdminError(err, msg);
     }
 };
 
@@ -297,6 +294,7 @@ onMounted(async () => {
                     </div>
                 </div>
             </div>
+            <AppFooter wrapper-class="bg-white border-[#e2e8f0] backdrop-blur-0" inner-class="px-6 text-[#64748b]" />
         </div>
 
         <div
@@ -388,25 +386,6 @@ onMounted(async () => {
             </div>
         </div>
 
-        <div
-            v-if="errorDialog.visible"
-            class="fixed inset-0 z-50 grid place-items-center bg-[rgba(15,23,42,0.45)] px-4"
-        >
-            <div class="absolute inset-0 bg-[rgba(220,38,38,0.08)]"></div>
-            <div class="relative w-full max-w-[420px] rounded-[14px] bg-white p-6 shadow-lg shadow-[0_20px_60px_rgba(220,38,38,0.25)] border border-[#fecdd3]">
-                <div class="mb-3 text-[16px] font-semibold text-[#0f172a]">操作失败</div>
-                <div class="text-[13px] text-[#475569]">{{ errorDialog.message }}</div>
-                <div class="mt-5 flex justify-end gap-2">
-                    <button
-                        class="rounded-[10px] border border-[#e2e8f0] px-4 py-2 text-[13px] font-semibold text-[#0f172a]"
-                        type="button"
-                        @click="errorDialog.visible = false"
-                    >
-                        知道了
-                    </button>
-                </div>
-            </div>
-        </div>
     </div>
 </template>
 

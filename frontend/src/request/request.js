@@ -1,6 +1,7 @@
 import axios from 'axios';
 import router from '../router/router';
 import { useAuthStore } from '../router/pinia';
+import { pushAdminErrorToast } from '../utils/adminErrorToast';
 
 // Dev: VITE_API_BASE=http://localhost:8066
 // Prod behind nginx under /agent: VITE_API_BASE=/agent
@@ -53,6 +54,71 @@ export const normalizeError = (error) => {
     };
 };
 
+const getRequestMeta = (errorLike) => {
+    const config = errorLike?.response?.config || errorLike?.config || errorLike?.raw?.config || null;
+    const methodRaw = config?.method || '';
+    const method = methodRaw ? String(methodRaw).toUpperCase() : '';
+    const url = config?.url ? String(config.url) : '';
+    return {
+        method,
+        url,
+        requestPath: [method, url].filter(Boolean).join(' ').trim()
+    };
+};
+
+const isAdminPage = () => {
+    const path = router.currentRoute.value.path || '';
+    return path.startsWith('/admin') && path !== '/admin/login';
+};
+
+const isNotifiedError = (error) => {
+    if (!error || typeof error !== 'object') return false;
+    return Boolean(error.__adminToastShown || error.raw?.__adminToastShown);
+};
+
+const markErrorNotified = (error) => {
+    if (!error || typeof error !== 'object') return;
+    error.__adminToastShown = true;
+    if (error.raw && typeof error.raw === 'object') {
+        error.raw.__adminToastShown = true;
+    }
+};
+
+const shouldShowOperation = (operation) => {
+    const text = String(operation || '').trim();
+    if (!text) return false;
+    const hidden = new Set(['操作失败', '请求失败', '失败']);
+    return !hidden.has(text);
+};
+
+export const notifyAdminError = (error, fallbackMessage = '操作失败') => {
+    const normalized = error && typeof error === 'object' && Object.prototype.hasOwnProperty.call(error, 'message')
+        ? error
+        : normalizeError(error);
+    const message = normalized?.message || fallbackMessage;
+    const meta = {
+        requestPath:
+            normalized?.requestPath ||
+            getRequestMeta(normalized).requestPath ||
+            getRequestMeta(normalized?.raw).requestPath ||
+            getRequestMeta(error).requestPath,
+        operation:
+            fallbackMessage && fallbackMessage !== message && shouldShowOperation(fallbackMessage)
+                ? fallbackMessage
+                : ''
+    };
+    if (!isAdminPage() || !message || message === '请求已取消' || isNotifiedError(normalized)) {
+        return message;
+    }
+    pushAdminErrorToast({
+        message,
+        requestPath: meta.requestPath,
+        operation: meta.operation
+    });
+    markErrorNotified(normalized);
+    return message;
+};
+
 http.interceptors.request.use(
     (config) => {
         let authStore;
@@ -87,6 +153,7 @@ http.interceptors.response.use(
     },
     (error) => {
         const status = error?.response?.status;
+        const normalized = normalizeError(error);
         let authStore;
         try {
             authStore = useAuthStore();
@@ -94,6 +161,9 @@ http.interceptors.response.use(
             authStore = null;
         }
         if (status === 401) {
+            if (isAdminPage()) {
+                notifyAdminError(normalized, '未登录或登录已过期，请重新登录');
+            }
             authStore?.clear();
             try {
                 const settingsRaw = localStorage.getItem(SETTINGS_KEY);
@@ -105,13 +175,16 @@ http.interceptors.response.use(
             } catch (_) {
                 // ignore
             }
-            if (router.currentRoute.value.path !== '/login') {
+            if (router.currentRoute.value.path !== '/login' && router.currentRoute.value.path !== '/admin/login') {
                 router.replace('/login');
             }
-        } else if (status === 403) {
+        } else if (status === 403 && !isAdminPage()) {
             window.alert('无权限访问该资源');
         }
-        return Promise.reject(normalizeError(error));
+        if (isAdminPage() && status !== 401) {
+            notifyAdminError(normalized);
+        }
+        return Promise.reject(normalized);
     }
 );
 
